@@ -23,22 +23,23 @@ export async function markNotificationReadAction(notificationId: string): Promis
   return { ok: true }
 }
 
-export async function markAllNotificationsReadAction(): Promise<{ ok: boolean; message?: string }> {
+export async function markAllNotificationsReadAction(formData: FormData): Promise<void> {
   try {
+    void formData
     const user = await getAuthenticatedUser()
-    if (!user) return { ok: false, message: 'Unauthorized' }
+    if (user) {
+      const supabase = await createClient()
+      const now = new Date().toISOString()
+      const { error } = await supabase.from('notifications').update({ read_at: now }).eq('user_id', user.id).is('read_at', null)
 
-    const supabase = await createClient()
-    const now = new Date().toISOString()
-    const { error } = await supabase.from('notifications').update({ read_at: now }).eq('user_id', user.id).is('read_at', null)
-
-    if (error) return { ok: false, message: error.message }
-
-    revalidatePath('/dashboard')
-    revalidatePath('/dashboard/notifications')
-    return { ok: true }
+      if (error) {
+        console.error('Failed to mark notifications as read:', error)
+      } else {
+        revalidatePath('/dashboard')
+        revalidatePath('/dashboard/notifications')
+      }
+    }
   } catch (error) {
-    console.error(error)
-    return { ok: false, message: 'Unexpected error' }
+    console.error('Failed to mark notifications as read:', error)
   }
 }
