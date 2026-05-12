@@ -31,7 +31,12 @@ export default async function NotificationsCenterPage() {
           </p>
         </div>
         {rows.some((r) => !r.read_at) ? (
-          <form action={markAllNotificationsReadAction}>
+          <form
+  action={async (formData: FormData) => {
+    'use server'
+    await markAllNotificationsReadAction()
+  }}
+>
             <Button type="submit" variant="secondary" size="sm">
               Mark all read
             </Button>
