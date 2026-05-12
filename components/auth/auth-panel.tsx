@@ -1,0 +1,662 @@
+'use client'
+
+import { useEffect, useId, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { AnimatePresence, motion } from 'framer-motion'
+import {
+  ArrowLeft,
+  Chrome,
+  Fingerprint,
+  Loader2,
+  Lock,
+  Mail,
+  ShieldCheck,
+  Smartphone,
+} from 'lucide-react'
+
+import { BrandLogo } from '@/components/layout/brand-logo'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { BRAND } from '@/constants/brand'
+import { buildAuthCallbackUrl } from '@/lib/auth/callback-url'
+import { safeNextPath } from '@/lib/auth/safe-next-path'
+import { formatAuthError } from '@/lib/auth/format-auth-error'
+import { normalizePhoneToE164 } from '@/lib/auth/normalize-phone'
+import { cn } from '@/lib/utils/cn'
+import { useSupabase } from '@/hooks/use-supabase'
+
+const ease = [0.22, 1, 0.36, 1] as const
+
+type AuthMode = 'login' | 'signup'
+type AuthStep = 'methods' | 'otp'
+type OtpPhase = 'phone' | 'verify'
+type Pending = null | 'google' | 'email' | 'otp-send' | 'otp-verify'
+
+const trustItems = [
+  {
+    icon: Lock,
+    label: 'TLS 1.3',
+    sub: 'Encrypted sessions',
+  },
+  {
+    icon: ShieldCheck,
+    label: 'Verified access',
+    sub: 'Fleet & identity checks',
+  },
+  {
+    icon: Fingerprint,
+    label: 'Biometric-ready',
+    sub: 'Step-up when required',
+  },
+] as const
+
+const methodsRoot = {
+  hidden: { opacity: 0, x: -12 },
+  show: {
+    opacity: 1,
+    x: 0,
+    transition: { staggerChildren: 0.07, delayChildren: 0.08, ease },
+  },
+  exit: { opacity: 0, x: 10, transition: { duration: 0.24, ease } },
+}
+
+const item = {
+  hidden: { opacity: 0, y: 10 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.38, ease } },
+}
+
+function maskE164ForDisplay(e164: string): string {
+  if (e164.length < 8) return e164
+  return `${e164.slice(0, 4)}••••${e164.slice(-2)}`
+}
+
+function MethodSurface({
+  children,
+  className,
+  glow = 'electric',
+  disabled = false,
+}: {
+  children: React.ReactNode
+  className?: string
+  glow?: 'electric' | 'neutral'
+  disabled?: boolean
+}) {
+  return (
+    <motion.div
+      whileHover={disabled ? undefined : { y: -2, transition: { duration: 0.28, ease } }}
+      whileTap={disabled ? undefined : { scale: 0.985 }}
+      className={cn(
+        'relative overflow-hidden rounded-2xl border transition-[border-color,box-shadow,background-color] duration-300',
+        glow === 'electric'
+          ? 'border-white/[0.14] bg-gradient-to-b from-white/[0.14] to-white/[0.04] shadow-[0_1px_0_0_rgba(255,255,255,0.12)_inset,0_18px_48px_-28px_rgba(59,130,246,0.35)] hover:border-electric/35 hover:shadow-[0_1px_0_0_rgba(255,255,255,0.14)_inset,0_22px_56px_-26px_rgba(59,130,246,0.45)]'
+          : 'border-white/[0.1] bg-white/[0.05] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] hover:border-white/[0.16] hover:bg-white/[0.08]',
+        className,
+      )}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+type AuthPanelProps = {
+  initialAuthError?: string
+  redirectTo?: string
+}
+
+export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
+  const headingId = useId()
+  const router = useRouter()
+  const supabase = useSupabase()
+
+  const [mode, setMode] = useState<AuthMode>('login')
+  const [step, setStep] = useState<AuthStep>('methods')
+  const [otpPhase, setOtpPhase] = useState<OtpPhase>('phone')
+  const [showEmail, setShowEmail] = useState(false)
+  const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
+  const [otp, setOtp] = useState('')
+  const [sentPhone, setSentPhone] = useState<string | null>(null)
+
+  const [error, setError] = useState<string | null>(null)
+  const [info, setInfo] = useState<string | null>(null)
+  const [pending, setPending] = useState<Pending>(null)
+
+  useEffect(() => {
+    if (initialAuthError) {
+      setError(initialAuthError)
+    }
+  }, [initialAuthError])
+
+  const shellClassName = cn(
+    'relative overflow-hidden rounded-[1.375rem] border border-white/[0.11]',
+    'bg-gradient-to-br from-white/[0.1] via-white/[0.03] to-transparent',
+    'p-6 shadow-[0_1px_0_0_rgba(255,255,255,0.1)_inset,0_32px_90px_-40px_rgba(0,0,0,0.88)]',
+    'backdrop-blur-[44px] sm:rounded-[1.75rem] sm:p-8 sm:shadow-[0_1px_0_0_rgba(255,255,255,0.1)_inset,0_40px_100px_-44px_rgba(0,0,0,0.9)]',
+  )
+
+  if (!supabase) {
+    return (
+      <motion.div
+        layout
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55, ease }}
+        className={shellClassName}
+      >
+        <div
+          className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-electric/[0.14] blur-[100px]"
+          aria-hidden
+        />
+        <div className="relative space-y-4">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200/90">Configuration</p>
+          <h2 id={headingId} className="text-lg font-semibold tracking-[-0.03em] text-soft sm:text-xl">
+            Supabase is not configured
+          </h2>
+          <p className="text-sm leading-relaxed text-silver/95">
+            Add <code className="rounded bg-white/[0.08] px-1.5 py-0.5 text-[13px]">NEXT_PUBLIC_SUPABASE_URL</code> and{' '}
+            <code className="rounded bg-white/[0.08] px-1.5 py-0.5 text-[13px]">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>{' '}
+            (or <code className="rounded bg-white/[0.08] px-1.5 py-0.5 text-[13px]">NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code>)
+            to <code className="rounded bg-white/[0.08] px-1.5 py-0.5 text-[13px]">.env.local</code>. See{' '}
+            <code className="rounded bg-white/[0.08] px-1.5 py-0.5 text-[13px]">.env.example</code> in the repo.
+          </p>
+          {initialAuthError ? (
+            <div
+              role="alert"
+              className="rounded-xl border border-red-400/25 bg-red-500/[0.08] px-4 py-3 text-sm text-red-100/95"
+            >
+              {initialAuthError}
+            </div>
+          ) : null}
+        </div>
+      </motion.div>
+    )
+  }
+
+  const sb = supabase
+
+  const authOrigin = typeof window !== 'undefined' ? window.location.origin : ''
+  const nextPath = safeNextPath(redirectTo, '/dashboard')
+  const callbackUrl = authOrigin ? buildAuthCallbackUrl(authOrigin, nextPath) : ''
+
+  const resetFlowMessages = () => {
+    setError(null)
+    setInfo(null)
+  }
+
+  const resetOtp = () => {
+    setOtpPhase('phone')
+    setOtp('')
+    setSentPhone(null)
+  }
+
+  const handleGoogle = async () => {
+    if (!callbackUrl) return
+    resetFlowMessages()
+    setPending('google')
+    try {
+      const { data, error: err } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: callbackUrl,
+        },
+      })
+      if (err) {
+        setError(formatAuthError(err))
+        return
+      }
+      if (data.url) {
+        window.location.assign(data.url)
+      } else {
+        setError('Could not start Google sign-in. Please try again.')
+      }
+    } catch (e) {
+      setError(formatAuthError(e instanceof Error ? e : undefined))
+    } finally {
+      setPending(null)
+    }
+  }
+
+  const handleEmailLink = async () => {
+    resetFlowMessages()
+    const trimmed = email.trim()
+    if (!trimmed || !trimmed.includes('@')) {
+      setError('Enter a valid email address.')
+      return
+    }
+    if (!callbackUrl) {
+      setError('Could not build a return URL. Check NEXT_PUBLIC_SITE_URL or open this page in the browser.')
+      return
+    }
+    setPending('email')
+    try {
+      const { error: err } = await sb.auth.signInWithOtp({
+        email: trimmed,
+        options: {
+          emailRedirectTo: callbackUrl,
+          shouldCreateUser: mode === 'signup',
+        },
+      })
+      if (err) {
+        setError(formatAuthError(err))
+        return
+      }
+      setInfo('Check your inbox for a secure sign-in link. It may take a minute to arrive.')
+    } catch (e) {
+      setError(formatAuthError(e instanceof Error ? e : undefined))
+    } finally {
+      setPending(null)
+    }
+  }
+
+  const handlePhoneSend = async () => {
+    resetFlowMessages()
+    const e164 = normalizePhoneToE164(phone)
+    if (!e164) {
+      setError('Use a valid Indian mobile (+91) or enter a full international number with +.')
+      return
+    }
+    setPending('otp-send')
+    try {
+      const { error: err } = await sb.auth.signInWithOtp({
+        phone: e164,
+        options: {
+          channel: 'sms',
+          shouldCreateUser: mode === 'signup',
+        },
+      })
+      if (err) {
+        setError(formatAuthError(err))
+        return
+      }
+      setSentPhone(e164)
+      setOtpPhase('verify')
+      setInfo('Code sent. Enter the 6-digit OTP from your SMS.')
+    } catch (e) {
+      setError(formatAuthError(e instanceof Error ? e : undefined))
+    } finally {
+      setPending(null)
+    }
+  }
+
+  const handlePhoneVerify = async () => {
+    resetFlowMessages()
+    const token = otp.replace(/\D/g, '')
+    if (!sentPhone || token.length < 6) {
+      setError('Enter the 6-digit code from your SMS.')
+      return
+    }
+    setPending('otp-verify')
+    try {
+      const { error: err } = await sb.auth.verifyOtp({
+        phone: sentPhone,
+        token,
+        type: 'sms',
+      })
+      if (err) {
+        setError(formatAuthError(err))
+        return
+      }
+      router.push(nextPath)
+      router.refresh()
+    } catch (e) {
+      setError(formatAuthError(e instanceof Error ? e : undefined))
+    } finally {
+      setPending(null)
+    }
+  }
+
+  const busy = pending !== null
+
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.55, ease }}
+      className={shellClassName}
+    >
+      <div
+        className="pointer-events-none absolute -left-24 top-0 h-72 w-72 rounded-full bg-electric/[0.14] blur-[100px]"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute -right-16 bottom-0 h-64 w-64 rounded-full bg-white/[0.06] blur-[90px]"
+        aria-hidden
+      />
+
+      <div className="relative">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex min-w-0 items-center gap-3">
+            <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/[0.12] bg-matte/40 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]">
+              <BrandLogo className="p-[3px]" priority />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-electric/90">
+                Secure access
+              </p>
+              <p id={headingId} className="mt-1 truncate text-lg font-semibold tracking-[-0.03em] text-soft sm:text-xl">
+                {BRAND.name}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <p className="mt-5 text-sm leading-relaxed text-silver/95 sm:text-[0.9375rem]">
+          {mode === 'login'
+            ? 'Sign in with the method you prefer. Same vault-grade session, whichever path you choose.'
+            : 'Create your profile — we’ll verify identity before your first drive.'}
+        </p>
+
+        {error ? (
+          <div
+            role="alert"
+            className="mt-5 rounded-xl border border-red-400/25 bg-red-500/[0.08] px-4 py-3 text-sm leading-relaxed text-red-100/95"
+          >
+            {error}
+          </div>
+        ) : null}
+
+        {info ? (
+          <div className="mt-5 rounded-xl border border-emerald-400/20 bg-emerald-500/[0.07] px-4 py-3 text-sm leading-relaxed text-emerald-50/95">
+            {info}
+          </div>
+        ) : null}
+
+        <div
+          role="tablist"
+          aria-label="Account mode"
+          className="mt-6 flex rounded-2xl border border-white/[0.08] bg-matte/45 p-1 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] backdrop-blur-md"
+        >
+          {(['login', 'signup'] as const).map((m) => {
+            const active = mode === m
+            return (
+              <button
+                key={m}
+                type="button"
+                role="tab"
+                aria-selected={active}
+                disabled={busy}
+                className={cn(
+                  'relative flex-1 rounded-[0.875rem] py-3 text-sm font-semibold tracking-[-0.02em] transition-colors duration-300',
+                  active ? 'text-soft' : 'text-muted hover:text-silver',
+                  busy && 'pointer-events-none opacity-50',
+                )}
+                onClick={() => {
+                  setMode(m)
+                  setStep('methods')
+                  setShowEmail(false)
+                  resetOtp()
+                  resetFlowMessages()
+                }}
+              >
+                {active ? (
+                  <motion.span
+                    layoutId="auth-mode-pill"
+                    className="absolute inset-0 rounded-[0.875rem] border border-white/[0.1] bg-white/[0.1] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_12px_40px_-28px_rgba(59,130,246,0.28)]"
+                    transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                  />
+                ) : null}
+                <span className="relative z-10">{m === 'login' ? 'Sign in' : 'Join'}</span>
+              </button>
+            )
+          })}
+        </div>
+
+        <AnimatePresence mode="wait">
+          {step === 'otp' ? (
+            <motion.div
+              key="otp"
+              initial={{ opacity: 0, x: 14 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -10 }}
+              transition={{ duration: 0.32, ease }}
+              className="mt-8 space-y-5"
+              role="region"
+              aria-labelledby={headingId}
+            >
+              <button
+                type="button"
+                disabled={busy}
+                onClick={() => {
+                  setStep('methods')
+                  resetOtp()
+                  resetFlowMessages()
+                }}
+                className="group inline-flex items-center gap-2 text-sm font-medium text-muted transition-colors hover:text-soft disabled:pointer-events-none disabled:opacity-40"
+              >
+                <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" aria-hidden />
+                All sign-in options
+              </button>
+
+              {otpPhase === 'phone' ? (
+                <>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Mobile OTP</p>
+                    <p className="mt-2 text-sm text-silver">
+                      We&apos;ll send a one-time code to your Indian mobile number. Codes expire in ten minutes.
+                    </p>
+                  </div>
+                  <Input
+                    label="Mobile number"
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    placeholder="+91 98XXX XXXXX"
+                    value={phone}
+                    disabled={busy}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="min-h-[3.25rem] text-[1.0625rem] tracking-wide"
+                  />
+                  <Button
+                    type="button"
+                    size="lg"
+                    disabled={busy}
+                    onClick={() => void handlePhoneSend()}
+                    className="min-h-[3.35rem] w-full text-base shadow-[0_16px_48px_-22px_rgba(59,130,246,0.55)]"
+                  >
+                    {pending === 'otp-send' ? (
+                      <>
+                        <Loader2 className="h-5 w-5 shrink-0 animate-spin" aria-hidden />
+                        Sending…
+                      </>
+                    ) : (
+                      'Send one-time code'
+                    )}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">Enter code</p>
+                    <p className="mt-2 text-sm text-silver">
+                      Sent to <span className="font-mono text-soft/95">{maskE164ForDisplay(sentPhone ?? '')}</span>
+                    </p>
+                  </div>
+                  <Input
+                    label="6-digit code"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    placeholder="• • • • • •"
+                    maxLength={6}
+                    value={otp}
+                    disabled={busy}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    className="min-h-[3.25rem] text-center text-[1.25rem] font-medium tracking-[0.35em] text-soft"
+                  />
+                  <Button
+                    type="button"
+                    size="lg"
+                    disabled={busy}
+                    onClick={() => void handlePhoneVerify()}
+                    className="min-h-[3.35rem] w-full text-base shadow-[0_16px_48px_-22px_rgba(59,130,246,0.55)]"
+                  >
+                    {pending === 'otp-verify' ? (
+                      <>
+                        <Loader2 className="h-5 w-5 shrink-0 animate-spin" aria-hidden />
+                        Verifying…
+                      </>
+                    ) : (
+                      'Verify & continue'
+                    )}
+                  </Button>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => {
+                      resetOtp()
+                      resetFlowMessages()
+                    }}
+                    className="w-full text-center text-sm font-medium text-muted underline-offset-2 transition-colors hover:text-soft disabled:pointer-events-none disabled:opacity-40"
+                  >
+                    Use a different number
+                  </button>
+                </>
+              )}
+
+              <p className="text-center text-xs leading-relaxed text-muted">
+                Carrier rates may apply. By continuing you agree to our{' '}
+                <a href="/terms" className="text-electric/90 underline-offset-2 hover:underline">
+                  Terms
+                </a>{' '}
+                and{' '}
+                <a href="/privacy" className="text-electric/90 underline-offset-2 hover:underline">
+                  Privacy
+                </a>
+                .
+              </p>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="methods"
+              className="mt-8 space-y-5"
+              variants={methodsRoot}
+              initial="hidden"
+              animate="show"
+              exit="exit"
+            >
+              <motion.div variants={item} className="space-y-3">
+                <MethodSurface glow="electric" className="w-full" disabled={busy}>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => void handleGoogle()}
+                    className="flex min-h-[3.35rem] w-full touch-manipulation items-center justify-center gap-3 px-5 text-[0.9375rem] font-semibold tracking-[-0.02em] text-soft disabled:pointer-events-none disabled:opacity-40"
+                  >
+                    {pending === 'google' ? (
+                      <Loader2 className="h-[22px] w-[22px] shrink-0 animate-spin text-soft" aria-hidden />
+                    ) : (
+                      <Chrome className="h-[22px] w-[22px] text-soft" aria-hidden />
+                    )}
+                    Continue with Google
+                  </button>
+                </MethodSurface>
+
+                <MethodSurface glow="neutral" className="w-full" disabled={busy}>
+                  <button
+                    type="button"
+                    disabled={busy}
+                    onClick={() => {
+                      resetFlowMessages()
+                      resetOtp()
+                      setStep('otp')
+                    }}
+                    className="flex min-h-[3.35rem] w-full touch-manipulation items-center justify-center gap-3 px-5 text-[0.9375rem] font-semibold tracking-[-0.02em] text-soft disabled:pointer-events-none disabled:opacity-40"
+                  >
+                    <Smartphone className="h-[22px] w-[22px] text-electric" aria-hidden />
+                    Continue with mobile OTP
+                  </button>
+                </MethodSurface>
+              </motion.div>
+
+              <motion.div variants={item} className="relative py-1">
+                <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+                <p className="relative mx-auto w-max bg-[rgba(10,10,12,0.72)] px-3 text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-muted backdrop-blur-sm">
+                  Professional email
+                </p>
+              </motion.div>
+
+              <motion.div variants={item}>
+                <button
+                  type="button"
+                  disabled={busy}
+                  onClick={() => setShowEmail((v) => !v)}
+                  aria-expanded={showEmail}
+                  className="flex min-h-[3rem] w-full touch-manipulation items-center justify-center gap-2 rounded-2xl border border-white/[0.1] bg-white/[0.03] px-4 text-sm font-semibold text-silver transition-[border-color,background-color,color,box-shadow] duration-300 hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-soft disabled:pointer-events-none disabled:opacity-40"
+                >
+                  <Mail className="h-[18px] w-[18px] text-electric/90" aria-hidden />
+                  {showEmail ? 'Hide email sign-in' : 'Continue with email'}
+                </button>
+
+                <AnimatePresence initial={false}>
+                  {showEmail ? (
+                    <motion.div
+                      key="email-fields"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.35, ease }}
+                      className="overflow-hidden"
+                    >
+                      <div className="space-y-4 pt-5">
+                        <Input
+                          label="Work or personal email"
+                          type="email"
+                          autoComplete="email"
+                          placeholder="you@studio.com"
+                          value={email}
+                          disabled={busy}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className="min-h-[3.25rem] text-[1.0625rem]"
+                        />
+                        <Button
+                          type="button"
+                          size="lg"
+                          disabled={busy}
+                          onClick={() => void handleEmailLink()}
+                          className="min-h-[3.35rem] w-full text-base shadow-[0_16px_48px_-22px_rgba(59,130,246,0.55)]"
+                        >
+                          {pending === 'email' ? (
+                            <>
+                              <Loader2 className="h-5 w-5 shrink-0 animate-spin" aria-hidden />
+                              Sending link…
+                            </>
+                          ) : mode === 'login' ? (
+                            'Email secure link'
+                          ) : (
+                            'Continue with email'
+                          )}
+                        </Button>
+                      </div>
+                    </motion.div>
+                  ) : null}
+                </AnimatePresence>
+              </motion.div>
+
+              <motion.div variants={item} className="grid gap-2.5 sm:grid-cols-3" role="list" aria-label="Security highlights">
+                {trustItems.map(({ icon: Icon, label, sub }) => (
+                  <div
+                    key={label}
+                    role="listitem"
+                    className="rounded-xl border border-white/[0.06] bg-matte/35 px-3 py-3 text-left shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] backdrop-blur-sm"
+                  >
+                    <Icon className="h-4 w-4 text-electric/90" aria-hidden />
+                    <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-soft/95">{label}</p>
+                    <p className="mt-1 text-[11px] leading-snug text-muted">{sub}</p>
+                  </div>
+                ))}
+              </motion.div>
+
+              <motion.p variants={item} className="text-center text-[11px] leading-relaxed text-muted">
+                Enterprise fleets can request delegated SSO after verification. Need help?{' '}
+                <a href="/support" className="font-medium text-electric/90 underline-offset-2 hover:underline">
+                  Concierge
+                </a>
+              </motion.p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  )
+}

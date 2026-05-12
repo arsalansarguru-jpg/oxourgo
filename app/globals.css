@@ -1,0 +1,146 @@
+@import 'tailwindcss';
+
+/* Premium theme tokens — extend via @theme; runtime overrides can use data-theme if needed */
+@theme {
+  /* System stack only — avoids `next/font/google` network fetch at build (SSL/proxy issues). */
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
+    Arial, sans-serif;
+
+  --color-matte: #0a0a0c;
+  --color-carbon: #141418;
+  --color-carbon-deep: #0f0f12;
+  --color-electric: #3b82f6;
+  --color-soft: #f4f6f9;
+  --color-silver: #aeb4bf;
+  --color-muted: rgba(174, 180, 191, 0.72);
+  --color-emerald: #10b981;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 0.875rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.5rem;
+
+  /* Mobile-first: tighter rhythm on phones, opens up on tablet+ */
+  --spacing-section-y: clamp(2.875rem, 9vw, 7.25rem);
+  --spacing-section-gap: clamp(1.75rem, 6vw, 5rem);
+  --spacing-edge: clamp(1.125rem, 4.5vw, 2rem);
+  /* Space reserved for fixed mobile tab bar (thumb + safe area) */
+  --bottom-nav-clearance: calc(4.85rem + max(0.5rem, env(safe-area-inset-bottom, 0px)));
+
+  --container-max: 72rem;
+  --container-wide: min(92rem, calc(100vw - var(--spacing-edge) * 2));
+
+  --shadow-glow: 0 0 56px -12px rgba(59, 130, 246, 0.38);
+  --shadow-glow-strong: 0 0 80px -16px rgba(59, 130, 246, 0.5);
+  --shadow-card:
+    0 1px 0 0 rgba(255, 255, 255, 0.045) inset, 0 26px 70px -34px rgba(0, 0, 0, 0.9);
+  --shadow-card-hover:
+    0 1px 0 0 rgba(255, 255, 255, 0.06) inset, 0 36px 96px -44px rgba(0, 0, 0, 0.92);
+  --shadow-card-accent:
+    0 1px 0 0 rgba(255, 255, 255, 0.05) inset, 0 0 0 1px rgba(59, 130, 246, 0.1),
+    0 28px 80px -40px rgba(0, 0, 0, 0.88);
+
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 200ms;
+  --duration-normal: 320ms;
+  --duration-slow: 480ms;
+
+  --background-image-hero-mesh: radial-gradient(
+      ellipse 100% 90% at 15% -5%,
+      rgba(59, 130, 246, 0.2),
+      transparent 58%
+    ),
+    radial-gradient(ellipse 70% 55% at 88% 8%, rgba(255, 255, 255, 0.06), transparent 52%),
+    radial-gradient(ellipse 50% 40% at 50% 100%, rgba(59, 130, 246, 0.06), transparent 55%),
+    linear-gradient(180deg, #0a0a0c 0%, #121218 48%, #0a0a0c 100%);
+
+  /** Hero-only: richer cinematic wash (used in HeroSection) */
+  --background-image-hero-cinematic: radial-gradient(
+      ellipse 85% 70% at 50% 120%,
+      rgba(59, 130, 246, 0.09),
+      transparent 52%
+    ),
+    radial-gradient(ellipse 55% 45% at 0% 35%, rgba(255, 255, 255, 0.045), transparent 58%),
+    linear-gradient(165deg, transparent 0%, rgba(10, 10, 12, 0.65) 100%);
+}
+
+@layer base {
+  html {
+    @apply scroll-smooth antialiased;
+  }
+  body {
+    @apply bg-matte font-sans text-soft;
+    text-rendering: optimizeLegibility;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+  ::selection {
+    @apply bg-electric/35 text-soft;
+  }
+}
+
+@utility glass-panel {
+  border: 1px solid rgba(255, 255, 255, 0.085);
+  background: linear-gradient(165deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  backdrop-filter: blur(32px);
+  box-shadow:
+    var(--shadow-card),
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+/** Fluid display — hero & cinematic headings */
+@utility text-display {
+  font-size: clamp(2.375rem, 4.5vw + 1rem, 3.875rem);
+  line-height: 1.06;
+  letter-spacing: -0.035em;
+  font-weight: 800;
+}
+
+/** Homepage hero — larger scale, tighter cinematic line-height */
+@utility text-hero-display {
+  font-size: clamp(2.625rem, 5.75vw + 0.75rem, 4.25rem);
+  line-height: 1.03;
+  letter-spacing: -0.04em;
+  font-weight: 800;
+}
+
+@utility text-hero-kicker {
+  font-size: clamp(0.8125rem, 0.35vw + 0.78rem, 0.9375rem);
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+  font-weight: 600;
+}
+
+@utility text-section-title {
+  font-size: clamp(1.625rem, 2.2vw + 0.9rem, 2.5rem);
+  line-height: 1.14;
+  letter-spacing: -0.025em;
+  font-weight: 700;
+}
+
+@utility container-app {
+  margin-inline: auto;
+  width: 100%;
+  max-width: min(var(--container-max), calc(100vw - var(--spacing-edge) * 2));
+  padding-inline: var(--spacing-edge);
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
