@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import { writeAdminAudit } from '@/lib/admin/audit'
 import { requireAppRole } from '@/lib/auth/server'
 import type { AdminActionResult } from '@/lib/admin/actions/types'
-import type { Database } from '@/lib/supabase/database.types'
+import type { Database, Json } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function adminCreateCarAction(input: {
@@ -72,7 +72,7 @@ export async function adminUpdateCarAction(
     action: 'fleet.car_update',
     entityType: 'car',
     entityId: id,
-    payload: patch as Record<string, unknown>,
+    payload: patch as Json,
   })
 
   revalidatePath('/admin/fleet')

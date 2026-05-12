@@ -20,12 +20,12 @@ import { cardPaddingCompact, cardSurfaceBase, cardSurfaceTransition } from '@/co
 
 const nav = [
   { href: '/admin', label: 'Overview', icon: LayoutDashboard, exact: true },
-  { href: '/admin/fleet', label: 'Fleet', icon: CarFront },
-  { href: '/admin/bookings', label: 'Bookings', icon: ClipboardList },
-  { href: '/admin/customers', label: 'Customers', icon: Users },
-  { href: '/admin/kyc', label: 'KYC', icon: ShieldCheck },
-  { href: '/admin/payments', label: 'Payments', icon: Banknote },
-  { href: '/admin/notifications', label: 'Alerts', icon: Bell },
+  { href: '/admin/fleet', label: 'Fleet', icon: CarFront, exact: false },
+  { href: '/admin/bookings', label: 'Bookings', icon: ClipboardList, exact: false },
+  { href: '/admin/customers', label: 'Customers', icon: Users, exact: false },
+  { href: '/admin/kyc', label: 'KYC', icon: ShieldCheck, exact: false },
+  { href: '/admin/payments', label: 'Payments', icon: Banknote, exact: false },
+  { href: '/admin/notifications', label: 'Alerts', icon: Bell, exact: false },
 ] as const
 
 export type AdminShellProps = {

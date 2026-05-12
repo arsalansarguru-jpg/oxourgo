@@ -40,7 +40,10 @@ export async function runTripReminderJob(options?: { hoursMin?: number; hoursMax
     })
     if (already) continue
 
-    const cars = b.cars as { brand: string; model: string } | { brand: string; model: string }[] | null
+    const cars = b.cars as unknown as
+      | { brand: string; model: string }
+      | { brand: string; model: string }[]
+      | null
     const c = Array.isArray(cars) ? cars[0] : cars
     const label = c ? `${c.brand} ${c.model}`.trim() : 'your vehicle'
 

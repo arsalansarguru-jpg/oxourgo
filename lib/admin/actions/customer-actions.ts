@@ -5,7 +5,7 @@ import { revalidatePath } from 'next/cache'
 import type { AdminActionResult } from '@/lib/admin/actions/types'
 import { writeAdminAudit } from '@/lib/admin/audit'
 import { requireAppRole } from '@/lib/auth/server'
-import type { Database } from '@/lib/supabase/database.types'
+import type { Database, Json } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 const TIERS = ['none', 'basic', 'verified'] as const
@@ -54,7 +54,7 @@ export async function adminUpdateCustomerProfileAction(
     action: 'customer.profile_update',
     entityType: 'profile',
     entityId: userId,
-    payload: patch as Record<string, unknown>,
+    payload: patch as Json,
   })
 
   revalidatePath('/admin/customers')

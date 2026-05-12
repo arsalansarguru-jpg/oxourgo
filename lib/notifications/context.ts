@@ -18,7 +18,10 @@ export async function getBookingNotifyContext(bookingId: string): Promise<Bookin
 
   if (error || !data) return null
 
-  const cars = data.cars as { brand: string; model: string } | { brand: string; model: string }[] | null
+  const cars = data.cars as unknown as
+    | { brand: string; model: string }
+    | { brand: string; model: string }[]
+    | null
   const c = Array.isArray(cars) ? cars[0] : cars
   const car_label = c ? `${c.brand} ${c.model}`.trim() : null
 
