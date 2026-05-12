@@ -1,7 +1,7 @@
 import { AdminKycActions } from '@/components/admin/admin-kyc-actions'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { adminListKycDocuments } from '@/lib/admin/data/kyc'
-import { formatKycDocType } from '@/lib/kyc/doc-label'
+import { formatKycDocumentType } from '@/lib/kyc/doc-label'
 import { Card, CardContent } from '@/components/ui/Card'
 import { cn } from '@/lib/utils/cn'
 import { cardSurfaceBase } from '@/components/ui/card-tokens'
@@ -29,7 +29,7 @@ export default async function AdminKycPage() {
           <Card key={row.id} className={cn(cardSurfaceBase, 'border border-white/[0.08]')}>
             <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0 space-y-1">
-                <p className="text-sm font-medium text-electric/90">{formatKycDocType(row.document_type)}</p>
+                <p className="text-sm font-medium text-electric/90">{formatKycDocumentType(row.document_type)}</p>
                 <p className="font-medium text-soft">{row.user_email ?? row.user_id}</p>
                 <p className="font-mono text-xs text-muted">{row.id}</p>
                 <p className="text-xs text-muted">

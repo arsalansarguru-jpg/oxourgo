@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 
 import { useSupabase } from '@/hooks/use-supabase'
 import type { KycDocumentRow } from '@/lib/customer/kyc-queries'
-import { formatKycDocType } from '@/lib/kyc/doc-label'
+import { formatKycDocumentType } from '@/lib/kyc/doc-label'
 import { KYC_TILES, KycUploadTile } from '@/features/dashboard/kyc-upload-tile'
 import type { KycDocumentTypeId } from '@/lib/kyc/constants'
 import { cn } from '@/lib/utils/cn'
@@ -79,7 +79,7 @@ export function KycCenterClient({
             {docs.map((d) => (
               <li key={d.id} className="flex flex-col gap-2 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                 <div className="space-y-1">
-                  <span className="font-medium text-soft">{formatKycDocType(d.document_type)}</span>
+                  <span className="font-medium text-soft">{formatKycDocumentType(d.document_type)}</span>
                   {d.original_filename ? (
                     <p className="text-xs text-muted">File: {d.original_filename}</p>
                   ) : null}
