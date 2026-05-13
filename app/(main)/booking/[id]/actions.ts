@@ -60,6 +60,8 @@ export async function createBookingAction(input: CreateBookingInput): Promise<Cr
       vehicleRow.id,
       input.pickupAtIso,
       input.returnAtIso,
+      null,
+      supabase,
     )
     if (overlapErr?.includes('has_vehicle_booking_overlap')) {
       return { ok: false, code: 'rpc_missing', message: overlapErr }

@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
 import { validateTripWindow } from '@/lib/booking/dates'
+import { hasVehicleBookingOverlap } from '@/lib/booking/vehicle-overlap'
 import { logFleetVehiclesError } from '@/lib/fleet/public-vehicle-catalog'
 import { isVehicleAvailableForBooking, type VehicleRow } from '@/lib/fleet/vehicle-mappers'
 import { createPublicServerSupabaseClient } from '@/lib/supabase/public-server-client'
@@ -55,28 +56,26 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    const { data: vOverlap, error: vRpcErr } = await supabase.rpc('has_vehicle_booking_overlap', {
-      p_vehicle_id: inventoryId,
-      p_pickup: pickup,
-      p_return: ret,
-      p_exclude_booking_id: null,
-    })
+    const { overlap: blocked, error: overlapErr } = await hasVehicleBookingOverlap(
+      inventoryId,
+      pickup,
+      ret,
+      null,
+      supabase,
+    )
 
-    if (vRpcErr) {
+    if (overlapErr) {
       return NextResponse.json(
         {
           ok: false,
-          error: vRpcErr.message,
-          hint:
-            vRpcErr.message.includes('has_vehicle_booking_overlap') || vRpcErr.code === '42883'
-              ? 'Apply supabase/migrations/20260513140000_bookings_vehicle_inventory.sql in the Supabase SQL editor.'
-              : undefined,
+          error: overlapErr,
+          hint: overlapErr.includes('has_vehicle_booking_overlap')
+            ? 'Apply supabase/migrations/20260513140000_bookings_vehicle_inventory.sql in the Supabase SQL editor, or set SUPABASE_SERVICE_ROLE_KEY for server-side overlap until the RPC exists.'
+            : undefined,
         },
         { status: 503 },
       )
     }
-
-    const blocked = Boolean(vOverlap)
     return NextResponse.json({
       ok: true,
       available: !blocked,
