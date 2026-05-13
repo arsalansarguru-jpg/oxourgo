@@ -122,7 +122,6 @@ export type Database = {
         Row: {
           id: string
           car_id: string | null
-          vehicle_id: string | null
           user_id: string
           pickup_at: string
           return_at: string
@@ -143,7 +142,6 @@ export type Database = {
         Insert: {
           id?: string
           car_id?: string | null
-          vehicle_id?: string | null
           user_id: string
           pickup_at: string
           return_at: string
@@ -164,7 +162,6 @@ export type Database = {
         Update: {
           id?: string
           car_id?: string | null
-          vehicle_id?: string | null
           user_id?: string
           pickup_at?: string
           return_at?: string

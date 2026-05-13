@@ -6,7 +6,6 @@ import { createAdminClient } from '@/lib/supabase/admin'
 const bookingSelect = `
   id,
   car_id,
-  vehicle_id,
   user_id,
   pickup_at,
   return_at,
