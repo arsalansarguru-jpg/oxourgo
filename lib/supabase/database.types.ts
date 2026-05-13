@@ -73,7 +73,10 @@ export type Database = {
           price_per_day: number
           image: string | null
           featured: boolean
-          availability_status: string
+          /** When set, drives catalog + booking (matches Supabase `available`). */
+          available?: boolean
+          /** Legacy text status; optional if the table only uses `available`. */
+          availability_status?: string
           year: number
           registration_number: string
           security_deposit: number
@@ -89,6 +92,7 @@ export type Database = {
           price_per_day: number
           image?: string | null
           featured?: boolean
+          available?: boolean
           availability_status?: string
           year?: number
           registration_number?: string
@@ -105,6 +109,7 @@ export type Database = {
           price_per_day?: number
           image?: string | null
           featured?: boolean
+          available?: boolean
           availability_status?: string
           year?: number
           registration_number?: string
@@ -443,6 +448,7 @@ export type VehicleSummaryRow = Pick<
   | 'brand'
   | 'price_per_day'
   | 'image'
+  | 'available'
   | 'transmission'
   | 'fuel_type'
   | 'seats'

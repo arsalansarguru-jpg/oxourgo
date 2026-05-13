@@ -25,7 +25,7 @@ export async function getFeaturedVehiclesForHome(limit = 6): Promise<GetFeatured
   const res = await fetchPublicVehicleRows()
   if (!res.ok) return { ok: false, error: res.error }
 
-  const listable = res.rows.filter((r) => isVehicleShownOnPublicCatalog(r.availability_status))
+  const listable = res.rows.filter((r) => isVehicleShownOnPublicCatalog(r))
   const sorted = sortFeaturedFirst(listable).slice(0, limit)
 
   const cars: Car[] = []

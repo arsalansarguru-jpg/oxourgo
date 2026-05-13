@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { validateTripWindow } from '@/lib/booking/dates'
 import { logFleetVehiclesError, isVehiclePubliclyListable } from '@/lib/fleet/public-vehicle-catalog'
 import type { FleetCarRow } from '@/lib/fleet/mappers'
-import type { VehicleRow } from '@/lib/fleet/vehicle-mappers'
+import { isVehicleAvailableForBooking, type VehicleRow } from '@/lib/fleet/vehicle-mappers'
 import { createPublicServerSupabaseClient } from '@/lib/supabase/public-server-client'
 
 /** `carId` is inventory id: resolved against `cars` first, then `vehicles`. */
@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
 
     const { data: vehicle, error: vErr } = await supabase
       .from('vehicles')
-      .select('availability_status')
+      .select('available,availability_status')
       .eq('id', inventoryId)
       .maybeSingle()
 
@@ -84,8 +84,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ ok: false, error: 'inventory_not_found' }, { status: 404 })
     }
 
-    const vStatus = (vehicle as Pick<VehicleRow, 'availability_status'>).availability_status
-    if (!isVehiclePubliclyListable(vStatus)) {
+    if (!isVehicleAvailableForBooking(vehicle as VehicleRow)) {
       return NextResponse.json({
         ok: true,
         available: false,

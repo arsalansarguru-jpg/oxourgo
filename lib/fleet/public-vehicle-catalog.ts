@@ -3,29 +3,29 @@ import 'server-only'
 import type { PostgrestError } from '@supabase/supabase-js'
 
 import { createPublicServerSupabaseClient } from '@/lib/supabase/public-server-client'
-import type { Database } from '@/lib/supabase/database.types'
+import type { VehicleRow } from '@/lib/fleet/vehicle-mappers'
 
-export type VehicleRow = Database['public']['Tables']['vehicles']['Row']
+export type { VehicleRow } from '@/lib/fleet/vehicle-mappers'
 
 /**
  * Explicit column list for narrow selects (detail pages, joins).
  * Catalog listing uses `select('*')` for resilience if the live schema adds columns.
  */
 export const VEHICLE_PUBLIC_COLUMNS =
-  'id,name,brand,transmission,fuel_type,seats,price_per_day,image,featured,availability_status,year,registration_number,security_deposit,created_at' as const
+  'id,name,brand,transmission,fuel_type,seats,price_per_day,image,featured,available,availability_status,year,registration_number,security_deposit,created_at' as const
 
 /**
- * Homepage + `/fleet`: show vehicles unless explicitly taken off sale.
- * (Booking/checkout still requires strict `available` — see `isVehiclePubliclyListable`.)
+ * Homepage + `/fleet`: list vehicles for browsing (including `available=false`, which shows as Unavailable with booking disabled).
+ * Legacy rows without `available` still respect `availability_status` for hiding maintenance-only rows.
  */
-export function isVehicleShownOnPublicCatalog(availabilityStatus: string | null | undefined): boolean {
-  const s = String(availabilityStatus ?? '').trim().toLowerCase()
-  if (!s) return true
+export function isVehicleShownOnPublicCatalog(row: VehicleRow): boolean {
+  if (typeof row.available === 'boolean') return true
+  const s = String(row.availability_status ?? '').trim().toLowerCase()
   if (s === 'unavailable' || s === 'maintenance' || s === 'inactive' || s === 'draft') return false
   return true
 }
 
-/** Checkout / overlap: vehicle must be explicitly available (case-insensitive). */
+/** Legacy `cars` table string `availability_status` only (vehicles use `isVehicleAvailableForBooking`). */
 export function isVehiclePubliclyListable(availabilityStatus: string | null | undefined): boolean {
   return String(availabilityStatus ?? '').trim().toLowerCase() === 'available'
 }

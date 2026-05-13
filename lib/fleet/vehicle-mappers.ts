@@ -25,8 +25,22 @@ function modelFromListingName(brand: string, name: string): string {
   return n
 }
 
-function toAvailability(status: string): FleetCarAvailabilityLabel {
-  return status?.trim().toLowerCase() === 'available' ? 'Available' : 'Unavailable'
+/**
+ * Bookable when `vehicles.available === true`.
+ * If the boolean column is missing (older rows), falls back to `availability_status === 'available'`.
+ */
+export function isVehicleAvailableForBooking(row: {
+  available?: boolean | null
+  availability_status?: string | null
+}): boolean {
+  if (typeof row.available === 'boolean') {
+    return row.available === true
+  }
+  return String(row.availability_status ?? '').trim().toLowerCase() === 'available'
+}
+
+function toAvailabilityLabel(row: VehicleRow): FleetCarAvailabilityLabel {
+  return isVehicleAvailableForBooking(row) ? 'Available' : 'Unavailable'
 }
 
 function toFleetFuel(raw: string): FleetCarFuel {
@@ -65,8 +79,8 @@ function toCarCategory(pricePerDay: number): CarCategory {
   return toFleetCategory(pricePerDay) as CarCategory
 }
 
-function toCarStatus(status: string): CarStatus {
-  return status?.trim().toLowerCase() === 'available' ? 'Available' : 'Unavailable'
+function toCarStatus(row: VehicleRow): CarStatus {
+  return isVehicleAvailableForBooking(row) ? 'Available' : 'Unavailable'
 }
 
 export function mapVehicleRowToFleetCar(row: VehicleRow): FleetCar {
@@ -85,7 +99,7 @@ export function mapVehicleRowToFleetCar(row: VehicleRow): FleetCar {
     seats: row.seats,
     pricePerDay: price,
     securityDeposit: Number(row.security_deposit),
-    availability: toAvailability(row.availability_status),
+    availability: toAvailabilityLabel(row),
     featured: Boolean(row.featured),
     category: toFleetCategory(price),
     imageUrl,
@@ -100,7 +114,7 @@ export function mapVehicleRowToCar(row: VehicleRow): Car {
   return {
     id: row.id,
     name,
-    status: toCarStatus(row.availability_status),
+    status: toCarStatus(row),
     category: toCarCategory(price),
     rating: 0,
     reviews: 0,

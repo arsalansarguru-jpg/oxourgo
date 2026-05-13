@@ -46,6 +46,7 @@ const bookingSelect = `
     brand,
     price_per_day,
     image,
+    available,
     transmission,
     fuel_type,
     seats,

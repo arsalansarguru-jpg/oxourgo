@@ -12,6 +12,7 @@ import { onBookingCreated } from '@/lib/notifications/events'
 import { createClient } from '@/lib/supabase/server'
 import { mapFleetRowToCar, type FleetCarRow } from '@/lib/fleet/mappers'
 import { isVehiclePubliclyListable } from '@/lib/fleet/public-vehicle-catalog'
+import { isVehicleAvailableForBooking, type VehicleRow } from '@/lib/fleet/vehicle-mappers'
 import type { Database } from '@/lib/supabase/database.types'
 
 export async function createBookingAction(input: CreateBookingInput): Promise<CreateBookingResult> {
@@ -36,12 +37,12 @@ export async function createBookingAction(input: CreateBookingInput): Promise<Cr
 
     const { data: vehicleRow, error: vehicleErr } = await supabase
       .from('vehicles')
-      .select('id,availability_status,price_per_day')
+      .select('id,available,availability_status,price_per_day')
       .eq('id', input.carId)
       .maybeSingle()
 
     if (!vehicleErr && vehicleRow) {
-      if (!isVehiclePubliclyListable(vehicleRow.availability_status)) {
+      if (!isVehicleAvailableForBooking(vehicleRow as VehicleRow)) {
         return { ok: false, code: 'car_unavailable', message: 'This vehicle is not available to book right now.' }
       }
 

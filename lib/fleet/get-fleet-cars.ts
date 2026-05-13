@@ -28,7 +28,7 @@ export async function getFleetCars(): Promise<GetFleetCarsResult> {
   const res = await fetchPublicVehicleRows()
   if (!res.ok) return { ok: false, error: res.error }
 
-  const listable = res.rows.filter((r) => isVehicleShownOnPublicCatalog(r.availability_status))
+  const listable = res.rows.filter((r) => isVehicleShownOnPublicCatalog(r))
   const sorted = sortFleetRows(listable)
 
   const cars: FleetCar[] = []

@@ -93,7 +93,7 @@ export function HomeView({ featuredCars, featuredFetchError = null }: HomeViewPr
               <EmptyState
                 icon={CarFront}
                 title="Featured fleet"
-                description="No available vehicles are returned from Supabase yet. Add rows to public.vehicles with availability_status set to available, or mark vehicles as featured."
+                description="No vehicles are returned from Supabase yet, or every row has available = false. Set available = true for bookable rows, or add vehicles in public.vehicles."
                 actionLabel="Browse fleet"
                 to="/fleet"
               />
