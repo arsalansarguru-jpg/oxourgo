@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
 
     const { data: rows, error: vErr } = await supabase
       .from('vehicles')
-      .select('id,available,availability_status')
+      .select('id,available')
       .eq('id', inventoryId)
       .limit(1)
 

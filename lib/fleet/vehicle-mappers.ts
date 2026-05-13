@@ -41,7 +41,7 @@ function modelFromListingName(brand: string, name: string): string {
 
 /**
  * Bookable when `vehicles.available === true`.
- * If the boolean column is missing (older rows), falls back to `availability_status === 'available'`.
+ * If `available` is absent, falls back to legacy `availability_status === 'available'` when that field exists on the row.
  */
 export function isVehicleAvailableForBooking(row: {
   available?: boolean | null

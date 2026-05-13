@@ -158,7 +158,7 @@ export function FleetClientView({
             <EmptyState
               icon={Search}
               title="No vehicles to show"
-              description="There are no vehicles to list, or every row is hidden by legacy availability_status. Ensure public.vehicles has rows and set available = true for bookable inventory."
+              description="There are no vehicles to list, or every row is hidden. Ensure public.vehicles has rows and set available = true for bookable inventory."
               actionLabel="Refresh"
               onAction={() => router.refresh()}
             />

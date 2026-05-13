@@ -12,11 +12,11 @@ export type { VehicleRow } from '@/lib/fleet/vehicle-mappers'
  * Catalog listing uses `select('*')` for resilience if the live schema adds columns.
  */
 export const VEHICLE_PUBLIC_COLUMNS =
-  'id,name,brand,transmission,fuel_type,seats,price_per_day,image,featured,available,availability_status,year,registration_number,security_deposit,created_at' as const
+  'id,name,brand,transmission,fuel_type,seats,price_per_day,image,featured,available,year,registration_number,security_deposit,created_at' as const
 
 /**
  * Homepage + `/fleet`: list vehicles for browsing (including `available=false`, which shows as Unavailable with booking disabled).
- * Legacy rows without `available` still respect `availability_status` for hiding maintenance-only rows.
+ * If `available` is missing on a row, optional legacy `availability_status` (when present on the object) can hide maintenance-only rows.
  */
 export function isVehicleShownOnPublicCatalog(row: VehicleRow): boolean {
   if (typeof row.available === 'boolean') return true

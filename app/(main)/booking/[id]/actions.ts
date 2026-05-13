@@ -34,7 +34,7 @@ export async function createBookingAction(input: CreateBookingInput): Promise<Cr
 
     const { data: vehicleRow, error: vehicleErr } = await supabase
       .from('vehicles')
-      .select('id,available,availability_status,price_per_day')
+      .select('id,available,price_per_day')
       .eq('id', input.carId)
       .maybeSingle()
 
