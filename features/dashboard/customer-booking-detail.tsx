@@ -32,12 +32,6 @@ import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
 import { cardEyebrow, cardSurfaceBase, cardSurfaceHover, cardSurfaceTransition } from '@/components/ui/card-tokens'
 
-function resolveCar(row: BookingWithCar) {
-  const c = row.cars
-  if (!c) return null
-  return Array.isArray(c) ? c[0] ?? null : c
-}
-
 function resolveVehicle(row: BookingWithCar) {
   const v = row.vehicles
   if (!v) return null
@@ -90,14 +84,13 @@ function timelineSteps(row: BookingWithCar) {
 }
 
 export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
-  const car = resolveCar(row)
   const vehicle = resolveVehicle(row)
   const visual = resolveBookingVehicleVisual(row)
   const ui = deriveCustomerBookingUiStatus(row)
   const bookingBadge = mapDbBookingStatusToCustomerBadge(row.booking_status)
   const steps = timelineSteps(row)
-  const securityDeposit = car?.security_deposit ?? vehicle?.security_deposit
-  const inventoryId = car?.id ?? vehicle?.id
+  const securityDeposit = vehicle?.security_deposit
+  const inventoryId = vehicle?.id
   const invoiceRef = `OX-${row.id.replace(/-/g, '').slice(0, 10).toUpperCase()}`
   const isCancelled = row.booking_status === 'cancelled'
 
@@ -251,7 +244,7 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
           </Card>
 
           {/* Vehicle */}
-          {car || vehicle ? (
+          {vehicle ? (
             <Card className={cn(cardSurfaceBase, 'border border-white/[0.08]')}>
               <CardContent className="p-5 sm:p-7">
                 <div className="flex items-center gap-2">
@@ -261,23 +254,23 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
                 <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
                   <div>
                     <dt className="text-muted">Registration</dt>
-                    <dd className="mt-1 font-medium text-soft">{car?.registration_number ?? vehicle?.registration_number}</dd>
+                    <dd className="mt-1 font-medium text-soft">{vehicle.registration_number}</dd>
                   </div>
                   <div>
                     <dt className="text-muted">Year</dt>
-                    <dd className="mt-1 font-medium text-soft">{car?.year ?? vehicle?.year}</dd>
+                    <dd className="mt-1 font-medium text-soft">{vehicle.year}</dd>
                   </div>
                   <div>
                     <dt className="text-muted">Fuel</dt>
-                    <dd className="mt-1 text-soft">{car?.fuel_type ?? vehicle?.fuel_type}</dd>
+                    <dd className="mt-1 text-soft">{vehicle.fuel_type}</dd>
                   </div>
                   <div>
                     <dt className="text-muted">Transmission</dt>
-                    <dd className="mt-1 text-soft">{car?.transmission ?? vehicle?.transmission}</dd>
+                    <dd className="mt-1 text-soft">{vehicle.transmission}</dd>
                   </div>
                   <div>
                     <dt className="text-muted">Seats</dt>
-                    <dd className="mt-1 text-soft">{car?.seats ?? vehicle?.seats}</dd>
+                    <dd className="mt-1 text-soft">{vehicle.seats}</dd>
                   </div>
                 </dl>
                 {inventoryId ? (

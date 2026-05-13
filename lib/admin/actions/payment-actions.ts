@@ -60,14 +60,14 @@ export async function adminCreateDepositHoldPlaceholderAction(bookingId: string)
 
   const { data: booking, error: bErr } = await admin
     .from('bookings')
-    .select('user_id, car_id')
+    .select('user_id, vehicle_id')
     .eq('id', bookingId)
     .single()
 
   if (bErr || !booking) return { ok: false, message: 'Booking not found.' }
 
-  if (!booking.car_id) {
-    return { ok: false, message: 'Booking has no linked vehicle (car_id).' }
+  if (!booking.vehicle_id) {
+    return { ok: false, message: 'Booking has no linked vehicle (vehicle_id).' }
   }
 
   let depositRow: { security_deposit: number } | null = null
@@ -75,7 +75,7 @@ export async function adminCreateDepositHoldPlaceholderAction(bookingId: string)
   const { data: vehicle, error: vErr } = await admin
     .from('vehicles')
     .select('security_deposit')
-    .eq('id', booking.car_id)
+    .eq('id', booking.vehicle_id)
     .maybeSingle()
   if (!vErr && vehicle) {
     depositRow = vehicle
@@ -83,7 +83,7 @@ export async function adminCreateDepositHoldPlaceholderAction(bookingId: string)
     const { data: car, error: cErr } = await admin
       .from('cars')
       .select('security_deposit')
-      .eq('id', booking.car_id)
+      .eq('id', booking.vehicle_id)
       .maybeSingle()
     if (cErr || !car) return { ok: false, message: 'Vehicle not found for this booking.' }
     depositRow = car

@@ -7,11 +7,6 @@ import { Card, CardContent } from '@/components/ui/Card'
 import { cardSurfaceBase, cardSurfaceHover, cardSurfaceTransition } from '@/components/ui/card-tokens'
 
 function carName(row: BookingWithCar) {
-  const c = row.cars
-  if (c) {
-    const car = Array.isArray(c) ? c[0] : c
-    if (car) return `${car.brand} ${car.model}`.trim()
-  }
   const v = row.vehicles
   if (v) {
     const veh = Array.isArray(v) ? v[0] : v
@@ -71,8 +66,9 @@ export function CustomerPaymentsView({
         <h2 className="text-lg font-semibold text-soft">Security deposit tracking</h2>
         <div className="grid gap-4 md:grid-cols-2">
           {bookings.slice(0, 4).map((b) => {
-            const car = Array.isArray(b.cars) ? b.cars[0] : b.cars
-            const dep = car?.security_deposit ?? 0
+            const vehJoin = b.vehicles
+            const v = Array.isArray(vehJoin) ? vehJoin[0] : vehJoin
+            const dep = v?.security_deposit ?? 0
             return (
               <Card key={b.id} className={cn(cardSurfaceHover, cardSurfaceTransition)}>
                 <CardContent className="p-5">

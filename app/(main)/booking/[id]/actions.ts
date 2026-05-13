@@ -78,7 +78,7 @@ export async function createBookingAction(input: CreateBookingInput): Promise<Cr
     }
 
     const insert: Database['public']['Tables']['bookings']['Insert'] = {
-      car_id: vehicleRow.id,
+      vehicle_id: vehicleRow.id,
       user_id: user.id,
       pickup_date: input.pickupAtIso,
       return_date: input.returnAtIso,

@@ -32,9 +32,9 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
     customerEmail = null
   }
 
-  const car = booking.cars
-  const carObj = Array.isArray(car) ? car[0] : car
-  const carTitle = carObj ? `${carObj.brand} ${carObj.model}`.trim() : 'Vehicle'
+  const vehJoin = booking.vehicles
+  const veh = Array.isArray(vehJoin) ? vehJoin[0] : vehJoin
+  const carTitle = veh ? (veh.name?.trim() || `${veh.brand}`.trim()) : 'Vehicle'
 
   return (
     <div className="space-y-8">
@@ -77,10 +77,10 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
                 <dt className="text-soft">Total</dt>
                 <dd className="tabular-nums text-soft">{formatInr(booking.total_rupees)}</dd>
               </div>
-              {carObj ? (
+              {veh ? (
                 <div className="flex justify-between gap-4 text-xs text-muted">
                   <dt>Security deposit (vehicle)</dt>
-                  <dd className="tabular-nums text-soft">{formatInr(carObj.security_deposit)}</dd>
+                  <dd className="tabular-nums text-soft">{formatInr(veh.security_deposit)}</dd>
                 </div>
               ) : null}
             </dl>

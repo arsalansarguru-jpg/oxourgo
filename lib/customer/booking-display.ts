@@ -1,4 +1,4 @@
-import type { BookingWithCar, CarRow, VehicleSummaryRow } from '@/lib/supabase/database.types'
+import type { BookingWithCar, VehicleSummaryRow } from '@/lib/supabase/database.types'
 import { getPublicStorageObjectUrl } from '@/lib/supabase/storage-public-url'
 import { resolveFleetImageUrl } from '@/lib/fleet/mappers'
 
@@ -10,11 +10,6 @@ export type BookingVehicleVisual = {
   /** Display title (e.g. full listing name or “Brand Model”). */
   name: string
   brand: string
-}
-
-function firstCar(cars: BookingWithCar['cars']): CarRow | null {
-  if (!cars) return null
-  return Array.isArray(cars) ? cars[0] ?? null : cars
 }
 
 function firstVehicle(vehicles: BookingWithCar['vehicles']): VehicleSummaryRow | null {
@@ -29,25 +24,8 @@ function imageFromVehicleRow(brand: string, image: string | null): string {
   return getPublicStorageObjectUrl('fleet', raw) ?? resolveFleetImageUrl(brand)
 }
 
-function imageFromCarRow(brand: string, coverImagePath: string | null): string {
-  const path = coverImagePath?.trim()
-  if (path) {
-    const url = getPublicStorageObjectUrl('fleet', path)
-    if (url) return url
-  }
-  return resolveFleetImageUrl(brand)
-}
-
-/** Resolves hero image plus name/brand for `cars` or `vehicles` join on a booking row. */
+/** Resolves hero image plus name/brand for the `vehicles` join on a booking row. */
 export function resolveBookingVehicleVisual(row: BookingWithCar): BookingVehicleVisual {
-  const car = firstCar(row.cars)
-  if (car) {
-    return {
-      imageUrl: imageFromCarRow(car.brand, car.cover_image_path),
-      name: `${car.brand} ${car.model}`.trim(),
-      brand: car.brand,
-    }
-  }
   const veh = firstVehicle(row.vehicles)
   if (veh) {
     return {

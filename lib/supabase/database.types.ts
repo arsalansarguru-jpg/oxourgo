@@ -121,7 +121,7 @@ export type Database = {
       bookings: {
         Row: {
           id: string
-          car_id: string | null
+          vehicle_id: string | null
           user_id: string
           pickup_date: string
           return_date: string
@@ -141,7 +141,7 @@ export type Database = {
         }
         Insert: {
           id?: string
-          car_id?: string | null
+          vehicle_id?: string | null
           user_id: string
           pickup_date: string
           return_date: string
@@ -161,7 +161,7 @@ export type Database = {
         }
         Update: {
           id?: string
-          car_id?: string | null
+          vehicle_id?: string | null
           user_id?: string
           pickup_date?: string
           return_date?: string
@@ -455,7 +455,6 @@ export type VehicleSummaryRow = Pick<
 >
 
 export type BookingWithCar = BookingRow & {
-  cars: CarRow | CarRow[] | null
-  vehicles?: VehicleSummaryRow | VehicleSummaryRow[] | null
+  vehicles: VehicleSummaryRow | VehicleSummaryRow[] | null
 }
 export type NotificationRow = Database['public']['Tables']['notifications']['Row']

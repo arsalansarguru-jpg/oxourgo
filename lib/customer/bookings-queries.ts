@@ -5,7 +5,7 @@ import type { BookingWithCar } from '@/lib/supabase/database.types'
 
 const bookingSelect = `
   id,
-  car_id,
+  vehicle_id,
   user_id,
   pickup_date,
   return_date,
@@ -21,23 +21,6 @@ const bookingSelect = `
   payment_status,
   created_at,
   updated_at,
-  cars (
-    id,
-    brand,
-    model,
-    year,
-    registration_number,
-    fuel_type,
-    transmission,
-    seats,
-    pricing_per_day,
-    security_deposit,
-    availability_status,
-    featured,
-    cover_image_path,
-    gallery_paths,
-    created_at
-  ),
   vehicles (
     id,
     name,

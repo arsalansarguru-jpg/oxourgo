@@ -19,7 +19,7 @@ export async function runTripReminderJob(options?: { hoursMin?: number; hoursMax
 
   const { data: bookings, error } = await admin
     .from('bookings')
-    .select('id, user_id, pickup_date, cars(brand,model)')
+    .select('id, user_id, pickup_date, vehicles(name, brand)')
     .eq('booking_status', 'confirmed')
     .gte('pickup_date', from)
     .lte('pickup_date', to)
@@ -40,12 +40,12 @@ export async function runTripReminderJob(options?: { hoursMin?: number; hoursMax
     })
     if (already) continue
 
-    const cars = b.cars as unknown as
-      | { brand: string; model: string }
-      | { brand: string; model: string }[]
+    const vehicles = b.vehicles as unknown as
+      | { name: string; brand: string }
+      | { name: string; brand: string }[]
       | null
-    const c = Array.isArray(cars) ? cars[0] : cars
-    const label = c ? `${c.brand} ${c.model}`.trim() : 'your vehicle'
+    const v = Array.isArray(vehicles) ? vehicles[0] : vehicles
+    const label = v ? (v.name?.trim() || `${v.brand}`.trim() || 'your vehicle') : 'your vehicle'
 
     await notifyCustomer({
       userId: b.user_id,

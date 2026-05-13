@@ -25,7 +25,7 @@ async function overlapViaBookingsTableAdmin(
   let q = admin
     .from('bookings')
     .select('id')
-    .eq('car_id', vehicleId)
+    .eq('vehicle_id', vehicleId)
     .lt('pickup_date', returnIso)
     .gt('return_date', pickupIso)
     .not('booking_status', 'eq', 'cancelled')

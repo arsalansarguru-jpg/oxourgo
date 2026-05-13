@@ -12,11 +12,6 @@ import { CustomerBookingCard } from '@/components/dashboard/customer-booking-car
 import { EmptyState } from '@/components/ui/EmptyState'
 
 function carLabel(row: BookingWithCar): string {
-  const c = row.cars
-  if (c) {
-    const car = Array.isArray(c) ? c[0] : c
-    if (car) return `${car.brand} ${car.model}`.trim()
-  }
   const v = row.vehicles
   if (v) {
     const veh = Array.isArray(v) ? v[0] : v

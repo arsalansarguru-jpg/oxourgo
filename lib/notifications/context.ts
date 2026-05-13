@@ -12,18 +12,18 @@ export async function getBookingNotifyContext(bookingId: string): Promise<Bookin
   const admin = createAdminClient()
   const { data, error } = await admin
     .from('bookings')
-    .select('user_id, pickup_date, cars(brand,model)')
+    .select('user_id, pickup_date, vehicles(name, brand)')
     .eq('id', bookingId)
     .maybeSingle()
 
   if (error || !data) return null
 
-  const cars = data.cars as unknown as
-    | { brand: string; model: string }
-    | { brand: string; model: string }[]
+  const vehicles = data.vehicles as unknown as
+    | { name: string; brand: string }
+    | { name: string; brand: string }[]
     | null
-  const c = Array.isArray(cars) ? cars[0] : cars
-  const car_label = c ? `${c.brand} ${c.model}`.trim() : null
+  const v = Array.isArray(vehicles) ? vehicles[0] : vehicles
+  const car_label = v ? (v.name?.trim() || `${v.brand}`.trim() || null) : null
 
   return {
     user_id: data.user_id,

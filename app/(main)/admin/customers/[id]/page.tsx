@@ -13,10 +13,12 @@ import { formatInr } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
 
-function carLabel(row: { cars: unknown }): string {
-  const c = row.cars as { brand?: string; model?: string } | null
-  if (!c) return 'Vehicle'
-  return `${c.brand ?? ''} ${c.model ?? ''}`.trim() || 'Vehicle'
+function vehicleLabel(row: { vehicles: unknown }): string {
+  const v = row.vehicles as { name?: string; brand?: string } | { name?: string; brand?: string }[] | null
+  if (!v) return 'Vehicle'
+  const first = Array.isArray(v) ? v[0] : v
+  if (!first) return 'Vehicle'
+  return (first.name?.trim() || `${first.brand ?? ''}`.trim()) || 'Vehicle'
 }
 
 export default async function AdminCustomerDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -88,7 +90,7 @@ export default async function AdminCustomerDetailPage({ params }: { params: Prom
               <tbody>
                 {bookings.map((b) => (
                   <tr key={b.id} className="border-b border-white/[0.05]">
-                    <td className="px-4 py-3 text-soft">{carLabel(b)}</td>
+                    <td className="px-4 py-3 text-soft">{vehicleLabel(b)}</td>
                     <td className="px-4 py-3 text-muted">
                       {new Date(b.pickup_date).toLocaleDateString(undefined, { dateStyle: 'medium' })}
                     </td>
