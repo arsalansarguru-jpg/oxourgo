@@ -41,7 +41,7 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
       <AdminPageHeader
         eyebrow="Booking"
         title={carTitle}
-        description={`Customer ${customerEmail ?? booking.user_id} · ${new Date(booking.pickup_at).toLocaleString()} → ${new Date(booking.return_at).toLocaleString()}`}
+        description={`Customer ${customerEmail ?? booking.user_id} · ${new Date(booking.pickup_date).toLocaleString()} → ${new Date(booking.return_date).toLocaleString()}`}
       />
 
       <div className="flex flex-wrap gap-2">

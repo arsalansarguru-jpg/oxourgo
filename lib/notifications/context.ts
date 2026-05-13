@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 export type BookingNotifyContext = {
   user_id: string
-  pickup_at: string
+  pickup_date: string
   car_label: string | null
 }
 
@@ -12,7 +12,7 @@ export async function getBookingNotifyContext(bookingId: string): Promise<Bookin
   const admin = createAdminClient()
   const { data, error } = await admin
     .from('bookings')
-    .select('user_id, pickup_at, cars(brand,model)')
+    .select('user_id, pickup_date, cars(brand,model)')
     .eq('id', bookingId)
     .maybeSingle()
 
@@ -27,7 +27,7 @@ export async function getBookingNotifyContext(bookingId: string): Promise<Bookin
 
   return {
     user_id: data.user_id,
-    pickup_at: data.pickup_at,
+    pickup_date: data.pickup_date,
     car_label,
   }
 }

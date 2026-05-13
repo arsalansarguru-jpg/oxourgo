@@ -19,10 +19,10 @@ export async function runTripReminderJob(options?: { hoursMin?: number; hoursMax
 
   const { data: bookings, error } = await admin
     .from('bookings')
-    .select('id, user_id, pickup_at, cars(brand,model)')
+    .select('id, user_id, pickup_date, cars(brand,model)')
     .eq('booking_status', 'confirmed')
-    .gte('pickup_at', from)
-    .lte('pickup_at', to)
+    .gte('pickup_date', from)
+    .lte('pickup_date', to)
 
   if (error || !bookings?.length) return { scanned: 0, inserted: 0 }
 
@@ -51,8 +51,8 @@ export async function runTripReminderJob(options?: { hoursMin?: number; hoursMax
       userId: b.user_id,
       type: 'trip_reminder',
       title: 'Upcoming trip reminder',
-      body: `Pickup for ${label} is scheduled soon (${new Date(b.pickup_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}).`,
-      metadata: { booking_id: b.id, pickup_at: b.pickup_at },
+      body: `Pickup for ${label} is scheduled soon (${new Date(b.pickup_date).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}).`,
+      metadata: { booking_id: b.id, pickup_date: b.pickup_date },
     })
     inserted += 1
   }

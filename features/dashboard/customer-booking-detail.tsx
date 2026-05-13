@@ -79,8 +79,8 @@ function timelineSteps(row: BookingWithCar) {
         ui === 'active' ||
         ui === 'upcoming',
     },
-    { key: 'pickup', label: 'Pickup', done: new Date() >= new Date(row.pickup_at) },
-    { key: 'return', label: 'Return', done: new Date() > new Date(row.return_at) },
+    { key: 'pickup', label: 'Pickup', done: new Date() >= new Date(row.pickup_date) },
+    { key: 'return', label: 'Return', done: new Date() > new Date(row.return_date) },
     { key: 'complete', label: 'Completed', done: ui === 'completed' },
   ]
   if (row.booking_status === 'cancelled') {
@@ -101,8 +101,8 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
   const invoiceRef = `OX-${row.id.replace(/-/g, '').slice(0, 10).toUpperCase()}`
   const isCancelled = row.booking_status === 'cancelled'
 
-  const pickupFmt = new Date(row.pickup_at).toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short' })
-  const returnFmt = new Date(row.return_at).toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short' })
+  const pickupFmt = new Date(row.pickup_date).toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short' })
+  const returnFmt = new Date(row.return_date).toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short' })
 
   return (
     <div className="space-y-8 pb-4 md:space-y-10 md:pb-8">

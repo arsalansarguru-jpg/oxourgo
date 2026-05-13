@@ -90,7 +90,7 @@ export default async function AdminCustomerDetailPage({ params }: { params: Prom
                   <tr key={b.id} className="border-b border-white/[0.05]">
                     <td className="px-4 py-3 text-soft">{carLabel(b)}</td>
                     <td className="px-4 py-3 text-muted">
-                      {new Date(b.pickup_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}
+                      {new Date(b.pickup_date).toLocaleDateString(undefined, { dateStyle: 'medium' })}
                     </td>
                     <td className="px-4 py-3">
                       <AdminStatusPill value={b.booking_status} />

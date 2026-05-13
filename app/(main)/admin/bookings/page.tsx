@@ -51,7 +51,7 @@ export default async function AdminBookingsPage() {
                   <tr key={b.id} className="border-b border-white/[0.05] hover:bg-white/[0.02]">
                     <td className="px-4 py-3 font-medium text-soft">{carLabel(b)}</td>
                     <td className="px-4 py-3 text-muted">
-                      {new Date(b.pickup_at).toLocaleDateString(undefined, { dateStyle: 'medium' })}
+                      {new Date(b.pickup_date).toLocaleDateString(undefined, { dateStyle: 'medium' })}
                     </td>
                     <td className="px-4 py-3">
                       <AdminStatusPill value={b.booking_status} />

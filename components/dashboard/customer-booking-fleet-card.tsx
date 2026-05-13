@@ -23,8 +23,8 @@ export type CustomerBookingFleetCardProps = {
 export function CustomerBookingFleetCard({ row }: CustomerBookingFleetCardProps) {
   const visual = resolveBookingVehicleVisual(row)
   const bookingBadge = mapDbBookingStatusToCustomerBadge(row.booking_status)
-  const pickupFmt = new Date(row.pickup_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
-  const returnFmt = new Date(row.return_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+  const pickupFmt = new Date(row.pickup_date).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+  const returnFmt = new Date(row.return_date).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 
   return (
     <article

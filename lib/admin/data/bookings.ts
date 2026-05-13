@@ -7,8 +7,8 @@ const bookingSelect = `
   id,
   car_id,
   user_id,
-  pickup_at,
-  return_at,
+  pickup_date,
+  return_date,
   pickup_location,
   return_location,
   rental_days,
@@ -81,7 +81,7 @@ export async function adminListBookingsForUser(userId: string): Promise<BookingW
     .from('bookings')
     .select(bookingSelect)
     .eq('user_id', userId)
-    .order('pickup_at', { ascending: false })
+    .order('pickup_date', { ascending: false })
     .limit(100)
 
   if (error || !data) return []

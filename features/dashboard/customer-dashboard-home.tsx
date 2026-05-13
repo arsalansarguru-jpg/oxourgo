@@ -47,7 +47,7 @@ export function CustomerDashboardHome({
   const now = Date.now()
   const withUi = bookings.map((b) => ({ row: b, ui: deriveCustomerBookingUiStatus(b) }))
 
-  const active = withUi.filter(({ ui, row }) => ui === 'active' || (ui === 'upcoming' && new Date(row.pickup_at).getTime() <= now + 36 * 60 * 60 * 1000))
+  const active = withUi.filter(({ ui, row }) => ui === 'active' || (ui === 'upcoming' && new Date(row.pickup_date).getTime() <= now + 36 * 60 * 60 * 1000))
   const upcoming = withUi.filter(({ ui }) => ui === 'upcoming')
   const spotlight = [...active, ...upcoming].slice(0, 3)
 
@@ -127,8 +127,8 @@ export function CustomerDashboardHome({
                 bookingId={row.id}
                 carLabel={carLabel(row)}
                 uiStatus={ui}
-                pickupAt={row.pickup_at}
-                returnAt={row.return_at}
+                pickupAt={row.pickup_date}
+                returnAt={row.return_date}
                 pickupLocation={row.pickup_location}
                 returnLocation={row.return_location}
                 totalRupees={row.total_rupees}

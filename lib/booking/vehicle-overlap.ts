@@ -26,8 +26,8 @@ async function overlapViaBookingsTableAdmin(
     .from('bookings')
     .select('id')
     .eq('car_id', vehicleId)
-    .lt('pickup_at', returnIso)
-    .gt('return_at', pickupIso)
+    .lt('pickup_date', returnIso)
+    .gt('return_date', pickupIso)
     .not('booking_status', 'eq', 'cancelled')
     .limit(1)
 

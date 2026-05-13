@@ -20,7 +20,7 @@ export async function onBookingCreated(bookingId: string): Promise<void> {
     userId: ctx.user_id,
     type: 'booking_received',
     title: 'Booking confirmation',
-    body: `We received your reservation${car}. Our team will review it shortly. Pickup ${pickupSnippet(ctx.pickup_at)}.`,
+    body: `We received your reservation${car}. Our team will review it shortly. Pickup ${pickupSnippet(ctx.pickup_date)}.`,
     metadata: meta,
   })
   await notifyCustomer({
@@ -34,8 +34,8 @@ export async function onBookingCreated(bookingId: string): Promise<void> {
     type: 'booking_pending_review',
     title: 'New booking pending review',
     body: ctx.car_label
-      ? `${ctx.car_label} · pickup ${pickupSnippet(ctx.pickup_at)}`
-      : `Pickup ${pickupSnippet(ctx.pickup_at)}`,
+      ? `${ctx.car_label} · pickup ${pickupSnippet(ctx.pickup_date)}`
+      : `Pickup ${pickupSnippet(ctx.pickup_date)}`,
     metadata: { ...meta, customer_user_id: ctx.user_id },
   })
 }
@@ -48,8 +48,8 @@ export async function onBookingApproved(bookingId: string): Promise<void> {
     type: 'booking_approved',
     title: 'Booking approved',
     body: ctx.car_label
-      ? `Your trip with ${ctx.car_label} is approved. Pickup ${pickupSnippet(ctx.pickup_at)}.`
-      : `Your trip is approved. Pickup ${pickupSnippet(ctx.pickup_at)}.`,
+      ? `Your trip with ${ctx.car_label} is approved. Pickup ${pickupSnippet(ctx.pickup_date)}.`
+      : `Your trip is approved. Pickup ${pickupSnippet(ctx.pickup_date)}.`,
     metadata: { booking_id: bookingId },
   })
 }

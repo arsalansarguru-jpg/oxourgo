@@ -10,16 +10,16 @@ export type CustomerBookingUiStatus =
  */
 export function deriveCustomerBookingUiStatus(row: {
   booking_status: string
-  pickup_at: string
-  return_at: string
+  pickup_date: string
+  return_date: string
 }): CustomerBookingUiStatus {
   if (row.booking_status === 'cancelled') return 'cancelled'
   if (row.booking_status === 'completed') return 'completed'
   if (row.booking_status === 'pending_payment') return 'pending_review'
 
   const now = Date.now()
-  const pickup = new Date(row.pickup_at).getTime()
-  const ret = new Date(row.return_at).getTime()
+  const pickup = new Date(row.pickup_date).getTime()
+  const ret = new Date(row.return_date).getTime()
 
   if (now > ret) return 'completed'
   if (now >= pickup && now <= ret) return 'active'

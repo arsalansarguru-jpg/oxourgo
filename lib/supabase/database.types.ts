@@ -123,8 +123,8 @@ export type Database = {
           id: string
           car_id: string | null
           user_id: string
-          pickup_at: string
-          return_at: string
+          pickup_date: string
+          return_date: string
           pickup_location: string
           return_location: string
           rental_days: number
@@ -143,8 +143,8 @@ export type Database = {
           id?: string
           car_id?: string | null
           user_id: string
-          pickup_at: string
-          return_at: string
+          pickup_date: string
+          return_date: string
           pickup_location: string
           return_location: string
           rental_days: number
@@ -163,8 +163,8 @@ export type Database = {
           id?: string
           car_id?: string | null
           user_id?: string
-          pickup_at?: string
-          return_at?: string
+          pickup_date?: string
+          return_date?: string
           pickup_location?: string
           return_location?: string
           rental_days?: number
