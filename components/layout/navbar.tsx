@@ -1,11 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { Menu, MessageCircle, X } from 'lucide-react'
+import { usePathname, useRouter } from 'next/navigation'
+import { ChevronDown, LayoutDashboard, LogOut, Menu, MessageCircle, X } from 'lucide-react'
+import type { User } from '@supabase/supabase-js'
 import { AnimatePresence, motion } from 'framer-motion'
 import { BRAND } from '@/constants/brand'
+import { useSupabase } from '@/hooks/use-supabase'
+import { useSupabaseAuthUser } from '@/hooks/use-supabase-auth-user'
 import { cn } from '@/lib/utils/cn'
 import { Button } from '@/components/ui/Button'
 import { BrandLogo } from '@/components/layout/brand-logo'
@@ -18,10 +21,37 @@ const nav = [
 
 const ease = [0.22, 1, 0.36, 1] as const
 
+function avatarUrlFromUser(user: User): string | null {
+  const m = user.user_metadata as Record<string, unknown> | undefined
+  const v = m?.avatar_url ?? m?.picture
+  return typeof v === 'string' && v.length > 0 ? v : null
+}
+
+function initialsFromUser(user: User): string {
+  const m = user.user_metadata as Record<string, unknown> | undefined
+  const name = m?.full_name ?? m?.name
+  if (typeof name === 'string' && name.trim()) {
+    const parts = name.trim().split(/\s+/)
+    const a = parts[0]?.[0] ?? ''
+    const b = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? '') : ''
+    const s = (a + b).toUpperCase()
+    return s || a.toUpperCase() || '?'
+  }
+  const e = user.email ?? ''
+  return e.slice(0, 2).toUpperCase() || '?'
+}
+
 export function Navbar() {
   const pathname = usePathname()
+  const router = useRouter()
+  const supabase = useSupabase()
+  const { user, ready } = useSupabaseAuthUser()
+  const accountMenuRef = useRef<HTMLDetailsElement>(null)
   const [open, setOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [signingOut, setSigningOut] = useState(false)
+
+  const avatarUrl = user ? avatarUrlFromUser(user) : null
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 12)
@@ -41,7 +71,21 @@ export function Navbar() {
 
   useEffect(() => {
     setOpen(false)
+    accountMenuRef.current?.removeAttribute('open')
   }, [pathname])
+
+  async function handleSignOut() {
+    if (!supabase || signingOut) return
+    setSigningOut(true)
+    try {
+      await supabase.auth.signOut()
+      accountMenuRef.current?.removeAttribute('open')
+      setOpen(false)
+      router.refresh()
+    } finally {
+      setSigningOut(false)
+    }
+  }
 
   return (
     <>
@@ -124,14 +168,69 @@ export function Navbar() {
               <MessageCircle className="h-[15px] w-[15px] opacity-90" />
               WhatsApp
             </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              to="/login"
-              className="hidden h-9 border-white/[0.1] bg-white/[0.05] px-3.5 text-[13px] font-medium text-soft shadow-none hover:translate-y-0 hover:border-white/[0.16] hover:bg-white/[0.09] active:translate-y-0 sm:inline-flex"
-            >
-              Log in
-            </Button>
+            {ready && user ? (
+              <details
+                ref={accountMenuRef}
+                className="relative hidden sm:block"
+              >
+                <summary
+                  className={cn(
+                    'flex cursor-pointer list-none items-center gap-1.5 rounded-full border border-white/[0.1] bg-white/[0.05] py-1 pl-1 pr-2 text-soft shadow-none transition-[border-color,background-color] hover:border-white/[0.16] hover:bg-white/[0.09] [&::-webkit-details-marker]:hidden',
+                  )}
+                  aria-label="Account menu"
+                >
+                  {avatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- OAuth avatars (e.g. Google) not in next/image remotePatterns
+                    <img
+                      src={avatarUrl}
+                      alt=""
+                      width={32}
+                      height={32}
+                      className="h-8 w-8 shrink-0 rounded-full object-cover"
+                      referrerPolicy="no-referrer"
+                    />
+                  ) : (
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-electric/20 text-[11px] font-bold text-electric">
+                      {initialsFromUser(user)}
+                    </span>
+                  )}
+                  <ChevronDown className="h-4 w-4 shrink-0 text-muted" aria-hidden />
+                </summary>
+                <div
+                  className={cn(
+                    'absolute right-0 top-[calc(100%+0.375rem)] z-[80] min-w-[11.5rem] overflow-hidden rounded-xl border border-white/[0.1] bg-matte/[0.96] py-1 shadow-[0_16px_48px_-20px_rgba(0,0,0,0.85)] backdrop-blur-xl',
+                  )}
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Link
+                    href="/dashboard"
+                    className="flex items-center gap-2 px-3 py-2.5 text-[13px] font-medium text-soft transition-colors hover:bg-white/[0.06]"
+                    onClick={() => accountMenuRef.current?.removeAttribute('open')}
+                  >
+                    <LayoutDashboard className="h-4 w-4 text-electric/90" aria-hidden />
+                    Dashboard
+                  </Link>
+                  <button
+                    type="button"
+                    disabled={signingOut}
+                    className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-[13px] font-medium text-muted transition-colors hover:bg-white/[0.06] hover:text-soft disabled:opacity-50"
+                    onClick={() => void handleSignOut()}
+                  >
+                    <LogOut className="h-4 w-4" aria-hidden />
+                    {signingOut ? 'Signing out…' : 'Sign out'}
+                  </button>
+                </div>
+              </details>
+            ) : ready && !user ? (
+              <Button
+                variant="secondary"
+                size="sm"
+                to="/login"
+                className="hidden h-9 border-white/[0.1] bg-white/[0.05] px-3.5 text-[13px] font-medium text-soft shadow-none hover:translate-y-0 hover:border-white/[0.16] hover:bg-white/[0.09] active:translate-y-0 sm:inline-flex"
+              >
+                Log in
+              </Button>
+            ) : null}
             <Button
               size="sm"
               to="/fleet"
@@ -233,15 +332,40 @@ export function Navbar() {
                   >
                     Book now
                   </Button>
-                  <Button
-                    variant="secondary"
-                    size="lg"
-                    to="/login"
-                    className="min-h-[3.25rem] w-full border-white/[0.12] bg-white/[0.06] text-[15px] font-medium hover:translate-y-0 hover:bg-white/[0.1] active:translate-y-0"
-                    onClick={() => setOpen(false)}
-                  >
-                    Log in
-                  </Button>
+                  {ready && user ? (
+                    <>
+                      <Button
+                        variant="secondary"
+                        size="lg"
+                        to="/dashboard"
+                        className="min-h-[3.25rem] w-full border-white/[0.12] bg-white/[0.06] text-[15px] font-medium hover:translate-y-0 hover:bg-white/[0.1] active:translate-y-0"
+                        onClick={() => setOpen(false)}
+                      >
+                        <LayoutDashboard className="h-[18px] w-[18px] text-electric" aria-hidden />
+                        Dashboard
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        className="min-h-[3.25rem] w-full text-[15px] font-medium hover:translate-y-0 active:translate-y-0"
+                        disabled={signingOut}
+                        onClick={() => void handleSignOut()}
+                      >
+                        <LogOut className="h-[18px] w-[18px]" aria-hidden />
+                        {signingOut ? 'Signing out…' : 'Sign out'}
+                      </Button>
+                    </>
+                  ) : ready && !user ? (
+                    <Button
+                      variant="secondary"
+                      size="lg"
+                      to="/login"
+                      className="min-h-[3.25rem] w-full border-white/[0.12] bg-white/[0.06] text-[15px] font-medium hover:translate-y-0 hover:bg-white/[0.1] active:translate-y-0"
+                      onClick={() => setOpen(false)}
+                    >
+                      Log in
+                    </Button>
+                  ) : null}
                 </div>
               </div>
             </motion.div>

@@ -36,6 +36,7 @@ export function DestinationCard({ destination, className }: DestinationCardProps
           src={destination.imageUrl}
           alt={destination.title}
           fill
+          unoptimized
           className="object-cover transition-[transform,filter] duration-[560ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/card:scale-[1.035] group-hover/card:brightness-[1.04]"
           sizes="(max-width:640px) 100vw,(max-width:1024px) 50vw, 25vw"
         />

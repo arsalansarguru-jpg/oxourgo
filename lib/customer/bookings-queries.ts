@@ -6,6 +6,7 @@ import type { BookingWithCar } from '@/lib/supabase/database.types'
 const bookingSelect = `
   id,
   car_id,
+  vehicle_id,
   user_id,
   pickup_at,
   return_at,
@@ -37,10 +38,36 @@ const bookingSelect = `
     cover_image_path,
     gallery_paths,
     created_at
+  ),
+  vehicles (
+    id,
+    name,
+    brand,
+    price_per_day,
+    image,
+    transmission,
+    fuel_type,
+    seats,
+    year,
+    registration_number,
+    security_deposit
   )
 `
 
-export async function listBookingsForUser(userId: string): Promise<BookingWithCar[]> {
+export type ListBookingsForUserError = {
+  code: 'query_failed'
+  message: string
+}
+
+export type ListBookingsForUserResult =
+  | { ok: true; data: BookingWithCar[] }
+  | { ok: false; error: ListBookingsForUserError }
+
+export function unwrapListBookingsResult(result: ListBookingsForUserResult): BookingWithCar[] {
+  return result.ok ? result.data : []
+}
+
+export async function listBookingsForUser(userId: string): Promise<ListBookingsForUserResult> {
   const supabase = await createClient()
   const { data, error } = await supabase
     .from('bookings')
@@ -48,8 +75,13 @@ export async function listBookingsForUser(userId: string): Promise<BookingWithCa
     .eq('user_id', userId)
     .order('pickup_at', { ascending: false })
 
-  if (error || !data) return []
-  return data as unknown as BookingWithCar[]
+  if (error) {
+    return {
+      ok: false,
+      error: { code: 'query_failed', message: error.message },
+    }
+  }
+  return { ok: true, data: (data ?? []) as unknown as BookingWithCar[] }
 }
 
 export async function getBookingForUser(bookingId: string, userId: string): Promise<BookingWithCar | null> {

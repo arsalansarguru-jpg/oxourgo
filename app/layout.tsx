@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next'
+import type { ReactNode } from 'react'
 
 import { AppProviders } from '@/components/providers/app-providers'
-import { readSupabasePublicEnv } from '@/lib/env/supabase-public'
 
 import './globals.css'
 
@@ -21,18 +21,11 @@ export const metadata: Metadata = {
     'Premium self-drive luxury car rentals in Mumbai. Verified vehicles, transparent pricing, and 24x7 support.',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const supabasePublic = readSupabasePublicEnv()
-
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark">
-      <body className="font-sans antialiased">
-        <AppProviders
-          supabaseUrl={supabasePublic?.url ?? null}
-          supabaseAnonKey={supabasePublic?.anonKey ?? null}
-        >
-          {children}
-        </AppProviders>
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <body className="font-sans antialiased" suppressHydrationWarning>
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   )

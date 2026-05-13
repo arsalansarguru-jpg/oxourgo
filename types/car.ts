@@ -2,7 +2,7 @@ export type CarCategory = 'Luxury' | 'SUV' | 'Sedan' | 'Hatchback' | 'Budget'
 
 export type CarStatus = 'Available' | 'Unavailable'
 
-export type FuelType = 'Petrol' | 'Diesel' | 'Electric'
+export type FuelType = 'Petrol' | 'Diesel' | 'Electric' | 'Hybrid' | 'CNG'
 
 export type Transmission = 'Auto' | 'Manual'
 

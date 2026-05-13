@@ -1,16 +1,19 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
 import { validateTripWindow } from '@/lib/booking/dates'
-import { createClient } from '@/lib/supabase/server'
+import { logFleetVehiclesError, isVehiclePubliclyListable } from '@/lib/fleet/public-vehicle-catalog'
 import type { FleetCarRow } from '@/lib/fleet/mappers'
+import type { VehicleRow } from '@/lib/fleet/vehicle-mappers'
+import { createPublicServerSupabaseClient } from '@/lib/supabase/public-server-client'
 
+/** `carId` is inventory id: resolved against `cars` first, then `vehicles`. */
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)
-  const carId = searchParams.get('carId')
+  const inventoryId = searchParams.get('carId')
   const pickup = searchParams.get('pickup')
   const ret = searchParams.get('return')
 
-  if (!carId || !pickup || !ret) {
+  if (!inventoryId || !pickup || !ret) {
     return NextResponse.json({ ok: false, error: 'missing_params' }, { status: 400 })
   }
 
@@ -20,19 +23,69 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const supabase = await createClient()
+    const supabase = createPublicServerSupabaseClient()
+
     const { data: car, error: carErr } = await supabase
       .from('cars')
       .select('availability_status')
-      .eq('id', carId)
+      .eq('id', inventoryId)
       .maybeSingle()
 
-    if (carErr || !car) {
-      return NextResponse.json({ ok: false, error: 'car_not_found' }, { status: 404 })
+    if (!carErr && car) {
+      const status = (car as Pick<FleetCarRow, 'availability_status'>).availability_status
+      if (!isVehiclePubliclyListable(status)) {
+        return NextResponse.json({
+          ok: true,
+          available: false,
+          reason: 'This vehicle is marked unavailable.',
+          carAvailable: false,
+        })
+      }
+
+      const { data: overlap, error: rpcErr } = await supabase.rpc('has_booking_overlap', {
+        p_car_id: inventoryId,
+        p_pickup: pickup,
+        p_return: ret,
+        p_exclude_booking_id: null,
+      })
+
+      if (rpcErr) {
+        return NextResponse.json(
+          {
+            ok: false,
+            error: rpcErr.message,
+            hint:
+              rpcErr.message.includes('has_booking_overlap') || rpcErr.code === '42883'
+                ? 'Apply supabase/migrations/20260212120000_bookings.sql in the Supabase SQL editor.'
+                : undefined,
+          },
+          { status: 503 },
+        )
+      }
+
+      const blocked = Boolean(overlap)
+      return NextResponse.json({
+        ok: true,
+        available: !blocked,
+        overlap: blocked,
+        reason: blocked ? 'Selected window overlaps an existing reservation.' : undefined,
+        carAvailable: true,
+      })
     }
 
-    const status = (car as Pick<FleetCarRow, 'availability_status'>).availability_status
-    if (status !== 'available') {
+    const { data: vehicle, error: vErr } = await supabase
+      .from('vehicles')
+      .select('availability_status')
+      .eq('id', inventoryId)
+      .maybeSingle()
+
+    if (vErr || !vehicle) {
+      if (vErr) logFleetVehiclesError('api/availability.vehicles', vErr)
+      return NextResponse.json({ ok: false, error: 'inventory_not_found' }, { status: 404 })
+    }
+
+    const vStatus = (vehicle as Pick<VehicleRow, 'availability_status'>).availability_status
+    if (!isVehiclePubliclyListable(vStatus)) {
       return NextResponse.json({
         ok: true,
         available: false,
@@ -41,28 +94,28 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    const { data: overlap, error: rpcErr } = await supabase.rpc('has_booking_overlap', {
-      p_car_id: carId,
+    const { data: vOverlap, error: vRpcErr } = await supabase.rpc('has_vehicle_booking_overlap', {
+      p_vehicle_id: inventoryId,
       p_pickup: pickup,
       p_return: ret,
       p_exclude_booking_id: null,
     })
 
-    if (rpcErr) {
+    if (vRpcErr) {
       return NextResponse.json(
         {
           ok: false,
-          error: rpcErr.message,
+          error: vRpcErr.message,
           hint:
-            rpcErr.message.includes('has_booking_overlap') || rpcErr.code === '42883'
-              ? 'Apply supabase/migrations/20260212120000_bookings.sql in the Supabase SQL editor.'
+            vRpcErr.message.includes('has_vehicle_booking_overlap') || vRpcErr.code === '42883'
+              ? 'Apply supabase/migrations/20260513140000_bookings_vehicle_inventory.sql in the Supabase SQL editor.'
               : undefined,
         },
         { status: 503 },
       )
     }
 
-    const blocked = Boolean(overlap)
+    const blocked = Boolean(vOverlap)
     return NextResponse.json({
       ok: true,
       available: !blocked,

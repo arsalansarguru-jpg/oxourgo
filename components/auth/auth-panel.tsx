@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowLeft,
-  Chrome,
   Fingerprint,
   Loader2,
   Lock,
@@ -27,7 +26,6 @@ import { useSupabase } from '@/hooks/use-supabase'
 
 const ease = [0.22, 1, 0.36, 1] as const
 
-type AuthMode = 'login' | 'signup'
 type AuthStep = 'methods' | 'otp'
 type OtpPhase = 'phone' | 'verify'
 type Pending = null | 'google' | 'email' | 'otp-send' | 'otp-verify'
@@ -70,6 +68,30 @@ function maskE164ForDisplay(e164: string): string {
   return `${e164.slice(0, 4)}••••${e164.slice(-2)}`
 }
 
+/** Gmail / Google account sign-in mark (multicolor “G”). */
+function GmailMark({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" aria-hidden xmlns="http://www.w3.org/2000/svg">
+      <path
+        fill="#EA4335"
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+      />
+      <path
+        fill="#4285F4"
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+      />
+    </svg>
+  )
+}
+
 function MethodSurface({
   children,
   className,
@@ -108,7 +130,6 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
   const router = useRouter()
   const supabase = useSupabase()
 
-  const [mode, setMode] = useState<AuthMode>('login')
   const [step, setStep] = useState<AuthStep>('methods')
   const [otpPhase, setOtpPhase] = useState<OtpPhase>('phone')
   const [showEmail, setShowEmail] = useState(false)
@@ -233,7 +254,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
         email: trimmed,
         options: {
           emailRedirectTo: callbackUrl,
-          shouldCreateUser: mode === 'signup',
+          shouldCreateUser: true,
         },
       })
       if (err) {
@@ -261,7 +282,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
         phone: e164,
         options: {
           channel: 'sms',
-          shouldCreateUser: mode === 'signup',
+          shouldCreateUser: true,
         },
       })
       if (err) {
@@ -342,9 +363,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
         </div>
 
         <p className="mt-5 text-sm leading-relaxed text-silver/95 sm:text-[0.9375rem]">
-          {mode === 'login'
-            ? 'Sign in with the method you prefer. Same vault-grade session, whichever path you choose.'
-            : 'Create your profile — we’ll verify identity before your first drive.'}
+          Sign in with the method you prefer. Same vault-grade session, whichever path you choose.
         </p>
 
         {error ? (
@@ -362,55 +381,10 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
           </div>
         ) : null}
 
-        <div
-          role="tablist"
-          aria-label="Account mode"
-          className="mt-6 flex rounded-2xl border border-white/[0.08] bg-matte/45 p-1 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.05)] backdrop-blur-md"
-        >
-          {(['login', 'signup'] as const).map((m) => {
-            const active = mode === m
-            return (
-              <button
-                key={m}
-                type="button"
-                role="tab"
-                aria-selected={active}
-                disabled={busy}
-                className={cn(
-                  'relative flex-1 rounded-[0.875rem] py-3 text-sm font-semibold tracking-[-0.02em] transition-colors duration-300',
-                  active ? 'text-soft' : 'text-muted hover:text-silver',
-                  busy && 'pointer-events-none opacity-50',
-                )}
-                onClick={() => {
-                  setMode(m)
-                  setStep('methods')
-                  setShowEmail(false)
-                  resetOtp()
-                  resetFlowMessages()
-                }}
-              >
-                {active ? (
-                  <motion.span
-                    layoutId="auth-mode-pill"
-                    className="absolute inset-0 rounded-[0.875rem] border border-white/[0.1] bg-white/[0.1] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_12px_40px_-28px_rgba(59,130,246,0.28)]"
-                    transition={{ type: 'spring', stiffness: 420, damping: 34 }}
-                  />
-                ) : null}
-                <span className="relative z-10">{m === 'login' ? 'Sign in' : 'Join'}</span>
-              </button>
-            )
-          })}
-        </div>
-
         <AnimatePresence mode="wait">
           {step === 'otp' ? (
             <motion.div
-              key="otp"
-              initial={{ opacity: 0, x: 14 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -10 }}
-              transition={{ duration: 0.32, ease }}
-              className="mt-8 space-y-5"
+              className="mt-6 space-y-5"
               role="region"
               aria-labelledby={headingId}
             >
@@ -528,8 +502,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
             </motion.div>
           ) : (
             <motion.div
-              key="methods"
-              className="mt-8 space-y-5"
+              className="mt-6 space-y-5"
               variants={methodsRoot}
               initial="hidden"
               animate="show"
@@ -546,7 +519,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
                     {pending === 'google' ? (
                       <Loader2 className="h-[22px] w-[22px] shrink-0 animate-spin text-soft" aria-hidden />
                     ) : (
-                      <Chrome className="h-[22px] w-[22px] text-soft" aria-hidden />
+                      <GmailMark className="h-[22px] w-[22px] shrink-0" />
                     )}
                     Continue with Google
                   </button>
@@ -584,7 +557,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
                   aria-expanded={showEmail}
                   className="flex min-h-[3rem] w-full touch-manipulation items-center justify-center gap-2 rounded-2xl border border-white/[0.1] bg-white/[0.03] px-4 text-sm font-semibold text-silver transition-[border-color,background-color,color,box-shadow] duration-300 hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-soft disabled:pointer-events-none disabled:opacity-40"
                 >
-                  <Mail className="h-[18px] w-[18px] text-electric/90" aria-hidden />
+                  <Mail className="h-[22px] w-[22px] shrink-0 text-electric" strokeWidth={2} aria-hidden />
                   {showEmail ? 'Hide email sign-in' : 'Continue with email'}
                 </button>
 
@@ -621,10 +594,8 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
                               <Loader2 className="h-5 w-5 shrink-0 animate-spin" aria-hidden />
                               Sending link…
                             </>
-                          ) : mode === 'login' ? (
-                            'Email secure link'
                           ) : (
-                            'Continue with email'
+                            'Email secure link'
                           )}
                         </Button>
                       </div>

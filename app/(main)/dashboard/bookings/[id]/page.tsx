@@ -8,10 +8,10 @@ export const dynamic = 'force-dynamic'
 
 export default async function CustomerBookingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await getAuthenticatedUser()
-  if (!user) {
-    redirect(`/login?${new URLSearchParams({ redirect: '/dashboard/bookings' }).toString()}`)
-  }
   const { id } = await params
+  if (!user) {
+    redirect(`/login?${new URLSearchParams({ redirect: `/dashboard/bookings/${id}` }).toString()}`)
+  }
   const row = await getBookingForUser(id, user.id)
   if (!row) {
     notFound()

@@ -16,6 +16,8 @@ export type FleetCar = {
   id: string
   brand: string
   model: string
+  /** Full listing title (e.g. from `vehicles.name` or brand + model). */
+  displayName: string
   year: number
   registrationNumber: string
   fuel: FleetCarFuel

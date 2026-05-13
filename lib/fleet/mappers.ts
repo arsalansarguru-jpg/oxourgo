@@ -61,7 +61,7 @@ function resolveRowGallery(row: FleetCarRow, primary: string): string[] {
 }
 
 function toAvailability(status: string): FleetCarAvailabilityLabel {
-  return status === 'available' ? 'Available' : 'Unavailable'
+  return status?.trim().toLowerCase() === 'available' ? 'Available' : 'Unavailable'
 }
 
 function toFleetFuel(raw: string): FleetCarFuel {
@@ -79,6 +79,8 @@ function toCarFuel(raw: string): FuelType {
   const f = raw.toLowerCase()
   if (f === 'diesel') return 'Diesel'
   if (f === 'electric') return 'Electric'
+  if (f === 'hybrid') return 'Hybrid'
+  if (f === 'cng') return 'CNG'
   return 'Petrol'
 }
 
@@ -99,16 +101,18 @@ function toCarCategory(pricePerDay: number): CarCategory {
 }
 
 function toCarStatus(status: string): CarStatus {
-  return status === 'available' ? 'Available' : 'Unavailable'
+  return status?.trim().toLowerCase() === 'available' ? 'Available' : 'Unavailable'
 }
 
 export function mapFleetRowToFleetCar(row: FleetCarRow): FleetCar {
   const price = Number(row.pricing_per_day)
   const imageUrl = resolveRowPrimaryImage(row)
+  const displayName = `${row.brand} ${row.model}`.trim()
   return {
     id: row.id,
     brand: row.brand,
     model: row.model,
+    displayName,
     year: row.year,
     registrationNumber: row.registration_number,
     fuel: toFleetFuel(row.fuel_type),

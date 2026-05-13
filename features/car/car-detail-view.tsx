@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { CalendarDays, ChevronDown, Shield, Star } from 'lucide-react'
+import { ChevronDown, Shield, Star } from 'lucide-react'
 import type { Car } from '@/types/car'
 import { carDetailFaqs } from '@/data/faqs'
 import { carReviews } from '@/data/reviews'
@@ -15,33 +15,23 @@ import { Badge } from '@/components/ui/Badge'
 import { Card, CardContent } from '@/components/ui/Card'
 import {
   cardEyebrow,
-  cardPaddingCompact,
   cardSurfaceBase,
   cardSurfaceHover,
   cardSurfaceTransition,
 } from '@/components/ui/card-tokens'
-import { PricingBreakdown } from '@/components/booking/pricing-breakdown'
+import { CarDetailBookingPanel } from '@/components/car/car-detail-booking-panel'
+
 type CarDetailViewProps = {
   car: Car
+  isLoggedIn: boolean
+  userEmail: string | null
 }
 
-export function CarDetailView({ car }: CarDetailViewProps) {
+export function CarDetailView({ car, isLoggedIn, userEmail }: CarDetailViewProps) {
   const [activeImage, setActiveImage] = useState(0)
-  const [days, setDays] = useState(2)
   const [openFaq, setOpenFaq] = useState<string | null>(carDetailFaqs[0]?.id ?? null)
 
   const reviews = useMemo(() => carReviews.filter((r) => r.carId === car.id), [car.id])
-
-  const subtotal = car.pricePerDay * days
-  const convenience = Math.round(subtotal * 0.04)
-  const taxes = Math.round((subtotal + convenience) * 0.18)
-  const lines = [
-    { label: `Rental (${days} days × ${formatInr(car.pricePerDay)})`, amount: subtotal },
-    { label: 'Concierge & connectivity', amount: convenience, hint: 'Transparent service fee' },
-    { label: 'GST', amount: taxes },
-  ]
-
-  const unavailable = car.unavailableDates ?? []
 
   return (
     <Section className="pt-8">
@@ -60,6 +50,7 @@ export function CarDetailView({ car }: CarDetailViewProps) {
                 src={car.gallery[activeImage] ?? car.imageUrl}
                 alt={car.name}
                 fill
+                unoptimized
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 65vw"
                 priority
@@ -84,7 +75,7 @@ export function CarDetailView({ car }: CarDetailViewProps) {
                       : 'border-white/10 hover:border-white/25',
                   )}
                 >
-                  <Image src={src} alt="" fill className="object-cover" sizes="96px" />
+                  <Image src={src} alt="" fill unoptimized className="object-cover" sizes="96px" />
                 </button>
               ))}
             </div>
@@ -201,67 +192,13 @@ export function CarDetailView({ car }: CarDetailViewProps) {
             <div>
               <p className={cardEyebrow}>From per day</p>
               <p className="mt-1 text-3xl font-bold text-soft">{formatInr(car.pricePerDay)}</p>
-            </div>
-
-            <div>
-              <label htmlFor="days" className="text-sm font-medium text-silver">
-                Trip length (days)
-              </label>
-              <input
-                id="days"
-                type="number"
-                min={1}
-                max={30}
-                value={days}
-                onChange={(e) => setDays(Math.max(1, Number(e.target.value) || 1))}
-                className="mt-2 h-11 w-full rounded-xl border border-white/12 bg-matte/60 px-3 text-sm text-soft focus:border-electric/60 focus:outline-none focus:ring-2 focus:ring-electric/25"
-              />
-            </div>
-
-            <PricingBreakdown lines={lines} />
-
-            <div
-              className={cn(
-                cardSurfaceBase,
-                cardSurfaceTransition,
-                cardPaddingCompact,
-                'bg-matte/[0.38]',
-              )}
-            >
-              <div className="flex items-center gap-2 text-sm font-semibold text-soft">
-                <CalendarDays className="h-4 w-4 text-electric" />
-                Availability snapshot
-              </div>
               <p className="mt-2 text-xs text-silver">
-                Blocked workshop &amp; VIP holds appear below. Live calendar syncs at checkout.
+                Days and total update from your pickup and return times.
               </p>
-              {unavailable.length === 0 ? (
-                <p className="mt-3 text-sm text-emerald">Fully open for the next 30 days</p>
-              ) : (
-                <ul className="mt-3 space-y-1 text-sm text-silver">
-                  {unavailable.map((d) => (
-                    <li key={d} className="flex justify-between rounded-lg bg-white/5 px-2 py-1">
-                      <span>Hold</span>
-                      <span className="tabular-nums text-soft">{d}</span>
-                    </li>
-                  ))}
-                </ul>
-              )}
             </div>
 
-            <div className="space-y-2 text-xs text-silver">
-              <p>Pickup hubs: Andheri, Bandra, Colaba, Juhu, Powai — valet handoff available.</p>
-            </div>
+            <CarDetailBookingPanel car={car} isLoggedIn={isLoggedIn} userEmail={userEmail} />
 
-            {car.status === 'Available' ? (
-              <Button size="lg" className="w-full" to={`/booking/${car.id}`}>
-                Proceed to booking
-              </Button>
-            ) : (
-              <Button size="lg" className="w-full" disabled>
-                Currently unavailable
-              </Button>
-            )}
             <Button size="lg" variant="secondary" className="w-full" to="/fleet">
               Back to fleet
             </Button>

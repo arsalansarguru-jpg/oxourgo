@@ -13,10 +13,16 @@ import { EmptyState } from '@/components/ui/EmptyState'
 
 function carLabel(row: BookingWithCar): string {
   const c = row.cars
-  if (!c) return 'Vehicle'
-  const car = Array.isArray(c) ? c[0] : c
-  if (!car) return 'Vehicle'
-  return `${car.brand} ${car.model}`.trim()
+  if (c) {
+    const car = Array.isArray(c) ? c[0] : c
+    if (car) return `${car.brand} ${car.model}`.trim()
+  }
+  const v = row.vehicles
+  if (v) {
+    const veh = Array.isArray(v) ? v[0] : v
+    if (veh) return (veh.name ?? `${veh.brand}`).trim() || 'Vehicle'
+  }
+  return 'Vehicle'
 }
 
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {

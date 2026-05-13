@@ -62,10 +62,62 @@ export type Database = {
         }
         Relationships: []
       }
+      vehicles: {
+        Row: {
+          id: string
+          name: string
+          brand: string
+          transmission: string
+          fuel_type: string
+          seats: number
+          price_per_day: number
+          image: string | null
+          featured: boolean
+          availability_status: string
+          year: number
+          registration_number: string
+          security_deposit: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          brand: string
+          transmission: string
+          fuel_type: string
+          seats: number
+          price_per_day: number
+          image?: string | null
+          featured?: boolean
+          availability_status?: string
+          year?: number
+          registration_number?: string
+          security_deposit?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          brand?: string
+          transmission?: string
+          fuel_type?: string
+          seats?: number
+          price_per_day?: number
+          image?: string | null
+          featured?: boolean
+          availability_status?: string
+          year?: number
+          registration_number?: string
+          security_deposit?: number
+          created_at?: string
+        }
+        Relationships: []
+      }
       bookings: {
         Row: {
           id: string
-          car_id: string
+          car_id: string | null
+          vehicle_id: string | null
           user_id: string
           pickup_at: string
           return_at: string
@@ -85,7 +137,8 @@ export type Database = {
         }
         Insert: {
           id?: string
-          car_id: string
+          car_id?: string | null
+          vehicle_id?: string | null
           user_id: string
           pickup_at: string
           return_at: string
@@ -105,7 +158,8 @@ export type Database = {
         }
         Update: {
           id?: string
-          car_id?: string
+          car_id?: string | null
+          vehicle_id?: string | null
           user_id?: string
           pickup_at?: string
           return_at?: string
@@ -365,6 +419,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      has_vehicle_booking_overlap: {
+        Args: {
+          p_vehicle_id: string
+          p_pickup: string
+          p_return: string
+          p_exclude_booking_id?: string | null
+        }
+        Returns: boolean
+      }
     }
     Enums: Record<never, never>
     CompositeTypes: Record<never, never>
@@ -373,5 +436,23 @@ export type Database = {
 
 export type BookingRow = Database['public']['Tables']['bookings']['Row']
 export type CarRow = Database['public']['Tables']['cars']['Row']
-export type BookingWithCar = BookingRow & { cars: CarRow | null }
+export type VehicleSummaryRow = Pick<
+  Database['public']['Tables']['vehicles']['Row'],
+  | 'id'
+  | 'name'
+  | 'brand'
+  | 'price_per_day'
+  | 'image'
+  | 'transmission'
+  | 'fuel_type'
+  | 'seats'
+  | 'year'
+  | 'registration_number'
+  | 'security_deposit'
+>
+
+export type BookingWithCar = BookingRow & {
+  cars: CarRow | CarRow[] | null
+  vehicles?: VehicleSummaryRow | VehicleSummaryRow[] | null
+}
 export type NotificationRow = Database['public']['Tables']['notifications']['Row']

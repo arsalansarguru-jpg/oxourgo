@@ -8,6 +8,14 @@ type FleetViewProps = {
 }
 
 export async function FleetView({ pickup, from, to }: FleetViewProps) {
-  const cars = await getFleetCars()
-  return <FleetClientView cars={cars} pickup={pickup} from={from} to={to} />
+  const result = await getFleetCars()
+  return (
+    <FleetClientView
+      cars={result.ok ? result.cars : []}
+      fetchError={result.ok ? null : result.error}
+      pickup={pickup}
+      from={from}
+      to={to}
+    />
+  )
 }

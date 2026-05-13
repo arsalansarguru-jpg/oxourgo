@@ -8,10 +8,16 @@ import { cardSurfaceBase, cardSurfaceHover, cardSurfaceTransition } from '@/comp
 
 function carName(row: BookingWithCar) {
   const c = row.cars
-  if (!c) return '—'
-  const car = Array.isArray(c) ? c[0] : c
-  if (!car) return '—'
-  return `${car.brand} ${car.model}`.trim()
+  if (c) {
+    const car = Array.isArray(c) ? c[0] : c
+    if (car) return `${car.brand} ${car.model}`.trim()
+  }
+  const v = row.vehicles
+  if (v) {
+    const veh = Array.isArray(v) ? v[0] : v
+    if (veh) return (veh.name ?? `${veh.brand}`).trim() || '—'
+  }
+  return '—'
 }
 
 export function CustomerPaymentsView({

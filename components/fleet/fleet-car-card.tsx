@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { Fuel, Gauge, Star, Users } from 'lucide-react'
 
@@ -25,12 +24,13 @@ export function FleetCarCard({ car, className }: FleetCarCardProps) {
     <motion.div whileHover={{ y: -5 }} transition={cardLiftSpring} className={cn('h-full', className)}>
       <Card className={cn('group/card flex h-full flex-col overflow-hidden', cardSurfaceHoverAccent)}>
         <div className="relative aspect-[16/10] overflow-hidden bg-carbon-deep">
-          <Image
+          {/* eslint-disable-next-line @next/next/no-img-element -- fleet image URLs come from Supabase (storage or any HTTPS) */}
+          <img
             src={car.imageUrl}
-            alt={`${car.brand} ${car.model}`}
-            fill
-            className="object-cover transition-[transform] duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/card:scale-[1.035]"
-            sizes="(max-width:768px) 100vw,(max-width:1280px) 50vw, 33vw"
+            alt={car.displayName}
+            className="absolute inset-0 h-full w-full object-cover transition-[transform] duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/card:scale-[1.035]"
+            loading="lazy"
+            referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-matte/92 via-matte/[0.12] to-transparent" />
           <div className="absolute left-3 top-3 z-[1] flex flex-wrap gap-2 sm:left-4 sm:top-4">
@@ -41,9 +41,7 @@ export function FleetCarCard({ car, className }: FleetCarCardProps) {
 
         <CardContent className="flex flex-1 flex-col gap-5">
           <div>
-            <h3 className={cardTitle}>
-              {car.brand} {car.model}
-            </h3>
+            <h3 className={cardTitle}>{car.displayName}</h3>
             <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted">
               <span className="inline-flex items-center gap-1">
                 <Star className="h-3.5 w-3.5 text-electric" />

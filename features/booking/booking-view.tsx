@@ -84,8 +84,8 @@ export function BookingView({ car, defaultPickupIso, defaultReturnIso, isLoggedI
     setAvail({ status: 'checking' })
     const qs = new URLSearchParams({
       carId: car.id,
-      pickup,
-      return: returnAt,
+      pickup: new Date(pickup).toISOString(),
+      return: new Date(returnAt).toISOString(),
     })
     try {
       const res = await fetch(`/api/bookings/availability?${qs}`)
@@ -271,7 +271,7 @@ export function BookingView({ car, defaultPickupIso, defaultReturnIso, isLoggedI
             </div>
             <div className="mt-5 flex flex-col gap-4 sm:flex-row sm:items-start">
               <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl bg-carbon-deep sm:h-36 sm:w-56 sm:shrink-0 sm:aspect-auto">
-                <Image src={car.imageUrl} alt="" fill className="object-cover" sizes="(max-width:768px) 100vw, 224px" />
+                <Image src={car.imageUrl} alt="" fill unoptimized className="object-cover" sizes="(max-width:768px) 100vw, 224px" />
               </div>
               <div className="min-w-0 flex-1 space-y-2 text-sm text-muted">
                 <div className="flex flex-wrap items-center gap-2">
