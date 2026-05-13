@@ -4,9 +4,6 @@ import { HomeView } from '@/features/home/home-view'
 export async function HomePageContent() {
   const result = await getFeaturedVehiclesForHome()
   return (
-    <HomeView
-      featuredCars={result.ok ? result.cars : []}
-      featuredFetchError={result.ok ? null : result.error}
-    />
+    <HomeView featuredCars={result.ok ? result.cars : []} featuredLoadFailed={!result.ok} />
   )
 }

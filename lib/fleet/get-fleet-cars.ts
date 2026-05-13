@@ -8,9 +8,7 @@ import {
 import type { FleetCar } from '@/lib/fleet/types'
 import { mapVehicleRowToFleetCar, type VehicleRow } from '@/lib/fleet/vehicle-mappers'
 
-export type GetFleetCarsResult =
-  | { ok: true; cars: FleetCar[] }
-  | { ok: false; error: string }
+export type GetFleetCarsResult = { ok: true; cars: FleetCar[] } | { ok: false }
 
 function sortFleetRows(rows: VehicleRow[]): VehicleRow[] {
   const ts = (iso: string | undefined) => {
@@ -26,7 +24,7 @@ function sortFleetRows(rows: VehicleRow[]): VehicleRow[] {
 
 export async function getFleetCars(): Promise<GetFleetCarsResult> {
   const res = await fetchPublicVehicleRows()
-  if (!res.ok) return { ok: false, error: res.error }
+  if (!res.ok) return { ok: false }
 
   const listable = res.rows.filter((r) => isVehicleShownOnPublicCatalog(r))
   const sorted = sortFleetRows(listable)

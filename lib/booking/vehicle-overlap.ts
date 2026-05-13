@@ -7,6 +7,9 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { Database } from '@/lib/supabase/database.types'
 
+/** Opaque codes only — never ship Postgrest messages to clients. */
+export type VehicleOverlapError = 'overlap_rpc_missing' | 'overlap_db_error' | 'overlap_unknown' | null
+
 function isVehicleOverlapRpcMissing(error: PostgrestError): boolean {
   return error.code === '42883' || error.message.includes('has_vehicle_booking_overlap')
 }
@@ -20,7 +23,7 @@ async function overlapViaBookingsTableAdmin(
   pickupIso: string,
   returnIso: string,
   excludeBookingId?: string | null,
-): Promise<{ overlap: boolean; error: string | null }> {
+): Promise<{ overlap: boolean; error: VehicleOverlapError }> {
   const admin = createAdminClient()
   let q = admin
     .from('bookings')
@@ -36,7 +39,10 @@ async function overlapViaBookingsTableAdmin(
   }
 
   const { data, error } = await q
-  if (error) return { overlap: false, error: error.message }
+  if (error) {
+    console.error('[hasVehicleBookingOverlap:admin]', error.message, error.code)
+    return { overlap: false, error: 'overlap_db_error' }
+  }
   return { overlap: (data?.length ?? 0) > 0, error: null }
 }
 
@@ -51,7 +57,7 @@ export async function hasVehicleBookingOverlap(
   returnIso: string,
   excludeBookingId?: string | null,
   rpcClient?: SupabaseClient<Database>,
-): Promise<{ overlap: boolean; error: string | null }> {
+): Promise<{ overlap: boolean; error: VehicleOverlapError }> {
   try {
     const client = rpcClient ?? (await createClient())
     const { data, error } = await client.rpc('has_vehicle_booking_overlap', {
@@ -66,19 +72,18 @@ export async function hasVehicleBookingOverlap(
     }
 
     if (!isVehicleOverlapRpcMissing(error)) {
-      return { overlap: false, error: error.message }
+      console.error('[hasVehicleBookingOverlap:rpc]', error.message, error.code)
+      return { overlap: false, error: 'overlap_db_error' }
     }
 
     try {
       return await overlapViaBookingsTableAdmin(vehicleId, pickupIso, returnIso, excludeBookingId)
     } catch (adminErr) {
-      const detail = adminErr instanceof Error ? adminErr.message : String(adminErr)
-      return {
-        overlap: false,
-        error: `has_vehicle_booking_overlap is missing on the database (${detail}). Apply supabase/migrations/20260513140000_bookings_vehicle_inventory.sql in the Supabase SQL editor, or set SUPABASE_SERVICE_ROLE_KEY on the server for a temporary overlap fallback.`,
-      }
+      console.error('[hasVehicleBookingOverlap:rpc_missing_fallback]', adminErr)
+      return { overlap: false, error: 'overlap_rpc_missing' }
     }
   } catch (e) {
-    return { overlap: false, error: e instanceof Error ? e.message : 'Overlap check failed.' }
+    console.error('[hasVehicleBookingOverlap]', e)
+    return { overlap: false, error: 'overlap_unknown' }
   }
 }

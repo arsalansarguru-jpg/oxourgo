@@ -3,22 +3,20 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { AlertTriangle, RefreshCw, Search } from 'lucide-react'
+import { RefreshCw, Search } from 'lucide-react'
 
 import { FleetCarCard } from '@/components/fleet/fleet-car-card'
 import { FilterPills } from '@/components/fleet/filter-pills'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { DataLoadErrorPanel } from '@/components/ui/data-load-error'
 import { Input } from '@/components/ui/Input'
 import { Section, SectionHeading } from '@/components/ui/Section'
-import { Button } from '@/components/ui/Button'
 import type { FleetCar, FleetFilterId } from '@/lib/fleet/types'
-import { cn } from '@/lib/utils/cn'
-import { cardSurfaceBase } from '@/components/ui/card-tokens'
 
 type FleetClientViewProps = {
   cars: FleetCar[]
-  /** Supabase / network failure loading `public.vehicles` (server passes message). */
-  fetchError?: string | null
+  /** True when the server could not load `public.vehicles` (details are server-logged only). */
+  loadFailed?: boolean
   pickup?: string
   from?: string
   to?: string
@@ -49,7 +47,7 @@ function carMatchesFilters(car: FleetCar, active: Set<string>) {
 
 export function FleetClientView({
   cars,
-  fetchError = null,
+  loadFailed = false,
   pickup = '',
   from = '',
   to = '',
@@ -84,7 +82,7 @@ export function FleetClientView({
         subtitle="Search, filter, and book verified luxury and premium economy vehicles across Mumbai hubs."
       />
 
-      {(pickup || from || to) && !fetchError && (
+      {(pickup || from || to) && !loadFailed && (
         <div className="mx-auto max-w-3xl rounded-2xl border border-electric/18 bg-gradient-to-br from-electric/[0.07] to-transparent px-4 py-3.5 text-center text-sm leading-relaxed text-muted">
           {pickup ? (
             <span>
@@ -104,38 +102,18 @@ export function FleetClientView({
         </div>
       )}
 
-      {fetchError ? (
-        <div
-          className={cn(
-            cardSurfaceBase,
-            'rounded-2xl border border-red-400/25 bg-red-500/[0.07] p-6 shadow-[var(--shadow-card)] sm:rounded-3xl sm:p-8',
-          )}
-        >
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-red-400/30 bg-red-500/15 text-red-200">
-              <AlertTriangle className="h-6 w-6" aria-hidden />
-            </div>
-            <div className="min-w-0 flex-1 space-y-2">
-              <h2 className="text-lg font-semibold text-soft">Could not load fleet</h2>
-              <p className="text-sm leading-relaxed text-muted">
-                The app could not read <span className="font-medium text-soft">public.vehicles</span> from Supabase.
-                Check environment variables on Vercel (
-                <code className="rounded bg-fill-glass-strong px-1 py-0.5 text-xs">NEXT_PUBLIC_SUPABASE_URL</code>, publishable
-                key), RLS policies, and project logs.
-              </p>
-              <p className="font-mono text-xs text-red-200/90">{fetchError}</p>
-              <Button
-                type="button"
-                variant="secondary"
-                className="mt-2 w-full sm:w-auto"
-                onClick={() => router.refresh()}
-              >
-                <RefreshCw className="h-4 w-4" aria-hidden />
-                Try again
-              </Button>
-            </div>
-          </div>
-        </div>
+      {loadFailed ? (
+        <DataLoadErrorPanel
+          title="Unable to load fleet"
+          description="Please refresh the page or try again shortly."
+          onRetry={() => router.refresh()}
+          retryLabel={
+            <>
+              <RefreshCw className="h-4 w-4" aria-hidden />
+              Try again
+            </>
+          }
+        />
       ) : (
         <>
           <div className="rounded-2xl border border-stroke bg-matte/[0.72] p-3 shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset] backdrop-blur-xl backdrop-saturate-150 transition-[border-color,box-shadow] duration-300 sm:p-4 lg:sticky lg:top-[3.75rem] lg:z-30 supports-[backdrop-filter]:bg-matte/55">

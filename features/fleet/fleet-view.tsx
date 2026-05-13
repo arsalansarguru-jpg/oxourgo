@@ -12,7 +12,7 @@ export async function FleetView({ pickup, from, to }: FleetViewProps) {
   return (
     <FleetClientView
       cars={result.ok ? result.cars : []}
-      fetchError={result.ok ? null : result.error}
+      loadFailed={!result.ok}
       pickup={pickup}
       from={from}
       to={to}

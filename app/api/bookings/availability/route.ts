@@ -33,18 +33,12 @@ export async function GET(request: NextRequest) {
 
     if (vErr) {
       logFleetVehiclesError('api/availability.vehicles', vErr)
-      return NextResponse.json(
-        { ok: false, error: 'vehicle_lookup_failed', hint: vErr.message },
-        { status: 503 },
-      )
+      return NextResponse.json({ ok: false, error: 'vehicle_lookup_failed' }, { status: 503 })
     }
 
     const vehicle = rows?.[0]
     if (!vehicle) {
-      return NextResponse.json(
-        { ok: false, error: 'vehicle_not_found', hint: 'No row in public.vehicles for this id.' },
-        { status: 404 },
-      )
+      return NextResponse.json({ ok: false, error: 'vehicle_not_found' }, { status: 404 })
     }
 
     if (!isVehicleAvailableForBooking(vehicle as VehicleRow)) {
@@ -65,16 +59,8 @@ export async function GET(request: NextRequest) {
     )
 
     if (overlapErr) {
-      return NextResponse.json(
-        {
-          ok: false,
-          error: overlapErr,
-          hint: overlapErr.includes('has_vehicle_booking_overlap')
-            ? 'Apply supabase/migrations/20260513140000_bookings_vehicle_inventory.sql in the Supabase SQL editor, or set SUPABASE_SERVICE_ROLE_KEY for server-side overlap until the RPC exists.'
-            : undefined,
-        },
-        { status: 503 },
-      )
+      logFleetVehiclesError('api/availability.overlap', overlapErr)
+      return NextResponse.json({ ok: false, error: 'availability_unavailable' }, { status: 503 })
     }
     return NextResponse.json({
       ok: true,
@@ -84,9 +70,7 @@ export async function GET(request: NextRequest) {
       carAvailable: true,
     })
   } catch (e) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : 'availability_failed' },
-      { status: 500 },
-    )
+    console.error('[api/bookings/availability]', e)
+    return NextResponse.json({ ok: false, error: 'availability_failed' }, { status: 500 })
   }
 }

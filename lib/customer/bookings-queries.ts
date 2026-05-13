@@ -59,9 +59,10 @@ export async function listBookingsForUser(userId: string): Promise<ListBookingsF
     .order('pickup_date', { ascending: false })
 
   if (error) {
+    console.error('[listBookingsForUser]', error.message, error.code, error.details)
     return {
       ok: false,
-      error: { code: 'query_failed', message: error.message },
+      error: { code: 'query_failed', message: 'Unable to load reservations.' },
     }
   }
   return { ok: true, data: (data ?? []) as unknown as BookingWithCar[] }

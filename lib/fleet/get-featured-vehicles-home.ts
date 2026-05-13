@@ -4,9 +4,7 @@ import type { Car } from '@/types/car'
 import { fetchPublicVehicleRows, isVehicleShownOnPublicCatalog, logFleetVehiclesError } from '@/lib/fleet/public-vehicle-catalog'
 import { mapVehicleRowToCar, type VehicleRow } from '@/lib/fleet/vehicle-mappers'
 
-export type GetFeaturedVehiclesForHomeResult =
-  | { ok: true; cars: Car[] }
-  | { ok: false; error: string }
+export type GetFeaturedVehiclesForHomeResult = { ok: true; cars: Car[] } | { ok: false }
 
 function sortFeaturedFirst(rows: VehicleRow[]): VehicleRow[] {
   const ts = (iso: string | undefined) => {
@@ -23,7 +21,7 @@ function sortFeaturedFirst(rows: VehicleRow[]): VehicleRow[] {
 /** Featured rows for homepage; prefers `featured`, otherwise latest available vehicles from `public.vehicles`. */
 export async function getFeaturedVehiclesForHome(limit = 6): Promise<GetFeaturedVehiclesForHomeResult> {
   const res = await fetchPublicVehicleRows()
-  if (!res.ok) return { ok: false, error: res.error }
+  if (!res.ok) return { ok: false }
 
   const listable = res.rows.filter((r) => isVehicleShownOnPublicCatalog(r))
   const sorted = sortFeaturedFirst(listable).slice(0, limit)

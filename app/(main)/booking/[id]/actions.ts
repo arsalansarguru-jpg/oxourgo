@@ -39,7 +39,8 @@ export async function createBookingAction(input: CreateBookingInput): Promise<Cr
       .maybeSingle()
 
     if (vehicleErr) {
-      return { ok: false, code: 'database', message: vehicleErr.message }
+      console.error('[createBookingAction:vehicle]', vehicleErr.message, vehicleErr.code)
+      return { ok: false, code: 'database', message: 'Unable to verify this vehicle. Please try again.' }
     }
     if (!vehicleRow) {
       return { ok: false, code: 'validation', message: 'Vehicle not found or no longer listed.' }
@@ -63,11 +64,15 @@ export async function createBookingAction(input: CreateBookingInput): Promise<Cr
       null,
       supabase,
     )
-    if (overlapErr?.includes('has_vehicle_booking_overlap')) {
-      return { ok: false, code: 'rpc_missing', message: overlapErr }
+    if (overlapErr === 'overlap_rpc_missing') {
+      return {
+        ok: false,
+        code: 'rpc_missing',
+        message: 'Reservations are temporarily unavailable. Please try again shortly.',
+      }
     }
     if (overlapErr) {
-      return { ok: false, code: 'database', message: overlapErr }
+      return { ok: false, code: 'database', message: 'Could not verify availability. Please try again.' }
     }
     if (overlap) {
       return {
@@ -97,10 +102,11 @@ export async function createBookingAction(input: CreateBookingInput): Promise<Cr
     const { data: created, error: insErr } = await supabase.from('bookings').insert(insert).select('id').single()
 
     if (insErr || !created?.id) {
+      console.error('[createBookingAction:insert]', insErr?.message, insErr?.code)
       return {
         ok: false,
         code: 'database',
-        message: insErr?.message ?? 'Could not save booking. Check Supabase RLS and the bookings table.',
+        message: 'Could not complete your booking. Please try again.',
       }
     }
 
@@ -110,10 +116,11 @@ export async function createBookingAction(input: CreateBookingInput): Promise<Cr
     void onBookingCreated(created.id)
     return { ok: true, bookingId: created.id, totalRupees: quote.totalRupees }
   } catch (e) {
+    console.error('[createBookingAction]', e)
     return {
       ok: false,
       code: 'unknown',
-      message: e instanceof Error ? e.message : 'Unexpected error creating booking.',
+      message: 'Something went wrong. Please try again.',
     }
   }
 }

@@ -47,9 +47,7 @@ function serializePostgrestError(err: PostgrestError) {
  * Loads rows from **`public.vehicles`** with the anon key (no cookie session).
  * Relies on your Supabase **SELECT** policy for `anon` / `authenticated`.
  */
-export async function fetchPublicVehicleRows(): Promise<
-  { ok: true; rows: VehicleRow[] } | { ok: false; error: string }
-> {
+export async function fetchPublicVehicleRows(): Promise<{ ok: true; rows: VehicleRow[] } | { ok: false }> {
   try {
     const supabase = createPublicServerSupabaseClient()
     const { data, error } = await supabase
@@ -59,7 +57,7 @@ export async function fetchPublicVehicleRows(): Promise<
 
     if (error) {
       logFleetVehiclesError('vehicles.select', serializePostgrestError(error))
-      return { ok: false, error: error.message || 'Failed to load vehicles from Supabase.' }
+      return { ok: false }
     }
 
     const rows = (data ?? []) as VehicleRow[]
@@ -74,9 +72,6 @@ export async function fetchPublicVehicleRows(): Promise<
     return { ok: true, rows }
   } catch (e) {
     logFleetVehiclesError('vehicles.select.exception', e)
-    return {
-      ok: false,
-      error: e instanceof Error ? e.message : 'Unexpected error while loading vehicles.',
-    }
+    return { ok: false }
   }
 }

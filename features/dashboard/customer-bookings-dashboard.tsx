@@ -1,11 +1,11 @@
-import { AlertTriangle, Car } from 'lucide-react'
+import { Car } from 'lucide-react'
 
 import type { BookingWithCar } from '@/lib/supabase/database.types'
 import type { ListBookingsForUserResult } from '@/lib/customer/bookings-queries'
 import { deriveCustomerBookingUiStatus } from '@/lib/customer/derive-booking-ui-status'
 import { CustomerBookingFleetCard } from '@/components/dashboard/customer-booking-fleet-card'
+import { DataLoadErrorPanel } from '@/components/ui/data-load-error'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils/cn'
 import { cardSurfaceBase } from '@/components/ui/card-tokens'
 
@@ -49,34 +49,6 @@ function partitionBookings(rows: BookingWithCar[]) {
   return { active, upcoming, completed, cancelled }
 }
 
-function BookingsErrorPanel({ message }: { message: string }) {
-  return (
-    <div
-      className={cn(
-        cardSurfaceBase,
-        'rounded-2xl border border-red-400/25 bg-red-500/[0.07] p-6 shadow-[var(--shadow-card)] sm:rounded-3xl sm:p-8',
-      )}
-    >
-      <div className="flex gap-4">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-red-400/30 bg-red-500/15 text-red-200">
-          <AlertTriangle className="h-6 w-6" aria-hidden />
-        </div>
-        <div className="min-w-0 space-y-2">
-          <h1 className="text-lg font-semibold text-soft">Could not load bookings</h1>
-          <p className="text-sm leading-relaxed text-muted">
-            We could not reach Supabase for your reservations. Check your connection and project configuration, then try
-            again.
-          </p>
-          <p className="font-mono text-xs text-red-200/90">{message}</p>
-          <Button className="mt-4" variant="secondary" to="/dashboard/bookings">
-            Retry
-          </Button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 export type CustomerBookingsDashboardProps = {
   result: ListBookingsForUserResult
 }
@@ -89,7 +61,11 @@ export function CustomerBookingsDashboard({ result }: CustomerBookingsDashboardP
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-electric/90">Reservations</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-soft">My bookings</h1>
         </header>
-        <BookingsErrorPanel message={result.error.message} />
+        <DataLoadErrorPanel
+          title="Unable to load reservations"
+          description="Please refresh the page or try again shortly."
+          retryTo="/dashboard/bookings"
+        />
       </div>
     )
   }

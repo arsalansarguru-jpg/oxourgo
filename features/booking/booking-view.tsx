@@ -99,9 +99,10 @@ export function BookingView({ car, defaultPickupIso, defaultReturnIso, isLoggedI
         hint?: string
       }
       if (!res.ok || body.ok === false) {
+        console.error('[checkAvailability]', res.status, body)
         setAvail({
           status: 'error',
-          message: [body.error, body.hint].filter(Boolean).join(' — ') || 'Availability check failed.',
+          message: 'We could not verify availability right now. Please try again in a moment.',
         })
         return
       }

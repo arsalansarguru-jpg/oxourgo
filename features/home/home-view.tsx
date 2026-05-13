@@ -3,12 +3,13 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
-import { AlertTriangle, Bot, CarFront, Clock, IndianRupee, RefreshCw, ShieldCheck } from 'lucide-react'
+import { Bot, CarFront, Clock, IndianRupee, RefreshCw, ShieldCheck } from 'lucide-react'
 import type { Car } from '@/types/car'
 import { destinations } from '@/data/destinations'
 import { testimonials } from '@/data/testimonials'
 import { HeroSection } from '@/components/marketing/hero-section'
 import { Section, SectionHeading } from '@/components/ui/Section'
+import { DataLoadErrorPanel } from '@/components/ui/data-load-error'
 import { CarCard } from '@/components/fleet/car-card'
 import { DestinationCard } from '@/components/marketing/destination-card'
 import { FeatureCard } from '@/components/marketing/feature-card'
@@ -16,8 +17,6 @@ import { TestimonialCard } from '@/components/marketing/testimonial-card'
 import { CTASection } from '@/components/marketing/cta-section'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { cn } from '@/lib/utils/cn'
-import { cardSurfaceBase } from '@/components/ui/card-tokens'
 
 const features = [
   {
@@ -44,11 +43,11 @@ const features = [
 
 type HomeViewProps = {
   featuredCars: Car[]
-  /** Supabase error loading `public.vehicles` for the featured strip. */
-  featuredFetchError?: string | null
+  /** True when featured vehicles could not be loaded (details are server-logged only). */
+  featuredLoadFailed?: boolean
 }
 
-export function HomeView({ featuredCars, featuredFetchError = null }: HomeViewProps) {
+export function HomeView({ featuredCars, featuredLoadFailed = false }: HomeViewProps) {
   const router = useRouter()
   return (
     <>
@@ -60,33 +59,19 @@ export function HomeView({ featuredCars, featuredFetchError = null }: HomeViewPr
           subtitle="Choose from our premium collection of verified luxury cars"
         />
         <div className="mx-auto grid w-full max-w-[var(--container-wide)] gap-6 sm:gap-7 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
-          {featuredFetchError ? (
+          {featuredLoadFailed ? (
             <div className="col-span-full">
-              <div
-                className={cn(
-                  cardSurfaceBase,
-                  'rounded-2xl border border-red-400/25 bg-red-500/[0.07] p-6 shadow-[var(--shadow-card)] sm:rounded-3xl sm:p-8',
-                )}
-              >
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-red-400/30 bg-red-500/15 text-red-200">
-                    <AlertTriangle className="h-6 w-6" aria-hidden />
-                  </div>
-                  <div className="min-w-0 flex-1 space-y-2">
-                    <h3 className="text-lg font-semibold text-soft">Featured fleet unavailable</h3>
-                    <p className="text-sm leading-relaxed text-muted">
-                      We could not load vehicles from <span className="font-medium text-soft">public.vehicles</span>.
-                      Confirm <code className="rounded bg-fill-glass-strong px-1 py-0.5 text-xs">NEXT_PUBLIC_SUPABASE_URL</code>{' '}
-                      and your publishable key on Vercel, then check Supabase logs for RLS or schema errors.
-                    </p>
-                    <p className="font-mono text-xs text-red-200/90">{featuredFetchError}</p>
-                    <Button type="button" variant="secondary" className="mt-2" onClick={() => router.refresh()}>
-                      <RefreshCw className="h-4 w-4" aria-hidden />
-                      Try again
-                    </Button>
-                  </div>
-                </div>
-              </div>
+              <DataLoadErrorPanel
+                title="Unable to load featured fleet"
+                description="Please refresh the page or try again shortly."
+                onRetry={() => router.refresh()}
+                retryLabel={
+                  <>
+                    <RefreshCw className="h-4 w-4" aria-hidden />
+                    Try again
+                  </>
+                }
+              />
             </div>
           ) : featuredCars.length === 0 ? (
             <div className="col-span-full">

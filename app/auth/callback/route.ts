@@ -26,8 +26,9 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (error) {
+      console.error('[auth/callback] exchangeCodeForSession', error.message, error.code)
       return NextResponse.redirect(
-        new URL(`/login?error=${encodeURIComponent(error.message)}`, origin),
+        new URL(`/login?error=${encodeURIComponent('Sign-in failed. Please try again.')}`, origin),
       )
     }
   }
