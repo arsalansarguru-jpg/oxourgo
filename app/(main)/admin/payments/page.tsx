@@ -31,7 +31,7 @@ export default async function AdminPaymentsPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {summary.map((s) => (
-          <Card key={s.payment_status} className={cn(cardSurfaceBase, 'border border-white/[0.08]')}>
+          <Card key={s.payment_status} className={cn(cardSurfaceBase, 'border border-stroke')}>
             <CardContent className="p-4">
               <p className="text-xs uppercase tracking-wide text-muted">{s.payment_status.replace(/_/g, ' ')}</p>
               <p className="mt-2 text-2xl font-semibold tabular-nums text-soft">{s.count}</p>
@@ -41,14 +41,14 @@ export default async function AdminPaymentsPage() {
         ))}
       </div>
 
-      <Card className={cn(cardSurfaceBase, 'overflow-hidden border border-white/[0.08]')}>
+      <Card className={cn(cardSurfaceBase, 'overflow-hidden border border-stroke')}>
         <CardContent className="p-0">
-          <div className="border-b border-white/[0.08] px-5 py-4">
+          <div className="border-b border-stroke px-5 py-4">
             <h2 className="text-lg font-semibold text-soft">Recent payment events</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px] text-left text-sm">
-              <thead className="border-b border-white/[0.08] bg-white/[0.03] text-xs uppercase tracking-wide text-muted">
+              <thead className="border-b border-stroke bg-fill-glass text-xs uppercase tracking-wide text-muted">
                 <tr>
                   <th className="px-4 py-3 font-medium">When</th>
                   <th className="px-4 py-3 font-medium">Title</th>
@@ -60,7 +60,7 @@ export default async function AdminPaymentsPage() {
               </thead>
               <tbody>
                 {events.map((e) => (
-                  <tr key={e.id} className="border-b border-white/[0.05]">
+                  <tr key={e.id} className="border-b border-stroke">
                     <td className="px-4 py-3 text-muted">{new Date(e.created_at).toLocaleString()}</td>
                     <td className="px-4 py-3 text-soft">{e.title}</td>
                     <td className="px-4 py-3">

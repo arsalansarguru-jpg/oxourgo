@@ -186,7 +186,7 @@ export function CarDetailBookingPanel({ car, isLoggedIn, userEmail }: CarDetailB
         </Button>
       )}
 
-      <motion.div layout className="rounded-2xl border border-white/[0.09] bg-carbon/55 p-4 shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset] backdrop-blur-xl sm:p-5">
+      <motion.div layout className="rounded-2xl border border-stroke bg-carbon/55 p-4 shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset] backdrop-blur-xl sm:p-5">
         <div className="flex items-center gap-2 text-soft">
           <CalendarRange className="h-4 w-4 text-electric" aria-hidden />
           <h3 className="text-sm font-semibold tracking-[-0.02em]">Trip window</h3>
@@ -198,7 +198,7 @@ export function CarDetailBookingPanel({ car, isLoggedIn, userEmail }: CarDetailB
         </div>
       </motion.div>
 
-      <motion.div layout className="rounded-2xl border border-white/[0.09] bg-carbon/55 p-4 shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset] backdrop-blur-xl sm:p-5">
+      <motion.div layout className="rounded-2xl border border-stroke bg-carbon/55 p-4 shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset] backdrop-blur-xl sm:p-5">
         <div className="flex items-center gap-2 text-soft">
           <MapPin className="h-4 w-4 text-electric" aria-hidden />
           <h3 className="text-sm font-semibold tracking-[-0.02em]">Hubs</h3>
@@ -216,7 +216,7 @@ export function CarDetailBookingPanel({ car, isLoggedIn, userEmail }: CarDetailB
               type="checkbox"
               checked={sameReturnHub}
               onChange={(e) => setSameReturnHub(e.target.checked)}
-              className="h-4 w-4 rounded border-white/20 bg-matte text-electric focus:ring-electric/40"
+              className="h-4 w-4 rounded border-stroke-strong bg-matte text-electric focus:ring-electric/40"
             />
             Return to the same hub
           </label>
@@ -241,7 +241,7 @@ export function CarDetailBookingPanel({ car, isLoggedIn, userEmail }: CarDetailB
         )}
       </div>
 
-      <div className="rounded-xl border border-white/[0.08] bg-matte/[0.35] p-4 text-sm text-muted">
+      <div className="rounded-xl border border-stroke bg-matte/[0.35] p-4 text-sm text-muted">
         <div className="flex items-center gap-2 font-medium text-soft">
           <Shield className="h-4 w-4 text-electric" aria-hidden />
           Security deposit
@@ -251,7 +251,7 @@ export function CarDetailBookingPanel({ car, isLoggedIn, userEmail }: CarDetailB
         </p>
       </div>
 
-      <div className="rounded-xl border border-white/[0.08] bg-matte/[0.35] p-4">
+      <div className="rounded-xl border border-stroke bg-matte/[0.35] p-4">
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Availability</p>
         <div className="mt-3 flex items-start gap-2 text-sm">
           {avail.status === 'checking' ? (

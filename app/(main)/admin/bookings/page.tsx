@@ -10,6 +10,14 @@ import { formatInr } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
 
+const STATUS_FILTERS = [
+  { label: 'All', param: '' },
+  { label: 'Pending', param: 'pending_payment' },
+  { label: 'Confirmed', param: 'confirmed' },
+  { label: 'Completed', param: 'completed' },
+  { label: 'Cancelled', param: 'cancelled' },
+] as const
+
 function vehicleLabel(row: { vehicles: unknown }): string {
   const v = row.vehicles as { name?: string; brand?: string } | { name?: string; brand?: string }[] | null
   if (!v) return 'Vehicle'
@@ -18,10 +26,20 @@ function vehicleLabel(row: { vehicles: unknown }): string {
   return (first.name?.trim() || `${first.brand ?? ''}`.trim()) || 'Vehicle'
 }
 
-export default async function AdminBookingsPage() {
+export default async function AdminBookingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string }>
+}) {
+  const q = await searchParams
+  const raw = typeof q.status === 'string' ? q.status.trim() : ''
+  const status = raw || undefined
+  const allowed = !status || STATUS_FILTERS.some((f) => f.param === status)
+  const safeStatus = allowed && status ? status : undefined
+
   let rows: Awaited<ReturnType<typeof adminListBookings>> = []
   try {
-    rows = await adminListBookings()
+    rows = await adminListBookings(safeStatus ? { booking_status: safeStatus } : {})
   } catch {
     rows = []
   }
@@ -31,14 +49,35 @@ export default async function AdminBookingsPage() {
       <AdminPageHeader
         eyebrow="Bookings"
         title="Reservations"
-        description="Approve pending requests, adjust lifecycle and payment states, and deep-link into operations."
+        description="Filter by lifecycle, open a row for payment and status controls, and sync with customer dashboards."
       />
 
-      <Card className={cn(cardSurfaceBase, 'overflow-hidden border border-white/[0.08]')}>
+      <div className="flex flex-wrap gap-2">
+        {STATUS_FILTERS.map((f) => {
+          const href = f.param ? `/admin/bookings?status=${encodeURIComponent(f.param)}` : '/admin/bookings'
+          const active = (safeStatus ?? '') === (f.param || '')
+          return (
+            <Link
+              key={f.label}
+              href={href}
+              className={cn(
+                'rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors',
+                active
+                  ? 'border-electric/50 bg-electric/15 text-electric'
+                  : 'border-stroke bg-fill-glass text-muted hover:border-stroke-strong hover:text-soft',
+              )}
+            >
+              {f.label}
+            </Link>
+          )
+        })}
+      </div>
+
+      <Card className={cn(cardSurfaceBase, 'overflow-hidden border border-stroke')}>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px] text-left text-sm">
-              <thead className="border-b border-white/[0.08] bg-white/[0.03] text-xs uppercase tracking-wide text-muted">
+              <thead className="border-b border-stroke bg-fill-glass text-xs uppercase tracking-wide text-muted">
                 <tr>
                   <th className="px-4 py-3 font-medium">Vehicle</th>
                   <th className="px-4 py-3 font-medium">Pickup</th>
@@ -50,7 +89,7 @@ export default async function AdminBookingsPage() {
               </thead>
               <tbody>
                 {rows.map((b) => (
-                  <tr key={b.id} className="border-b border-white/[0.05] hover:bg-white/[0.02]">
+                  <tr key={b.id} className="border-b border-stroke hover:bg-fill-glass">
                     <td className="px-4 py-3 font-medium text-soft">{vehicleLabel(b)}</td>
                     <td className="px-4 py-3 text-muted">
                       {new Date(b.pickup_date).toLocaleDateString(undefined, { dateStyle: 'medium' })}
@@ -73,7 +112,7 @@ export default async function AdminBookingsPage() {
             </table>
           </div>
           {rows.length === 0 ? (
-            <p className="p-6 text-sm text-muted">No bookings loaded — check service role key.</p>
+            <p className="p-6 text-sm text-muted">No bookings in this view — check filters or service role key.</p>
           ) : null}
         </CardContent>
       </Card>

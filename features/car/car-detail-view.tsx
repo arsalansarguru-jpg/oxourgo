@@ -72,7 +72,7 @@ export function CarDetailView({ car, isLoggedIn, userEmail }: CarDetailViewProps
                     'relative h-16 w-24 shrink-0 overflow-hidden rounded-xl border transition',
                     idx === activeImage
                       ? 'border-electric/60 ring-2 ring-electric/30'
-                      : 'border-white/10 hover:border-white/25',
+                      : 'border-stroke hover:border-stroke-strong',
                   )}
                 >
                   <Image src={src} alt="" fill unoptimized className="object-cover" sizes="96px" />
@@ -104,7 +104,7 @@ export function CarDetailView({ car, isLoggedIn, userEmail }: CarDetailViewProps
                   {Object.entries(car.specs).map(([k, v]) => (
                     <div
                       key={k}
-                      className="flex justify-between gap-4 border-b border-white/5 pb-2 last:border-0"
+                      className="flex justify-between gap-4 border-b border-stroke pb-2 last:border-0"
                     >
                       <dt className="text-silver">{k}</dt>
                       <dd className="text-right font-medium text-soft">{v}</dd>
@@ -134,7 +134,7 @@ export function CarDetailView({ car, isLoggedIn, userEmail }: CarDetailViewProps
             <h2 className="text-xl font-semibold text-soft">Frequently asked</h2>
             <div
               className={cn(
-                'mt-4 divide-y divide-white/[0.08]',
+                'mt-4 divide-y divide-stroke',
                 cardSurfaceBase,
                 cardSurfaceTransition,
                 'bg-matte/[0.35]',
@@ -188,7 +188,7 @@ export function CarDetailView({ car, isLoggedIn, userEmail }: CarDetailViewProps
         </div>
 
         <aside className="lg:sticky lg:top-24 lg:self-start">
-          <div className="glass-panel space-y-5 rounded-[1.25rem] border border-white/[0.09] p-5 shadow-[var(--shadow-card)] sm:rounded-3xl sm:p-6">
+          <div className="glass-panel space-y-5 rounded-[1.25rem] border border-stroke p-5 shadow-[var(--shadow-card)] sm:rounded-3xl sm:p-6">
             <div>
               <p className={cardEyebrow}>From per day</p>
               <p className="mt-1 text-3xl font-bold text-soft">{formatInr(car.pricePerDay)}</p>

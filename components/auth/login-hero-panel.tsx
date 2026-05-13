@@ -24,7 +24,7 @@ export function LoginHeroPanel({ className }: LoginHeroPanelProps) {
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.85, ease }}
       className={cn(
-        'relative isolate flex min-h-[220px] flex-col overflow-hidden rounded-2xl border border-white/[0.08] shadow-[0_1px_0_0_rgba(255,255,255,0.06)_inset,0_40px_120px_-48px_rgba(0,0,0,0.95)] sm:min-h-[280px] lg:min-h-0 lg:rounded-3xl',
+        'relative isolate flex min-h-[220px] flex-col overflow-hidden rounded-2xl border border-stroke shadow-[0_1px_0_0_rgba(255,255,255,0.06)_inset,0_40px_120px_-48px_rgba(0,0,0,0.95)] sm:min-h-[280px] lg:min-h-0 lg:rounded-3xl',
         className,
       )}
     >
@@ -56,7 +56,7 @@ export function LoginHeroPanel({ className }: LoginHeroPanelProps) {
         transition={{ duration: 0.65, delay: 0.15, ease }}
         className="relative flex flex-1 flex-col justify-end p-6 sm:p-8 lg:p-10"
       >
-        <div className="mb-3 inline-flex w-fit items-center gap-2 rounded-full border border-white/[0.12] bg-matte/35 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-soft/90 backdrop-blur-md">
+        <div className="mb-3 inline-flex w-fit items-center gap-2 rounded-full border border-stroke-strong bg-matte/35 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-soft/90 backdrop-blur-md">
           <Sparkles className="h-3.5 w-3.5 text-electric" aria-hidden />
           {BRAND.name}
         </div>

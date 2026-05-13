@@ -45,21 +45,21 @@ export default async function AdminCustomerDetailPage({ params }: { params: Prom
       />
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card className={cn(cardSurfaceBase, 'border border-white/[0.08]')}>
+        <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
           <CardContent className="p-4">
             <p className="text-xs uppercase tracking-wide text-muted">Displayed risk</p>
             <p className="mt-2 text-2xl font-semibold tabular-nums text-soft">{displayRisk}</p>
             <p className="mt-1 text-xs text-muted">Max of stored profile score and cancel-rate heuristic.</p>
           </CardContent>
         </Card>
-        <Card className={cn(cardSurfaceBase, 'border border-white/[0.08]')}>
+        <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
           <CardContent className="p-4">
             <p className="text-xs uppercase tracking-wide text-muted">Bookings</p>
             <p className="mt-2 text-2xl font-semibold text-soft">{customer.bookingCount}</p>
             <p className="mt-1 text-xs text-muted">{customer.cancelledCount} cancelled</p>
           </CardContent>
         </Card>
-        <Card className={cn(cardSurfaceBase, 'border border-white/[0.08]')}>
+        <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
           <CardContent className="p-4">
             <p className="text-xs uppercase tracking-wide text-muted">Tier</p>
             <p className="mt-3">
@@ -71,14 +71,14 @@ export default async function AdminCustomerDetailPage({ params }: { params: Prom
 
       <AdminCustomerOps userId={customer.userId} profile={customer.profile} />
 
-      <Card className={cn(cardSurfaceBase, 'overflow-hidden border border-white/[0.08]')}>
+      <Card className={cn(cardSurfaceBase, 'overflow-hidden border border-stroke')}>
         <CardContent className="p-0">
-          <div className="border-b border-white/[0.08] px-5 py-4">
+          <div className="border-b border-stroke px-5 py-4">
             <h2 className="text-lg font-semibold text-soft">Booking history</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="border-b border-white/[0.08] bg-white/[0.03] text-xs uppercase tracking-wide text-muted">
+              <thead className="border-b border-stroke bg-fill-glass text-xs uppercase tracking-wide text-muted">
                 <tr>
                   <th className="px-4 py-3 font-medium">Vehicle</th>
                   <th className="px-4 py-3 font-medium">Pickup</th>
@@ -89,7 +89,7 @@ export default async function AdminCustomerDetailPage({ params }: { params: Prom
               </thead>
               <tbody>
                 {bookings.map((b) => (
-                  <tr key={b.id} className="border-b border-white/[0.05]">
+                  <tr key={b.id} className="border-b border-stroke">
                     <td className="px-4 py-3 text-soft">{vehicleLabel(b)}</td>
                     <td className="px-4 py-3 text-muted">
                       {new Date(b.pickup_date).toLocaleDateString(undefined, { dateStyle: 'medium' })}

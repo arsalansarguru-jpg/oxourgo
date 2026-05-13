@@ -74,13 +74,13 @@ export function SupportView() {
                   'bg-matte/[0.45]',
                 )}
               >
-                <div className="max-w-[85%] rounded-2xl rounded-bl-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-silver">
+                <div className="max-w-[85%] rounded-2xl rounded-bl-md border border-stroke bg-fill-glass px-3 py-2 text-sm text-muted">
                   Hi Aditya — I can help with bookings, billing, or roadside. What do you need?
                 </div>
                 <div className="ml-auto max-w-[85%] rounded-2xl rounded-br-md border border-electric/25 bg-electric/10 px-3 py-2 text-sm text-soft">
                   I&apos;d like to extend my BMW booking by one day.
                 </div>
-                <div className="max-w-[85%] rounded-2xl rounded-bl-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-silver">
+                <div className="max-w-[85%] rounded-2xl rounded-bl-md border border-stroke bg-fill-glass px-3 py-2 text-sm text-muted">
                   Checking detailing… You can extend until May 15, 18:00 for ₹8,500 + taxes. Shall I hold
                   it?
                 </div>

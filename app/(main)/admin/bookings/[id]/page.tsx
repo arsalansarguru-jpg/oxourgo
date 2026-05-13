@@ -50,14 +50,14 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
       </div>
 
       {booking.ops_note ? (
-        <p className="rounded-xl border border-white/[0.08] bg-white/[0.04] px-4 py-3 text-sm text-muted">
+        <p className="rounded-xl border border-stroke bg-fill-glass px-4 py-3 text-sm text-muted">
           <span className="font-medium text-soft">Ops note: </span>
           {booking.ops_note}
         </p>
       ) : null}
 
       <div className="grid gap-8 lg:grid-cols-2">
-        <Card className={cn(cardSurfaceBase, 'border border-white/[0.08]')}>
+        <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
           <CardContent className="space-y-3 p-5 sm:p-6 text-sm">
             <h2 className="text-lg font-semibold text-soft">Trip</h2>
             <dl className="grid gap-2">
@@ -73,7 +73,7 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
                 <dt className="text-muted">Days</dt>
                 <dd className="text-soft">{booking.rental_days}</dd>
               </div>
-              <div className="flex justify-between gap-4 border-t border-white/[0.08] pt-2 text-base font-semibold">
+              <div className="flex justify-between gap-4 border-t border-stroke pt-2 text-base font-semibold">
                 <dt className="text-soft">Total</dt>
                 <dd className="tabular-nums text-soft">{formatInr(booking.total_rupees)}</dd>
               </div>

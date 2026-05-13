@@ -26,14 +26,14 @@ export function AdminCarOps({ car }: { car: CarRow }) {
 
   return (
     <div className="space-y-6">
-      <Card className={cn(cardSurfaceBase, 'border border-white/[0.08]')}>
+      <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
         <CardContent className="space-y-4 p-5 sm:p-6">
           <h2 className="text-lg font-semibold text-soft">Listing controls</h2>
           <div className="flex flex-wrap items-center gap-4">
             <label className="flex items-center gap-2 text-sm text-soft">
               <input
                 type="checkbox"
-                className="h-4 w-4 rounded border-white/20 bg-matte"
+                className="h-4 w-4 rounded border-stroke-strong bg-matte"
                 checked={optimisticFeatured}
                 disabled={pending}
                 onChange={() => {
@@ -77,7 +77,7 @@ export function AdminCarOps({ car }: { car: CarRow }) {
         </CardContent>
       </Card>
 
-      <Card className={cn(cardSurfaceBase, 'border border-white/[0.08]')}>
+      <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
         <CardContent className="space-y-4 p-5 sm:p-6">
           <h2 className="text-lg font-semibold text-soft">Images (fleet bucket)</h2>
           <form

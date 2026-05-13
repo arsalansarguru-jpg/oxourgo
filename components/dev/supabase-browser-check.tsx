@@ -56,7 +56,7 @@ export function SupabaseBrowserCheck() {
   }, [supabase])
 
   return (
-    <pre className="max-h-64 overflow-auto rounded-xl border border-white/[0.08] bg-matte/80 p-4 text-left text-[12px] leading-relaxed text-muted">
+    <pre className="max-h-64 overflow-auto rounded-xl border border-stroke bg-matte/80 p-4 text-left text-[12px] leading-relaxed text-muted">
       {payload}
     </pre>
   )

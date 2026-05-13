@@ -33,7 +33,7 @@ export default async function AdminNotificationsPage() {
       <section className="space-y-3">
         <h2 className="text-lg font-semibold text-soft">Active</h2>
         {active.length === 0 ? (
-          <Card className={cn(cardSurfaceBase, 'border border-white/[0.08]')}>
+          <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
             <CardContent className="p-6 text-sm text-muted">No active alerts.</CardContent>
           </Card>
         ) : (
@@ -50,7 +50,7 @@ export default async function AdminNotificationsPage() {
           <h2 className="text-lg font-semibold text-soft">Dismissed (recent)</h2>
           <ul className="space-y-2 text-sm text-muted">
             {done.slice(0, 30).map((a) => (
-              <li key={a.id} className="flex flex-wrap justify-between gap-2 border-b border-white/[0.06] py-2">
+              <li key={a.id} className="flex flex-wrap justify-between gap-2 border-b border-stroke py-2">
                 <span className="text-soft">{a.title}</span>
                 <span>{new Date(a.created_at).toLocaleString()}</span>
               </li>

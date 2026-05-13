@@ -110,8 +110,8 @@ function MethodSurface({
       className={cn(
         'relative overflow-hidden rounded-2xl border transition-[border-color,box-shadow,background-color] duration-300',
         glow === 'electric'
-          ? 'border-white/[0.14] bg-gradient-to-b from-white/[0.14] to-white/[0.04] shadow-[0_1px_0_0_rgba(255,255,255,0.12)_inset,0_18px_48px_-28px_rgba(59,130,246,0.35)] hover:border-electric/35 hover:shadow-[0_1px_0_0_rgba(255,255,255,0.14)_inset,0_22px_56px_-26px_rgba(59,130,246,0.45)]'
-          : 'border-white/[0.1] bg-white/[0.05] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] hover:border-white/[0.16] hover:bg-white/[0.08]',
+          ? 'border-stroke-strong bg-gradient-to-b from-fill-glass-strong to-fill-glass shadow-[0_1px_0_0_rgba(255,255,255,0.12)_inset,0_18px_48px_-28px_rgba(59,130,246,0.35)] hover:border-electric/35 hover:shadow-[0_1px_0_0_rgba(255,255,255,0.14)_inset,0_22px_56px_-26px_rgba(59,130,246,0.45)]'
+          : 'border-stroke bg-fill-glass shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] hover:border-stroke-strong hover:bg-fill-glass-strong',
         className,
       )}
     >
@@ -149,8 +149,8 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
   }, [initialAuthError])
 
   const shellClassName = cn(
-    'relative overflow-hidden rounded-[1.375rem] border border-white/[0.11]',
-    'bg-gradient-to-br from-white/[0.1] via-white/[0.03] to-transparent',
+    'relative overflow-hidden rounded-[1.375rem] border border-stroke-strong',
+    'bg-gradient-to-br from-fill-glass-strong via-fill-glass to-transparent',
     'p-6 shadow-[0_1px_0_0_rgba(255,255,255,0.1)_inset,0_32px_90px_-40px_rgba(0,0,0,0.88)]',
     'backdrop-blur-[44px] sm:rounded-[1.75rem] sm:p-8 sm:shadow-[0_1px_0_0_rgba(255,255,255,0.1)_inset,0_40px_100px_-44px_rgba(0,0,0,0.9)]',
   )
@@ -174,11 +174,11 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
             Supabase is not configured
           </h2>
           <p className="text-sm leading-relaxed text-silver/95">
-            Add <code className="rounded bg-white/[0.08] px-1.5 py-0.5 text-[13px]">NEXT_PUBLIC_SUPABASE_URL</code> and{' '}
-            <code className="rounded bg-white/[0.08] px-1.5 py-0.5 text-[13px]">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>{' '}
-            (or <code className="rounded bg-white/[0.08] px-1.5 py-0.5 text-[13px]">NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code>)
-            to <code className="rounded bg-white/[0.08] px-1.5 py-0.5 text-[13px]">.env.local</code>. See{' '}
-            <code className="rounded bg-white/[0.08] px-1.5 py-0.5 text-[13px]">.env.example</code> in the repo.
+            Add <code className="rounded bg-fill-glass-strong px-1.5 py-0.5 text-[13px]">NEXT_PUBLIC_SUPABASE_URL</code> and{' '}
+            <code className="rounded bg-fill-glass-strong px-1.5 py-0.5 text-[13px]">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>{' '}
+            (or <code className="rounded bg-fill-glass-strong px-1.5 py-0.5 text-[13px]">NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code>)
+            to <code className="rounded bg-fill-glass-strong px-1.5 py-0.5 text-[13px]">.env.local</code>. See{' '}
+            <code className="rounded bg-fill-glass-strong px-1.5 py-0.5 text-[13px]">.env.example</code> in the repo.
           </p>
           {initialAuthError ? (
             <div
@@ -341,14 +341,14 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute -right-16 bottom-0 h-64 w-64 rounded-full bg-white/[0.06] blur-[90px]"
+        className="pointer-events-none absolute -right-16 bottom-0 h-64 w-64 rounded-full bg-fill-glass-strong blur-[90px]"
         aria-hidden
       />
 
       <div className="relative">
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/[0.12] bg-matte/40 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]">
+            <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-stroke-strong bg-matte/40 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]">
               <BrandLogo className="p-[3px]" priority />
             </div>
             <div className="min-w-0">
@@ -555,7 +555,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
                   disabled={busy}
                   onClick={() => setShowEmail((v) => !v)}
                   aria-expanded={showEmail}
-                  className="flex min-h-[3rem] w-full touch-manipulation items-center justify-center gap-2 rounded-2xl border border-white/[0.1] bg-white/[0.03] px-4 text-sm font-semibold text-silver transition-[border-color,background-color,color,box-shadow] duration-300 hover:border-white/[0.16] hover:bg-white/[0.06] hover:text-soft disabled:pointer-events-none disabled:opacity-40"
+                  className="flex min-h-[3rem] w-full touch-manipulation items-center justify-center gap-2 rounded-2xl border border-stroke bg-fill-glass px-4 text-sm font-semibold text-silver transition-[border-color,background-color,color,box-shadow] duration-300 hover:border-stroke-strong hover:bg-fill-glass-strong hover:text-soft disabled:pointer-events-none disabled:opacity-40"
                 >
                   <Mail className="h-[22px] w-[22px] shrink-0 text-electric" strokeWidth={2} aria-hidden />
                   {showEmail ? 'Hide email sign-in' : 'Continue with email'}
@@ -609,7 +609,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
                   <div
                     key={label}
                     role="listitem"
-                    className="rounded-xl border border-white/[0.06] bg-matte/35 px-3 py-3 text-left shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] backdrop-blur-sm"
+                    className="rounded-xl border border-stroke bg-matte/35 px-3 py-3 text-left shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] backdrop-blur-sm"
                   >
                     <Icon className="h-4 w-4 text-electric/90" aria-hidden />
                     <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-soft/95">{label}</p>

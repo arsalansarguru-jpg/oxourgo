@@ -86,7 +86,7 @@ export default async function SupabaseTestPage() {
           </div>
         ) : (
           <>
-            <div className="rounded-2xl border border-white/[0.08] bg-carbon-deep/80 p-5 text-sm">
+            <div className="rounded-2xl border border-stroke bg-carbon-deep/80 p-5 text-sm">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Resolved public config</p>
               <dl className="mt-4 space-y-2 text-muted">
                 <div>
@@ -100,12 +100,12 @@ export default async function SupabaseTestPage() {
               </dl>
             </div>
 
-            <div className="rounded-2xl border border-white/[0.08] bg-carbon-deep/80 p-5">
+            <div className="rounded-2xl border border-stroke bg-carbon-deep/80 p-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">1. PostgREST (HTTP)</p>
               <p className="mt-2 text-sm text-muted">
                 GET <span className="font-mono text-[12px] text-soft/90">/rest/v1/</span> with anon credentials.
               </p>
-              <pre className="mt-4 max-h-48 overflow-auto rounded-xl border border-white/[0.06] bg-matte/80 p-4 text-left text-[12px] leading-relaxed text-muted">
+              <pre className="mt-4 max-h-48 overflow-auto rounded-xl border border-stroke bg-matte/80 p-4 text-left text-[12px] leading-relaxed text-muted">
                 {JSON.stringify(postgrest, null, 2)}
               </pre>
               {postgrest && 'ok' in postgrest && postgrest.ok ? (
@@ -113,7 +113,7 @@ export default async function SupabaseTestPage() {
               ) : null}
             </div>
 
-            <div className="rounded-2xl border border-white/[0.08] bg-carbon-deep/80 p-5">
+            <div className="rounded-2xl border border-stroke bg-carbon-deep/80 p-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
                 2. Server client (<code className="text-soft/90">@/lib/supabase/server</code>)
               </p>
@@ -121,7 +121,7 @@ export default async function SupabaseTestPage() {
                 <code className="text-[12px] text-soft/90">createClient()</code> +{' '}
                 <code className="text-[12px] text-soft/90">auth.getClaims()</code>
               </p>
-              <pre className="mt-4 max-h-48 overflow-auto rounded-xl border border-white/[0.06] bg-matte/80 p-4 text-left text-[12px] leading-relaxed text-muted">
+              <pre className="mt-4 max-h-48 overflow-auto rounded-xl border border-stroke bg-matte/80 p-4 text-left text-[12px] leading-relaxed text-muted">
                 {JSON.stringify(serverClient, null, 2)}
               </pre>
               {serverClient && 'ok' in serverClient && serverClient.ok ? (
@@ -129,7 +129,7 @@ export default async function SupabaseTestPage() {
               ) : null}
             </div>
 
-            <div className="rounded-2xl border border-white/[0.08] bg-carbon-deep/80 p-5">
+            <div className="rounded-2xl border border-stroke bg-carbon-deep/80 p-5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">
                 3. Browser client (<code className="text-soft/90">useSupabase</code>)
               </p>

@@ -57,12 +57,12 @@ export function CustomerDashboardShell({
           cardSurfaceBase,
           cardSurfaceTransition,
           cardPaddingCompact,
-          'rounded-2xl border border-white/[0.08] bg-carbon/[0.55] p-4 backdrop-blur-xl lg:rounded-3xl lg:p-5',
+          'rounded-2xl border border-stroke bg-carbon/[0.55] p-4 backdrop-blur-xl lg:rounded-3xl lg:p-5',
         )}
       >
-        <div className="flex items-center justify-between gap-3 border-b border-white/[0.06] pb-4">
+        <div className="flex items-center justify-between gap-3 border-b border-stroke pb-4">
           <div className="flex min-w-0 items-center gap-2">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.1] bg-electric/15">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-stroke bg-electric/15">
               <Sparkles className="h-5 w-5 text-electric" aria-hidden />
             </div>
             <div className="min-w-0">
@@ -90,8 +90,8 @@ export function CustomerDashboardShell({
                 className={cn(
                   'flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium tracking-[-0.01em] transition-[color,background-color,box-shadow] duration-200',
                   active
-                    ? 'bg-white/[0.1] text-soft shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)]'
-                    : 'text-muted hover:bg-white/[0.05] hover:text-soft',
+                    ? 'bg-fill-glass-strong text-soft shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)]'
+                    : 'text-muted hover:bg-fill-glass hover:text-soft',
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0 text-electric/90" aria-hidden />

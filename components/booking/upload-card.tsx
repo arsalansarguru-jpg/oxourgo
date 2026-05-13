@@ -37,8 +37,8 @@ export function UploadCard({
         <div className="flex min-w-0 items-start gap-3 sm:gap-4">
           <span
             className={cn(
-              'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.1] bg-matte/[0.5] text-electric shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] transition-[border-color,background-color] duration-300',
-              'group-hover/card:border-white/[0.14] group-hover/card:bg-matte/[0.58]',
+              'flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-stroke bg-matte/[0.5] text-electric shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] transition-[border-color,background-color] duration-300',
+              'group-hover/card:border-stroke-strong group-hover/card:bg-matte/[0.58]',
             )}
           >
             <UploadCloud className="h-5 w-5" />

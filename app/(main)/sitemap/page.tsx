@@ -34,7 +34,7 @@ export default function SitemapPage() {
           <li key={l.href}>
             <Link
               href={l.href}
-              className="flex items-center justify-between rounded-xl border border-white/10 bg-carbon/50 px-4 py-3 text-sm font-medium text-soft transition hover:border-electric/35"
+              className="flex items-center justify-between rounded-xl border border-stroke bg-carbon/50 px-4 py-3 text-sm font-medium text-soft transition hover:border-electric/35"
             >
               {l.label}
               <span className="text-xs text-silver">{l.href}</span>

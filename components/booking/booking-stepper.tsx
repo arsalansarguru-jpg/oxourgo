@@ -30,7 +30,7 @@ export function BookingStepper({ steps, current, className }: BookingStepperProp
                   'flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-sm font-bold sm:h-8 sm:w-8 sm:text-xs',
                   done && 'border-emerald/40 bg-emerald/15 text-emerald',
                   active && 'border-electric/50 bg-electric/15 text-electric shadow-glow',
-                  !done && !active && 'border-white/10 bg-white/5 text-muted',
+                  !done && !active && 'border-stroke bg-fill-glass text-muted',
                 )}
                 aria-current={active ? 'step' : undefined}
               >
@@ -46,7 +46,7 @@ export function BookingStepper({ steps, current, className }: BookingStepperProp
               </span>
             </div>
             {idx < steps.length - 1 ? (
-              <span className="mx-0.5 hidden h-px w-6 shrink-0 bg-white/10 sm:mx-1 sm:block" aria-hidden />
+              <span className="mx-0.5 hidden h-px w-6 shrink-0 bg-stroke sm:mx-1 sm:block" aria-hidden />
             ) : null}
           </li>
         )

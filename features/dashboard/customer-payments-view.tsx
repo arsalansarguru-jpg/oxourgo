@@ -35,9 +35,9 @@ export function CustomerPaymentsView({
 
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-soft">Booking charges</h2>
-        <div className={cn('overflow-hidden rounded-2xl border border-white/[0.08]', cardSurfaceBase, cardSurfaceTransition)}>
+        <div className={cn('overflow-hidden rounded-2xl border border-stroke', cardSurfaceBase, cardSurfaceTransition)}>
           <table className="w-full text-left text-sm">
-            <thead className="bg-white/[0.04] text-[11px] font-semibold uppercase tracking-wide text-muted">
+            <thead className="bg-fill-glass text-[11px] font-semibold uppercase tracking-wide text-muted">
               <tr>
                 <th className="px-4 py-3">Invoice ref</th>
                 <th className="px-4 py-3">Vehicle</th>
@@ -45,7 +45,7 @@ export function CustomerPaymentsView({
                 <th className="px-4 py-3">Payment</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.06]">
+            <tbody className="divide-y divide-stroke">
               {bookings.map((b) => (
                 <tr key={b.id} className="text-muted">
                   <td className="px-4 py-3 font-mono text-xs text-soft">OX-{b.id.replace(/-/g, '').slice(0, 10).toUpperCase()}</td>
@@ -86,9 +86,9 @@ export function CustomerPaymentsView({
 
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-soft">Ledger events</h2>
-        <div className={cn('overflow-hidden rounded-2xl border border-white/[0.08]', cardSurfaceBase)}>
+        <div className={cn('overflow-hidden rounded-2xl border border-stroke', cardSurfaceBase)}>
           <table className="w-full text-left text-sm">
-            <thead className="bg-white/[0.04] text-[11px] font-semibold uppercase tracking-wide text-muted">
+            <thead className="bg-fill-glass text-[11px] font-semibold uppercase tracking-wide text-muted">
               <tr>
                 <th className="px-4 py-3">Title</th>
                 <th className="px-4 py-3">Direction</th>
@@ -96,7 +96,7 @@ export function CustomerPaymentsView({
                 <th className="px-4 py-3">When</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/[0.06]">
+            <tbody className="divide-y divide-stroke">
               {events.map((e) => (
                 <tr key={e.id} className="text-muted">
                   <td className="px-4 py-3 text-soft">{e.title}</td>

@@ -1,6 +1,9 @@
 @import 'tailwindcss';
 
-/* Premium theme tokens — extend via @theme; runtime overrides can use data-theme if needed */
+/** Descendant variant for light theme (paired with `html[data-theme="light"]`). */
+@custom-variant theme-light (&:where(html[data-theme="light"] *));
+
+/* Premium theme tokens — extend via @theme; light palette overrides on `html[data-theme="light"]` */
 @theme {
   /* System stack only — avoids `next/font/google` network fetch at build (SSL/proxy issues). */
   --font-sans:
@@ -15,6 +18,13 @@
   --color-silver: #aeb4bf;
   --color-muted: rgba(174, 180, 191, 0.72);
   --color-emerald: #10b981;
+
+  /** Hairlines & glass fills — swap on `html[data-theme="light"]` for contrast */
+  --color-stroke: rgb(255 255 255 / 0.09);
+  --color-stroke-strong: rgb(255 255 255 / 0.14);
+  --color-fill-glass: rgb(255 255 255 / 0.05);
+  --color-fill-glass-strong: rgb(255 255 255 / 0.085);
+  --color-hero-mist: rgb(255 255 255 / 0.045);
 
   --radius-sm: 0.5rem;
   --radius-md: 0.625rem;
@@ -67,6 +77,52 @@
     linear-gradient(165deg, transparent 0%, rgba(10, 10, 12, 0.65) 100%);
 }
 
+html[data-theme='light'] {
+  color-scheme: light;
+  --color-matte: #f3f5fb;
+  --color-carbon: #ffffff;
+  --color-carbon-deep: #e8ecf6;
+  --color-soft: #0c1017;
+  --color-silver: #4b5563;
+  --color-muted: rgb(55 65 81 / 0.82);
+  --color-stroke: rgb(15 23 42 / 0.11);
+  --color-stroke-strong: rgb(15 23 42 / 0.18);
+  --color-fill-glass: rgb(15 23 42 / 0.045);
+  --color-fill-glass-strong: rgb(15 23 42 / 0.09);
+  --color-hero-mist: rgb(59 130 246 / 0.09);
+
+  --shadow-glow: 0 0 48px -14px rgba(59, 130, 246, 0.28);
+  --shadow-glow-strong: 0 0 72px -18px rgba(59, 130, 246, 0.38);
+  --shadow-card:
+    0 1px 0 0 rgba(255, 255, 255, 0.85) inset, 0 18px 48px -28px rgba(15, 23, 42, 0.12);
+  --shadow-card-hover:
+    0 1px 0 0 rgba(255, 255, 255, 0.95) inset, 0 26px 64px -34px rgba(15, 23, 42, 0.16);
+  --shadow-card-accent:
+    0 1px 0 0 rgba(255, 255, 255, 0.8) inset, 0 0 0 1px rgba(59, 130, 246, 0.14),
+    0 22px 56px -36px rgba(15, 23, 42, 0.14);
+
+  --background-image-hero-mesh: radial-gradient(
+      ellipse 100% 90% at 15% -5%,
+      rgba(59, 130, 246, 0.14),
+      transparent 58%
+    ),
+    radial-gradient(ellipse 70% 55% at 88% 8%, rgba(15, 23, 42, 0.04), transparent 52%),
+    radial-gradient(ellipse 50% 40% at 50% 100%, rgba(59, 130, 246, 0.05), transparent 55%),
+    linear-gradient(180deg, #f3f5fb 0%, #eef2fa 48%, #f3f5fb 100%);
+
+  --background-image-hero-cinematic: radial-gradient(
+      ellipse 85% 70% at 50% 120%,
+      rgba(59, 130, 246, 0.07),
+      transparent 52%
+    ),
+    radial-gradient(ellipse 55% 45% at 0% 35%, rgba(15, 23, 42, 0.03), transparent 58%),
+    linear-gradient(165deg, transparent 0%, rgba(243, 245, 251, 0.85) 100%);
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+}
+
 @layer base {
   html {
     @apply scroll-smooth antialiased;
@@ -84,15 +140,21 @@
   ::selection {
     @apply bg-electric/35 text-soft;
   }
+
+  html[data-theme='light'] ::selection {
+    @apply bg-electric/25 text-soft;
+  }
 }
 
 @utility glass-panel {
-  border: 1px solid rgba(255, 255, 255, 0.085);
-  background: linear-gradient(165deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  border: 1px solid var(--color-stroke);
+  background: linear-gradient(
+    165deg,
+    color-mix(in srgb, var(--color-fill-glass-strong) 55%, transparent),
+    color-mix(in srgb, var(--color-fill-glass) 40%, transparent)
+  );
   backdrop-filter: blur(32px);
-  box-shadow:
-    var(--shadow-card),
-    0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+  box-shadow: var(--shadow-card), 0 0 0 1px color-mix(in srgb, var(--color-stroke) 35%, transparent) inset;
 }
 
 @utility text-balance {

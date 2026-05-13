@@ -36,7 +36,7 @@ export function TestimonialCard({ testimonial, className }: TestimonialCardProps
       <blockquote className={cn(cardBody, 'mt-4 flex-1 text-pretty sm:text-[0.9375rem]')}>
         “{testimonial.quote}”
       </blockquote>
-      <figcaption className="mt-6 border-t border-white/[0.08] pt-4">
+      <figcaption className="mt-6 border-t border-stroke pt-4">
         <p className="text-[0.9375rem] font-semibold tracking-[-0.02em] text-soft">{testimonial.name}</p>
         <p className="mt-1 text-xs leading-relaxed text-muted">{testimonial.role}</p>
       </figcaption>

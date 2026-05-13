@@ -22,7 +22,7 @@ function SectionBlock({
     <section className="space-y-4">
       <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-muted">{title}</h2>
       {items.length === 0 ? (
-        <p className="rounded-2xl border border-dashed border-white/[0.12] bg-matte/[0.2] px-4 py-6 text-center text-sm text-muted">
+        <p className="rounded-2xl border border-dashed border-stroke-strong bg-matte/[0.2] px-4 py-6 text-center text-sm text-muted">
           {empty}
         </p>
       ) : (
@@ -105,7 +105,7 @@ export function CustomerBookingsDashboard({ result }: CustomerBookingsDashboardP
             Your authenticated reservations appear here with vehicle imagery, trip dates, totals, and live status.
           </p>
         </header>
-        <div className={cn(cardSurfaceBase, 'rounded-2xl border border-white/[0.08] p-6 sm:rounded-3xl')}>
+        <div className={cn(cardSurfaceBase, 'rounded-2xl border border-stroke p-6 sm:rounded-3xl')}>
           <EmptyState
             icon={Car}
             title="No bookings yet"
@@ -122,7 +122,7 @@ export function CustomerBookingsDashboard({ result }: CustomerBookingsDashboardP
 
   return (
     <div className="space-y-12">
-      <header className="border-b border-white/[0.06] pb-8">
+      <header className="border-b border-stroke pb-8">
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-electric/90">Reservations</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-soft md:text-4xl">My bookings</h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">

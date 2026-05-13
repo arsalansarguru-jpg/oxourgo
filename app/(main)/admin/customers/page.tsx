@@ -25,11 +25,11 @@ export default async function AdminCustomersPage() {
         description="Auth-backed directory with profile tier, heuristic risk from cancellations, and admin-editable fields."
       />
 
-      <Card className={cn(cardSurfaceBase, 'overflow-hidden border border-white/[0.08]')}>
+      <Card className={cn(cardSurfaceBase, 'overflow-hidden border border-stroke')}>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[800px] text-left text-sm">
-              <thead className="border-b border-white/[0.08] bg-white/[0.03] text-xs uppercase tracking-wide text-muted">
+              <thead className="border-b border-stroke bg-fill-glass text-xs uppercase tracking-wide text-muted">
                 <tr>
                   <th className="px-4 py-3 font-medium">Email</th>
                   <th className="px-4 py-3 font-medium">Tier</th>
@@ -44,7 +44,7 @@ export default async function AdminCustomersPage() {
                   const stored = r.profile?.risk_score ?? 0
                   const displayRisk = Math.max(stored, r.heuristicRisk)
                   return (
-                    <tr key={r.userId} className="border-b border-white/[0.05] hover:bg-white/[0.02]">
+                    <tr key={r.userId} className="border-b border-stroke hover:bg-fill-glass">
                       <td className="px-4 py-3 text-soft">{r.email ?? r.userId}</td>
                       <td className="px-4 py-3">
                         <AdminStatusPill value={tier} />

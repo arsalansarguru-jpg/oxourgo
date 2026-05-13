@@ -33,7 +33,7 @@ export function EmptyState({
     >
       <div
         className={cn(
-          'mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/[0.1] bg-white/[0.05] text-electric shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]',
+          'mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-stroke bg-fill-glass text-electric shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]',
         )}
       >
         <Icon className="h-7 w-7" />

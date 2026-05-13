@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import type { ReactNode } from 'react'
+import Script from 'next/script'
 
 import { AppProviders } from '@/components/providers/app-providers'
 
@@ -9,7 +10,10 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
-  themeColor: '#0a0a0c',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f3f5fb' },
+    { color: '#0a0a0c' },
+  ],
 }
 
 export const metadata: Metadata = {
@@ -21,10 +25,15 @@ export const metadata: Metadata = {
     'Premium self-drive luxury car rentals in Mumbai. Verified vehicles, transparent pricing, and 24x7 support.',
 }
 
+const themeBootstrapScript = `(function(){try{var k='oxour-theme',d=document.documentElement,s=localStorage.getItem(k);function a(t){d.setAttribute('data-theme',t);}if(s==='light'||s==='dark'){a(s);return;}a(window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning data-theme="dark">
       <body className="font-sans antialiased" suppressHydrationWarning>
+        <Script id="oxour-theme-init" strategy="beforeInteractive">
+          {themeBootstrapScript}
+        </Script>
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

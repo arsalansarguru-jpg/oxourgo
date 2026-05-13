@@ -38,13 +38,13 @@ const bookingSelect = `
   )
 `
 
-export async function adminListBookings(): Promise<BookingWithCar[]> {
+export async function adminListBookings(options?: { booking_status?: string }): Promise<BookingWithCar[]> {
   const admin = createAdminClient()
-  const { data, error } = await admin
-    .from('bookings')
-    .select(bookingSelect)
-    .order('created_at', { ascending: false })
-    .limit(200)
+  let q = admin.from('bookings').select(bookingSelect).order('created_at', { ascending: false }).limit(200)
+  if (options?.booking_status) {
+    q = q.eq('booking_status', options.booking_status)
+  }
+  const { data, error } = await q
 
   if (error || !data) return []
   return data as unknown as BookingWithCar[]

@@ -2,43 +2,50 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
-import { AdminCarFieldsForm } from '@/components/admin/admin-car-fields-form'
-import { AdminCarOps } from '@/components/admin/admin-car-ops'
+import { AdminVehicleFieldsForm } from '@/components/admin/admin-vehicle-fields-form'
+import { AdminVehicleOps } from '@/components/admin/admin-vehicle-ops'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
-import { adminGetCar } from '@/lib/admin/data/fleet'
+import { adminGetVehicle } from '@/lib/admin/data/fleet'
 import { getPublicStorageObjectUrl } from '@/lib/supabase/storage-public-url'
 
 export const dynamic = 'force-dynamic'
 
+function heroUrl(image: string | null | undefined): string | null {
+  const raw = image?.trim()
+  if (!raw) return null
+  if (/^https?:\/\//i.test(raw)) return raw
+  return getPublicStorageObjectUrl('fleet', raw)
+}
+
 export default async function AdminFleetDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
-  let car: Awaited<ReturnType<typeof adminGetCar>> = null
+  let vehicle: Awaited<ReturnType<typeof adminGetVehicle>> = null
   try {
-    car = await adminGetCar(id)
+    vehicle = await adminGetVehicle(id)
   } catch {
-    car = null
+    vehicle = null
   }
-  if (!car) notFound()
+  if (!vehicle) notFound()
 
-  const cover = car.cover_image_path ? getPublicStorageObjectUrl('fleet', car.cover_image_path) : null
+  const cover = heroUrl(vehicle.image)
 
   return (
     <div className="space-y-8">
       <AdminPageHeader
         eyebrow="Fleet"
-        title={`${car.brand} ${car.model}`}
-        description={`Registration ${car.registration_number} · ID ${car.id}`}
+        title={vehicle.name}
+        description={`${vehicle.brand} · ${vehicle.registration_number} · ID ${vehicle.id}`}
       />
 
       {cover ? (
-        <div className="relative h-64 w-full overflow-hidden rounded-2xl border border-white/[0.08]">
-          <Image src={cover} alt="" fill sizes="100vw" className="object-cover" priority />
+        <div className="relative h-56 w-full overflow-hidden rounded-2xl border border-stroke sm:h-64">
+          <Image src={cover} alt="" fill sizes="100vw" className="object-cover" priority unoptimized />
         </div>
       ) : null}
 
       <div className="grid gap-8 lg:grid-cols-2">
-        <AdminCarFieldsForm car={car} />
-        <AdminCarOps car={car} />
+        <AdminVehicleFieldsForm vehicle={vehicle} />
+        <AdminVehicleOps vehicle={vehicle} />
       </div>
 
       <p className="text-center text-sm text-muted">

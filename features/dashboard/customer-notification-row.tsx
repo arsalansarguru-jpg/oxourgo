@@ -31,7 +31,7 @@ export function CustomerNotificationRow({ row }: { row: NotificationRow }) {
         className={cn(
           cardSurfaceTransition,
           cardSurfaceHover,
-          'overflow-hidden border border-white/[0.08]',
+          'overflow-hidden border border-stroke',
           unread && 'border-electric/25 bg-electric/[0.04]',
         )}
       >

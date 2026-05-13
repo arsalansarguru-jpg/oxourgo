@@ -1,18 +1,20 @@
 import 'server-only'
 
-import type { CarRow } from '@/lib/supabase/database.types'
+import type { Database } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-export async function adminListCars(): Promise<CarRow[]> {
+export type AdminVehicleRow = Database['public']['Tables']['vehicles']['Row']
+
+export async function adminListVehicles(): Promise<AdminVehicleRow[]> {
   const admin = createAdminClient()
-  const { data, error } = await admin.from('cars').select('*').order('created_at', { ascending: false })
+  const { data, error } = await admin.from('vehicles').select('*').order('created_at', { ascending: false })
   if (error || !data) return []
-  return data as CarRow[]
+  return data as AdminVehicleRow[]
 }
 
-export async function adminGetCar(id: string): Promise<CarRow | null> {
+export async function adminGetVehicle(id: string): Promise<AdminVehicleRow | null> {
   const admin = createAdminClient()
-  const { data, error } = await admin.from('cars').select('*').eq('id', id).maybeSingle()
+  const { data, error } = await admin.from('vehicles').select('*').eq('id', id).maybeSingle()
   if (error || !data) return null
-  return data as CarRow
+  return data as AdminVehicleRow
 }

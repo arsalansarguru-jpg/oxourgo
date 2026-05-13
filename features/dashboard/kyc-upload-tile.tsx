@@ -196,7 +196,7 @@ export function KycUploadTile({
           }}
           className={cn(
             cardSurfaceBase,
-            'rounded-xl border border-dashed border-white/[0.14] bg-matte/[0.35] p-6 text-center transition-[border-color,background-color,box-shadow] duration-300',
+            'rounded-xl border border-dashed border-stroke-strong bg-matte/[0.35] p-6 text-center transition-[border-color,background-color,box-shadow] duration-300',
             dragOver && 'border-electric/45 bg-electric/[0.06]',
           )}
         >
@@ -220,7 +220,7 @@ export function KycUploadTile({
           ) : progress !== null ? (
             <div className="space-y-3">
               <p className="text-sm font-medium text-soft">Uploading…</p>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.08]">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-fill-glass-strong">
                 <div
                   className="h-full rounded-full bg-gradient-to-r from-electric to-sky-400 transition-[width] duration-150 ease-out"
                   style={{ width: `${Math.round(progress * 100)}%` }}
@@ -274,7 +274,7 @@ export function KycUploadTile({
         ) : null}
 
         {latest?.reviewer_note && latest.status === 'rejected' ? (
-          <p className="rounded-lg border border-white/[0.08] bg-white/[0.03] px-3 py-2 text-xs text-muted">
+          <p className="rounded-lg border border-stroke bg-fill-glass px-3 py-2 text-xs text-muted">
             <span className="font-medium text-soft">Reviewer: </span>
             {latest.reviewer_note}
           </p>

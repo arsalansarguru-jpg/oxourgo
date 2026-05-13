@@ -120,7 +120,7 @@ export function FleetClientView({
               <p className="text-sm leading-relaxed text-muted">
                 The app could not read <span className="font-medium text-soft">public.vehicles</span> from Supabase.
                 Check environment variables on Vercel (
-                <code className="rounded bg-white/10 px-1 py-0.5 text-xs">NEXT_PUBLIC_SUPABASE_URL</code>, publishable
+                <code className="rounded bg-fill-glass-strong px-1 py-0.5 text-xs">NEXT_PUBLIC_SUPABASE_URL</code>, publishable
                 key), RLS policies, and project logs.
               </p>
               <p className="font-mono text-xs text-red-200/90">{fetchError}</p>
@@ -138,7 +138,7 @@ export function FleetClientView({
         </div>
       ) : (
         <>
-          <div className="rounded-2xl border border-white/[0.07] bg-matte/[0.72] p-3 shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset] backdrop-blur-xl backdrop-saturate-150 transition-[border-color,box-shadow] duration-300 sm:p-4 lg:sticky lg:top-[3.75rem] lg:z-30 supports-[backdrop-filter]:bg-matte/55">
+          <div className="rounded-2xl border border-stroke bg-matte/[0.72] p-3 shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset] backdrop-blur-xl backdrop-saturate-150 transition-[border-color,box-shadow] duration-300 sm:p-4 lg:sticky lg:top-[3.75rem] lg:z-30 supports-[backdrop-filter]:bg-matte/55">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="relative w-full lg:max-w-sm">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-silver" />

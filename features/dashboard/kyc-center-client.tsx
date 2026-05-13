@@ -47,9 +47,9 @@ export function KycCenterClient({
         <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-soft">KYC center</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted">
           Files upload directly to your private Supabase Storage prefix (
-          <code className="rounded bg-white/10 px-1 font-mono text-xs">kyc/&lt;your-account-id&gt;/…</code>) with your
+          <code className="rounded bg-fill-glass-strong px-1 font-mono text-xs">kyc/&lt;your-account-id&gt;/…</code>) with your
           session token. We store the storage path and metadata in{' '}
-          <code className="rounded bg-white/10 px-1 font-mono text-xs">kyc_documents</code> for verification. Operations
+          <code className="rounded bg-fill-glass-strong px-1 font-mono text-xs">kyc_documents</code> for verification. Operations
           staff review using admin tools; objects are not world-readable.
         </p>
       </header>
@@ -69,13 +69,13 @@ export function KycCenterClient({
         ))}
       </div>
 
-      <div className={cn(cardSurfaceBase, 'rounded-2xl border border-white/[0.08] p-5 sm:rounded-3xl sm:p-6')}>
+      <div className={cn(cardSurfaceBase, 'rounded-2xl border border-stroke p-5 sm:rounded-3xl sm:p-6')}>
         <h2 className="text-lg font-semibold text-soft">Submission log</h2>
         <p className="mt-1 text-xs text-muted">New uploads append here; the tiles above always reflect your latest file per category.</p>
         {docs.length === 0 ? (
           <p className="mt-3 text-sm text-muted">No uploads yet.</p>
         ) : (
-          <ul className="mt-4 divide-y divide-white/[0.06] text-sm">
+          <ul className="mt-4 divide-y divide-stroke text-sm">
             {docs.map((d) => (
               <li key={d.id} className="flex flex-col gap-2 py-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
                 <div className="space-y-1">

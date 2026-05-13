@@ -51,7 +51,7 @@ export function Modal({ open, onClose, title, children, className }: ModalProps)
             aria-modal="true"
             aria-labelledby={title ? 'modal-title' : undefined}
             className={cn(
-              'glass-panel relative z-10 w-full max-w-lg rounded-[1.125rem] border border-white/[0.09] p-5 shadow-[var(--shadow-card)] sm:rounded-2xl sm:p-6',
+              'glass-panel relative z-10 w-full max-w-lg rounded-[1.125rem] border border-stroke p-5 shadow-[var(--shadow-card)] sm:rounded-2xl sm:p-6',
               className,
             )}
             initial={{ opacity: 0, y: 16, scale: 0.98 }}

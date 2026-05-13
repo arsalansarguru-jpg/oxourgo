@@ -5,7 +5,7 @@ function Shimmer({ className }: { className?: string }) {
   return (
     <div
       className={cn(
-        'animate-pulse rounded-lg bg-gradient-to-r from-white/[0.06] via-white/[0.12] to-white/[0.06] bg-[length:200%_100%]',
+        'animate-pulse rounded-lg bg-gradient-to-r from-fill-glass-strong via-fill-glass-strong to-fill-glass-strong bg-[length:200%_100%]',
         className,
       )}
       aria-hidden
@@ -16,7 +16,7 @@ function Shimmer({ className }: { className?: string }) {
 export function CustomerBookingsSkeleton() {
   return (
     <div className="space-y-12">
-      <div className="border-b border-white/[0.06] pb-8">
+      <div className="border-b border-stroke pb-8">
         <Shimmer className="h-3 w-28" />
         <Shimmer className="mt-4 h-9 w-64 max-w-full" />
         <Shimmer className="mt-4 h-4 w-full max-w-xl" />
@@ -29,7 +29,7 @@ export function CustomerBookingsSkeleton() {
             key={i}
             className={cn(
               cardSurfaceBase,
-              'grid gap-5 rounded-2xl border border-white/[0.08] p-5 sm:rounded-3xl sm:p-6 lg:grid-cols-[minmax(0,160px)_1fr]',
+              'grid gap-5 rounded-2xl border border-stroke p-5 sm:rounded-3xl sm:p-6 lg:grid-cols-[minmax(0,160px)_1fr]',
             )}
           >
             <Shimmer className="aspect-[16/10] w-full rounded-2xl lg:min-h-[140px]" />
@@ -43,7 +43,7 @@ export function CustomerBookingsSkeleton() {
                   <Shimmer className="h-[4.5rem] rounded-xl sm:col-span-2" />
                 </div>
               </div>
-              <div className="flex w-full flex-col gap-3 border-t border-white/[0.06] pt-4 lg:w-52 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
+              <div className="flex w-full flex-col gap-3 border-t border-stroke pt-4 lg:w-52 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
                 <Shimmer className="h-3 w-14" />
                 <Shimmer className="h-8 w-32" />
                 <div className="flex gap-2">

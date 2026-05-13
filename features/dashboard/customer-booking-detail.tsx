@@ -110,7 +110,7 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
       </nav>
 
       {/* Hero */}
-      <section className="overflow-hidden rounded-2xl border border-white/[0.09] shadow-[var(--shadow-card)] sm:rounded-3xl">
+      <section className="overflow-hidden rounded-2xl border border-stroke shadow-[var(--shadow-card)] sm:rounded-3xl">
         <div className="relative min-h-[200px] w-full md:min-h-[300px]">
           <Image
             src={visual.imageUrl}
@@ -143,7 +143,7 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
                     Payment · {formatPaymentStatusLabel(row.payment_status)}
                   </Badge>
                 </div>
-                <div className="glass-panel inline-flex flex-col rounded-2xl border border-white/[0.12] bg-matte/50 px-5 py-4 backdrop-blur-md">
+                <div className="glass-panel inline-flex flex-col rounded-2xl border border-stroke-strong bg-matte/50 px-5 py-4 backdrop-blur-md">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Total</p>
                   <p className="mt-1 text-3xl font-semibold tabular-nums tracking-[-0.04em] text-soft md:text-4xl">
                     {formatInr(row.total_rupees)}
@@ -168,21 +168,21 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
                 Pickup and return windows, concierge hubs, and rental length for this reservation.
               </p>
               <dl className="mt-6 grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl border border-white/[0.07] bg-matte/[0.35] p-4">
+                <div className="rounded-2xl border border-stroke bg-matte/[0.35] p-4">
                   <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted">
                     <Calendar className="h-3.5 w-3.5 text-electric/85" aria-hidden />
                     Pickup
                   </dt>
                   <dd className="mt-2 text-sm font-medium leading-snug text-soft sm:text-base">{pickupFmt}</dd>
                 </div>
-                <div className="rounded-2xl border border-white/[0.07] bg-matte/[0.35] p-4">
+                <div className="rounded-2xl border border-stroke bg-matte/[0.35] p-4">
                   <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted">
                     <Calendar className="h-3.5 w-3.5 text-electric/85" aria-hidden />
                     Return
                   </dt>
                   <dd className="mt-2 text-sm font-medium leading-snug text-soft sm:text-base">{returnFmt}</dd>
                 </div>
-                <div className="rounded-2xl border border-white/[0.07] bg-matte/[0.35] p-4 sm:col-span-2">
+                <div className="rounded-2xl border border-stroke bg-matte/[0.35] p-4 sm:col-span-2">
                   <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted">
                     <MapPin className="h-3.5 w-3.5 text-electric/85" aria-hidden />
                     Hubs
@@ -193,11 +193,11 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
                     <span className="text-muted">{row.return_location}</span>
                   </dd>
                 </div>
-                <div className="rounded-2xl border border-white/[0.07] bg-matte/[0.35] p-4">
+                <div className="rounded-2xl border border-stroke bg-matte/[0.35] p-4">
                   <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">Rental length</dt>
                   <dd className="mt-2 text-2xl font-semibold tabular-nums text-soft">{row.rental_days} days</dd>
                 </div>
-                <div className="rounded-2xl border border-white/[0.07] bg-matte/[0.35] p-4">
+                <div className="rounded-2xl border border-stroke bg-matte/[0.35] p-4">
                   <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted">
                     <Receipt className="h-3.5 w-3.5 text-electric/85" aria-hidden />
                     Invoice ref
@@ -216,15 +216,15 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
                 <h2 className="text-lg font-semibold tracking-[-0.02em] text-soft">Amounts</h2>
               </div>
               <ul className="mt-6 space-y-3 text-sm">
-                <li className="flex justify-between gap-4 border-b border-white/[0.06] pb-3 text-muted">
+                <li className="flex justify-between gap-4 border-b border-stroke pb-3 text-muted">
                   <span>Subtotal</span>
                   <span className="tabular-nums text-soft">{formatInr(row.subtotal_rupees)}</span>
                 </li>
-                <li className="flex justify-between gap-4 border-b border-white/[0.06] pb-3 text-muted">
+                <li className="flex justify-between gap-4 border-b border-stroke pb-3 text-muted">
                   <span>Concierge &amp; connectivity</span>
                   <span className="tabular-nums text-soft">{formatInr(row.convenience_fee_rupees)}</span>
                 </li>
-                <li className="flex justify-between gap-4 border-b border-white/[0.06] pb-3 text-muted">
+                <li className="flex justify-between gap-4 border-b border-stroke pb-3 text-muted">
                   <span>GST</span>
                   <span className="tabular-nums text-soft">{formatInr(row.gst_rupees)}</span>
                 </li>
@@ -234,7 +234,7 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
                 </li>
               </ul>
               {securityDeposit != null ? (
-                <p className="mt-5 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3 py-2.5 text-xs leading-relaxed text-muted">
+                <p className="mt-5 rounded-xl border border-stroke bg-fill-glass px-3 py-2.5 text-xs leading-relaxed text-muted">
                   Security deposit at handoff:{' '}
                   <span className="font-semibold text-soft">{formatInr(Number(securityDeposit))}</span> — pre-auth per
                   fleet policy.
@@ -245,7 +245,7 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
 
           {/* Vehicle */}
           {vehicle ? (
-            <Card className={cn(cardSurfaceBase, 'border border-white/[0.08]')}>
+            <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
               <CardContent className="p-5 sm:p-7">
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-electric" aria-hidden />
@@ -285,7 +285,7 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
           ) : null}
 
           {/* Timeline */}
-          <Card className={cn(cardSurfaceBase, 'border border-white/[0.08]')}>
+          <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
             <CardContent className="p-5 sm:p-7">
               <h2 className="text-lg font-semibold text-soft">Status timeline</h2>
               <ul className="mt-6 space-y-3">
@@ -294,7 +294,7 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
                     <span
                       className={cn(
                         'flex h-9 w-9 shrink-0 items-center justify-center rounded-full border',
-                        s.done ? 'border-emerald-400/40 bg-emerald-500/15 text-emerald' : 'border-white/15 text-muted',
+                        s.done ? 'border-emerald-400/40 bg-emerald-500/15 text-emerald' : 'border-stroke-strong text-muted',
                       )}
                     >
                       {s.done ? <Check className="h-4 w-4" aria-hidden /> : <Circle className="h-4 w-4" aria-hidden />}
@@ -337,7 +337,7 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
             </CardContent>
           </Card>
 
-          <Card className={cn(cardSurfaceTransition, cardSurfaceHover, 'glass-panel border border-white/[0.1]')}>
+          <Card className={cn(cardSurfaceTransition, cardSurfaceHover, 'glass-panel border border-stroke')}>
             <CardContent className="space-y-4 p-5 sm:p-6">
               <div className="flex items-start gap-3">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-electric/30 bg-electric/15 text-electric">

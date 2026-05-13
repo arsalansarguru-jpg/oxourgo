@@ -67,11 +67,11 @@ export function CustomerDashboardHome({
 
       <div
         className={cn(
-          'flex flex-col gap-4 rounded-2xl border border-electric/20 bg-gradient-to-br from-electric/[0.12] via-transparent to-white/[0.04] p-5 sm:flex-row sm:items-center sm:justify-between sm:rounded-3xl sm:p-6',
+          'flex flex-col gap-4 rounded-2xl border border-electric/20 bg-gradient-to-br from-electric/[0.12] via-transparent to-fill-glass p-5 sm:flex-row sm:items-center sm:justify-between sm:rounded-3xl sm:p-6',
         )}
       >
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/[0.12] bg-matte/50">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-stroke-strong bg-matte/50">
             <Sparkles className="h-5 w-5 text-electric" aria-hidden />
           </div>
           <div>
@@ -105,7 +105,7 @@ export function CustomerDashboardHome({
           </Link>
         </div>
         {spotlight.length === 0 ? (
-          <div className={cn(cardSurfaceBase, 'rounded-2xl border border-white/[0.08] p-6 sm:rounded-3xl')}>
+          <div className={cn(cardSurfaceBase, 'rounded-2xl border border-stroke p-6 sm:rounded-3xl')}>
             <EmptyState
               icon={Car}
               title="No trips yet"

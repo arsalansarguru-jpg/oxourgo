@@ -2,15 +2,17 @@ import { redirect } from 'next/navigation'
 
 import { AdminShell } from '@/components/admin/admin-shell'
 import { listOpsAlertsForAdmin } from '@/lib/admin/data/ops-alerts'
-import { requireAppRole } from '@/lib/auth/server'
+import { getAuthSessionSummary } from '@/lib/auth/server'
+import { roleAtLeast } from '@/lib/auth/roles'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  let session: Awaited<ReturnType<typeof requireAppRole>>
-  try {
-    session = await requireAppRole('ops_admin')
-  } catch {
+  const summary = await getAuthSessionSummary()
+  if (!summary) {
+    redirect(`/login?${new URLSearchParams({ redirect: '/admin' }).toString()}`)
+  }
+  if (!roleAtLeast(summary.appRole, 'ops_admin')) {
     redirect('/dashboard?error=forbidden')
   }
 
@@ -20,7 +22,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   let opsInitialItems: Awaited<ReturnType<typeof listOpsAlertsForAdmin>> = []
   if (hasServiceRole) {
     try {
-      const items = await listOpsAlertsForAdmin(session.user.id, 12)
+      const items = await listOpsAlertsForAdmin(summary.user.id, 12)
       opsInitialUnread = items.filter((i) => !i.dismissed).length
       opsInitialItems = items.filter((i) => !i.dismissed).slice(0, 6)
     } catch {
@@ -31,8 +33,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <AdminShell
-      email={session.user.email ?? undefined}
-      appRole={session.appRole}
+      email={summary.user.email ?? undefined}
+      appRole={summary.appRole}
       opsInitialUnread={opsInitialUnread}
       opsInitialItems={opsInitialItems}
     >

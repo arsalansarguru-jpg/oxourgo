@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
-import { adminListCars } from '@/lib/admin/data/fleet'
+import { adminListVehicles } from '@/lib/admin/data/fleet'
 import { getPublicStorageObjectUrl } from '@/lib/supabase/storage-public-url'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -13,12 +13,19 @@ import { formatInr } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
 
+function thumbUrl(image: string | null | undefined): string | null {
+  const raw = image?.trim()
+  if (!raw) return null
+  if (/^https?:\/\//i.test(raw)) return raw
+  return getPublicStorageObjectUrl('fleet', raw)
+}
+
 export default async function AdminFleetPage() {
-  let cars: Awaited<ReturnType<typeof adminListCars>> = []
+  let vehicles: Awaited<ReturnType<typeof adminListVehicles>> = []
   try {
-    cars = await adminListCars()
+    vehicles = await adminListVehicles()
   } catch {
-    cars = []
+    vehicles = []
   }
 
   return (
@@ -27,53 +34,54 @@ export default async function AdminFleetPage() {
         <AdminPageHeader
           eyebrow="Fleet"
           title="Vehicles"
-          description="Create, price, feature, and publish fleet rows backed by Supabase."
+          description="Catalog inventory in public.vehicles — pricing, availability, and featuring for the live site."
         />
         <Button to="/admin/fleet/new">Add vehicle</Button>
       </div>
 
-      <Card className={cn(cardSurfaceBase, 'overflow-hidden border border-white/[0.08]')}>
+      <Card className={cn(cardSurfaceBase, 'overflow-hidden border border-stroke')}>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[720px] text-left text-sm">
-              <thead className="border-b border-white/[0.08] bg-white/[0.03] text-xs uppercase tracking-wide text-muted">
+              <thead className="border-b border-stroke bg-fill-glass text-xs uppercase tracking-wide text-muted">
                 <tr>
                   <th className="px-4 py-3 font-medium">Vehicle</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
+                  <th className="px-4 py-3 font-medium">Bookable</th>
                   <th className="px-4 py-3 font-medium">Price / day</th>
                   <th className="px-4 py-3 font-medium">Featured</th>
                   <th className="px-4 py-3 font-medium" />
                 </tr>
               </thead>
               <tbody>
-                {cars.map((c) => {
-                  const thumb = c.cover_image_path ? getPublicStorageObjectUrl('fleet', c.cover_image_path) : null
+                {vehicles.map((v) => {
+                  const thumb = thumbUrl(v.image)
+                  const listable = v.available !== false
                   return (
-                    <tr key={c.id} className="border-b border-white/[0.05] hover:bg-white/[0.02]">
+                    <tr key={v.id} className="border-b border-stroke hover:bg-fill-glass">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-lg border border-white/[0.08] bg-white/5">
+                          <div className="relative h-12 w-16 shrink-0 overflow-hidden rounded-lg border border-stroke bg-fill-glass">
                             {thumb ? (
-                              <Image src={thumb} alt="" fill sizes="64px" className="object-cover" />
+                              <Image src={thumb} alt="" fill sizes="64px" className="object-cover" unoptimized />
                             ) : (
                               <div className="flex h-full items-center justify-center text-[10px] text-muted">—</div>
                             )}
                           </div>
                           <div>
-                            <p className="font-medium text-soft">
-                              {c.brand} {c.model}
+                            <p className="font-medium text-soft">{v.name}</p>
+                            <p className="text-xs text-muted">
+                              {v.brand} · {v.registration_number}
                             </p>
-                            <p className="text-xs text-muted">{c.registration_number}</p>
                           </div>
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <AdminStatusPill value={c.availability_status} />
+                        <AdminStatusPill value={listable ? 'available' : 'unavailable'} />
                       </td>
-                      <td className="px-4 py-3 tabular-nums text-soft">{formatInr(c.pricing_per_day)}</td>
-                      <td className="px-4 py-3 text-muted">{c.featured ? 'Yes' : 'No'}</td>
+                      <td className="px-4 py-3 tabular-nums text-soft">{formatInr(v.price_per_day)}</td>
+                      <td className="px-4 py-3 text-muted">{v.featured ? 'Yes' : 'No'}</td>
                       <td className="px-4 py-3 text-right">
-                        <Link href={`/admin/fleet/${c.id}`} className="text-electric hover:underline">
+                        <Link href={`/admin/fleet/${v.id}`} className="text-electric hover:underline">
                           Manage
                         </Link>
                       </td>
@@ -83,8 +91,8 @@ export default async function AdminFleetPage() {
               </tbody>
             </table>
           </div>
-          {cars.length === 0 ? (
-            <p className="p-6 text-sm text-muted">No vehicles loaded — check service role key and migration.</p>
+          {vehicles.length === 0 ? (
+            <p className="p-6 text-sm text-muted">No vehicles loaded — check service role key and RLS for service role.</p>
           ) : null}
         </CardContent>
       </Card>

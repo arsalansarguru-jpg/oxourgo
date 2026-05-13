@@ -42,7 +42,7 @@ export function PricingBreakdown({ lines, className }: PricingBreakdownProps) {
           </li>
         ))}
       </ul>
-      <div className="mt-5 flex items-center justify-between border-t border-white/[0.08] pt-4 text-base font-semibold tracking-[-0.02em] text-soft">
+      <div className="mt-5 flex items-center justify-between border-t border-stroke pt-4 text-base font-semibold tracking-[-0.02em] text-soft">
         <span>Total</span>
         <span className="tabular-nums">{formatInr(total)}</span>
       </div>

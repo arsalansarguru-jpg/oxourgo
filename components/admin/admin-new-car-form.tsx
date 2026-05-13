@@ -17,7 +17,7 @@ export function AdminNewCarForm() {
   const [error, setError] = useState<string | null>(null)
 
   return (
-    <Card className={cn(cardSurfaceBase, 'border border-white/[0.08]')}>
+    <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
       <CardContent className="p-5 sm:p-6">
         <form
           className="grid gap-4 sm:grid-cols-2"
@@ -71,7 +71,7 @@ export function AdminNewCarForm() {
             <option value="maintenance">Maintenance</option>
           </Select>
           <label className="flex items-center gap-2 text-sm text-soft sm:col-span-2">
-            <input type="checkbox" name="featured" className="h-4 w-4 rounded border-white/20 bg-matte" />
+            <input type="checkbox" name="featured" className="h-4 w-4 rounded border-stroke-strong bg-matte" />
             Featured on fleet grid
           </label>
           {error ? <p className="text-sm text-red-300 sm:col-span-2">{error}</p> : null}

@@ -76,7 +76,7 @@ export function HomeView({ featuredCars, featuredFetchError = null }: HomeViewPr
                     <h3 className="text-lg font-semibold text-soft">Featured fleet unavailable</h3>
                     <p className="text-sm leading-relaxed text-muted">
                       We could not load vehicles from <span className="font-medium text-soft">public.vehicles</span>.
-                      Confirm <code className="rounded bg-white/10 px-1 py-0.5 text-xs">NEXT_PUBLIC_SUPABASE_URL</code>{' '}
+                      Confirm <code className="rounded bg-fill-glass-strong px-1 py-0.5 text-xs">NEXT_PUBLIC_SUPABASE_URL</code>{' '}
                       and your publishable key on Vercel, then check Supabase logs for RLS or schema errors.
                     </p>
                     <p className="font-mono text-xs text-red-200/90">{featuredFetchError}</p>

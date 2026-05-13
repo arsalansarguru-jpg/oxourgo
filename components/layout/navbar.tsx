@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { ChevronDown, LayoutDashboard, LogOut, Menu, MessageCircle, X } from 'lucide-react'
+import { ChevronDown, LayoutDashboard, LogOut, Menu, X } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 import { AnimatePresence, motion } from 'framer-motion'
 import { BRAND } from '@/constants/brand'
@@ -12,6 +12,7 @@ import { useSupabaseAuthUser } from '@/hooks/use-supabase-auth-user'
 import { cn } from '@/lib/utils/cn'
 import { Button } from '@/components/ui/Button'
 import { BrandLogo } from '@/components/layout/brand-logo'
+import { ThemeToggle } from '@/components/layout/theme-toggle'
 
 const nav = [
   { href: '/fleet', label: 'Fleet' },
@@ -93,8 +94,8 @@ export function Navbar() {
         className={cn(
           'sticky top-0 z-50 border-b transition-[background-color,backdrop-filter,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
           scrolled
-            ? 'border-white/[0.08] bg-matte/[0.78] shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset,0_18px_48px_-28px_rgba(0,0,0,0.75)] backdrop-blur-2xl backdrop-saturate-[1.35] supports-[backdrop-filter]:bg-matte/[0.62]'
-            : 'border-white/[0.05] bg-matte/[0.52] shadow-[0_24px_64px_-40px_rgba(0,0,0,0.55)] backdrop-blur-3xl backdrop-saturate-[1.2] supports-[backdrop-filter]:bg-matte/[0.38]',
+            ? 'border-stroke bg-matte/[0.78] shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset,0_18px_48px_-28px_rgba(0,0,0,0.75)] backdrop-blur-2xl backdrop-saturate-[1.35] supports-[backdrop-filter]:bg-matte/[0.62]'
+            : 'border-stroke bg-matte/[0.52] shadow-[0_24px_64px_-40px_rgba(0,0,0,0.55)] backdrop-blur-3xl backdrop-saturate-[1.2] supports-[backdrop-filter]:bg-matte/[0.38]',
         )}
       >
         <div className="container-app grid h-[3.25rem] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 sm:h-14 lg:h-[3.75rem] lg:gap-4">
@@ -105,8 +106,8 @@ export function Navbar() {
           >
             <div
               className={cn(
-                'relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-[0.625rem] border border-white/[0.09] bg-gradient-to-b from-white/[0.11] to-white/[0.02] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_0_0_1px_rgba(0,0,0,0.35)] transition-[transform,box-shadow,border-color] duration-300 sm:h-9 sm:w-9 sm:rounded-[0.6875rem]',
-                'group-hover:-translate-y-px group-hover:border-white/[0.14] group-hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.14),0_0_0_1px_rgba(59,130,246,0.12),0_12px_40px_-18px_rgba(59,130,246,0.35)]',
+                'relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-[0.625rem] border border-stroke bg-gradient-to-b from-fill-glass-strong to-fill-glass shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_0_0_1px_rgba(0,0,0,0.35)] transition-[transform,box-shadow,border-color] duration-300 sm:h-9 sm:w-9 sm:rounded-[0.6875rem]',
+                'group-hover:-translate-y-px group-hover:border-stroke-strong group-hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.14),0_0_0_1px_rgba(59,130,246,0.12),0_12px_40px_-18px_rgba(59,130,246,0.35)]',
               )}
             >
               <BrandLogo priority className="relative z-10 p-[3px]" />
@@ -129,7 +130,7 @@ export function Navbar() {
             aria-label="Primary"
             className="hidden items-center justify-center justify-self-center md:flex"
           >
-            <div className="flex items-center rounded-full border border-white/[0.07] bg-white/[0.025] p-1 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] backdrop-blur-md">
+            <div className="flex items-center rounded-full border border-stroke bg-fill-glass p-1 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] backdrop-blur-md">
               {nav.map(({ href, label }) => {
                 const active = pathname === href || pathname.startsWith(`${href}/`)
                 return (
@@ -140,13 +141,13 @@ export function Navbar() {
                       'relative rounded-full px-3.5 py-2 text-[13px] font-medium tracking-[-0.01em] transition-[color,background-color,transform] duration-300 lg:px-4',
                       active
                         ? 'text-soft'
-                        : 'text-muted hover:bg-white/[0.05] hover:text-soft',
+                        : 'text-muted hover:bg-fill-glass hover:text-soft',
                     )}
                   >
                     {active ? (
                       <span
                         aria-hidden
-                        className="absolute inset-0 rounded-full bg-white/[0.09] shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]"
+                        className="absolute inset-0 rounded-full bg-fill-glass-strong shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]"
                       />
                     ) : null}
                     <span className="relative">{label}</span>
@@ -157,17 +158,7 @@ export function Navbar() {
           </nav>
 
           <div className="flex items-center justify-end gap-1.5 justify-self-end sm:gap-2 lg:gap-2.5">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="hidden h-9 px-3 text-[13px] font-medium text-muted hover:translate-y-0 hover:bg-white/[0.05] hover:text-soft active:translate-y-0 lg:inline-flex"
-              href={BRAND.whatsapp}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <MessageCircle className="h-[15px] w-[15px] opacity-90" />
-              WhatsApp
-            </Button>
+            <ThemeToggle className="hidden md:inline-flex" />
             {ready && user ? (
               <details
                 ref={accountMenuRef}
@@ -175,7 +166,7 @@ export function Navbar() {
               >
                 <summary
                   className={cn(
-                    'flex cursor-pointer list-none items-center gap-1.5 rounded-full border border-white/[0.1] bg-white/[0.05] py-1 pl-1 pr-2 text-soft shadow-none transition-[border-color,background-color] hover:border-white/[0.16] hover:bg-white/[0.09] [&::-webkit-details-marker]:hidden',
+                    'flex cursor-pointer list-none items-center gap-1.5 rounded-full border border-stroke bg-fill-glass py-1 pl-1 pr-2 text-soft shadow-none transition-[border-color,background-color] hover:border-stroke-strong hover:bg-fill-glass-strong [&::-webkit-details-marker]:hidden',
                   )}
                   aria-label="Account menu"
                 >
@@ -198,13 +189,13 @@ export function Navbar() {
                 </summary>
                 <div
                   className={cn(
-                    'absolute right-0 top-[calc(100%+0.375rem)] z-[80] min-w-[11.5rem] overflow-hidden rounded-xl border border-white/[0.1] bg-matte/[0.96] py-1 shadow-[0_16px_48px_-20px_rgba(0,0,0,0.85)] backdrop-blur-xl',
+                    'absolute right-0 top-[calc(100%+0.375rem)] z-[80] min-w-[11.5rem] overflow-hidden rounded-xl border border-stroke bg-matte/[0.96] py-1 shadow-[0_16px_48px_-20px_rgba(0,0,0,0.85)] backdrop-blur-xl',
                   )}
                   onClick={(e) => e.stopPropagation()}
                 >
                   <Link
                     href="/dashboard"
-                    className="flex items-center gap-2 px-3 py-2.5 text-[13px] font-medium text-soft transition-colors hover:bg-white/[0.06]"
+                    className="flex items-center gap-2 px-3 py-2.5 text-[13px] font-medium text-soft transition-colors hover:bg-fill-glass-strong"
                     onClick={() => accountMenuRef.current?.removeAttribute('open')}
                   >
                     <LayoutDashboard className="h-4 w-4 text-electric/90" aria-hidden />
@@ -213,7 +204,7 @@ export function Navbar() {
                   <button
                     type="button"
                     disabled={signingOut}
-                    className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-[13px] font-medium text-muted transition-colors hover:bg-white/[0.06] hover:text-soft disabled:opacity-50"
+                    className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-[13px] font-medium text-muted transition-colors hover:bg-fill-glass-strong hover:text-soft disabled:opacity-50"
                     onClick={() => void handleSignOut()}
                   >
                     <LogOut className="h-4 w-4" aria-hidden />
@@ -226,7 +217,7 @@ export function Navbar() {
                 variant="secondary"
                 size="sm"
                 to="/login"
-                className="hidden h-9 border-white/[0.1] bg-white/[0.05] px-3.5 text-[13px] font-medium text-soft shadow-none hover:translate-y-0 hover:border-white/[0.16] hover:bg-white/[0.09] active:translate-y-0 sm:inline-flex"
+                className="hidden h-9 border-stroke bg-fill-glass px-3.5 text-[13px] font-medium text-soft shadow-none hover:translate-y-0 hover:border-stroke-strong hover:bg-fill-glass-strong active:translate-y-0 sm:inline-flex"
               >
                 Log in
               </Button>
@@ -244,8 +235,8 @@ export function Navbar() {
               className={cn(
                 'touch-manipulation inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.625rem] border text-soft transition-[transform,border-color,background-color,color,box-shadow] duration-300 active:scale-[0.96] md:hidden',
                 open
-                  ? 'border-white/[0.14] bg-white/[0.1] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]'
-                  : 'border-white/[0.1] bg-white/[0.04] shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] hover:border-white/[0.14] hover:bg-white/[0.08]',
+                  ? 'border-stroke-strong bg-fill-glass-strong shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]'
+                  : 'border-stroke bg-fill-glass shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] hover:border-stroke-strong hover:bg-fill-glass-strong',
               )}
               aria-label={open ? 'Close menu' : 'Open menu'}
               aria-expanded={open}
@@ -282,7 +273,7 @@ export function Navbar() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.38, ease }}
-              className="fixed left-0 right-0 top-[3.25rem] z-[70] max-h-[calc(100dvh-3.25rem)] overflow-y-auto border-b border-white/[0.08] bg-matte/[0.92] shadow-[0_24px_80px_-32px_rgba(0,0,0,0.85)] backdrop-blur-2xl backdrop-saturate-[1.25] supports-[backdrop-filter]:bg-matte/[0.78] sm:top-14 sm:max-h-[calc(100dvh-3.5rem)] md:hidden"
+              className="fixed left-0 right-0 top-[3.25rem] z-[70] max-h-[calc(100dvh-3.25rem)] overflow-y-auto border-b border-stroke bg-matte/[0.92] shadow-[0_24px_80px_-32px_rgba(0,0,0,0.85)] backdrop-blur-2xl backdrop-saturate-[1.25] supports-[backdrop-filter]:bg-matte/[0.78] sm:top-14 sm:max-h-[calc(100dvh-3.5rem)] md:hidden"
             >
               <div className="container-app flex flex-col gap-1 py-5">
                 <p className="px-1 pb-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted">
@@ -302,8 +293,8 @@ export function Navbar() {
                         className={cn(
                           'block min-h-12 rounded-xl px-3 py-4 text-[15px] font-medium leading-snug tracking-[-0.02em] transition-[color,background-color,box-shadow] duration-200',
                           active
-                            ? 'bg-white/[0.08] text-soft shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]'
-                            : 'text-muted hover:bg-white/[0.05] hover:text-soft',
+                            ? 'bg-fill-glass-strong text-soft shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]'
+                            : 'text-muted hover:bg-fill-glass hover:text-soft',
                         )}
                         onClick={() => setOpen(false)}
                       >
@@ -313,17 +304,11 @@ export function Navbar() {
                   )
                 })}
 
-                <a
-                  href={BRAND.whatsapp}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-1 flex min-h-12 items-center gap-3 rounded-xl border border-white/[0.08] bg-white/[0.03] px-3 py-3.5 text-[15px] font-medium text-soft transition-[border-color,background-color] duration-200 hover:border-electric/25 hover:bg-electric/[0.06] touch-manipulation active:bg-white/[0.05]"
-                >
-                  <MessageCircle className="h-[18px] w-[18px] text-electric" />
-                  WhatsApp concierge
-                </a>
+                <div className="mt-1">
+                  <ThemeToggle size="comfortable" className="w-full justify-center" />
+                </div>
 
-                <div className="mt-5 grid gap-3 border-t border-white/[0.06] pt-5">
+                <div className="mt-5 grid gap-3 border-t border-stroke pt-5">
                   <Button
                     size="lg"
                     to="/fleet"
@@ -338,7 +323,7 @@ export function Navbar() {
                         variant="secondary"
                         size="lg"
                         to="/dashboard"
-                        className="min-h-[3.25rem] w-full border-white/[0.12] bg-white/[0.06] text-[15px] font-medium hover:translate-y-0 hover:bg-white/[0.1] active:translate-y-0"
+                        className="min-h-[3.25rem] w-full border-stroke-strong bg-fill-glass-strong text-[15px] font-medium hover:translate-y-0 hover:bg-fill-glass-strong active:translate-y-0"
                         onClick={() => setOpen(false)}
                       >
                         <LayoutDashboard className="h-[18px] w-[18px] text-electric" aria-hidden />
@@ -360,7 +345,7 @@ export function Navbar() {
                       variant="secondary"
                       size="lg"
                       to="/login"
-                      className="min-h-[3.25rem] w-full border-white/[0.12] bg-white/[0.06] text-[15px] font-medium hover:translate-y-0 hover:bg-white/[0.1] active:translate-y-0"
+                      className="min-h-[3.25rem] w-full border-stroke-strong bg-fill-glass-strong text-[15px] font-medium hover:translate-y-0 hover:bg-fill-glass-strong active:translate-y-0"
                       onClick={() => setOpen(false)}
                     >
                       Log in

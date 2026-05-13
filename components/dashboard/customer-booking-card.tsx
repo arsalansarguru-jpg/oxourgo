@@ -52,7 +52,7 @@ export function CustomerBookingCard({
       <CardContent className="p-0">
         <Link
           href={`/dashboard/bookings/${bookingId}`}
-          className="flex flex-col gap-4 p-4 transition-colors hover:bg-white/[0.03] sm:flex-row sm:items-center sm:justify-between sm:p-5"
+          className="flex flex-col gap-4 p-4 transition-colors hover:bg-fill-glass sm:flex-row sm:items-center sm:justify-between sm:p-5"
         >
           <div className="min-w-0 space-y-2">
             <div className="flex flex-wrap items-center gap-2">

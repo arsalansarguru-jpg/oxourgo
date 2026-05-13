@@ -28,7 +28,7 @@ import {
 } from '@/components/ui/card-tokens'
 
 const panel =
-  'rounded-2xl border border-white/[0.09] bg-carbon/55 p-5 shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset] backdrop-blur-xl sm:rounded-3xl sm:p-6'
+  'rounded-2xl border border-stroke bg-carbon/55 p-5 shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset] backdrop-blur-xl sm:rounded-3xl sm:p-6'
 
 export type BookingViewProps = {
   car: Car
@@ -257,7 +257,7 @@ export function BookingView({ car, defaultPickupIso, defaultReturnIso, isLoggedI
                   type="checkbox"
                   checked={sameReturnHub}
                   onChange={(e) => setSameReturnHub(e.target.checked)}
-                  className="h-4 w-4 rounded border-white/20 bg-matte text-electric focus:ring-electric/40"
+                  className="h-4 w-4 rounded border-stroke-strong bg-matte text-electric focus:ring-electric/40"
                 />
                 <label htmlFor="same-hub">Return to the same hub</label>
               </div>
@@ -345,7 +345,7 @@ export function BookingView({ car, defaultPickupIso, defaultReturnIso, isLoggedI
               <p className="text-sm text-muted">Enter valid trip times to see pricing.</p>
             )}
 
-            <div className="rounded-xl border border-white/[0.08] bg-matte/[0.35] p-4 text-sm text-muted">
+            <div className="rounded-xl border border-stroke bg-matte/[0.35] p-4 text-sm text-muted">
               <div className="flex items-center gap-2 font-medium text-soft">
                 <Shield className="h-4 w-4 text-electric" aria-hidden />
                 Security deposit
@@ -355,7 +355,7 @@ export function BookingView({ car, defaultPickupIso, defaultReturnIso, isLoggedI
               </p>
             </div>
 
-            <div className="rounded-xl border border-white/[0.08] bg-matte/[0.35] p-4">
+            <div className="rounded-xl border border-stroke bg-matte/[0.35] p-4">
               <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Availability</p>
               <div className="mt-3 flex items-start gap-2 text-sm">
                 {avail.status === 'checking' ? (
@@ -386,7 +386,7 @@ export function BookingView({ car, defaultPickupIso, defaultReturnIso, isLoggedI
               </div>
             </div>
 
-            <div className="rounded-xl border border-white/[0.06] bg-white/[0.03] p-3 text-center text-[11px] text-muted">
+            <div className="rounded-xl border border-stroke bg-fill-glass p-3 text-center text-[11px] text-muted">
               {BRAND.name} · Mumbai self-drive
             </div>
           </div>

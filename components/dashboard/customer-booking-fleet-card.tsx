@@ -32,11 +32,11 @@ export function CustomerBookingFleetCard({ row }: CustomerBookingFleetCardProps)
         cardSurfaceBase,
         cardSurfaceTransition,
         cardSurfaceHover,
-        'overflow-hidden rounded-2xl border border-white/[0.09] shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset] sm:rounded-3xl',
+        'overflow-hidden rounded-2xl border border-stroke shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset] sm:rounded-3xl',
       )}
     >
       <div className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[minmax(0,160px)_1fr] lg:items-stretch lg:gap-8">
-        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-white/[0.08] bg-matte/40 lg:aspect-auto lg:min-h-[140px]">
+        <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-stroke bg-matte/40 lg:aspect-auto lg:min-h-[140px]">
           <Image
             src={visual.imageUrl}
             alt={visual.name}
@@ -54,21 +54,21 @@ export function CustomerBookingFleetCard({ row }: CustomerBookingFleetCardProps)
             </div>
 
             <dl className="grid gap-3 text-sm sm:grid-cols-2 sm:gap-x-6">
-              <div className="rounded-xl border border-white/[0.06] bg-matte/[0.35] px-3 py-2.5">
+              <div className="rounded-xl border border-stroke bg-matte/[0.35] px-3 py-2.5">
                 <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted">
                   <Calendar className="h-3.5 w-3.5 text-electric/80" aria-hidden />
                   Pickup
                 </dt>
                 <dd className="mt-1 font-medium leading-snug text-soft">{pickupFmt}</dd>
               </div>
-              <div className="rounded-xl border border-white/[0.06] bg-matte/[0.35] px-3 py-2.5">
+              <div className="rounded-xl border border-stroke bg-matte/[0.35] px-3 py-2.5">
                 <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted">
                   <Calendar className="h-3.5 w-3.5 text-electric/80" aria-hidden />
                   Return
                 </dt>
                 <dd className="mt-1 font-medium leading-snug text-soft">{returnFmt}</dd>
               </div>
-              <div className="rounded-xl border border-white/[0.06] bg-matte/[0.35] px-3 py-2.5 sm:col-span-2">
+              <div className="rounded-xl border border-stroke bg-matte/[0.35] px-3 py-2.5 sm:col-span-2">
                 <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted">
                   <MapPin className="h-3.5 w-3.5 text-electric/80" aria-hidden />
                   Route
@@ -82,7 +82,7 @@ export function CustomerBookingFleetCard({ row }: CustomerBookingFleetCardProps)
             </dl>
           </div>
 
-          <div className="flex shrink-0 flex-col gap-4 border-t border-white/[0.06] pt-4 lg:w-[min(100%,220px)] lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+          <div className="flex shrink-0 flex-col gap-4 border-t border-stroke pt-4 lg:w-[min(100%,220px)] lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-wide text-muted">Total</p>
               <p className="mt-1 text-2xl font-semibold tabular-nums tracking-[-0.03em] text-soft">{formatInr(row.total_rupees)}</p>

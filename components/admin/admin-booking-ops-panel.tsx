@@ -37,7 +37,7 @@ export function AdminBookingOpsPanel({ booking }: { booking: BookingWithCar }) {
 
   return (
     <div className="space-y-6">
-      <Card className={cn(cardSurfaceBase, 'border border-white/[0.08]')}>
+      <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
         <CardContent className="space-y-4 p-5 sm:p-6">
           <h2 className="text-lg font-semibold text-soft">Workflow</h2>
           <div className="flex flex-wrap gap-2">
@@ -76,7 +76,7 @@ export function AdminBookingOpsPanel({ booking }: { booking: BookingWithCar }) {
         </CardContent>
       </Card>
 
-      <Card className={cn(cardSurfaceBase, 'border border-white/[0.08]')}>
+      <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
         <CardContent className="space-y-4 p-5 sm:p-6">
           <h2 className="text-lg font-semibold text-soft">Statuses</h2>
           <form
@@ -119,11 +119,11 @@ export function AdminBookingOpsPanel({ booking }: { booking: BookingWithCar }) {
         </CardContent>
       </Card>
 
-      <Card className={cn(cardSurfaceBase, 'border border-white/[0.08]')}>
+      <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
         <CardContent className="space-y-4 p-5 sm:p-6">
           <h2 className="text-lg font-semibold text-soft">Payment ledger placeholders</h2>
           <p className="text-sm text-muted">
-            Creates <code className="rounded bg-white/10 px-1 font-mono text-xs">payment_events</code> rows for finance
+            Creates <code className="rounded bg-fill-glass-strong px-1 font-mono text-xs">payment_events</code> rows for finance
             follow-up. Does not call a PSP.
           </p>
           <div className="flex flex-wrap gap-2">

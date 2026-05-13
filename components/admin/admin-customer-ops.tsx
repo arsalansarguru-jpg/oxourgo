@@ -30,7 +30,7 @@ export function AdminCustomerOps({
   const risk = profile?.risk_score ?? 0
 
   return (
-    <Card className={cn(cardSurfaceBase, 'border border-white/[0.08]')}>
+    <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
       <CardContent className="p-5 sm:p-6">
         <h2 className="mb-4 text-lg font-semibold text-soft">Verification & risk</h2>
         <form
@@ -67,7 +67,7 @@ export function AdminCustomerOps({
               name="admin_notes"
               rows={4}
               defaultValue={notes}
-              className="mt-2 w-full rounded-xl border border-white/[0.12] bg-matte/[0.55] px-4 py-3 text-sm text-soft placeholder:text-muted/80 focus:border-electric/55 focus:outline-none focus:ring-2 focus:ring-electric/22"
+              className="mt-2 w-full rounded-xl border border-stroke-strong bg-matte/[0.55] px-4 py-3 text-sm text-soft placeholder:text-muted/80 focus:border-electric/55 focus:outline-none focus:ring-2 focus:ring-electric/22"
             />
           </div>
           {error ? <p className="text-sm text-red-300 sm:col-span-2">{error}</p> : null}

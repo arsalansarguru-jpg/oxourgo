@@ -3,12 +3,21 @@
 import type { ReactNode } from 'react'
 
 import { SupabaseProvider } from '@/components/providers/supabase-provider'
+import { ThemeProvider } from '@/components/providers/theme-provider'
+import { GlobalChrome } from '@/components/layout/global-chrome'
 
 type AppProvidersProps = {
   children: ReactNode
 }
 
-/** Root client providers (Supabase, future query client, etc.) */
+/** Root client providers (Supabase, theme, etc.) */
 export function AppProviders({ children }: AppProvidersProps) {
-  return <SupabaseProvider>{children}</SupabaseProvider>
+  return (
+    <ThemeProvider>
+      <SupabaseProvider>
+        {children}
+        <GlobalChrome />
+      </SupabaseProvider>
+    </ThemeProvider>
+  )
 }

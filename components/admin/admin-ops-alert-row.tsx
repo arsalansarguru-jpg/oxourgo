@@ -19,7 +19,7 @@ export function AdminOpsAlertRow({ alert }: { alert: OpsAlertListItem }) {
 
   return (
     <motion.li layout initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
-      <Card className={cn(cardSurfaceTransition, cardSurfaceHover, cardSurfaceBase, 'border border-white/[0.08]')}>
+      <Card className={cn(cardSurfaceTransition, cardSurfaceHover, cardSurfaceBase, 'border border-stroke')}>
         <CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5">
           <div className="min-w-0 space-y-1">
             <p className="text-xs font-medium uppercase tracking-wide text-electric/90">{alert.type.replace(/_/g, ' ')}</p>

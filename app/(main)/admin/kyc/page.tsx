@@ -26,7 +26,7 @@ export default async function AdminKycPage() {
 
       <div className="space-y-4">
         {rows.map((row) => (
-          <Card key={row.id} className={cn(cardSurfaceBase, 'border border-white/[0.08]')}>
+          <Card key={row.id} className={cn(cardSurfaceBase, 'border border-stroke')}>
             <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0 space-y-1">
                 <p className="text-sm font-medium text-electric/90">{formatKycDocumentType(row.document_type)}</p>
@@ -48,7 +48,7 @@ export default async function AdminKycPage() {
           </Card>
         ))}
         {rows.length === 0 ? (
-          <Card className={cn(cardSurfaceBase, 'border border-white/[0.08]')}>
+          <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
             <CardContent className="p-6 text-sm text-muted">No KYC rows loaded.</CardContent>
           </Card>
         ) : null}

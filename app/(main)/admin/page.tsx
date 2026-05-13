@@ -10,7 +10,7 @@ import { cardSurfaceHover, cardSurfaceTransition } from '@/components/ui/card-to
 export const dynamic = 'force-dynamic'
 
 export default async function AdminHomePage() {
-  let stats = { cars: 0, bookings: 0, pendingBookings: 0, pendingKyc: 0 }
+  let stats = { vehicles: 0, customers: 0, bookings: 0, pendingBookings: 0, pendingKyc: 0 }
   try {
     stats = await adminOverviewStats()
   } catch {
@@ -18,9 +18,10 @@ export default async function AdminHomePage() {
   }
 
   const tiles = [
-    { label: 'Fleet vehicles', value: stats.cars, href: '/admin/fleet' },
+    { label: 'Catalog vehicles', value: stats.vehicles, href: '/admin/fleet' },
+    { label: 'Customer profiles', value: stats.customers, href: '/admin/customers' },
     { label: 'Total bookings', value: stats.bookings, href: '/admin/bookings' },
-    { label: 'Pending approval', value: stats.pendingBookings, href: '/admin/bookings' },
+    { label: 'Pending approval', value: stats.pendingBookings, href: '/admin/bookings?status=pending_payment' },
     { label: 'KYC in queue', value: stats.pendingKyc, href: '/admin/kyc' },
   ] as const
 
@@ -28,17 +29,17 @@ export default async function AdminHomePage() {
     <div className="space-y-10">
       <AdminPageHeader
         title="Control center"
-        description="Live Supabase metrics and shortcuts into fleet, reservations, customers, KYC, and payments."
+        description="Live Supabase metrics, role-gated operations (ops_admin+), and shortcuts into fleet, reservations, customers, KYC, and payments."
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {tiles.map((t) => (
           <Link key={t.label} href={t.href} className="group block">
             <Card
               className={cn(
                 cardSurfaceTransition,
                 cardSurfaceHover,
-                'h-full border border-white/[0.08] bg-carbon/[0.35]',
+                'h-full border border-stroke bg-carbon/[0.35]',
               )}
             >
               <CardContent className="p-5">
@@ -57,6 +58,12 @@ export default async function AdminHomePage() {
         <Button to="/admin/fleet/new">Add vehicle</Button>
         <Button variant="secondary" to="/admin/bookings">
           Review bookings
+        </Button>
+        <Button variant="secondary" to="/admin/bookings?status=pending_payment">
+          Pending only
+        </Button>
+        <Button variant="secondary" to="/admin/customers">
+          Customers
         </Button>
         <Button variant="secondary" to="/admin/kyc">
           KYC queue
