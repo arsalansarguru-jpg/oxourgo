@@ -60,7 +60,9 @@ export function BookingView({ car, defaultPickupIso, defaultReturnIso, isLoggedI
 
   const quote = useMemo(() => {
     if (!dates.ok) return null
-    return computeBookingQuote(car.pricePerDay, dates.rentalDays)
+    const p = car.pricePerDay
+    if (!Number.isFinite(p) || p <= 0) return null
+    return computeBookingQuote(p, dates.rentalDays)
   }, [car.pricePerDay, dates])
 
   const lines = useMemo(() => {
@@ -120,7 +122,10 @@ export function BookingView({ car, defaultPickupIso, defaultReturnIso, isLoggedI
     return () => window.clearTimeout(t)
   }, [checkAvailability])
 
+  const inventoryAvailable = car.status === 'Available'
+
   const canSubmit =
+    inventoryAvailable &&
     isLoggedIn &&
     dates.ok &&
     quote &&
@@ -131,6 +136,10 @@ export function BookingView({ car, defaultPickupIso, defaultReturnIso, isLoggedI
 
   const onSubmit = () => {
     setFormError(null)
+    if (!inventoryAvailable) {
+      setFormError('This vehicle is not available to book.')
+      return
+    }
     if (!dates.ok || !quote) {
       setFormError(dates.ok ? 'Unable to compute pricing.' : dates.message)
       return

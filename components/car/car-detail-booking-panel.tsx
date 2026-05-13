@@ -49,7 +49,9 @@ export function CarDetailBookingPanel({ car, isLoggedIn, userEmail }: CarDetailB
 
   const quote = useMemo(() => {
     if (!dates.ok) return null
-    return computeBookingQuote(car.pricePerDay, dates.rentalDays)
+    const p = car.pricePerDay
+    if (!Number.isFinite(p) || p <= 0) return null
+    return computeBookingQuote(p, dates.rentalDays)
   }, [car.pricePerDay, dates])
 
   const lines = useMemo(() => {

@@ -6,6 +6,20 @@ import { resolveFleetImageUrl } from '@/lib/fleet/mappers'
 
 export type VehicleRow = Database['public']['Tables']['vehicles']['Row']
 
+/** Parses Postgres numeric / string into a finite rupee integer (≥ 0). */
+export function parseMoneyIntRupees(value: unknown, fallback = 0): number {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    return Math.max(0, Math.round(value))
+  }
+  const s = String(value ?? '')
+    .replace(/,/g, '')
+    .trim()
+  if (!s) return fallback
+  const n = Number.parseFloat(s)
+  if (!Number.isFinite(n) || n < 0) return fallback
+  return Math.round(n)
+}
+
 function resolveVehicleImageUrl(image: string | null, brand: string): string {
   const raw = image?.trim()
   if (!raw) return resolveFleetImageUrl(brand)
@@ -84,7 +98,7 @@ function toCarStatus(row: VehicleRow): CarStatus {
 }
 
 export function mapVehicleRowToFleetCar(row: VehicleRow): FleetCar {
-  const price = Number(row.price_per_day)
+  const price = parseMoneyIntRupees(row.price_per_day)
   const imageUrl = resolveVehicleImageUrl(row.image, row.brand)
   const displayName = row.name.trim() || `${row.brand} ${modelFromListingName(row.brand, row.name)}`.trim()
   return {
@@ -98,7 +112,7 @@ export function mapVehicleRowToFleetCar(row: VehicleRow): FleetCar {
     transmission: toTransmission(row.transmission),
     seats: row.seats,
     pricePerDay: price,
-    securityDeposit: Number(row.security_deposit),
+    securityDeposit: parseMoneyIntRupees(row.security_deposit),
     availability: toAvailabilityLabel(row),
     featured: Boolean(row.featured),
     category: toFleetCategory(price),
@@ -107,7 +121,7 @@ export function mapVehicleRowToFleetCar(row: VehicleRow): FleetCar {
 }
 
 export function mapVehicleRowToCar(row: VehicleRow): Car {
-  const price = Number(row.price_per_day)
+  const price = parseMoneyIntRupees(row.price_per_day)
   const imageUrl = resolveVehicleImageUrl(row.image, row.brand)
   const name = row.name.trim() || `${row.brand} ${modelFromListingName(row.brand, row.name)}`.trim()
   const gallery = [imageUrl, imageUrl, imageUrl]
@@ -134,6 +148,6 @@ export function mapVehicleRowToCar(row: VehicleRow): Car {
       Transmission: toTransmission(row.transmission) === 'Auto' ? 'Automatic' : 'Manual',
       Seats: String(row.seats),
     },
-    securityDeposit: Number(row.security_deposit),
+    securityDeposit: parseMoneyIntRupees(row.security_deposit),
   }
 }
