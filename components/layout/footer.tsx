@@ -9,7 +9,7 @@ export function Footer() {
   return (
     <footer className="border-t border-white/[0.07] bg-carbon-deep">
       <div className="container-app py-[clamp(3.25rem,6vw,4.75rem)] 2xl:max-w-[var(--container-wide)]">
-        <div className="grid gap-11 md:grid-cols-2 md:gap-x-12 md:gap-y-14 lg:grid-cols-4 lg:gap-12">
+        <div className="grid grid-cols-1 gap-10 md:gap-x-8 md:gap-y-10 md:[grid-template-columns:minmax(0,min(100%,20rem))_minmax(0,1fr)] lg:grid-cols-[minmax(0,min(100%,22rem))_repeat(3,minmax(0,1fr))] lg:gap-x-8 lg:gap-y-0 lg:items-start">
           <div className="min-w-0">
             <div className="flex items-center gap-2.5">
               <span className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-white/[0.1] bg-gradient-to-br from-white/[0.08] to-transparent shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
@@ -17,15 +17,15 @@ export function Footer() {
               </span>
               <span className="text-[0.9375rem] font-bold tracking-[-0.02em] text-soft">{BRAND.name}</span>
             </div>
-            <p className="mt-5 max-w-sm text-sm leading-[1.7] text-muted">
+            <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted">
               Experience premium self-drive car rentals in Mumbai. Verified cars, transparent pricing,
               and 24x7 support.
             </p>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-soft/95">Company</p>
-            <ul className="mt-5 space-y-3">
+            <ul className="mt-4 flex flex-col gap-2">
               <li>
                 <Link href="/about" className={linkClass}>
                   About Us
@@ -49,9 +49,9 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-soft/95">Legal</p>
-            <ul className="mt-5 space-y-3">
+            <ul className="mt-4 flex flex-col gap-2">
               <li>
                 <Link href="/terms" className={linkClass}>
                   Terms &amp; Conditions
@@ -75,9 +75,9 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-soft/95">Contact</p>
-            <ul className="mt-5 space-y-3 text-sm text-muted">
+            <ul className="mt-4 flex flex-col gap-2 text-sm text-muted">
               <li>{BRAND.address}</li>
               <li>
                 <a href={`tel:${BRAND.phoneTel}`} className="transition-colors duration-300 hover:text-soft">
