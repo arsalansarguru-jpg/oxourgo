@@ -2,22 +2,25 @@ import type { ReactNode } from 'react'
 
 import { DashboardSlimFooter } from '@/components/layout/dashboard-slim-footer'
 import { DashboardTopBar, type DashboardTopBarProps } from '@/components/layout/dashboard-top-bar'
-import { MobileBottomNav } from '@/components/layout/mobile-bottom-nav'
+import { FloatingWhatsApp } from '@/components/layout/floating-whatsapp'
 
 type Props = {
   children: ReactNode
 } & DashboardTopBarProps
 
 /**
- * Authenticated customer dashboard shell — minimal chrome (G1, G3).
+ * Authenticated customer dashboard shell: compact topbar, slim footer, no marketing chrome.
+ * WhatsApp concierge FAB bottom-left (marketing mobile nav is not used here).
  */
 export function DashboardLayout({ children, ...topBar }: Props) {
   return (
-    <>
+    <div className="min-h-dvh bg-matte pb-8 md:pb-10">
       <DashboardTopBar {...topBar} />
-      <div className="pb-20 md:pb-24">{children}</div>
+      <main id="main" className="pb-6 pt-0 md:pb-8">
+        {children}
+      </main>
       <DashboardSlimFooter />
-      <MobileBottomNav />
-    </>
+      <FloatingWhatsApp position="left" />
+    </div>
   )
 }

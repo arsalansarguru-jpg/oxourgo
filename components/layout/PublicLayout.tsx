@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react'
 
+import { FloatingWhatsApp } from '@/components/layout/floating-whatsapp'
 import { Footer } from '@/components/layout/footer'
 import { MobileBottomNav } from '@/components/layout/mobile-bottom-nav'
 import { Navbar } from '@/components/layout/navbar'
 
 /**
- * Marketing + catalog shell: full nav, generous bottom padding for floating actions (G1, G2).
+ * Marketing + catalog shell: full nav, footer, mobile nav, floating WhatsApp (bottom-right).
  */
 export function PublicLayout({ children }: { children: ReactNode }) {
   return (
@@ -16,6 +17,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
       </main>
       <Footer />
       <MobileBottomNav />
+      <FloatingWhatsApp position="right" />
     </div>
   )
 }

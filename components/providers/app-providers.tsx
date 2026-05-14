@@ -4,7 +4,6 @@ import type { ReactNode } from 'react'
 
 import { SupabaseProvider } from '@/components/providers/supabase-provider'
 import { ThemeProvider } from '@/components/providers/theme-provider'
-import { GlobalChrome } from '@/components/layout/global-chrome'
 
 type AppProvidersProps = {
   children: ReactNode
@@ -14,10 +13,7 @@ type AppProvidersProps = {
 export function AppProviders({ children }: AppProvidersProps) {
   return (
     <ThemeProvider>
-      <SupabaseProvider>
-        {children}
-        <GlobalChrome />
-      </SupabaseProvider>
+      <SupabaseProvider>{children}</SupabaseProvider>
     </ThemeProvider>
   )
 }

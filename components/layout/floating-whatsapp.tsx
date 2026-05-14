@@ -1,7 +1,5 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
-
 import { BRAND } from '@/constants/brand'
 import { cn } from '@/lib/utils/cn'
 
@@ -22,23 +20,30 @@ function WhatsAppGlyph({ className }: { className?: string }) {
   )
 }
 
-export function FloatingWhatsApp({ className }: { className?: string }) {
-  const pathname = usePathname() ?? ''
-  const isAdmin = pathname === '/admin' || pathname.startsWith('/admin/')
-  const isDashboard = pathname.startsWith('/dashboard')
+type FloatingWhatsAppProps = {
+  /** Public shell: bottom-right. Dashboard shell: bottom-left. */
+  position: 'left' | 'right'
+  className?: string
+}
 
-  if (isAdmin) return null
+/**
+ * Fixed WhatsApp concierge — rendered only inside `PublicLayout` or `DashboardLayout` so it is never stacked with admin chrome.
+ */
+export function FloatingWhatsApp({ position, className }: FloatingWhatsAppProps) {
+  const bottomOffset =
+    position === 'right'
+      ? 'bottom-[calc(var(--bottom-nav-clearance)+0.35rem)] md:bottom-8'
+      : 'bottom-6 md:bottom-8'
 
   return (
     <a
       href={BRAND.whatsapp}
       target="_blank"
-      rel="noreferrer"
+      rel="noopener noreferrer"
       className={cn(
-        'fixed z-50 flex h-14 w-14 items-center justify-center rounded-full text-white shadow-[0_12px_40px_-8px_rgba(37,211,102,0.55),0_4px_14px_-4px_rgba(15,23,42,0.35)] transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:shadow-[0_16px_48px_-10px_rgba(37,211,102,0.6),0_6px_20px_-6px_rgba(15,23,42,0.4)] active:scale-[0.96] md:h-[3.75rem] md:w-[3.75rem]',
-        isDashboard
-          ? 'bottom-[calc(var(--bottom-nav-clearance)+0.35rem)] left-4 md:bottom-8 md:left-8'
-          : 'bottom-[calc(var(--bottom-nav-clearance)+0.35rem)] right-4 md:bottom-8 md:right-8',
+        'fixed z-[45] flex h-14 w-14 items-center justify-center rounded-full text-white shadow-[0_12px_40px_-8px_rgba(37,211,102,0.55),0_4px_14px_-4px_rgba(15,23,42,0.35)] transition-[transform,box-shadow] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] hover:-translate-y-0.5 hover:shadow-[0_16px_48px_-10px_rgba(37,211,102,0.6),0_6px_20px_-6px_rgba(15,23,42,0.4)] active:scale-[0.96] md:h-[3.75rem] md:w-[3.75rem]',
+        bottomOffset,
+        position === 'right' ? 'right-4 md:right-8' : 'left-4 md:left-8',
         className,
       )}
       style={{ backgroundColor: WA_BG }}

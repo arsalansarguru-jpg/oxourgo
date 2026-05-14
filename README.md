@@ -16,7 +16,7 @@ npm run lint
 
 | Area | Location |
 |------|----------|
-| Routes & layouts | `app/` — `app/(main)/` is the primary shell (nav, footer, transitions) |
+| Routes & layouts | `app/` — `app/(main)/layout.tsx` (skip link + page transitions); `app/(main)/(public)/` uses `components/layout/PublicLayout.tsx` (marketing chrome + floating WhatsApp); `app/(main)/dashboard/` uses `components/layout/DashboardLayout.tsx` (SaaS topbar + slim footer + WhatsApp); `app/(main)/admin/` uses `AdminShell` |
 | Feature screens (client views) | `features/*` — keep route files thin; logic lives here |
 | UI primitives | `components/ui/` |
 | Domain components | `components/layout`, `marketing`, `fleet`, `booking`, `auth`, `dashboard`, `support`, `legal` |

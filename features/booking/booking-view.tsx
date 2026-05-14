@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle, CalendarRange, Car as CarIcon, CheckCircle2, Loader2, MapPin, Shield } from 'lucide-react'
 
-import { createBookingAction } from '@/app/(main)/booking/[id]/actions'
+import { createBookingAction } from '@/app/(main)/(public)/booking/[id]/actions'
 import { customerBookingFailureCopy } from '@/lib/booking/customer-booking-failure-copy'
 import { SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
 import { BRAND } from '@/constants/brand'
