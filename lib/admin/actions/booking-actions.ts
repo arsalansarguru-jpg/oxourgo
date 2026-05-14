@@ -22,8 +22,8 @@ function nowIso() {
   return new Date().toISOString()
 }
 
-export async function adminApproveBookingAction(bookingId: string): Promise<AdminActionResult> {
-  const { user } = await requireAppRole('ops_admin')
+/** Shared: pending_payment → confirmed with audit + notifications (approve / mark active). */
+async function confirmPendingBookingFromAdmin(bookingId: string, actorUserId: string): Promise<AdminActionResult> {
   const admin = createAdminClient()
 
   const { data: row, error: fetchErr } = await admin.from('bookings').select('booking_status').eq('id', bookingId).single()
@@ -37,10 +37,10 @@ export async function adminApproveBookingAction(bookingId: string): Promise<Admi
     .update({ booking_status: 'confirmed', updated_at: nowIso() })
     .eq('id', bookingId)
 
-  if (error) return adminActionDbFailed('adminApproveBookingAction', error)
+  if (error) return adminActionDbFailed('confirmPendingBookingFromAdmin', error)
 
   await writeAdminAudit({
-    actorUserId: user.id,
+    actorUserId,
     action: 'booking.approve',
     entityType: 'booking',
     entityId: bookingId,
@@ -52,6 +52,32 @@ export async function adminApproveBookingAction(bookingId: string): Promise<Admi
   revalidatePath(`/admin/bookings/${bookingId}`)
   revalidatePath('/dashboard')
   return { ok: true }
+}
+
+export async function adminApproveBookingAction(bookingId: string): Promise<AdminActionResult> {
+  const { user } = await requireAppRole('ops_admin')
+  return confirmPendingBookingFromAdmin(bookingId, user.id)
+}
+
+/**
+ * Idempotent “active” = confirmed in this schema.
+ * Pending → same path as approve (notifications). Already confirmed → success no-op.
+ */
+export async function adminMarkBookingActiveAction(bookingId: string): Promise<AdminActionResult> {
+  const { user } = await requireAppRole('ops_admin')
+  const admin = createAdminClient()
+
+  const { data: row, error: fetchErr } = await admin.from('bookings').select('booking_status').eq('id', bookingId).single()
+  if (fetchErr || !row) return { ok: false, message: 'Booking not found.' }
+  if (row.booking_status === 'confirmed') return { ok: true }
+  if (row.booking_status === 'cancelled' || row.booking_status === 'completed') {
+    return { ok: false, message: 'Booking cannot be marked active in this state.' }
+  }
+  if (row.booking_status !== 'pending_payment') {
+    return { ok: false, message: 'Only pending bookings can be marked active.' }
+  }
+
+  return confirmPendingBookingFromAdmin(bookingId, user.id)
 }
 
 export async function adminRejectBookingAction(bookingId: string, note?: string): Promise<AdminActionResult> {
