@@ -8,9 +8,7 @@ import type { Database } from '@/lib/supabase/database.types'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
-import { Card, CardContent } from '@/components/ui/Card'
-import { cn } from '@/lib/utils/cn'
-import { cardSurfaceBase } from '@/components/ui/card-tokens'
+import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 
 type Profile = Database['public']['Tables']['profiles']['Row']
 
@@ -30,8 +28,8 @@ export function AdminCustomerOps({
   const risk = profile?.risk_score ?? 0
 
   return (
-    <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
-      <CardContent className="p-5 sm:p-6">
+    <AdminCard>
+      <AdminCardContent>
         <h2 className="mb-4 text-lg font-semibold text-soft">Verification & risk</h2>
         <form
           className="grid gap-4 sm:grid-cols-2"
@@ -77,7 +75,7 @@ export function AdminCustomerOps({
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+      </AdminCardContent>
+    </AdminCard>
   )
 }

@@ -8,9 +8,7 @@ import type { CarRow } from '@/lib/supabase/database.types'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
-import { Card, CardContent } from '@/components/ui/Card'
-import { cn } from '@/lib/utils/cn'
-import { cardSurfaceBase } from '@/components/ui/card-tokens'
+import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 
 export function AdminCarFieldsForm({ car }: { car: CarRow }) {
   const router = useRouter()
@@ -18,8 +16,8 @@ export function AdminCarFieldsForm({ car }: { car: CarRow }) {
   const [error, setError] = useState<string | null>(null)
 
   return (
-    <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
-      <CardContent className="p-5 sm:p-6">
+    <AdminCard>
+      <AdminCardContent>
         <h2 className="mb-4 text-lg font-semibold text-soft">Vehicle details</h2>
         <form
           className="grid gap-4 sm:grid-cols-2"
@@ -77,7 +75,7 @@ export function AdminCarFieldsForm({ car }: { car: CarRow }) {
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+      </AdminCardContent>
+    </AdminCard>
   )
 }

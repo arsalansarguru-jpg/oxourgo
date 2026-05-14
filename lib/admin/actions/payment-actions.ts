@@ -41,6 +41,8 @@ export async function adminCreateRefundPlaceholderAction(bookingId: string): Pro
   if (error) return adminActionDbFailed('adminCreateRefundPlaceholderAction', error)
 
   await writeAdminAudit({
+    actorUserId: user.id,
+    action: 'payment.refund_placeholder',
     entityType: 'booking',
     entityId: bookingId,
   })
@@ -106,6 +108,8 @@ export async function adminCreateDepositHoldPlaceholderAction(bookingId: string)
   if (error) return adminActionDbFailed('adminCreateDepositHoldPlaceholderAction', error)
 
   await writeAdminAudit({
+    actorUserId: user.id,
+    action: 'payment.deposit_hold_placeholder',
     entityType: 'booking',
     entityId: bookingId,
   })

@@ -7,9 +7,7 @@ import { adminCreateCarAction } from '@/lib/admin/actions/fleet-actions'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
-import { Card, CardContent } from '@/components/ui/Card'
-import { cn } from '@/lib/utils/cn'
-import { cardSurfaceBase } from '@/components/ui/card-tokens'
+import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 
 export function AdminNewCarForm() {
   const router = useRouter()
@@ -17,8 +15,8 @@ export function AdminNewCarForm() {
   const [error, setError] = useState<string | null>(null)
 
   return (
-    <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
-      <CardContent className="p-5 sm:p-6">
+    <AdminCard>
+      <AdminCardContent>
         <form
           className="grid gap-4 sm:grid-cols-2"
           action={(formData) => {
@@ -81,7 +79,7 @@ export function AdminNewCarForm() {
             </Button>
           </div>
         </form>
-      </CardContent>
-    </Card>
+      </AdminCardContent>
+    </AdminCard>
   )
 }

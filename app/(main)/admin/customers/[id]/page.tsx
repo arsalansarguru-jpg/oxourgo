@@ -3,12 +3,10 @@ import { notFound } from 'next/navigation'
 
 import { AdminCustomerOps } from '@/components/admin/admin-customer-ops'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
+import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 import { AdminStatusPill } from '@/components/admin/admin-status-pill'
 import { adminGetCustomer } from '@/lib/admin/data/customers'
 import { adminListBookingsForUser } from '@/lib/admin/data/bookings'
-import { Card, CardContent } from '@/components/ui/Card'
-import { cn } from '@/lib/utils/cn'
-import { cardSurfaceBase } from '@/components/ui/card-tokens'
 import { formatInr } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
@@ -45,51 +43,45 @@ export default async function AdminCustomerDetailPage({ params }: { params: Prom
       />
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
-          <CardContent className="p-4">
-            <p className="text-xs uppercase tracking-wide text-muted">Displayed risk</p>
-            <p className="mt-2 text-2xl font-semibold tabular-nums text-soft">{displayRisk}</p>
-            <p className="mt-1 text-xs text-muted">Max of stored profile score and cancel-rate heuristic.</p>
-          </CardContent>
-        </Card>
-        <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
-          <CardContent className="p-4">
-            <p className="text-xs uppercase tracking-wide text-muted">Bookings</p>
-            <p className="mt-2 text-2xl font-semibold text-soft">{customer.bookingCount}</p>
-            <p className="mt-1 text-xs text-muted">{customer.cancelledCount} cancelled</p>
-          </CardContent>
-        </Card>
-        <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
-          <CardContent className="p-4">
-            <p className="text-xs uppercase tracking-wide text-muted">Tier</p>
-            <p className="mt-3">
-              <AdminStatusPill value={customer.profile?.verification_tier ?? 'basic'} />
-            </p>
-          </CardContent>
-        </Card>
+        <AdminCard className="p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">Displayed risk</p>
+          <p className="mt-3 text-3xl font-semibold tabular-nums tracking-[-0.03em] text-soft">{displayRisk}</p>
+          <p className="mt-2 text-xs leading-relaxed text-muted">Max of stored profile score and cancel-rate heuristic.</p>
+        </AdminCard>
+        <AdminCard className="p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">Bookings</p>
+          <p className="mt-3 text-3xl font-semibold tracking-[-0.03em] text-soft">{customer.bookingCount}</p>
+          <p className="mt-2 text-xs text-muted">{customer.cancelledCount} cancelled</p>
+        </AdminCard>
+        <AdminCard className="p-5">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">Tier</p>
+          <p className="mt-4">
+            <AdminStatusPill value={customer.profile?.verification_tier ?? 'basic'} />
+          </p>
+        </AdminCard>
       </div>
 
       <AdminCustomerOps userId={customer.userId} profile={customer.profile} />
 
-      <Card className={cn(cardSurfaceBase, 'overflow-hidden border border-stroke')}>
-        <CardContent className="p-0">
-          <div className="border-b border-stroke px-5 py-4">
-            <h2 className="text-lg font-semibold text-soft">Booking history</h2>
+      <AdminCard className="overflow-hidden">
+        <AdminCardContent className="p-0">
+          <div className="border-b border-white/[0.06] px-6 py-5">
+            <h2 className="text-lg font-semibold tracking-[-0.02em] text-soft">Booking history</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="border-b border-stroke bg-fill-glass text-xs uppercase tracking-wide text-muted">
+              <thead className="admin-table-head">
                 <tr>
-                  <th className="px-4 py-3 font-medium">Vehicle</th>
-                  <th className="px-4 py-3 font-medium">Pickup</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium">Total</th>
-                  <th className="px-4 py-3 font-medium" />
+                  <th className="px-4 py-3.5 font-medium">Vehicle</th>
+                  <th className="px-4 py-3.5 font-medium">Pickup</th>
+                  <th className="px-4 py-3.5 font-medium">Status</th>
+                  <th className="px-4 py-3.5 font-medium">Total</th>
+                  <th className="px-4 py-3.5 font-medium" />
                 </tr>
               </thead>
               <tbody>
                 {bookings.map((b) => (
-                  <tr key={b.id} className="border-b border-stroke">
+                  <tr key={b.id} className="admin-table-row">
                     <td className="px-4 py-3 text-soft">{vehicleLabel(b)}</td>
                     <td className="px-4 py-3 text-muted">
                       {new Date(b.pickup_date).toLocaleDateString(undefined, { dateStyle: 'medium' })}
@@ -99,7 +91,10 @@ export default async function AdminCustomerDetailPage({ params }: { params: Prom
                     </td>
                     <td className="px-4 py-3 tabular-nums text-soft">{formatInr(b.total_rupees)}</td>
                     <td className="px-4 py-3 text-right">
-                      <Link href={`/admin/bookings/${b.id}`} className="text-electric hover:underline">
+                      <Link
+                        href={`/admin/bookings/${b.id}`}
+                        className="font-medium text-electric transition-colors hover:text-electric/85"
+                      >
                         Open
                       </Link>
                     </td>
@@ -109,11 +104,11 @@ export default async function AdminCustomerDetailPage({ params }: { params: Prom
             </table>
           </div>
           {bookings.length === 0 ? <p className="p-6 text-sm text-muted">No bookings for this account.</p> : null}
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
 
       <p className="text-center text-sm text-muted">
-        <Link href="/admin/customers" className="text-electric hover:underline">
+        <Link href="/admin/customers" className="font-medium text-electric transition-colors hover:text-electric/85">
           ← Customers
         </Link>
       </p>

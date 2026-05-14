@@ -1,11 +1,9 @@
 import Link from 'next/link'
 
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
+import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 import { adminListCustomers } from '@/lib/admin/data/customers'
-import { Card, CardContent } from '@/components/ui/Card'
 import { AdminStatusPill } from '@/components/admin/admin-status-pill'
-import { cn } from '@/lib/utils/cn'
-import { cardSurfaceBase } from '@/components/ui/card-tokens'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,17 +23,17 @@ export default async function AdminCustomersPage() {
         description="Auth-backed directory with profile tier, heuristic risk from cancellations, and admin-editable fields."
       />
 
-      <Card className={cn(cardSurfaceBase, 'overflow-hidden border border-stroke')}>
-        <CardContent className="p-0">
+      <AdminCard className="overflow-hidden">
+        <AdminCardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full min-w-[800px] text-left text-sm">
-              <thead className="border-b border-stroke bg-fill-glass text-xs uppercase tracking-wide text-muted">
+              <thead className="admin-table-head">
                 <tr>
-                  <th className="px-4 py-3 font-medium">Email</th>
-                  <th className="px-4 py-3 font-medium">Tier</th>
-                  <th className="px-4 py-3 font-medium">Risk</th>
-                  <th className="px-4 py-3 font-medium">Bookings</th>
-                  <th className="px-4 py-3 font-medium" />
+                  <th className="px-4 py-3.5 font-medium">Email</th>
+                  <th className="px-4 py-3.5 font-medium">Tier</th>
+                  <th className="px-4 py-3.5 font-medium">Risk</th>
+                  <th className="px-4 py-3.5 font-medium">Bookings</th>
+                  <th className="px-4 py-3.5 font-medium" />
                 </tr>
               </thead>
               <tbody>
@@ -44,7 +42,7 @@ export default async function AdminCustomersPage() {
                   const stored = r.profile?.risk_score ?? 0
                   const displayRisk = Math.max(stored, r.heuristicRisk)
                   return (
-                    <tr key={r.userId} className="border-b border-stroke hover:bg-fill-glass">
+                    <tr key={r.userId} className="admin-table-row">
                       <td className="px-4 py-3 text-soft">{r.email ?? r.userId}</td>
                       <td className="px-4 py-3">
                         <AdminStatusPill value={tier} />
@@ -60,7 +58,10 @@ export default async function AdminCustomersPage() {
                         {r.cancelledCount ? ` · ${r.cancelledCount} cancelled` : ''}
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <Link href={`/admin/customers/${r.userId}`} className="text-electric hover:underline">
+                        <Link
+                          href={`/admin/customers/${r.userId}`}
+                          className="font-medium text-electric transition-colors hover:text-electric/85"
+                        >
                           Open
                         </Link>
                       </td>
@@ -73,8 +74,8 @@ export default async function AdminCustomersPage() {
           {rows.length === 0 ? (
             <p className="p-6 text-sm text-muted">No customers in this view. Adjust filters or try again shortly.</p>
           ) : null}
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
     </div>
   )
 }

@@ -76,6 +76,8 @@ export async function adminRejectBookingAction(bookingId: string, note?: string)
   if (error) return adminActionDbFailed('adminRejectBookingAction', error)
 
   await writeAdminAudit({
+    actorUserId: user.id,
+    action: 'booking.reject',
     entityType: 'booking',
     entityId: bookingId,
     payload: { note: note?.trim() ?? null },
@@ -111,6 +113,8 @@ export async function adminCancelBookingAction(bookingId: string, note?: string)
   if (error) return adminActionDbFailed('adminCancelBookingAction', error)
 
   await writeAdminAudit({
+    actorUserId: user.id,
+    action: 'booking.cancel',
     entityType: 'booking',
     entityId: bookingId,
     payload: { note: note?.trim() ?? null },
@@ -183,6 +187,8 @@ export async function adminSetBookingStatusAction(
   if (error) return adminActionDbFailed('adminSetBookingStatusAction', error)
 
   await writeAdminAudit({
+    actorUserId: user.id,
+    action: 'booking.status',
     entityType: 'booking',
     entityId: bookingId,
     payload: { booking_status },

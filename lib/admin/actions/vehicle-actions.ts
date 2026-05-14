@@ -7,7 +7,7 @@ import { writeAdminAudit } from '@/lib/admin/audit'
 import { requireAppRole } from '@/lib/auth/server'
 import type { Database, Json } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { adminActionDbFailed, SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
+import { adminActionDbFailed, logUnknownError, SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
 
 export async function adminCreateVehicleAction(input: {
   name: string
@@ -82,6 +82,51 @@ export async function adminUpdateVehicleAction(
 
 export async function adminSetVehicleAvailableAction(id: string, available: boolean): Promise<AdminActionResult> {
   return adminUpdateVehicleAction(id, { available })
+}
+
+export async function adminUploadVehicleImageAction(formData: FormData): Promise<AdminActionResult> {
+  const { user } = await requireAppRole('ops_admin')
+  const vehicleId = String(formData.get('vehicleId') ?? '').trim()
+  const file = formData.get('file')
+  if (!vehicleId || !(file instanceof File) || file.size === 0) {
+    return { ok: false, message: 'Vehicle and image file are required.' }
+  }
+
+  const maxBytes = 6 * 1024 * 1024
+  if (file.size > maxBytes) {
+    return { ok: false, message: 'Image must be 6MB or smaller.' }
+  }
+
+  const admin = createAdminClient()
+  const ext = (file.name.split('.').pop() ?? 'jpg').toLowerCase()
+  const safeExt = ['jpg', 'jpeg', 'png', 'webp', 'gif'].includes(ext) ? ext : 'jpg'
+  const path = `${vehicleId}/catalog-${Date.now()}.${safeExt}`
+  const buffer = Buffer.from(await file.arrayBuffer())
+
+  const { error: upErr } = await admin.storage.from('fleet').upload(path, buffer, {
+    contentType: file.type || 'image/jpeg',
+    upsert: false,
+  })
+  if (upErr) {
+    logUnknownError('adminUploadVehicleImageAction:storage', upErr)
+    return { ok: false, message: SAFE_USER_MESSAGE.generic }
+  }
+
+  const { error: dbErr } = await admin.from('vehicles').update({ image: path }).eq('id', vehicleId)
+  if (dbErr) return adminActionDbFailed('adminUploadVehicleImageAction:db', dbErr)
+
+  await writeAdminAudit({
+    actorUserId: user.id,
+    action: 'fleet.vehicle_image_upload',
+    entityType: 'vehicle',
+    entityId: vehicleId,
+    payload: { path },
+  })
+
+  revalidatePath('/admin/fleet')
+  revalidatePath(`/admin/fleet/${vehicleId}`)
+  revalidatePath('/fleet')
+  return { ok: true }
 }
 
 export async function adminToggleVehicleFeaturedAction(id: string, featured: boolean): Promise<AdminActionResult> {

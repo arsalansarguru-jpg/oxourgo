@@ -123,6 +123,40 @@ html[data-theme='dark'] {
   color-scheme: dark;
 }
 
+/**
+ * Admin console: forced dark luxury palette + graphite wash so tables/cards stay on-brand
+ * even when the global theme toggle is set to light (tokens resolve from this subtree).
+ */
+.admin-app-root {
+  color-scheme: dark;
+  --color-matte: #030304;
+  --color-carbon: #0c0c10;
+  --color-carbon-deep: #070709;
+  --color-soft: #e8ecf1;
+  --color-silver: #9aa3b0;
+  --color-muted: rgb(154 163 176 / 0.78);
+  --color-stroke: rgb(255 255 255 / 0.07);
+  --color-stroke-strong: rgb(255 255 255 / 0.11);
+  --color-fill-glass: rgb(255 255 255 / 0.045);
+  --color-fill-glass-strong: rgb(255 255 255 / 0.078);
+  --color-hero-mist: rgb(255 255 255 / 0.04);
+  --shadow-card:
+    0 1px 0 0 rgb(255 255 255 / 0.04) inset,
+    0 28px 72px -38px rgb(0 0 0 / 0.94);
+  --shadow-card-hover:
+    0 1px 0 0 rgb(255 255 255 / 0.055) inset,
+    0 40px 96px -44px rgb(0 0 0 / 0.95);
+  --shadow-card-accent:
+    0 1px 0 0 rgb(255 255 255 / 0.04) inset,
+    0 0 0 1px rgb(59 130 246 / 0.14),
+    0 28px 80px -42px rgb(0 0 0 / 0.88);
+  background-color: var(--color-matte);
+  background-image:
+    radial-gradient(ellipse 120% 90% at 50% -30%, rgb(59 130 246 / 0.14), transparent 58%),
+    radial-gradient(ellipse 55% 45% at 100% 0%, rgb(255 255 255 / 0.05), transparent 50%),
+    linear-gradient(180deg, #040405 0%, #0a0a0f 42%, #060608 100%);
+}
+
 @layer base {
   html {
     @apply scroll-smooth antialiased;
@@ -159,6 +193,14 @@ html[data-theme='dark'] {
 
 @utility text-balance {
   text-wrap: balance;
+}
+
+@utility admin-table-head {
+  @apply border-b border-white/[0.06] bg-white/[0.035] text-[11px] font-semibold uppercase tracking-[0.12em] text-muted;
+}
+
+@utility admin-table-row {
+  @apply border-b border-white/[0.05] transition-colors duration-200 hover:bg-white/[0.035];
 }
 
 /** Fluid display — hero & cinematic headings */

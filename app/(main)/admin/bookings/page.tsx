@@ -1,12 +1,9 @@
 import Link from 'next/link'
 
+import { AdminBookingsManager } from '@/components/admin/bookings/admin-bookings-manager'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
-import { AdminStatusPill } from '@/components/admin/admin-status-pill'
-import { adminListBookings } from '@/lib/admin/data/bookings'
-import { Card, CardContent } from '@/components/ui/Card'
+import { adminEnrichBookingsWithCustomerEmails, adminListBookings } from '@/lib/admin/data/bookings'
 import { cn } from '@/lib/utils/cn'
-import { cardSurfaceBase } from '@/components/ui/card-tokens'
-import { formatInr } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,14 +14,6 @@ const STATUS_FILTERS = [
   { label: 'Completed', param: 'completed' },
   { label: 'Cancelled', param: 'cancelled' },
 ] as const
-
-function vehicleLabel(row: { vehicles: unknown }): string {
-  const v = row.vehicles as { name?: string; brand?: string } | { name?: string; brand?: string }[] | null
-  if (!v) return 'Vehicle'
-  const first = Array.isArray(v) ? v[0] : v
-  if (!first) return 'Vehicle'
-  return (first.name?.trim() || `${first.brand ?? ''}`.trim()) || 'Vehicle'
-}
 
 export default async function AdminBookingsPage({
   searchParams,
@@ -37,9 +26,10 @@ export default async function AdminBookingsPage({
   const allowed = !status || STATUS_FILTERS.some((f) => f.param === status)
   const safeStatus = allowed && status ? status : undefined
 
-  let rows: Awaited<ReturnType<typeof adminListBookings>> = []
+  let rows: Awaited<ReturnType<typeof adminEnrichBookingsWithCustomerEmails>> = []
   try {
-    rows = await adminListBookings(safeStatus ? { booking_status: safeStatus } : {})
+    const base = await adminListBookings(safeStatus ? { booking_status: safeStatus } : {})
+    rows = await adminEnrichBookingsWithCustomerEmails(base)
   } catch {
     rows = []
   }
@@ -49,7 +39,7 @@ export default async function AdminBookingsPage({
       <AdminPageHeader
         eyebrow="Bookings"
         title="Reservations"
-        description="Filter by lifecycle, open a row for payment and status controls, and sync with customer dashboards."
+        description="Search and filter live reservations, act on lifecycle transitions, and open any row for full payment and audit context."
       />
 
       <div className="flex flex-wrap gap-2">
@@ -61,10 +51,10 @@ export default async function AdminBookingsPage({
               key={f.label}
               href={href}
               className={cn(
-                'rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition-colors',
+                'rounded-full border px-3.5 py-2 text-[11px] font-semibold uppercase tracking-[0.12em] transition-[background-color,border-color,color,box-shadow] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
                 active
-                  ? 'border-electric/50 bg-electric/15 text-electric'
-                  : 'border-stroke bg-fill-glass text-muted hover:border-stroke-strong hover:text-soft',
+                  ? 'border-electric/45 bg-electric/18 text-electric shadow-[0_0_24px_-10px_rgba(59,130,246,0.55)]'
+                  : 'border-white/[0.08] bg-white/[0.03] text-muted hover:border-white/[0.12] hover:bg-white/[0.055] hover:text-soft',
               )}
             >
               {f.label}
@@ -73,49 +63,7 @@ export default async function AdminBookingsPage({
         })}
       </div>
 
-      <Card className={cn(cardSurfaceBase, 'overflow-hidden border border-stroke')}>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[900px] text-left text-sm">
-              <thead className="border-b border-stroke bg-fill-glass text-xs uppercase tracking-wide text-muted">
-                <tr>
-                  <th className="px-4 py-3 font-medium">Vehicle</th>
-                  <th className="px-4 py-3 font-medium">Pickup</th>
-                  <th className="px-4 py-3 font-medium">Booking</th>
-                  <th className="px-4 py-3 font-medium">Payment</th>
-                  <th className="px-4 py-3 font-medium">Total</th>
-                  <th className="px-4 py-3 font-medium" />
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((b) => (
-                  <tr key={b.id} className="border-b border-stroke hover:bg-fill-glass">
-                    <td className="px-4 py-3 font-medium text-soft">{vehicleLabel(b)}</td>
-                    <td className="px-4 py-3 text-muted">
-                      {new Date(b.pickup_date).toLocaleDateString(undefined, { dateStyle: 'medium' })}
-                    </td>
-                    <td className="px-4 py-3">
-                      <AdminStatusPill value={b.booking_status} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <AdminStatusPill value={b.payment_status} />
-                    </td>
-                    <td className="px-4 py-3 tabular-nums text-soft">{formatInr(b.total_rupees)}</td>
-                    <td className="px-4 py-3 text-right">
-                      <Link href={`/admin/bookings/${b.id}`} className="text-electric hover:underline">
-                        Open
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {rows.length === 0 ? (
-            <p className="p-6 text-sm text-muted">No bookings in this view. Adjust filters or try again shortly.</p>
-          ) : null}
-        </CardContent>
-      </Card>
+      <AdminBookingsManager rows={rows} />
     </div>
   )
 }

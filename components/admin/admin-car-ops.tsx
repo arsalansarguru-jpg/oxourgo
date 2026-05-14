@@ -14,9 +14,7 @@ import type { CarRow } from '@/lib/supabase/database.types'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
-import { Card, CardContent } from '@/components/ui/Card'
-import { cn } from '@/lib/utils/cn'
-import { cardSurfaceBase } from '@/components/ui/card-tokens'
+import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 
 export function AdminCarOps({ car }: { car: CarRow }) {
   const router = useRouter()
@@ -26,8 +24,8 @@ export function AdminCarOps({ car }: { car: CarRow }) {
 
   return (
     <div className="space-y-6">
-      <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
-        <CardContent className="space-y-4 p-5 sm:p-6">
+      <AdminCard>
+        <AdminCardContent className="space-y-4">
           <h2 className="text-lg font-semibold text-soft">Listing controls</h2>
           <div className="flex flex-wrap items-center gap-4">
             <label className="flex items-center gap-2 text-sm text-soft">
@@ -74,11 +72,11 @@ export function AdminCarOps({ car }: { car: CarRow }) {
             </form>
           </div>
           {msg ? <p className="text-sm text-red-300">{msg}</p> : null}
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
 
-      <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
-        <CardContent className="space-y-4 p-5 sm:p-6">
+      <AdminCard>
+        <AdminCardContent className="space-y-4">
           <h2 className="text-lg font-semibold text-soft">Images (fleet bucket)</h2>
           <form
             className="flex flex-wrap items-end gap-3"
@@ -116,11 +114,11 @@ export function AdminCarOps({ car }: { car: CarRow }) {
               Add to gallery
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
 
-      <Card className={cn(cardSurfaceBase, 'border border-red-500/20')}>
-        <CardContent className="space-y-3 p-5 sm:p-6">
+      <AdminCard variant="risk">
+        <AdminCardContent className="space-y-3">
           <h2 className="text-lg font-semibold text-red-200">Danger zone</h2>
           <p className="text-sm text-muted">Deletes the row if no foreign keys block it (existing bookings will block).</p>
           <Button
@@ -142,8 +140,8 @@ export function AdminCarOps({ car }: { car: CarRow }) {
           >
             Remove vehicle
           </Button>
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
     </div>
   )
 }

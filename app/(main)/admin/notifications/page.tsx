@@ -2,11 +2,9 @@ import Link from 'next/link'
 
 import { AdminOpsAlertRow } from '@/components/admin/admin-ops-alert-row'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
+import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 import { listOpsAlertsForAdmin } from '@/lib/admin/data/ops-alerts'
 import { requireAppRole } from '@/lib/auth/server'
-import { Card, CardContent } from '@/components/ui/Card'
-import { cn } from '@/lib/utils/cn'
-import { cardSurfaceBase } from '@/components/ui/card-tokens'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,9 +31,9 @@ export default async function AdminNotificationsPage() {
       <section className="space-y-3">
         <h2 className="text-lg font-semibold text-soft">Active</h2>
         {active.length === 0 ? (
-          <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
-            <CardContent className="p-6 text-sm text-muted">No active alerts.</CardContent>
-          </Card>
+          <AdminCard>
+            <AdminCardContent className="p-6 text-sm text-muted">No active alerts.</AdminCardContent>
+          </AdminCard>
         ) : (
           <ul className="space-y-3">
             {active.map((a) => (
@@ -50,7 +48,7 @@ export default async function AdminNotificationsPage() {
           <h2 className="text-lg font-semibold text-soft">Dismissed (recent)</h2>
           <ul className="space-y-2 text-sm text-muted">
             {done.slice(0, 30).map((a) => (
-              <li key={a.id} className="flex flex-wrap justify-between gap-2 border-b border-stroke py-2">
+              <li key={a.id} className="flex flex-wrap justify-between gap-2 border-b border-white/[0.06] py-2.5">
                 <span className="text-soft">{a.title}</span>
                 <span>{new Date(a.created_at).toLocaleString()}</span>
               </li>
@@ -60,7 +58,7 @@ export default async function AdminNotificationsPage() {
       ) : null}
 
       <p className="text-center text-sm text-muted">
-        <Link href="/admin" className="text-electric hover:underline">
+        <Link href="/admin" className="font-medium text-electric transition-colors hover:text-electric/85">
           ← Admin overview
         </Link>
       </p>

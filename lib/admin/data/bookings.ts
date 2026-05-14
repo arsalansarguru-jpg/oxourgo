@@ -38,6 +38,8 @@ const bookingSelect = `
   )
 `
 
+export type AdminBookingListItem = BookingWithCar & { customerEmail: string | null }
+
 export async function adminListBookings(options?: { booking_status?: string }): Promise<BookingWithCar[]> {
   const admin = createAdminClient()
   let q = admin.from('bookings').select(bookingSelect).order('created_at', { ascending: false }).limit(200)
@@ -48,6 +50,35 @@ export async function adminListBookings(options?: { booking_status?: string }): 
 
   if (error || !data) return []
   return data as unknown as BookingWithCar[]
+}
+
+/** Resolves auth emails for unique customers (bounded) — admin list UX only. */
+export async function adminEnrichBookingsWithCustomerEmails(rows: BookingWithCar[]): Promise<AdminBookingListItem[]> {
+  if (rows.length === 0) return []
+
+  const admin = createAdminClient()
+  const uniqueIds = [...new Set(rows.map((r) => r.user_id))].slice(0, 100)
+  const emailByUserId = new Map<string, string | null>()
+
+  await Promise.all(
+    uniqueIds.map(async (uid) => {
+      try {
+        const { data, error } = await admin.auth.admin.getUserById(uid)
+        if (error || !data?.user) {
+          emailByUserId.set(uid, null)
+          return
+        }
+        emailByUserId.set(uid, data.user.email ?? null)
+      } catch {
+        emailByUserId.set(uid, null)
+      }
+    }),
+  )
+
+  return rows.map((r) => ({
+    ...r,
+    customerEmail: emailByUserId.get(r.user_id) ?? null,
+  }))
 }
 
 export async function adminGetBooking(id: string): Promise<BookingWithCar | null> {

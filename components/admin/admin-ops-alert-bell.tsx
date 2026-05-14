@@ -59,8 +59,8 @@ export function AdminOpsAlertBell({
         type="button"
         onClick={() => setOpen((o) => !o)}
         className={cn(
-          'relative flex h-10 w-10 items-center justify-center rounded-xl border border-stroke bg-fill-glass text-soft transition-[background-color,box-shadow,border-color] duration-200 hover:border-stroke-strong hover:bg-fill-glass-strong',
-          open && 'border-amber-400/35 bg-amber-500/10',
+          'relative flex h-11 w-11 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04] text-soft shadow-[var(--shadow-card)] transition-[background-color,box-shadow,border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-white/[0.12] hover:bg-white/[0.07]',
+          open && 'border-amber-400/35 bg-amber-500/12 shadow-[0_0_28px_-10px_rgba(251,191,36,0.35)]',
         )}
         aria-expanded={open}
         aria-label="Operations alerts"
@@ -82,7 +82,7 @@ export function AdminOpsAlertBell({
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
             className={cn(
               cardSurfaceBase,
-              'absolute left-0 z-50 mt-2 w-[min(100vw-2rem,22rem)] overflow-hidden rounded-2xl border border-stroke bg-carbon/[0.92] p-0 shadow-[0_24px_80px_-32px_rgba(0,0,0,0.85)] backdrop-blur-2xl lg:left-auto lg:right-0',
+              'absolute left-0 z-50 mt-2 w-[min(100vw-2rem,22rem)] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0a0a0f]/95 p-0 shadow-[0_28px_90px_-36px_rgba(0,0,0,0.92)] ring-1 ring-inset ring-white/[0.04] backdrop-blur-2xl lg:left-auto lg:right-0',
             )}
           >
             <div className="border-b border-stroke px-4 py-3">

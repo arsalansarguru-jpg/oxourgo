@@ -1,11 +1,9 @@
 import Link from 'next/link'
 
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
+import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 import { AdminStatusPill } from '@/components/admin/admin-status-pill'
 import { adminBookingPaymentSummary, adminListPaymentEvents } from '@/lib/admin/data/payments'
-import { Card, CardContent } from '@/components/ui/Card'
-import { cn } from '@/lib/utils/cn'
-import { cardSurfaceBase } from '@/components/ui/card-tokens'
 import { formatInr } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
@@ -31,36 +29,36 @@ export default async function AdminPaymentsPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {summary.map((s) => (
-          <Card key={s.payment_status} className={cn(cardSurfaceBase, 'border border-stroke')}>
-            <CardContent className="p-4">
-              <p className="text-xs uppercase tracking-wide text-muted">{s.payment_status.replace(/_/g, ' ')}</p>
-              <p className="mt-2 text-2xl font-semibold tabular-nums text-soft">{s.count}</p>
-              <p className="mt-1 text-xs text-muted">Bookings</p>
-            </CardContent>
-          </Card>
+          <AdminCard key={s.payment_status} className="p-5 transition-transform duration-300 hover:-translate-y-0.5">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
+              {s.payment_status.replace(/_/g, ' ')}
+            </p>
+            <p className="mt-3 text-3xl font-semibold tabular-nums tracking-[-0.03em] text-soft">{s.count}</p>
+            <p className="mt-1 text-xs text-muted">Bookings</p>
+          </AdminCard>
         ))}
       </div>
 
-      <Card className={cn(cardSurfaceBase, 'overflow-hidden border border-stroke')}>
-        <CardContent className="p-0">
-          <div className="border-b border-stroke px-5 py-4">
-            <h2 className="text-lg font-semibold text-soft">Recent payment events</h2>
+      <AdminCard className="overflow-hidden">
+        <AdminCardContent className="p-0">
+          <div className="border-b border-white/[0.06] px-6 py-5">
+            <h2 className="text-lg font-semibold tracking-[-0.02em] text-soft">Recent payment events</h2>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[900px] text-left text-sm">
-              <thead className="border-b border-stroke bg-fill-glass text-xs uppercase tracking-wide text-muted">
+              <thead className="admin-table-head">
                 <tr>
-                  <th className="px-4 py-3 font-medium">When</th>
-                  <th className="px-4 py-3 font-medium">Title</th>
-                  <th className="px-4 py-3 font-medium">Direction</th>
-                  <th className="px-4 py-3 font-medium">Status</th>
-                  <th className="px-4 py-3 font-medium">Amount</th>
-                  <th className="px-4 py-3 font-medium">Booking</th>
+                  <th className="px-4 py-3.5 font-medium">When</th>
+                  <th className="px-4 py-3.5 font-medium">Title</th>
+                  <th className="px-4 py-3.5 font-medium">Direction</th>
+                  <th className="px-4 py-3.5 font-medium">Status</th>
+                  <th className="px-4 py-3.5 font-medium">Amount</th>
+                  <th className="px-4 py-3.5 font-medium">Booking</th>
                 </tr>
               </thead>
               <tbody>
                 {events.map((e) => (
-                  <tr key={e.id} className="border-b border-stroke">
+                  <tr key={e.id} className="admin-table-row">
                     <td className="px-4 py-3 text-muted">{new Date(e.created_at).toLocaleString()}</td>
                     <td className="px-4 py-3 text-soft">{e.title}</td>
                     <td className="px-4 py-3">
@@ -72,7 +70,10 @@ export default async function AdminPaymentsPage() {
                     <td className="px-4 py-3 tabular-nums text-soft">{formatInr(e.amount_rupees)}</td>
                     <td className="px-4 py-3 text-right">
                       {e.booking_id ? (
-                        <Link href={`/admin/bookings/${e.booking_id}`} className="text-electric hover:underline">
+                        <Link
+                          href={`/admin/bookings/${e.booking_id}`}
+                          className="font-medium text-electric transition-colors hover:text-electric/85"
+                        >
                           Open
                         </Link>
                       ) : (
@@ -87,8 +88,8 @@ export default async function AdminPaymentsPage() {
           {events.length === 0 ? (
             <p className="p-6 text-sm text-muted">No payment_events yet — placeholders can be created from a booking.</p>
           ) : null}
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
     </div>
   )
 }

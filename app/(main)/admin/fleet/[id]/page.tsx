@@ -6,16 +6,9 @@ import { AdminVehicleFieldsForm } from '@/components/admin/admin-vehicle-fields-
 import { AdminVehicleOps } from '@/components/admin/admin-vehicle-ops'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { adminGetVehicle } from '@/lib/admin/data/fleet'
-import { getPublicStorageObjectUrl } from '@/lib/supabase/storage-public-url'
+import { fleetVehicleImageUrl } from '@/lib/admin/fleet-image-url'
 
 export const dynamic = 'force-dynamic'
-
-function heroUrl(image: string | null | undefined): string | null {
-  const raw = image?.trim()
-  if (!raw) return null
-  if (/^https?:\/\//i.test(raw)) return raw
-  return getPublicStorageObjectUrl('fleet', raw)
-}
 
 export default async function AdminFleetDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -27,7 +20,7 @@ export default async function AdminFleetDetailPage({ params }: { params: Promise
   }
   if (!vehicle) notFound()
 
-  const cover = heroUrl(vehicle.image)
+  const cover = fleetVehicleImageUrl(vehicle.image)
 
   return (
     <div className="space-y-8">
@@ -38,7 +31,7 @@ export default async function AdminFleetDetailPage({ params }: { params: Promise
       />
 
       {cover ? (
-        <div className="relative h-56 w-full overflow-hidden rounded-2xl border border-stroke sm:h-64">
+        <div className="relative h-56 w-full overflow-hidden rounded-2xl border border-white/[0.08] shadow-[var(--shadow-card)] sm:h-64">
           <Image src={cover} alt="" fill sizes="100vw" className="object-cover" priority unoptimized />
         </div>
       ) : null}

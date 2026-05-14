@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 
+import { AdminCard } from '@/components/admin/admin-card'
 import { AdminShell } from '@/components/admin/admin-shell'
 import { listOpsAlertsForAdmin } from '@/lib/admin/data/ops-alerts'
 import { getAuthSessionSummary } from '@/lib/auth/server'
@@ -42,13 +43,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       opsInitialItems={opsInitialItems}
     >
       {!hasServiceRole ? (
-        <div className="rounded-2xl border border-stroke bg-fill-glass p-5 text-sm text-muted shadow-[var(--shadow-card)] sm:p-6">
-          <p className="font-semibold text-soft">Admin data connection incomplete</p>
-          <p className="mt-2 leading-relaxed text-muted">
+        <AdminCard className="border-amber-400/20 bg-gradient-to-br from-amber-500/[0.07] to-transparent p-6 sm:p-7">
+          <p className="text-sm font-semibold tracking-[-0.02em] text-soft">Admin data connection incomplete</p>
+          <p className="mt-2 text-sm leading-relaxed text-muted">
             Some lists and actions may be empty until the deployment is fully configured. If you are an operator, check
             server logs or contact your technical lead.
           </p>
-        </div>
+        </AdminCard>
       ) : null}
       {children}
     </AdminShell>

@@ -17,9 +17,7 @@ import {
 import type { BookingWithCar } from '@/lib/supabase/database.types'
 import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
-import { Card, CardContent } from '@/components/ui/Card'
-import { cn } from '@/lib/utils/cn'
-import { cardSurfaceBase } from '@/components/ui/card-tokens'
+import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 
 export function AdminBookingOpsPanel({ booking }: { booking: BookingWithCar }) {
   const router = useRouter()
@@ -37,8 +35,8 @@ export function AdminBookingOpsPanel({ booking }: { booking: BookingWithCar }) {
 
   return (
     <div className="space-y-6">
-      <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
-        <CardContent className="space-y-4 p-5 sm:p-6">
+      <AdminCard>
+        <AdminCardContent className="space-y-4">
           <h2 className="text-lg font-semibold text-soft">Workflow</h2>
           <div className="flex flex-wrap gap-2">
             {booking.booking_status === 'pending_payment' ? (
@@ -73,11 +71,11 @@ export function AdminBookingOpsPanel({ booking }: { booking: BookingWithCar }) {
               </Button>
             ) : null}
           </div>
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
 
-      <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
-        <CardContent className="space-y-4 p-5 sm:p-6">
+      <AdminCard>
+        <AdminCardContent className="space-y-4">
           <h2 className="text-lg font-semibold text-soft">Statuses</h2>
           <form
             className="grid gap-4 sm:grid-cols-2"
@@ -116,11 +114,11 @@ export function AdminBookingOpsPanel({ booking }: { booking: BookingWithCar }) {
               </Button>
             </div>
           </form>
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
 
-      <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
-        <CardContent className="space-y-4 p-5 sm:p-6">
+      <AdminCard>
+        <AdminCardContent className="space-y-4">
           <h2 className="text-lg font-semibold text-soft">Payment ledger placeholders</h2>
           <p className="text-sm text-muted">
             Creates <code className="rounded bg-fill-glass-strong px-1 font-mono text-xs">payment_events</code> rows for finance
@@ -144,8 +142,8 @@ export function AdminBookingOpsPanel({ booking }: { booking: BookingWithCar }) {
               Deposit hold placeholder
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
 
       {msg ? <p className="text-sm text-red-300">{msg}</p> : null}
     </div>

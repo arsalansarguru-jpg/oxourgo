@@ -1,10 +1,8 @@
 import { AdminKycActions } from '@/components/admin/admin-kyc-actions'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
+import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 import { adminListKycDocuments } from '@/lib/admin/data/kyc'
 import { formatKycDocumentType } from '@/lib/kyc/doc-label'
-import { Card, CardContent } from '@/components/ui/Card'
-import { cn } from '@/lib/utils/cn'
-import { cardSurfaceBase } from '@/components/ui/card-tokens'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,8 +24,8 @@ export default async function AdminKycPage() {
 
       <div className="space-y-4">
         {rows.map((row) => (
-          <Card key={row.id} className={cn(cardSurfaceBase, 'border border-stroke')}>
-            <CardContent className="flex flex-col gap-4 p-5 sm:flex-row sm:items-start sm:justify-between">
+          <AdminCard key={row.id}>
+            <AdminCardContent className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0 space-y-1">
                 <p className="text-sm font-medium text-electric/90">{formatKycDocumentType(row.document_type)}</p>
                 <p className="font-medium text-soft">{row.user_email ?? row.user_id}</p>
@@ -44,13 +42,13 @@ export default async function AdminKycPage() {
                 ) : null}
               </div>
               <AdminKycActions row={row} />
-            </CardContent>
-          </Card>
+            </AdminCardContent>
+          </AdminCard>
         ))}
         {rows.length === 0 ? (
-          <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
-            <CardContent className="p-6 text-sm text-muted">No KYC rows loaded.</CardContent>
-          </Card>
+          <AdminCard>
+            <AdminCardContent className="p-6 text-sm text-muted">No KYC rows loaded.</AdminCardContent>
+          </AdminCard>
         ) : null}
       </div>
     </div>

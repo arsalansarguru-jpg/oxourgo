@@ -10,9 +10,7 @@ import {
 } from '@/lib/admin/actions/vehicle-actions'
 import type { AdminVehicleRow } from '@/lib/admin/data/fleet'
 import { Button } from '@/components/ui/Button'
-import { Card, CardContent } from '@/components/ui/Card'
-import { cn } from '@/lib/utils/cn'
-import { cardSurfaceBase } from '@/components/ui/card-tokens'
+import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 
 export function AdminVehicleOps({ vehicle }: { vehicle: AdminVehicleRow }) {
   const router = useRouter()
@@ -24,8 +22,8 @@ export function AdminVehicleOps({ vehicle }: { vehicle: AdminVehicleRow }) {
 
   return (
     <div className="space-y-6">
-      <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
-        <CardContent className="space-y-4 p-5 sm:p-6">
+      <AdminCard>
+        <AdminCardContent className="space-y-4">
           <h2 className="text-lg font-semibold text-soft">Listing controls</h2>
           <p className="text-sm text-muted">
             Toggle public availability and homepage featuring. Pricing lives in the details card.
@@ -79,11 +77,11 @@ export function AdminVehicleOps({ vehicle }: { vehicle: AdminVehicleRow }) {
             </label>
           </div>
           {msg ? <p className="text-sm text-red-300">{msg}</p> : null}
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
 
-      <Card className={cn(cardSurfaceBase, 'border border-red-500/20')}>
-        <CardContent className="space-y-3 p-5 sm:p-6">
+      <AdminCard variant="risk">
+        <AdminCardContent className="space-y-3">
           <h2 className="text-lg font-semibold text-red-200">Danger zone</h2>
           <p className="text-sm text-muted">
             Deletes this catalog row. Bookings referencing this vehicle may block deletion until re-pointed.
@@ -107,8 +105,8 @@ export function AdminVehicleOps({ vehicle }: { vehicle: AdminVehicleRow }) {
           >
             Remove vehicle
           </Button>
-        </CardContent>
-      </Card>
+        </AdminCardContent>
+      </AdminCard>
     </div>
   )
 }
