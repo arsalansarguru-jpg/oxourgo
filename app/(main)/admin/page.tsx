@@ -14,7 +14,7 @@ export default async function AdminHomePage() {
   try {
     stats = await adminOverviewStats()
   } catch {
-    // Missing service role or network — layout already warns.
+    // Stats are best-effort; layout surfaces configuration guidance when needed.
   }
 
   const tiles = [
@@ -29,7 +29,7 @@ export default async function AdminHomePage() {
     <div className="space-y-10">
       <AdminPageHeader
         title="Control center"
-        description="Live Supabase metrics, role-gated operations (ops_admin+), and shortcuts into fleet, reservations, customers, KYC, and payments."
+        description="Live operational metrics and shortcuts into fleet, reservations, customers, identity checks, and payments."
       />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">

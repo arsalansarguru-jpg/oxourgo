@@ -7,6 +7,7 @@ import { writeAdminAudit } from '@/lib/admin/audit'
 import { requireAppRole } from '@/lib/auth/server'
 import type { Database, Json } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { adminActionDbFailed, SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
 
 export async function adminCreateVehicleAction(input: {
   name: string
@@ -39,9 +40,8 @@ export async function adminCreateVehicleAction(input: {
   }
 
   const { data, error } = await admin.from('vehicles').insert(insert).select('id').single()
-  if (error || !data?.id) {
-    return { ok: false, message: error?.message ?? 'Could not create vehicle.' }
-  }
+  if (error) return adminActionDbFailed('adminCreateVehicleAction', error)
+  if (!data?.id) return { ok: false, message: SAFE_USER_MESSAGE.generic }
 
   await writeAdminAudit({
     actorUserId: user.id,
@@ -64,7 +64,7 @@ export async function adminUpdateVehicleAction(
   const admin = createAdminClient()
 
   const { error } = await admin.from('vehicles').update(patch).eq('id', id)
-  if (error) return { ok: false, message: error.message }
+  if (error) return adminActionDbFailed('adminUpdateVehicleAction', error)
 
   await writeAdminAudit({
     actorUserId: user.id,
@@ -93,7 +93,7 @@ export async function adminDeleteVehicleAction(id: string): Promise<AdminActionR
   const admin = createAdminClient()
 
   const { error } = await admin.from('vehicles').delete().eq('id', id)
-  if (error) return { ok: false, message: error.message }
+  if (error) return adminActionDbFailed('adminDeleteVehicleAction', error)
 
   await writeAdminAudit({
     actorUserId: user.id,

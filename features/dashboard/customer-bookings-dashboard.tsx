@@ -103,7 +103,7 @@ export function CustomerBookingsDashboard({ result }: CustomerBookingsDashboardP
         <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-soft md:text-4xl">My bookings</h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted">
           {bookings.length} reservation{bookings.length === 1 ? '' : 's'} on your account — grouped by trip state.
-          Vehicle art, hubs, totals, and booking and payment status stay in sync with Supabase.
+          Vehicle imagery, hubs, totals, and booking and payment status update as your trip progresses.
         </p>
       </header>
 

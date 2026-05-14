@@ -14,12 +14,13 @@ import {
 } from 'lucide-react'
 
 import { BrandLogo } from '@/components/layout/brand-logo'
+import { DataLoadErrorPanel } from '@/components/ui/data-load-error'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { BRAND } from '@/constants/brand'
 import { buildAuthCallbackUrl } from '@/lib/auth/callback-url'
 import { safeNextPath } from '@/lib/auth/safe-next-path'
-import { formatAuthError } from '@/lib/auth/format-auth-error'
+import { formatAuthError } from '@/lib/errors/format-auth-error'
 import { normalizePhoneToE164 } from '@/lib/auth/normalize-phone'
 import { cn } from '@/lib/utils/cn'
 import { useSupabase } from '@/hooks/use-supabase'
@@ -169,21 +170,16 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
           aria-hidden
         />
         <div className="relative space-y-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200/90">Configuration</p>
-          <h2 id={headingId} className="text-lg font-semibold tracking-[-0.03em] text-soft sm:text-xl">
-            Supabase is not configured
-          </h2>
-          <p className="text-sm leading-relaxed text-silver/95">
-            Add <code className="rounded bg-fill-glass-strong px-1.5 py-0.5 text-[13px]">NEXT_PUBLIC_SUPABASE_URL</code> and{' '}
-            <code className="rounded bg-fill-glass-strong px-1.5 py-0.5 text-[13px]">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>{' '}
-            (or <code className="rounded bg-fill-glass-strong px-1.5 py-0.5 text-[13px]">NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY</code>)
-            to <code className="rounded bg-fill-glass-strong px-1.5 py-0.5 text-[13px]">.env.local</code>. See{' '}
-            <code className="rounded bg-fill-glass-strong px-1.5 py-0.5 text-[13px]">.env.example</code> in the repo.
-          </p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200/90">Sign-in</p>
+          <DataLoadErrorPanel
+            title="Sign-in is not available"
+            description="This environment is not fully configured. Please try again later or contact support if the issue continues."
+            className="text-left shadow-none"
+          />
           {initialAuthError ? (
             <div
               role="alert"
-              className="rounded-xl border border-red-400/25 bg-red-500/[0.08] px-4 py-3 text-sm text-red-100/95"
+              className="rounded-xl border border-stroke bg-fill-glass px-4 py-3 text-sm text-muted"
             >
               {initialAuthError}
             </div>
@@ -245,7 +241,8 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
       return
     }
     if (!callbackUrl) {
-      setError('Could not build a return URL. Check NEXT_PUBLIC_SITE_URL or open this page in the browser.')
+      console.error('[auth-panel] missing origin for callback URL')
+      setError('Could not start sign-in from this page. Open the app in your browser and try again.')
       return
     }
     setPending('email')

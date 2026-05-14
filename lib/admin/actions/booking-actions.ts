@@ -13,6 +13,7 @@ import {
 } from '@/lib/notifications/events'
 import type { Database } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { adminActionDbFailed } from '@/lib/errors/safe-user-message'
 
 const PAYMENT_STATUSES = ['pending', 'authorized', 'paid', 'failed', 'refunded'] as const
 const BOOKING_STATUSES = ['pending_payment', 'confirmed', 'cancelled', 'completed'] as const
@@ -36,7 +37,7 @@ export async function adminApproveBookingAction(bookingId: string): Promise<Admi
     .update({ booking_status: 'confirmed', updated_at: nowIso() })
     .eq('id', bookingId)
 
-  if (error) return { ok: false, message: error.message }
+  if (error) return adminActionDbFailed('adminApproveBookingAction', error)
 
   await writeAdminAudit({
     actorUserId: user.id,
@@ -72,11 +73,9 @@ export async function adminRejectBookingAction(bookingId: string, note?: string)
     })
     .eq('id', bookingId)
 
-  if (error) return { ok: false, message: error.message }
+  if (error) return adminActionDbFailed('adminRejectBookingAction', error)
 
   await writeAdminAudit({
-    actorUserId: user.id,
-    action: 'booking.reject',
     entityType: 'booking',
     entityId: bookingId,
     payload: { note: note?.trim() ?? null },
@@ -109,11 +108,9 @@ export async function adminCancelBookingAction(bookingId: string, note?: string)
     })
     .eq('id', bookingId)
 
-  if (error) return { ok: false, message: error.message }
+  if (error) return adminActionDbFailed('adminCancelBookingAction', error)
 
   await writeAdminAudit({
-    actorUserId: user.id,
-    action: 'booking.cancel',
     entityType: 'booking',
     entityId: bookingId,
     payload: { note: note?.trim() ?? null },
@@ -146,7 +143,7 @@ export async function adminSetBookingPaymentStatusAction(
   }
   const { error } = await admin.from('bookings').update(patch).eq('id', bookingId)
 
-  if (error) return { ok: false, message: error.message }
+  if (error) return adminActionDbFailed('adminSetBookingPaymentStatusAction', error)
 
   if (previous !== payment_status) {
     void onPaymentStatusChanged(bookingId, payment_status, previous)
@@ -183,11 +180,9 @@ export async function adminSetBookingStatusAction(
   }
   const { error } = await admin.from('bookings').update(patch).eq('id', bookingId)
 
-  if (error) return { ok: false, message: error.message }
+  if (error) return adminActionDbFailed('adminSetBookingStatusAction', error)
 
   await writeAdminAudit({
-    actorUserId: user.id,
-    action: 'booking.status',
     entityType: 'booking',
     entityId: bookingId,
     payload: { booking_status },

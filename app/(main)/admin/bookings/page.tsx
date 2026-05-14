@@ -112,7 +112,7 @@ export default async function AdminBookingsPage({
             </table>
           </div>
           {rows.length === 0 ? (
-            <p className="p-6 text-sm text-muted">No bookings in this view — check filters or service role key.</p>
+            <p className="p-6 text-sm text-muted">No bookings in this view. Adjust filters or try again shortly.</p>
           ) : null}
         </CardContent>
       </Card>

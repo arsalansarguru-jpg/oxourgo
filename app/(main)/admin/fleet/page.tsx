@@ -92,7 +92,7 @@ export default async function AdminFleetPage() {
             </table>
           </div>
           {vehicles.length === 0 ? (
-            <p className="p-6 text-sm text-muted">No vehicles loaded — check service role key and RLS for service role.</p>
+            <p className="p-6 text-sm text-muted">No vehicles in this view. Adjust filters or try again shortly.</p>
           ) : null}
         </CardContent>
       </Card>

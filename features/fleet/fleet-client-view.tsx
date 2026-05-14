@@ -15,7 +15,7 @@ import type { FleetCar, FleetFilterId } from '@/lib/fleet/types'
 
 type FleetClientViewProps = {
   cars: FleetCar[]
-  /** True when the server could not load `public.vehicles` (details are server-logged only). */
+  /** True when the server could not load fleet data (details are server-logged only). */
   loadFailed?: boolean
   pickup?: string
   from?: string
@@ -136,7 +136,7 @@ export function FleetClientView({
             <EmptyState
               icon={Search}
               title="No vehicles to show"
-              description="There are no vehicles to list, or every row is hidden. Ensure public.vehicles has rows and set available = true for bookable inventory."
+                description="Nothing is listed yet, or everything on offer is fully booked. Try refreshing, adjusting filters, or contact us for a bespoke match."
               actionLabel="Refresh"
               onAction={() => router.refresh()}
             />

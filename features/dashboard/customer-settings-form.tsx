@@ -39,7 +39,9 @@ export function CustomerSettingsForm({ user, profile }: { user: User; profile: P
       <header>
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-electric/90">Account</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-soft">Profile settings</h1>
-        <p className="mt-2 max-w-2xl text-sm text-muted">Identity fields sync to the `profiles` table (RLS: your row only).</p>
+        <p className="mt-2 max-w-2xl text-sm text-muted">
+          Identity details are saved securely to your account and used only for reservations and support.
+        </p>
       </header>
 
       <Card className={cn(cardSurfaceTransition, cardSurfaceHover)}>

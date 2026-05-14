@@ -6,13 +6,14 @@ import type { KycDocumentRow } from '@/lib/customer/kyc-queries'
 import { getAuthenticatedUser } from '@/lib/auth/server'
 import { onKycSubmitted } from '@/lib/notifications/events'
 import { createClient } from '@/lib/supabase/server'
+import { adminActionDbFailed, SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
 
 const docTypes = ['aadhaar', 'license', 'passport', 'selfie'] as const
 
 export async function updateCustomerProfileAction(formData: FormData): Promise<{ ok: boolean; message?: string }> {
   const user = await getAuthenticatedUser()
   if (!user) {
-    return { ok: false, message: 'Unauthorized' }
+    return { ok: false, message: SAFE_USER_MESSAGE.unauthorized }
   }
 
   const fullName = String(formData.get('fullName') ?? '').trim()
@@ -31,9 +32,7 @@ export async function updateCustomerProfileAction(formData: FormData): Promise<{
     { onConflict: 'user_id' },
   )
 
-  if (error) {
-    return { ok: false, message: error.message }
-  }
+  if (error) return adminActionDbFailed('updateCustomerProfileAction', error)
 
   revalidatePath('/dashboard')
   revalidatePath('/dashboard/settings')
@@ -49,7 +48,7 @@ export async function registerKycDocumentAction(input: {
 }): Promise<{ ok: boolean; message?: string; document?: KycDocumentRow }> {
   const user = await getAuthenticatedUser()
   if (!user) {
-    return { ok: false, message: 'Unauthorized' }
+    return { ok: false, message: SAFE_USER_MESSAGE.unauthorized }
   }
 
   if (!docTypes.includes(input.documentType as (typeof docTypes)[number])) {
@@ -79,9 +78,7 @@ export async function registerKycDocumentAction(input: {
     .select('*')
     .single()
 
-  if (error) {
-    return { ok: false, message: error.message }
-  }
+  if (error) return adminActionDbFailed('registerKycDocumentAction', error)
 
   revalidatePath('/dashboard/kyc')
   revalidatePath('/dashboard')

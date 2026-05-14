@@ -63,10 +63,7 @@ export async function fetchPublicVehicleRows(): Promise<{ ok: true; rows: Vehicl
     const rows = (data ?? []) as VehicleRow[]
 
     if (rows.length === 0) {
-      console.warn(
-        '[oxour-go/fleet:vehicles.select]',
-        'Query succeeded but returned 0 rows from public.vehicles — verify data exists and RLS allows SELECT for anon.',
-      )
+      console.warn('[oxour-go/fleet:vehicles.select] Query returned 0 rows (empty catalog or filtered inventory).')
     }
 
     return { ok: true, rows }

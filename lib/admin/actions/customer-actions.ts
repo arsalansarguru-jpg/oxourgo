@@ -7,6 +7,7 @@ import { writeAdminAudit } from '@/lib/admin/audit'
 import { requireAppRole } from '@/lib/auth/server'
 import type { Database, Json } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { adminActionDbFailed } from '@/lib/errors/safe-user-message'
 
 const TIERS = ['none', 'basic', 'verified'] as const
 
@@ -47,7 +48,7 @@ export async function adminUpdateCustomerProfileAction(
         })
       ).error
 
-  if (error) return { ok: false, message: error.message }
+  if (error) return adminActionDbFailed('adminUpdateCustomerProfileAction', error)
 
   await writeAdminAudit({
     actorUserId: user.id,

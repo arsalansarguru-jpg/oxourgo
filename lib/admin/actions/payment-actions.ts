@@ -8,6 +8,7 @@ import { requireAppRole } from '@/lib/auth/server'
 import { onOpsPaymentLedger } from '@/lib/notifications/events'
 import type { Json } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { adminActionDbFailed } from '@/lib/errors/safe-user-message'
 
 export async function adminCreateRefundPlaceholderAction(bookingId: string): Promise<AdminActionResult> {
   const { user } = await requireAppRole('ops_admin')
@@ -37,11 +38,9 @@ export async function adminCreateRefundPlaceholderAction(bookingId: string): Pro
     metadata,
   })
 
-  if (error) return { ok: false, message: error.message }
+  if (error) return adminActionDbFailed('adminCreateRefundPlaceholderAction', error)
 
   await writeAdminAudit({
-    actorUserId: user.id,
-    action: 'payment.refund_placeholder',
     entityType: 'booking',
     entityId: bookingId,
   })
@@ -67,7 +66,7 @@ export async function adminCreateDepositHoldPlaceholderAction(bookingId: string)
   if (bErr || !booking) return { ok: false, message: 'Booking not found.' }
 
   if (!booking.vehicle_id) {
-    return { ok: false, message: 'Booking has no linked vehicle (vehicle_id).' }
+    return { ok: false, message: 'This booking is not linked to a vehicle.' }
   }
 
   let depositRow: { security_deposit: number } | null = null
@@ -104,11 +103,9 @@ export async function adminCreateDepositHoldPlaceholderAction(bookingId: string)
     metadata,
   })
 
-  if (error) return { ok: false, message: error.message }
+  if (error) return adminActionDbFailed('adminCreateDepositHoldPlaceholderAction', error)
 
   await writeAdminAudit({
-    actorUserId: user.id,
-    action: 'payment.deposit_placeholder',
     entityType: 'booking',
     entityId: bookingId,
   })

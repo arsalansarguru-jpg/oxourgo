@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache'
 import type { AdminActionResult } from '@/lib/admin/actions/types'
 import { requireAppRole } from '@/lib/auth/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { adminActionDbFailed } from '@/lib/errors/safe-user-message'
 import { listOpsAlertsForAdmin } from '@/lib/admin/data/ops-alerts'
 
 export async function dismissOpsAlertAction(alertId: string): Promise<AdminActionResult> {
@@ -20,7 +21,7 @@ export async function dismissOpsAlertAction(alertId: string): Promise<AdminActio
     if (error.message.includes('duplicate') || error.code === '23505') {
       return { ok: true }
     }
-    return { ok: false, message: error.message }
+    return adminActionDbFailed('dismissOpsAlertAction', error)
   }
 
   revalidatePath('/admin')

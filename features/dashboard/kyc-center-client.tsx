@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
+import { DataLoadErrorPanel } from '@/components/ui/data-load-error'
 import { useSupabase } from '@/hooks/use-supabase'
 import type { KycDocumentRow } from '@/lib/customer/kyc-queries'
 import { formatKycDocumentType } from '@/lib/kyc/doc-label'
@@ -29,12 +30,18 @@ export function KycCenterClient({
     setDocs(initialDocs)
   }, [initialDocs])
 
+  useEffect(() => {
+    if (!supabase || !projectUrl || !anonKey) {
+      console.error('[KycCenterClient] Secure uploads unavailable: client or public project configuration is incomplete.')
+    }
+  }, [supabase, projectUrl, anonKey])
+
   if (!supabase || !projectUrl || !anonKey) {
     return (
-      <p className="text-sm text-amber-200/90">
-        Supabase is not configured in the browser — set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (or
-        publishable key) in `.env.local` to enable secure uploads.
-      </p>
+      <DataLoadErrorPanel
+        title="Unable to open secure uploads"
+        description="Document uploads are temporarily unavailable. Please try again later or contact support if this continues."
+      />
     )
   }
 
@@ -46,11 +53,8 @@ export function KycCenterClient({
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-electric/90">Trust &amp; vault</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-soft">KYC center</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted">
-          Files upload directly to your private Supabase Storage prefix (
-          <code className="rounded bg-fill-glass-strong px-1 font-mono text-xs">kyc/&lt;your-account-id&gt;/…</code>) with your
-          session token. We store the storage path and metadata in{' '}
-          <code className="rounded bg-fill-glass-strong px-1 font-mono text-xs">kyc_documents</code> for verification. Operations
-          staff review using admin tools; objects are not world-readable.
+          Files upload over an encrypted session into your private vault. We keep only what is needed for verification; our
+          operations team reviews submissions through secure tools.
         </p>
       </header>
 

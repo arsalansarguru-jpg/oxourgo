@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle, CalendarRange, Car as CarIcon, CheckCircle2, Loader2, MapPin, Shield } from 'lucide-react'
 
 import { createBookingAction } from '@/app/(main)/booking/[id]/actions'
+import { customerBookingFailureCopy } from '@/lib/booking/customer-booking-failure-copy'
+import { SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
 import { BRAND } from '@/constants/brand'
 import { formatInr } from '@/lib/format'
 import { computeBookingQuote } from '@/lib/booking/pricing'
@@ -99,10 +101,10 @@ export function BookingView({ car, defaultPickupIso, defaultReturnIso, isLoggedI
         hint?: string
       }
       if (!res.ok || body.ok === false) {
-        console.error('[checkAvailability]', res.status, body)
+        console.error('[booking-view] checkAvailability', res.status, body)
         setAvail({
           status: 'error',
-          message: 'We could not verify availability right now. Please try again in a moment.',
+          message: SAFE_USER_MESSAGE.availability,
         })
         return
       }
@@ -111,8 +113,9 @@ export function BookingView({ car, defaultPickupIso, defaultReturnIso, isLoggedI
         available: Boolean(body.available),
         reason: body.reason,
       })
-    } catch {
-      setAvail({ status: 'error', message: 'Network error while checking availability.' })
+    } catch (e) {
+      console.error('[booking-view] checkAvailability', e)
+      setAvail({ status: 'error', message: SAFE_USER_MESSAGE.availability })
     }
   }, [car.id, pickup, returnAt])
 
@@ -163,7 +166,8 @@ export function BookingView({ car, defaultPickupIso, defaultReturnIso, isLoggedI
         returnLocation: sameReturnHub ? pickupHub : returnHub,
       })
       if (!result.ok) {
-        setFormError(result.message)
+        console.error('[booking-view] createBookingAction', result.code)
+        setFormError(customerBookingFailureCopy(result.code))
         return
       }
       setSuccess({ bookingId: result.bookingId, totalRupees: result.totalRupees })
@@ -302,10 +306,10 @@ export function BookingView({ car, defaultPickupIso, defaultReturnIso, isLoggedI
                 initial={{ opacity: 0, y: 6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
-                className="flex gap-3 rounded-2xl border border-red-400/25 bg-red-500/[0.08] px-4 py-3 text-sm text-red-100/95"
+                className="flex gap-3 rounded-2xl border border-stroke bg-fill-glass px-4 py-3 text-sm text-muted shadow-[var(--shadow-card)]"
               >
-                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-                <p>{formError}</p>
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/90" aria-hidden />
+                <p className="leading-relaxed text-soft">{formError}</p>
               </motion.div>
             ) : null}
           </AnimatePresence>

@@ -4,7 +4,8 @@ import { createClient } from '@/lib/supabase/server'
 
 /**
  * Returns true if another non-cancelled booking overlaps [pickup, return) for this car.
- * Uses `has_booking_overlap` RPC (SECURITY DEFINER). Apply migration if this errors.
+ * Uses `has_booking_overlap` RPC (SECURITY DEFINER). On failure, details are logged server-side only;
+ * `error` is an opaque token (not end-user copy).
  */
 export async function hasBookingOverlap(
   carId: string,
@@ -22,15 +23,15 @@ export async function hasBookingOverlap(
     })
     if (error) {
       if (error.message.includes('has_booking_overlap') || error.code === '42883') {
-        return {
-          overlap: false,
-          error: 'Database function has_booking_overlap is missing. Apply supabase/migrations/20260212120000_bookings.sql.',
-        }
+        console.error('[hasBookingOverlap] RPC missing or not deployed', error.message, error.code)
+        return { overlap: false, error: 'overlap_check_unavailable' }
       }
-      return { overlap: false, error: error.message }
+      console.error('[hasBookingOverlap]', error.message, error.code, error.details, error.hint)
+      return { overlap: false, error: 'overlap_check_failed' }
     }
     return { overlap: Boolean(data), error: null }
   } catch (e) {
-    return { overlap: false, error: e instanceof Error ? e.message : 'Overlap check failed.' }
+    console.error('[hasBookingOverlap] exception', e)
+    return { overlap: false, error: 'overlap_check_failed' }
   }
 }

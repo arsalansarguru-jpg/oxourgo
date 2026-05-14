@@ -7,6 +7,7 @@ import { writeAdminAudit } from '@/lib/admin/audit'
 import { requireAppRole } from '@/lib/auth/server'
 import { onKycDecision } from '@/lib/notifications/events'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { adminActionDbFailed, logUnknownError, SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
 
 function nowIso() {
   return new Date().toISOString()
@@ -50,7 +51,7 @@ export async function adminSetKycDocumentStatusAction(input: {
     })
     .eq('id', input.documentId)
 
-  if (error) return { ok: false, message: error.message }
+  if (error) return adminActionDbFailed('adminSetKycDocumentStatusAction', error)
 
   if (input.status === 'approved') {
     await maybePromoteVerification(admin, doc.user_id)
@@ -90,7 +91,8 @@ export async function adminGetKycSignedUrlAction(documentId: string): Promise<
     .createSignedUrl(doc.storage_path, 120)
 
   if (signErr || !signed?.signedUrl) {
-    return { ok: false, message: signErr?.message ?? 'Could not sign URL.' }
+    if (signErr) logUnknownError('adminGetKycSignedUrlAction:storage', signErr)
+    return { ok: false, message: SAFE_USER_MESSAGE.generic }
   }
 
   return { ok: true, url: signed.signedUrl, expiresIn: 120 }

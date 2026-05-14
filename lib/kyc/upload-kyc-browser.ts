@@ -38,18 +38,21 @@ export function uploadKycObjectWithProgress(input: {
         input.onProgress(1)
         resolve()
       } else {
-        let message = `Upload failed (${xhr.status})`
+        let detail: unknown = null
         try {
-          const body = JSON.parse(xhr.responseText) as { message?: string; error?: string }
-          message = body.message ?? body.error ?? message
+          detail = JSON.parse(xhr.responseText) as { message?: string; error?: string }
         } catch {
-          if (xhr.responseText) message = xhr.responseText.slice(0, 200)
+          detail = xhr.responseText ? xhr.responseText.slice(0, 500) : null
         }
-        reject(new Error(message))
+        console.error('[uploadKycObjectWithProgress] failed', xhr.status, detail)
+        reject(new Error('UPLOAD_FAILED'))
       }
     }
 
-    xhr.onerror = () => reject(new Error('Network error during upload.'))
+    xhr.onerror = () => {
+      console.error('[uploadKycObjectWithProgress] network error')
+      reject(new Error('UPLOAD_FAILED'))
+    }
     xhr.onabort = () => reject(new Error('Upload cancelled.'))
 
     xhr.send(input.file)

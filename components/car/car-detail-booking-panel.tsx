@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle, CalendarRange, CheckCircle2, Loader2, MapPin, Shield } from 'lucide-react'
 
 import { createBookingAction } from '@/app/(main)/booking/[id]/actions'
+import { customerBookingFailureCopy } from '@/lib/booking/customer-booking-failure-copy'
+import { SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
 import { BRAND } from '@/constants/brand'
 import { formatInr } from '@/lib/format'
 import { computeBookingQuote } from '@/lib/booking/pricing'
@@ -90,9 +92,10 @@ export function CarDetailBookingPanel({ car, isLoggedIn, userEmail }: CarDetailB
         hint?: string
       }
       if (!res.ok || body.ok === false) {
+        console.error('[car-detail-booking-panel] checkAvailability', res.status, body)
         setAvail({
           status: 'error',
-          message: [body.error, body.hint].filter(Boolean).join(' — ') || 'Availability check failed.',
+          message: SAFE_USER_MESSAGE.availability,
         })
         return
       }
@@ -101,8 +104,9 @@ export function CarDetailBookingPanel({ car, isLoggedIn, userEmail }: CarDetailB
         available: Boolean(body.available),
         reason: body.reason,
       })
-    } catch {
-      setAvail({ status: 'error', message: 'Network error while checking availability.' })
+    } catch (e) {
+      console.error('[car-detail-booking-panel] checkAvailability', e)
+      setAvail({ status: 'error', message: SAFE_USER_MESSAGE.availability })
     }
   }, [car.id, pickup, returnAt])
 
@@ -152,7 +156,8 @@ export function CarDetailBookingPanel({ car, isLoggedIn, userEmail }: CarDetailB
         returnLocation: sameReturnHub ? pickupHub : returnHub,
       })
       if (!result.ok) {
-        setFormError(result.message)
+        console.error('[car-detail-booking-panel] createBookingAction', result.code)
+        setFormError(customerBookingFailureCopy(result.code))
         return
       }
       router.push('/dashboard/bookings')
@@ -289,10 +294,10 @@ export function CarDetailBookingPanel({ car, isLoggedIn, userEmail }: CarDetailB
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="flex gap-3 rounded-xl border border-red-400/25 bg-red-500/[0.08] px-3 py-2.5 text-sm text-red-100/95"
+            className="flex gap-3 rounded-xl border border-stroke bg-fill-glass px-3 py-2.5 text-sm text-muted shadow-[var(--shadow-card)]"
           >
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-            <p>{formError}</p>
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/90" aria-hidden />
+            <p className="leading-relaxed text-soft">{formError}</p>
           </motion.div>
         ) : null}
       </AnimatePresence>

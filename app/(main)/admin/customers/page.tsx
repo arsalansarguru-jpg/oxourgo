@@ -71,7 +71,7 @@ export default async function AdminCustomersPage() {
             </table>
           </div>
           {rows.length === 0 ? (
-            <p className="p-6 text-sm text-muted">No users returned — check service role and Auth admin API access.</p>
+            <p className="p-6 text-sm text-muted">No customers in this view. Adjust filters or try again shortly.</p>
           ) : null}
         </CardContent>
       </Card>

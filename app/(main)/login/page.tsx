@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
 import { LoginView } from '@/features/auth/login-view'
+import { sanitizeUrlAuthError } from '@/lib/auth/sanitize-url-auth-error'
 import { safeNextPath } from '@/lib/auth/safe-next-path'
 import { readSupabasePublicEnv } from '@/lib/env/supabase-public'
 import { createClient } from '@/lib/supabase/server'
@@ -32,5 +33,5 @@ export default async function LoginPage({
     }
   }
 
-  return <LoginView initialAuthError={q.error} redirectTo={q.redirect} />
+  return <LoginView initialAuthError={sanitizeUrlAuthError(q.error)} redirectTo={q.redirect} />
 }

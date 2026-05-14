@@ -1,8 +1,14 @@
 import type { AuthError } from '@supabase/supabase-js'
 
-/** Maps Supabase Auth errors to concise, user-safe copy (no internal tokens). */
+import { SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
+
+/**
+ * Maps Supabase Auth errors to user-safe copy. Raw messages are never returned;
+ * unknown errors log to console and fall back to a generic line.
+ */
 export function formatAuthError(error: AuthError | Error | null | undefined): string {
-  if (!error) return 'Something went wrong. Please try again.'
+  if (!error) return SAFE_USER_MESSAGE.generic
+
   const msg = 'message' in error ? error.message : String(error)
   const code = 'status' in error ? String((error as AuthError).status) : ''
 
@@ -37,5 +43,6 @@ export function formatAuthError(error: AuthError | Error | null | undefined): st
     return 'We could not complete that request. Check your input and try again.'
   }
 
-  return msg.length > 160 ? `${msg.slice(0, 157)}…` : msg
+  console.error('[formatAuthError] unmapped auth error', msg, code)
+  return SAFE_USER_MESSAGE.generic
 }

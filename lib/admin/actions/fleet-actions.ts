@@ -7,6 +7,7 @@ import { requireAppRole } from '@/lib/auth/server'
 import type { AdminActionResult } from '@/lib/admin/actions/types'
 import type { Database, Json } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { adminActionDbFailed, logUnknownError, SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
 
 export async function adminCreateCarAction(input: {
   brand: string
@@ -39,9 +40,8 @@ export async function adminCreateCarAction(input: {
   }
 
   const { data, error } = await admin.from('cars').insert(insert).select('id').single()
-  if (error || !data?.id) {
-    return { ok: false, message: error?.message ?? 'Could not create vehicle.' }
-  }
+  if (error) return adminActionDbFailed('adminCreateCarAction', error)
+  if (!data?.id) return { ok: false, message: SAFE_USER_MESSAGE.generic }
 
   await writeAdminAudit({
     actorUserId: user.id,
@@ -65,7 +65,7 @@ export async function adminUpdateCarAction(
 
   const { error } = await admin.from('cars').update(patch).eq('id', id)
 
-  if (error) return { ok: false, message: error.message }
+  if (error) return adminActionDbFailed('adminUpdateCarAction', error)
 
   await writeAdminAudit({
     actorUserId: user.id,
@@ -87,7 +87,7 @@ export async function adminDeleteCarAction(id: string): Promise<AdminActionResul
   const admin = createAdminClient()
 
   const { error } = await admin.from('cars').delete().eq('id', id)
-  if (error) return { ok: false, message: error.message }
+  if (error) return adminActionDbFailed('adminDeleteCarAction', error)
 
   await writeAdminAudit({
     actorUserId: user.id,
@@ -139,10 +139,13 @@ export async function adminUploadCarCoverAction(formData: FormData): Promise<Adm
     contentType: file.type || 'image/jpeg',
     upsert: true,
   })
-  if (upErr) return { ok: false, message: upErr.message }
+  if (upErr) {
+    logUnknownError('adminUploadCarCoverAction:storage', upErr)
+    return { ok: false, message: SAFE_USER_MESSAGE.generic }
+  }
 
   const { error: dbErr } = await admin.from('cars').update({ cover_image_path: path }).eq('id', carId)
-  if (dbErr) return { ok: false, message: dbErr.message }
+  if (dbErr) return adminActionDbFailed('adminUploadCarCoverAction:db', dbErr)
 
   await writeAdminAudit({
     actorUserId: user.id,
@@ -180,13 +183,16 @@ export async function adminAppendGalleryImageAction(formData: FormData): Promise
     contentType: file.type || 'image/jpeg',
     upsert: false,
   })
-  if (upErr) return { ok: false, message: upErr.message }
+  if (upErr) {
+    logUnknownError('adminAppendGalleryImageAction:storage', upErr)
+    return { ok: false, message: SAFE_USER_MESSAGE.generic }
+  }
 
   const existing = (car.gallery_paths as string[] | null) ?? []
   const next = [...existing, path].slice(0, 12)
 
   const { error: dbErr } = await admin.from('cars').update({ gallery_paths: next }).eq('id', carId)
-  if (dbErr) return { ok: false, message: dbErr.message }
+  if (dbErr) return adminActionDbFailed('adminAppendGalleryImageAction:db', dbErr)
 
   await writeAdminAudit({
     actorUserId: user.id,

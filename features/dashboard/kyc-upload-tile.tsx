@@ -7,6 +7,7 @@ import { Check, Eye, FileUp, Loader2, ShieldCheck } from 'lucide-react'
 
 import { registerKycDocumentAction } from '@/app/(main)/dashboard/actions'
 import type { KycDocumentRow } from '@/lib/customer/kyc-queries'
+import { SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
 import type { Database } from '@/lib/supabase/database.types'
 import type { KycDocumentTypeId } from '@/lib/kyc/constants'
 import { KYC_ID_ACCEPT, KYC_MAX_FILE_BYTES, KYC_SELFIE_ACCEPT } from '@/lib/kyc/constants'
@@ -129,7 +130,8 @@ export function KycUploadTile({
           router.refresh()
         } catch (e) {
           setProgress(null)
-          setLocalError(e instanceof Error ? e.message : 'Upload failed.')
+          console.error('[KycUploadTile] upload or register failed', e)
+          setLocalError(SAFE_USER_MESSAGE.save)
         }
       })
     },

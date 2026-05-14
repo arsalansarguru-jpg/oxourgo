@@ -17,6 +17,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   const hasServiceRole = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY?.trim())
+  if (!hasServiceRole) {
+    console.error('[admin layout] Privileged server access is not configured; admin data may be incomplete.')
+  }
 
   let opsInitialUnread = 0
   let opsInitialItems: Awaited<ReturnType<typeof listOpsAlertsForAdmin>> = []
@@ -39,11 +42,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       opsInitialItems={opsInitialItems}
     >
       {!hasServiceRole ? (
-        <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-5 text-sm text-amber-100">
-          <p className="font-semibold">Service role key missing</p>
-          <p className="mt-2 text-amber-100/90">
-            Set <code className="rounded bg-black/30 px-1 py-0.5 font-mono text-xs">SUPABASE_SERVICE_ROLE_KEY</code> on
-            the server. Admin data and mutations use the privileged Supabase client after your JWT role is validated.
+        <div className="rounded-2xl border border-stroke bg-fill-glass p-5 text-sm text-muted shadow-[var(--shadow-card)] sm:p-6">
+          <p className="font-semibold text-soft">Admin data connection incomplete</p>
+          <p className="mt-2 leading-relaxed text-muted">
+            Some lists and actions may be empty until the deployment is fully configured. If you are an operator, check
+            server logs or contact your technical lead.
           </p>
         </div>
       ) : null}

@@ -18,7 +18,9 @@ export async function GET(request: NextRequest) {
   }
 
   if (!readSupabasePublicEnv()) {
-    return NextResponse.redirect(new URL('/login?error=Supabase%20is%20not%20configured', origin))
+    return NextResponse.redirect(
+      new URL(`/login?error=${encodeURIComponent('Sign-in is temporarily unavailable.')}`, origin),
+    )
   }
 
   const code = url.searchParams.get('code')
