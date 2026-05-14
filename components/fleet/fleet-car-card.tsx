@@ -76,8 +76,8 @@ export function FleetCarCard({ car, className }: FleetCarCardProps) {
             </span>
           </div>
 
-          <div className="mt-auto flex items-end justify-between gap-3 pt-1">
-            <div>
+          <div className="mt-auto flex flex-col gap-4 min-[400px]:flex-row min-[400px]:items-end min-[400px]:justify-between">
+            <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">From</p>
               <p className="text-xl font-bold tracking-[-0.02em] text-soft">
                 {formatInr(car.pricePerDay)}
@@ -85,11 +85,11 @@ export function FleetCarCard({ car, className }: FleetCarCardProps) {
               </p>
             </div>
             {available ? (
-              <Button size="md" to={`/car/${car.id}`}>
+              <Button size="md" to={`/car/${car.id}`} className="w-full min-[400px]:w-auto">
                 Book
               </Button>
             ) : (
-              <Button size="md" variant="secondary" disabled>
+              <Button size="md" variant="secondary" disabled className="w-full min-[400px]:w-auto">
                 Unavailable
               </Button>
             )}

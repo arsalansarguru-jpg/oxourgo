@@ -14,9 +14,9 @@ type Props = {
  */
 export function DashboardLayout({ children, ...topBar }: Props) {
   return (
-    <div className="min-h-dvh bg-matte pb-8 md:pb-10">
+    <div className="flex min-h-dvh min-w-0 flex-col overflow-x-clip bg-matte pb-8 md:pb-10">
       <DashboardTopBar {...topBar} />
-      <main id="main" className="pb-6 pt-0 md:pb-8">
+      <main id="main" className="min-w-0 flex-1 pb-6 pt-0 md:pb-8">
         {children}
       </main>
       <DashboardSlimFooter />

@@ -44,7 +44,7 @@ export default async function AdminPaymentsPage() {
           <div className="border-b border-white/[0.06] px-6 py-5">
             <h2 className="text-lg font-semibold tracking-[-0.02em] text-soft">Recent payment events</h2>
           </div>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scroll-touch">
             <table className="w-full min-w-[900px] text-left text-sm">
               <thead className="admin-table-head">
                 <tr>

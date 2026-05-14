@@ -157,7 +157,7 @@ export function FleetClientView({
         </div>
       )}
 
-      <div className="sticky top-14 z-40 rounded-2xl border border-stroke bg-matte/[0.88] p-3 shadow-[0_8px_40px_-28px_rgba(0,0,0,0.65)] backdrop-blur-2xl supports-[backdrop-filter]:bg-matte/75 sm:top-[3.5rem] md:top-[3.75rem] md:p-4 lg:sticky">
+      <div className="sticky top-[var(--public-header-offset)] z-40 -mx-[var(--spacing-edge)] min-w-0 rounded-2xl border border-stroke bg-matte/[0.88] px-[var(--spacing-edge)] py-3 shadow-[0_8px_40px_-28px_rgba(0,0,0,0.65)] backdrop-blur-2xl supports-[backdrop-filter]:bg-matte/75 md:mx-0 md:py-4 lg:sticky lg:top-[var(--public-header-offset)]">
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between lg:gap-6">
                 <div className="min-w-0 flex-1 space-y-2">
@@ -302,7 +302,7 @@ export function FleetClientView({
               {totalPages > 1 && !isSearchDebouncing ? (
                 <motion.div
                   layout
-                  className="mt-10 flex flex-wrap items-center justify-center gap-2"
+                  className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                 >

@@ -43,7 +43,7 @@ export function CustomerNotificationRow({ row }: { row: NotificationRow }) {
                 <span className="h-2 w-2 shrink-0 rounded-full bg-electric shadow-[0_0_12px_rgba(59,130,246,0.55)]" />
               ) : null}
             </div>
-            {row.body ? <p className="text-sm text-muted">{row.body}</p> : null}
+            {row.body ? <p className="break-words text-sm text-muted">{row.body}</p> : null}
             <p className="text-xs text-muted">{new Date(row.created_at).toLocaleString()}</p>
           </div>
           <div className="flex shrink-0 flex-wrap gap-2">

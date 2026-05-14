@@ -92,13 +92,13 @@ export function Navbar() {
     <>
       <header
         className={cn(
-          'sticky top-0 z-50 border-b transition-[background-color,backdrop-filter,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
+          'sticky top-0 z-50 border-b pt-[var(--safe-top)] transition-[background-color,backdrop-filter,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
           scrolled
             ? 'border-stroke bg-matte/[0.78] shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset,0_18px_48px_-28px_rgba(0,0,0,0.75)] backdrop-blur-2xl backdrop-saturate-[1.35] supports-[backdrop-filter]:bg-matte/[0.62]'
             : 'border-stroke bg-matte/[0.52] shadow-[0_24px_64px_-40px_rgba(0,0,0,0.55)] backdrop-blur-3xl backdrop-saturate-[1.2] supports-[backdrop-filter]:bg-matte/[0.38]',
         )}
       >
-        <div className="container-app grid h-[3.25rem] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 sm:h-14 lg:h-[3.75rem] lg:gap-4">
+        <div className="container-app grid min-h-[3.25rem] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 sm:min-h-14 lg:min-h-[3.75rem] lg:gap-4">
           <Link
             href="/"
             className="group flex min-w-0 max-w-[min(100%,14rem)] items-center gap-2.5 justify-self-start sm:max-w-none sm:gap-3"
@@ -282,7 +282,7 @@ export function Navbar() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.38, ease }}
-              className="fixed left-0 right-0 top-[3.25rem] z-[70] max-h-[calc(100dvh-3.25rem)] overflow-y-auto border-b border-stroke bg-matte/[0.92] shadow-[0_24px_80px_-32px_rgba(0,0,0,0.85)] backdrop-blur-2xl backdrop-saturate-[1.25] supports-[backdrop-filter]:bg-matte/[0.78] sm:top-14 sm:max-h-[calc(100dvh-3.5rem)] md:hidden"
+              className="fixed left-0 right-0 top-[var(--public-header-offset)] z-[70] max-h-[calc(100dvh-var(--public-header-offset))] overflow-y-auto overflow-x-hidden border-b border-stroke bg-matte/[0.92] shadow-[0_24px_80px_-32px_rgba(0,0,0,0.85)] backdrop-blur-2xl backdrop-saturate-[1.25] supports-[backdrop-filter]:bg-matte/[0.78] md:hidden"
             >
               <div className="container-app flex flex-col gap-1 py-5">
                 <p className="px-1 pb-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted">

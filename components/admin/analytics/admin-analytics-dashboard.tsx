@@ -324,7 +324,7 @@ export function AdminAnalyticsDashboard({ data }: { data: AdminAnalyticsBundle }
               <h2 className="text-lg font-semibold text-soft">Recent bookings</h2>
               <p className="text-xs text-muted">Latest in the selected window.</p>
             </div>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto scroll-touch">
               <table className="w-full min-w-[720px] text-left text-sm">
                 <thead className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
                   <tr className="border-b border-white/[0.06]">
@@ -412,7 +412,7 @@ export function AdminAnalyticsDashboard({ data }: { data: AdminAnalyticsBundle }
                 <p className="text-xs text-muted">Posted revenue and trip volume in window.</p>
               </div>
             </div>
-            <div className="overflow-x-auto">
+            <div className="overflow-x-auto scroll-touch">
               <table className="w-full min-w-[520px] text-left text-sm">
                 <thead className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
                   <tr className="border-b border-white/[0.06]">

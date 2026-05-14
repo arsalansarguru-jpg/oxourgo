@@ -25,7 +25,7 @@ export default async function AdminCustomersPage() {
 
       <AdminCard className="overflow-hidden">
         <AdminCardContent className="p-0">
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto scroll-touch">
             <table className="w-full min-w-[800px] text-left text-sm">
               <thead className="admin-table-head">
                 <tr>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ChevronDown, Shield } from 'lucide-react'
 
@@ -34,13 +34,18 @@ type CarDetailViewProps = {
 export function CarDetailView({ car, isLoggedIn, kycApproved, kycStatus }: CarDetailViewProps) {
   const [activeImage, setActiveImage] = useState(0)
   const [openFaq, setOpenFaq] = useState<string | null>(carDetailFaqs[0]?.id ?? null)
+  const bookingAnchorRef = useRef<HTMLDivElement>(null)
 
   const reviews = useMemo(() => carReviews.filter((r) => r.carId === car.id), [car.id])
 
+  const scrollToBooking = () => {
+    bookingAnchorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
   return (
     <Section className="pt-8">
-      <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr]">
-        <div>
+      <div className="grid min-w-0 gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+        <div className="min-w-0">
           <div
             className={cn(
               'overflow-hidden',
@@ -64,14 +69,14 @@ export function CarDetailView({ car, isLoggedIn, kycApproved, kycStatus }: CarDe
                 <Badge variant="electric">{car.category}</Badge>
               </div>
             </div>
-            <div className="flex gap-2 overflow-x-auto p-3">
+            <div className="scroll-touch flex snap-x snap-mandatory gap-2 overflow-x-auto p-3 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {car.gallery.map((src, idx) => (
                 <button
                   key={`gallery-${idx}`}
                   type="button"
                   onClick={() => setActiveImage(idx)}
                   className={cn(
-                    'relative h-16 w-24 shrink-0 overflow-hidden rounded-xl border transition-[border-color,box-shadow,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/50 focus-visible:ring-offset-2 focus-visible:ring-offset-matte',
+                    'relative h-[4.25rem] w-[6.75rem] shrink-0 snap-start overflow-hidden rounded-xl border transition-[border-color,box-shadow,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/50 focus-visible:ring-offset-2 focus-visible:ring-offset-matte sm:h-16 sm:w-24',
                     idx === activeImage
                       ? 'border-electric/60 ring-2 ring-electric/30'
                       : 'border-stroke hover:border-stroke-strong hover:-translate-y-0.5',
@@ -83,8 +88,8 @@ export function CarDetailView({ car, isLoggedIn, kycApproved, kycStatus }: CarDe
             </div>
           </div>
 
-          <div className="mt-8 space-y-4">
-            <h1 className="text-3xl font-bold tracking-tight text-soft md:text-4xl">{car.name}</h1>
+          <div className="mt-8 min-w-0 space-y-4">
+            <h1 className="text-2xl font-bold tracking-tight text-soft sm:text-3xl md:text-4xl">{car.name}</h1>
             <p className="max-w-2xl text-silver leading-relaxed">{car.description}</p>
             <div className="flex flex-wrap items-center gap-3 text-sm text-silver">
               <ReviewBadge rating={car.rating} count={car.reviews} className="text-sm" />
@@ -152,7 +157,7 @@ export function CarDetailView({ car, isLoggedIn, kycApproved, kycStatus }: CarDe
                   <div key={faq.id} className="px-4">
                     <button
                       type="button"
-                      className="flex w-full items-center justify-between gap-4 py-4 text-left"
+                      className="flex min-h-12 w-full touch-manipulation items-center justify-between gap-4 py-4 text-left"
                       aria-expanded={open}
                       onClick={() => setOpenFaq(open ? null : faq.id)}
                     >
@@ -206,8 +211,12 @@ export function CarDetailView({ car, isLoggedIn, kycApproved, kycStatus }: CarDe
           </div>
         </div>
 
-        <aside className="lg:sticky lg:top-24 lg:self-start">
-          <div className="glass-panel space-y-5 rounded-[1.25rem] border border-stroke p-5 shadow-[var(--shadow-card)] sm:rounded-3xl sm:p-6">
+        <aside className="min-w-0 lg:sticky lg:top-24 lg:self-start">
+          <div
+            ref={bookingAnchorRef}
+            id="vehicle-reserve"
+            className="glass-panel scroll-mt-[calc(var(--public-header-offset)+0.75rem)] space-y-5 rounded-[1.25rem] border border-stroke p-5 shadow-[var(--shadow-card)] sm:rounded-3xl sm:p-6 lg:scroll-mt-28"
+          >
             <div>
               <p className={cardEyebrow}>From per day</p>
               <p className="mt-1 text-3xl font-bold text-soft">{formatInr(car.pricePerDay)}</p>
@@ -230,6 +239,25 @@ export function CarDetailView({ car, isLoggedIn, kycApproved, kycStatus }: CarDe
             </Link>
           </p>
         </aside>
+      </div>
+
+      <div
+        className="pointer-events-none fixed inset-x-0 z-[48] lg:hidden"
+        style={{ bottom: 'var(--mobile-fab-clearance)' }}
+        role="region"
+        aria-label="Reserve this vehicle"
+      >
+        <div className="pointer-events-auto mx-auto max-w-lg px-[var(--spacing-edge)]">
+          <div className="flex items-center justify-between gap-3 rounded-2xl border border-stroke bg-matte/[0.94] px-4 py-3 shadow-[0_-12px_48px_-20px_rgba(0,0,0,0.72)] backdrop-blur-2xl supports-[backdrop-filter]:bg-matte/80">
+            <div className="min-w-0">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">From / day</p>
+              <p className="truncate text-lg font-bold tabular-nums text-soft">{formatInr(car.pricePerDay)}</p>
+            </div>
+            <Button type="button" size="lg" className="shrink-0 touch-manipulation" onClick={scrollToBooking}>
+              Reserve
+            </Button>
+          </div>
+        </div>
       </div>
     </Section>
   )

@@ -58,7 +58,7 @@ export function FleetFilterDrawer({
             exit={{ y: '105%' }}
             transition={{ type: 'spring', damping: 30, stiffness: 340 }}
             className={cn(
-              'fixed inset-x-0 bottom-0 z-[95] max-h-[88dvh] overflow-y-auto rounded-t-[1.35rem] border border-stroke bg-matte/[0.97] px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-24px_80px_-32px_rgba(0,0,0,0.85)] backdrop-blur-2xl md:hidden',
+              'fixed inset-x-0 bottom-0 z-[95] max-h-[88dvh] scroll-touch overflow-y-auto overscroll-y-contain rounded-t-[1.35rem] border border-stroke bg-matte/[0.97] px-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] pt-3 shadow-[0_-24px_80px_-32px_rgba(0,0,0,0.85)] backdrop-blur-2xl md:hidden',
               className,
             )}
           >

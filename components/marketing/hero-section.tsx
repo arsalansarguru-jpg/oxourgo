@@ -34,12 +34,12 @@ export function HeroSection() {
           'relative container-app pb-[clamp(2.75rem,6vw,4.5rem)] pt-[clamp(2rem,4.5vw,3.25rem)] sm:pb-16 sm:pt-[clamp(2.5rem,4vw,3.75rem)] lg:pb-[clamp(3.5rem,6vw,5.5rem)] lg:pt-[clamp(2.75rem,4vw,4.25rem)] 2xl:max-w-[var(--container-wide)]',
         )}
       >
-        <div className="grid items-center gap-10 sm:gap-11 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-12 lg:gap-x-14 xl:gap-x-16">
+        <div className="grid min-w-0 items-center gap-10 sm:gap-11 lg:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)] lg:gap-12 lg:gap-x-14 xl:gap-x-16">
           <motion.div
             variants={staggerContainer}
             initial="initial"
             animate="animate"
-            className="flex max-w-[36rem] flex-col lg:max-w-none xl:max-w-[40rem]"
+            className="flex min-w-0 max-w-[36rem] flex-col lg:max-w-none xl:max-w-[40rem]"
           >
             <motion.div
               variants={{
@@ -138,7 +138,7 @@ export function HeroSection() {
             }}
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
             transition={reduceMotion ? { duration: 0 } : { duration: 0.85, delay: 0.06, ease }}
-            className="w-full"
+            className="w-full min-w-0"
           >
             <div
               className={cn(

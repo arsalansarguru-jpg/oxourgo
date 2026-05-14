@@ -119,6 +119,31 @@ html[data-theme='light'] {
     linear-gradient(165deg, transparent 0%, rgba(243, 245, 251, 0.85) 100%);
 }
 
+/**
+ * Safe areas + public chrome height — fleet sticky bars and mobile nav offset.
+ * Inner navbar heights mirror `Navbar` (`min-h` breakpoints).
+ */
+:root {
+  --safe-top: max(0px, env(safe-area-inset-top, 0px));
+  --safe-bottom: max(0px, env(safe-area-inset-bottom, 0px));
+  --public-header-inner-h: 3.25rem;
+  --public-header-offset: calc(var(--public-header-inner-h) + var(--safe-top));
+  /** Space above the fixed mobile tab bar for floating CTAs (approx. tab bar + inset). */
+  --mobile-fab-clearance: calc(4.35rem + var(--safe-bottom));
+}
+
+@media (min-width: 640px) {
+  :root {
+    --public-header-inner-h: 3.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --public-header-inner-h: 3.75rem;
+  }
+}
+
 html[data-theme='dark'] {
   color-scheme: dark;
 }
@@ -160,9 +185,10 @@ html[data-theme='dark'] {
 @layer base {
   html {
     @apply scroll-smooth antialiased;
+    overflow-x: clip;
   }
   body {
-    @apply bg-matte font-sans text-soft;
+    @apply min-w-0 overflow-x-clip bg-matte font-sans text-soft;
     text-rendering: optimizeLegibility;
   }
   h1,
@@ -232,7 +258,7 @@ html[data-theme='dark'] {
 
 /** Homepage hero — larger scale, tighter cinematic line-height */
 @utility text-hero-display {
-  font-size: clamp(2.625rem, 5.75vw + 0.75rem, 4.25rem);
+  font-size: clamp(2.125rem, 5.25vw + 0.85rem, 4.25rem);
   line-height: 1.03;
   letter-spacing: -0.04em;
   font-weight: 800;
@@ -254,9 +280,16 @@ html[data-theme='dark'] {
 
 @utility container-app {
   margin-inline: auto;
+  min-width: 0;
   width: 100%;
   max-width: min(var(--container-max), calc(100vw - var(--spacing-edge) * 2));
   padding-inline: var(--spacing-edge);
+}
+
+/** Momentum scrolling inside horizontal overflow regions (tables, galleries). */
+@utility scroll-touch {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 
 @keyframes shimmer {

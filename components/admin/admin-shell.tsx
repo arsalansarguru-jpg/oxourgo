@@ -210,7 +210,7 @@ export function AdminShell({ email, appRole, opsInitialUnread, opsInitialItems, 
   const desktopExpanded = sidebarHydrated ? !collapsed : true
 
   return (
-    <div className="flex min-h-dvh">
+    <div className="flex min-h-dvh min-w-0">
       <aside
         className={cn(
           'fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-white/[0.08] py-8 shadow-[12px_0_64px_-36px_rgba(0,0,0,0.92)] backdrop-blur-2xl backdrop-saturate-150 lg:flex',
@@ -316,7 +316,7 @@ export function AdminShell({ email, appRole, opsInitialUnread, opsInitialItems, 
               animate={{ x: 0 }}
               exit={{ x: '-105%' }}
               transition={{ type: 'spring', stiffness: 380, damping: 38 }}
-              className="fixed inset-y-0 left-0 z-50 flex w-[min(21rem,92vw)] flex-col border-r border-white/[0.09] bg-gradient-to-b from-white/[0.08] via-[#08080c]/98 to-[#050506] p-6 shadow-[24px_0_80px_-40px_rgba(0,0,0,0.9)] ring-1 ring-inset ring-white/[0.05] backdrop-blur-2xl backdrop-saturate-150 lg:hidden"
+              className="fixed inset-y-0 left-0 z-50 flex w-[min(21rem,92vw)] min-w-0 flex-col border-r border-white/[0.09] bg-gradient-to-b from-white/[0.08] via-[#08080c]/98 to-[#050506] px-5 pb-[max(1.25rem,var(--safe-bottom))] pt-[max(1rem,var(--safe-top))] shadow-[24px_0_80px_-40px_rgba(0,0,0,0.9)] ring-1 ring-inset ring-white/[0.05] backdrop-blur-2xl backdrop-saturate-150 lg:hidden"
               aria-label="Admin navigation mobile"
             >
               <div className="flex items-start justify-between gap-3">

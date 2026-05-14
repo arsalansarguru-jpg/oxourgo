@@ -12,7 +12,7 @@ export function Section({ className, contained = true, children, ...props }: Sec
       {...props}
     >
       {contained ? (
-        <div className="container-app flex flex-col gap-[var(--spacing-section-gap)] md:gap-[clamp(2.25rem,6vw,5rem)]">
+        <div className="container-app flex min-w-0 flex-col gap-[var(--spacing-section-gap)] md:gap-[clamp(2.25rem,6vw,5rem)]">
           {children}
         </div>
       ) : (

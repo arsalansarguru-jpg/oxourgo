@@ -59,7 +59,7 @@ export function SupportView({ greetingName }: SupportViewProps) {
           subtitle="Premium mobility deserves premium care—AI triage with human escalation in Mumbai."
         />
 
-        <div className="grid gap-6 lg:grid-cols-3">
+        <div className="grid min-w-0 gap-6 lg:grid-cols-3">
           <Card className={cn('lg:col-span-2', cardSurfaceHover)}>
             <CardContent>
               <div className="flex items-center justify-between gap-3">
@@ -94,16 +94,17 @@ export function SupportView({ greetingName }: SupportViewProps) {
                 </div>
               </div>
 
-              <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+              <div className="mt-4 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-stretch">
                 <Input
                   placeholder="Ask anything about your trip…"
                   value={chat}
                   onChange={(e) => setChat(e.target.value)}
                   aria-label="Chat message"
+                  className="min-w-0 flex-1"
                 />
                 <Button
                   type="button"
-                  className="sm:w-36"
+                  className="w-full shrink-0 sm:w-40"
                   disabled={sending || !chat.trim()}
                   onClick={() => {
                     setSentHint(null)

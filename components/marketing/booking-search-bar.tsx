@@ -86,10 +86,10 @@ export function BookingSearchBar() {
       initial={{ opacity: 0, y: 22 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.48, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-      className="relative mx-auto w-full max-w-[var(--container-wide)] xl:max-w-5xl"
+      className="relative mx-auto w-full min-w-0 max-w-[var(--container-wide)] xl:max-w-5xl"
     >
       <div className="glass-panel rounded-[1.25rem] p-4 shadow-[var(--shadow-card)] sm:rounded-3xl sm:p-6 lg:p-7">
-        <div className="grid gap-4 sm:gap-5 md:grid-cols-2 md:gap-5 lg:grid-cols-4 lg:items-end lg:gap-5">
+        <div className="grid min-w-0 gap-4 sm:gap-5 md:grid-cols-2 md:gap-5 lg:grid-cols-4 lg:items-end lg:gap-5">
           <Select label="Pickup Location" value={pickup} onChange={(e) => setPickup(e.target.value)}>
             {PICKUP_LOCATIONS.map((loc) => (
               <option key={loc} value={loc}>

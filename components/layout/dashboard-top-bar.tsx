@@ -70,17 +70,17 @@ export function DashboardTopBar({ userId, notificationUnread, notificationPrevie
   return (
     <header
       className={cn(
-        'sticky top-0 z-50 border-b border-stroke bg-matte/[0.78] shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset] backdrop-blur-2xl supports-[backdrop-filter]:bg-matte/[0.62]',
+        'sticky top-0 z-50 border-b border-stroke bg-matte/[0.78] pt-[var(--safe-top)] shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset] backdrop-blur-2xl supports-[backdrop-filter]:bg-matte/[0.62]',
       )}
     >
-      <div className="container-app flex h-14 items-center justify-between gap-3 lg:h-[3.75rem]">
-        <Link href="/dashboard" className="flex shrink-0 items-center gap-2" aria-label="Oxour Go dashboard home">
+      <div className="container-app flex min-h-14 items-center justify-between gap-3 lg:min-h-[3.75rem]">
+        <Link href="/dashboard" className="flex min-w-0 shrink-0 items-center gap-2" aria-label="Oxour Go dashboard home">
           <span className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-[0.6875rem] border border-stroke bg-gradient-to-b from-fill-glass-strong to-fill-glass shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12)]">
             <BrandLogo priority className="relative z-10 p-[3px]" />
           </span>
         </Link>
 
-        <div className="flex items-center justify-end gap-1.5 sm:gap-2">
+        <div className="flex min-w-0 items-center justify-end gap-2 sm:gap-2.5">
           <DashboardNotificationBell
             userId={userId}
             initialUnread={notificationUnread}

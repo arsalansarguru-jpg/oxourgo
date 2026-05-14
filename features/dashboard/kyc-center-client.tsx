@@ -82,11 +82,11 @@ export function KycCenterClient({
   const latestForTile = (t: KycDocumentTypeId) => latestMap.get(t) as KycDocumentRow | undefined
 
   return (
-    <div className="space-y-8">
+    <div className="min-w-0 space-y-8">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="space-y-2">
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-electric/90">Trust &amp; vault</p>
-          <h1 className="text-3xl font-semibold tracking-[-0.04em] text-soft">KYC center</h1>
+          <h1 className="text-2xl font-semibold tracking-[-0.04em] text-soft sm:text-3xl">KYC center</h1>
           <p className="max-w-2xl text-sm text-muted">
             Files upload over an encrypted session into your private vault. We keep only what is needed for verification; our
             operations team reviews submissions through secure tools.
@@ -116,8 +116,7 @@ export function KycCenterClient({
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-stroke-strong bg-matte/60">
               <UserRound className="h-6 w-6 text-electric" aria-hidden />
             </div>
-            <div>
-              <p className="text-sm font-semibold text-soft">Profile &amp; document completion</p>
+            <div className="min-w-0">
               <p className="mt-1 max-w-xl text-xs leading-relaxed text-muted">
                 Complete each step to move faster through review. Bookings unlock when operations approves your license,
                 government ID, and selfie.
@@ -160,7 +159,7 @@ export function KycCenterClient({
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {KYC_TILES.map((tile) => (
           <KycUploadTile
             key={tile.id}

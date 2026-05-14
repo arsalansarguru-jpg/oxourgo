@@ -20,11 +20,11 @@ export default async function NotificationsCenterPage() {
   const rows = await listNotificationsForUser(user.id)
 
   return (
-    <div className="space-y-8">
+    <div className="min-w-0 space-y-8">
       <header className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-electric/90">Inbox</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-soft">Notifications</h1>
+          <h1 className="text-2xl font-semibold tracking-[-0.04em] text-soft sm:text-3xl">Notifications</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted">
             Booking updates, verification outcomes, and payment milestones land here as soon as they are recorded for your
             account.

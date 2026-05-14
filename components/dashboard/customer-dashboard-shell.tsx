@@ -44,7 +44,7 @@ export function CustomerDashboardShell({
   const pathname = usePathname()
 
   return (
-    <div className="mx-auto flex w-full max-w-[var(--container-wide)] flex-col gap-8 px-[var(--spacing-edge)] pb-16 pt-8 md:pt-10 lg:flex-row lg:gap-10">
+    <div className="mx-auto flex min-w-0 w-full max-w-[var(--container-wide)] flex-col gap-8 px-[var(--spacing-edge)] pb-20 pt-8 md:pt-10 lg:flex-row lg:gap-10">
       <aside
         className={cn(
           'shrink-0 lg:w-64',
@@ -75,7 +75,7 @@ export function CustomerDashboardShell({
                 key={href}
                 href={href}
                 className={cn(
-                  'flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-sm font-medium tracking-[-0.01em] transition-[color,background-color,box-shadow] duration-200',
+                  'flex w-full min-h-12 items-center justify-between gap-2 rounded-xl px-3 py-3 text-sm font-medium tracking-[-0.01em] transition-[color,background-color,box-shadow] duration-200',
                   active
                     ? 'bg-fill-glass-strong text-soft shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)]'
                     : 'text-muted hover:bg-fill-glass hover:text-soft',

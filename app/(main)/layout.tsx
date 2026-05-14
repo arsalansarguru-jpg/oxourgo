@@ -11,7 +11,7 @@ const skipClass =
  */
 export default function MainSegmentLayout({ children }: { children: ReactNode }) {
   return (
-    <div className="min-h-dvh">
+    <div className="min-h-dvh min-w-0 overflow-x-clip">
       <a href="#main" className={skipClass}>
         Skip to content
       </a>

@@ -113,7 +113,7 @@ export function CustomerDashboardHome({
             </p>
           </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-3">
           {pendingPaymentBookings > 0 ? (
             <Button to="/dashboard/payments" className="min-h-11">
               <CreditCard className="mr-1.5 h-4 w-4" aria-hidden />
