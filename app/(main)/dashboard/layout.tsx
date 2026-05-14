@@ -1,11 +1,12 @@
 import { redirect } from 'next/navigation'
 
 import { CustomerDashboardShell } from '@/components/dashboard/customer-dashboard-shell'
+import { DashboardLayout as DashboardChrome } from '@/components/layout/DashboardLayout'
 import { getAuthenticatedUser } from '@/lib/auth/server'
 import { countUnreadNotifications, listNotificationsForUser } from '@/lib/customer/notifications-queries'
 import { createClient } from '@/lib/supabase/server'
 
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function DashboardRouteLayout({ children }: { children: React.ReactNode }) {
   const user = await getAuthenticatedUser()
   if (!user) {
     redirect(`/login?${new URLSearchParams({ redirect: '/dashboard' }).toString()}`)
@@ -24,21 +25,24 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const verificationLabel =
     tier === 'verified' ? 'Account verified' : tier === 'basic' ? 'Verification in progress' : 'Complete your profile'
 
-    const [notificationUnread, notificationPreview] = await Promise.all([
-      countUnreadNotifications(user.id).catch(() => 0),
-      listNotificationsForUser(user.id, 8).catch(() => []),
-    ])
+  const [notificationUnread, notificationPreview] = await Promise.all([
+    countUnreadNotifications(user.id).catch(() => 0),
+    listNotificationsForUser(user.id, 8).catch(() => []),
+  ])
 
   return (
-    <CustomerDashboardShell
+    <DashboardChrome
       userId={user.id}
-      displayName={displayName}
-      email={user.email ?? undefined}
-      verificationLabel={verificationLabel}
       notificationUnread={notificationUnread}
       notificationPreview={notificationPreview}
     >
-      {children}
-    </CustomerDashboardShell>
+      <CustomerDashboardShell
+        displayName={displayName}
+        email={user.email ?? undefined}
+        verificationLabel={verificationLabel}
+      >
+        {children}
+      </CustomerDashboardShell>
+    </DashboardChrome>
   )
 }

@@ -4,6 +4,7 @@ import { Select } from '@/components/ui/Select'
 export type FleetVehicleFormDefaults = {
   name: string
   brand: string
+  city?: string | null
   year: number
   registration_number: string
   fuel_type: string
@@ -33,14 +34,15 @@ export function FleetVehicleFormFields({ defaults, showImageUrlField, showListin
     <>
       <Input
         name="name"
-        label="Listing name"
+        label="Model"
         required
-        placeholder="BMW 5 Series 530i"
+        placeholder="5 Series 530i"
         defaultValue={defaults.name ?? ''}
         className="sm:col-span-2"
       />
       <Input name="brand" label="Brand" required placeholder="BMW" defaultValue={defaults.brand ?? ''} />
-      <Input name="year" label="Year" type="number" required min={1990} max={2035} defaultValue={year} />
+      <Input name="city" label="City / hub" placeholder="Mumbai, BKC…" defaultValue={defaults.city ?? ''} />
+      <Input name="year" label="Year" type="number" required min={1990} max={2100} defaultValue={year} />
       <Input
         name="registration_number"
         label="Registration"
@@ -59,7 +61,7 @@ export function FleetVehicleFormFields({ defaults, showImageUrlField, showListin
         <option value="auto">Automatic</option>
         <option value="manual">Manual</option>
       </Select>
-      <Input name="seats" label="Seats" type="number" required min={2} max={9} defaultValue={seats} />
+      <Input name="seats" label="Seats" type="number" required min={2} max={12} defaultValue={seats} />
       <Input
         name="price_per_day"
         label="Price / day (INR)"

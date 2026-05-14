@@ -5,9 +5,10 @@ type FleetViewProps = {
   pickup?: string
   from?: string
   to?: string
+  location?: string
 }
 
-export async function FleetView({ pickup, from, to }: FleetViewProps) {
+export async function FleetView({ pickup, from, to, location }: FleetViewProps) {
   const result = await getFleetCars()
   return (
     <FleetClientView
@@ -16,6 +17,7 @@ export async function FleetView({ pickup, from, to }: FleetViewProps) {
       pickup={pickup}
       from={from}
       to={to}
+      location={location}
     />
   )
 }

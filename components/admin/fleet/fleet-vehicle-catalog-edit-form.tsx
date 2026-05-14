@@ -52,6 +52,7 @@ export function FleetVehicleCatalogEditForm({
             const res = await adminUpdateVehicleAction(vehicle.id, {
               name: String(formData.get('name') ?? '').trim(),
               brand: String(formData.get('brand') ?? '').trim(),
+              city: String(formData.get('city') ?? '').trim() || null,
               year: Number(formData.get('year') ?? 0),
               registration_number: String(formData.get('registration_number') ?? '').trim(),
               fuel_type: String(formData.get('fuel_type') ?? 'petrol'),
@@ -83,6 +84,7 @@ export function FleetVehicleCatalogEditForm({
           defaults={{
             name: vehicle.name,
             brand: vehicle.brand,
+            city: vehicle.city ?? null,
             year: vehicle.year,
             registration_number: vehicle.registration_number,
             fuel_type: vehicle.fuel_type,

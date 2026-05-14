@@ -13,9 +13,6 @@ import {
   Sparkles,
 } from 'lucide-react'
 
-import type { NotificationRow } from '@/lib/supabase/database.types'
-import { DashboardNotificationBell } from '@/features/dashboard/dashboard-notification-bell'
-
 import { cn } from '@/lib/utils/cn'
 import { cardPaddingCompact, cardSurfaceBase, cardSurfaceTransition } from '@/components/ui/card-tokens'
 
@@ -29,22 +26,16 @@ const nav = [
 ] as const
 
 export type CustomerDashboardShellProps = {
-  userId: string
   displayName: string
   email: string | undefined
   verificationLabel: string
-  notificationUnread: number
-  notificationPreview: NotificationRow[]
   children: React.ReactNode
 }
 
 export function CustomerDashboardShell({
-  userId,
   displayName,
   email,
   verificationLabel,
-  notificationUnread,
-  notificationPreview,
   children,
 }: CustomerDashboardShellProps) {
   const pathname = usePathname()
@@ -60,21 +51,14 @@ export function CustomerDashboardShell({
           'rounded-2xl border border-stroke bg-carbon/[0.55] p-4 backdrop-blur-xl lg:rounded-3xl lg:p-5',
         )}
       >
-        <div className="flex items-center justify-between gap-3 border-b border-stroke pb-4">
-          <div className="flex min-w-0 items-center gap-2">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-stroke bg-electric/15">
-              <Sparkles className="h-5 w-5 text-electric" aria-hidden />
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-soft">{displayName}</p>
-              <p className="truncate text-xs text-muted">{email ?? '—'}</p>
-            </div>
+        <div className="flex items-center gap-3 border-b border-stroke pb-4">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-stroke bg-electric/15">
+            <Sparkles className="h-5 w-5 text-electric" aria-hidden />
           </div>
-          <DashboardNotificationBell
-            userId={userId}
-            initialUnread={notificationUnread}
-            initialPreview={notificationPreview}
-          />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-soft">{displayName}</p>
+            <p className="truncate text-xs text-muted">{email ?? '—'}</p>
+          </div>
         </div>
         <p className="mt-3 flex items-center gap-1.5 text-[11px] font-medium uppercase tracking-[0.14em] text-muted">
           <FileBadge className="h-3.5 w-3.5 text-electric/90" aria-hidden />

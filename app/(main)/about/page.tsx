@@ -1,5 +1,7 @@
 import Link from 'next/link'
+
 import { LegalProse } from '@/components/legal/legal-prose'
+import { Button } from '@/components/ui/Button'
 
 export default function AboutPage() {
   return (
@@ -32,6 +34,11 @@ export default function AboutPage() {
         </Link>
         .
       </p>
+      <div className="pt-6">
+        <Button size="lg" to="/fleet">
+          Browse the fleet
+        </Button>
+      </div>
     </LegalProse>
   )
 }

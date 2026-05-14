@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 
-import { Modal } from '@/components/ui/Modal'
 import { FleetVehicleCatalogEditForm } from '@/components/admin/fleet/fleet-vehicle-catalog-edit-form'
+import { FleetVehicleDeletePanel } from '@/components/admin/fleet/fleet-vehicle-delete-panel'
+import { Modal } from '@/components/ui/Modal'
 import type { AdminVehicleRow } from '@/lib/admin/data/fleet'
 
 type Props = {
@@ -17,15 +18,20 @@ export function FleetEditVehicleModal({ vehicle, onClose }: Props) {
     <Modal
       open={open}
       onClose={onClose}
-      title={vehicle ? `Edit · ${vehicle.name}` : undefined}
-      className="max-w-2xl"
+      title={vehicle ? `Edit · ${vehicle.brand} ${vehicle.name}` : undefined}
+      className="max-w-3xl"
     >
       {vehicle ? (
-        <div className="max-h-[min(72vh,680px)] overflow-y-auto pr-0.5 [-ms-overflow-style:none] [scrollbar-width:thin]">
+        <div className="max-h-[min(78vh,760px)] overflow-y-auto pr-0.5 [-ms-overflow-style:none] [scrollbar-width:thin]">
           <div className="space-y-6">
             <FleetVehicleCatalogEditForm vehicle={vehicle} shell="none" onSaved={onClose} />
+            <FleetVehicleDeletePanel
+              vehicleId={vehicle.id}
+              label={`${vehicle.brand} ${vehicle.name}`.trim()}
+              onDeleted={onClose}
+            />
             <p className="text-center text-xs text-muted">
-              Need danger-zone tools?{' '}
+              Audit trail & legacy tools:{' '}
               <Link href={`/admin/fleet/${vehicle.id}`} className="font-medium text-electric hover:underline">
                 Open full workspace
               </Link>

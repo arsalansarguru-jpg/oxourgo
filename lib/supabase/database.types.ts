@@ -67,6 +67,7 @@ export type Database = {
           id: string
           name: string
           brand: string
+          city: string | null
           transmission: string
           fuel_type: string
           seats: number
@@ -80,12 +81,15 @@ export type Database = {
           year: number
           registration_number: string
           security_deposit: number
+          /** Public fleet segment: SUV, Sedan, Hatchback, Luxury, Budget */
+          catalog_category?: string | null
           created_at: string
         }
         Insert: {
           id?: string
           name: string
           brand: string
+          city?: string | null
           transmission: string
           fuel_type: string
           seats: number
@@ -97,12 +101,14 @@ export type Database = {
           year?: number
           registration_number?: string
           security_deposit?: number
+          catalog_category?: string | null
           created_at?: string
         }
         Update: {
           id?: string
           name?: string
           brand?: string
+          city?: string | null
           transmission?: string
           fuel_type?: string
           seats?: number
@@ -114,6 +120,7 @@ export type Database = {
           year?: number
           registration_number?: string
           security_deposit?: number
+          catalog_category?: string | null
           created_at?: string
         }
         Relationships: []

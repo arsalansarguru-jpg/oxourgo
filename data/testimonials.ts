@@ -3,6 +3,9 @@ export type Testimonial = {
   name: string
   role: string
   quote: string
+  rating: number
+  verifiedLabel: string
+  initials: string
 }
 
 export const testimonials: Testimonial[] = [
@@ -12,6 +15,9 @@ export const testimonials: Testimonial[] = [
     role: 'Entrepreneur',
     quote:
       'Exceptional service! The BMW I rented was spotless and the booking process was seamless. Perfect for my business trips in Mumbai.',
+    rating: 5,
+    verifiedLabel: 'Verified booking · Mar 2025',
+    initials: 'AM',
   },
   {
     id: '2',
@@ -19,6 +25,9 @@ export const testimonials: Testimonial[] = [
     role: 'Travel Blogger',
     quote:
       'Oxour Go made my Mumbai trip unforgettable. The Audi Q7 was a dream to drive, and the 24/7 support team was incredibly helpful.',
+    rating: 5,
+    verifiedLabel: 'Verified booking · Jan 2025',
+    initials: 'PS',
   },
   {
     id: '3',
@@ -26,5 +35,8 @@ export const testimonials: Testimonial[] = [
     role: 'Tech Professional',
     quote:
       'Premium quality cars at transparent prices. No hidden charges, verified vehicles, and instant booking. Highly recommended!',
+    rating: 5,
+    verifiedLabel: 'Verified booking · Feb 2025',
+    initials: 'RK',
   },
 ]

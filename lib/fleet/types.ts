@@ -29,4 +29,6 @@ export type FleetCar = {
   featured: boolean
   category: FleetCarCategory
   imageUrl: string
+  /** Optional hub / city label for search (Supabase `vehicles.city`). */
+  city?: string | null
 }

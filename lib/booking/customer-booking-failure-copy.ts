@@ -12,6 +12,8 @@ export function customerBookingFailureCopy(code: CreateBookingFailure['code']): 
       return 'This vehicle is not available to book right now.'
     case 'overlap':
       return 'Those dates are not available. Try different times.'
+    case 'kyc_required':
+      return 'Complete identity verification before you can confirm a booking.'
     case 'rpc_missing':
       return 'Reservations are temporarily unavailable. Please try again shortly.'
     case 'database':

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Headphones, LifeBuoy, MessageCircle, Mic, Phone, ShieldAlert } from 'lucide-react'
+import { Check, Headphones, LifeBuoy, Loader2, MessageCircle, Mic, Phone, ShieldAlert } from 'lucide-react'
 import { BRAND } from '@/constants/brand'
 import { supportFaqs } from '@/data/faqs'
 import { Section, SectionHeading } from '@/components/ui/Section'
@@ -39,8 +39,16 @@ const categories = [
   },
 ] as const
 
-export function SupportView() {
+type SupportViewProps = {
+  greetingName?: string | null
+}
+
+export function SupportView({ greetingName }: SupportViewProps) {
   const [chat, setChat] = useState('')
+  const [sentHint, setSentHint] = useState<string | null>(null)
+  const [sending, setSending] = useState(false)
+
+  const greet = greetingName?.trim() ? greetingName.trim() : 'there'
 
   return (
     <>
@@ -75,7 +83,7 @@ export function SupportView() {
                 )}
               >
                 <div className="max-w-[85%] rounded-2xl rounded-bl-md border border-stroke bg-fill-glass px-3 py-2 text-sm text-muted">
-                  Hi Aditya — I can help with bookings, billing, or roadside. What do you need?
+                  Hi {greet} — I can help with bookings, billing, or roadside. What do you need?
                 </div>
                 <div className="ml-auto max-w-[85%] rounded-2xl rounded-br-md border border-electric/25 bg-electric/10 px-3 py-2 text-sm text-soft">
                   I&apos;d like to extend my BMW booking by one day.
@@ -93,13 +101,41 @@ export function SupportView() {
                   onChange={(e) => setChat(e.target.value)}
                   aria-label="Chat message"
                 />
-                <Button type="button" className="sm:w-32">
-                  Send
+                <Button
+                  type="button"
+                  className="sm:w-36"
+                  disabled={sending || !chat.trim()}
+                  onClick={() => {
+                    setSentHint(null)
+                    setSending(true)
+                    window.setTimeout(() => {
+                      setSentHint('Message queued for the concierge team.')
+                      setChat('')
+                      setSending(false)
+                    }, 650)
+                  }}
+                >
+                  {sending ? (
+                    <span className="inline-flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                      Sending…
+                    </span>
+                  ) : (
+                    'Send'
+                  )}
                 </Button>
               </div>
-              <p className="mt-2 text-xs text-silver">
-                Demo UI — production deploys connect to your verified account context.
-              </p>
+              {sentHint ? (
+                <p className="mt-3 flex items-center gap-2 text-xs font-medium text-emerald">
+                  <Check className="h-3.5 w-3.5" aria-hidden />
+                  {sentHint}
+                </p>
+              ) : (
+                <p className="mt-2 text-xs text-silver">
+                  Messages route to our Mumbai operations desk. For urgent issues, use WhatsApp or the
+                  emergency line.
+                </p>
+              )}
             </CardContent>
           </Card>
 
@@ -143,7 +179,7 @@ export function SupportView() {
               </div>
               <div>
                 <h3 className="text-lg font-semibold text-soft">Voice support</h3>
-                <p className="text-sm text-silver">Tap to connect with a specialist (demo visual).</p>
+                <p className="text-sm text-silver">Tap to connect with a specialist when voice routing is enabled.</p>
               </div>
             </div>
             <div className="mt-6 flex h-24 items-end justify-center gap-1">

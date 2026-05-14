@@ -55,9 +55,11 @@ export function FleetVehicleCard({ vehicle, onEdit }: Props) {
         )}
         <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between gap-2">
           <div className="min-w-0">
-            <p className="truncate text-base font-semibold tracking-[-0.02em] text-soft drop-shadow-sm">{vehicle.name}</p>
+            <p className="truncate text-base font-semibold tracking-[-0.02em] text-soft drop-shadow-sm">
+              {vehicle.brand} {vehicle.name}
+            </p>
             <p className="truncate text-xs text-muted drop-shadow-sm">
-              {vehicle.brand} · {vehicle.year} · {vehicle.registration_number}
+              {[vehicle.city?.trim(), vehicle.year, vehicle.registration_number].filter(Boolean).join(' · ')}
             </p>
           </div>
           <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/[0.12] bg-matte/55 text-soft opacity-0 shadow-lg backdrop-blur-md transition-all duration-300 group-hover:opacity-100 theme-light:bg-white/85">

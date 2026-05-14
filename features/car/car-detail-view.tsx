@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ChevronDown, Shield, Star } from 'lucide-react'
+import { ChevronDown, Shield } from 'lucide-react'
 import type { Car } from '@/types/car'
 import { carDetailFaqs } from '@/data/faqs'
 import { carReviews } from '@/data/reviews'
@@ -20,14 +20,15 @@ import {
   cardSurfaceTransition,
 } from '@/components/ui/card-tokens'
 import { CarDetailBookingPanel } from '@/components/car/car-detail-booking-panel'
+import { ReviewBadge } from '@/components/marketing/review-badge'
 
 type CarDetailViewProps = {
   car: Car
   isLoggedIn: boolean
-  userEmail: string | null
+  kycApproved: boolean
 }
 
-export function CarDetailView({ car, isLoggedIn, userEmail }: CarDetailViewProps) {
+export function CarDetailView({ car, isLoggedIn, kycApproved }: CarDetailViewProps) {
   const [activeImage, setActiveImage] = useState(0)
   const [openFaq, setOpenFaq] = useState<string | null>(carDetailFaqs[0]?.id ?? null)
 
@@ -85,11 +86,10 @@ export function CarDetailView({ car, isLoggedIn, userEmail }: CarDetailViewProps
             <h1 className="text-3xl font-bold tracking-tight text-soft md:text-4xl">{car.name}</h1>
             <p className="max-w-2xl text-silver leading-relaxed">{car.description}</p>
             <div className="flex flex-wrap items-center gap-3 text-sm text-silver">
-              <span className="inline-flex items-center gap-1">
-                <Star className="h-4 w-4 text-electric" />
-                {car.rating} · {car.reviews} reviews
+              <ReviewBadge rating={car.rating} count={car.reviews} className="text-sm" />
+              <span aria-hidden className="text-silver/50">
+                ·
               </span>
-              <span>·</span>
               <span>
                 {car.fuel} · {car.transmission} · {car.seats} seats
               </span>
@@ -121,10 +121,15 @@ export function CarDetailView({ car, isLoggedIn, userEmail }: CarDetailViewProps
                   Security deposit
                 </h2>
                 <p className="mt-3 text-sm leading-relaxed text-silver">
-                  A refundable pre-authorization of{' '}
-                  <span className="font-semibold text-soft">{formatInr(car.securityDeposit)}</span>{' '}
-                  is held at pickup. Released after a successful return inspection—typically 5–7 banking
-                  days.
+                  {car.securityDeposit <= 0 ? (
+                    <>No security deposit is required for this vehicle at handoff.</>
+                  ) : (
+                    <>
+                      A refundable pre-authorization of{' '}
+                      <span className="font-semibold text-soft">{formatInr(car.securityDeposit)}</span> is held at
+                      pickup. Released after a successful return inspection—typically 5–7 banking days.
+                    </>
+                  )}
                 </p>
               </CardContent>
             </Card>
@@ -153,14 +158,21 @@ export function CarDetailView({ car, isLoggedIn, userEmail }: CarDetailViewProps
                       <span className="font-medium text-soft">{faq.question}</span>
                       <ChevronDown
                         className={cn(
-                          'h-5 w-5 shrink-0 text-silver transition',
+                          'h-5 w-5 shrink-0 text-silver transition-transform duration-300 ease-out',
                           open && 'rotate-180',
                         )}
                       />
                     </button>
-                    {open ? (
-                      <p className="pb-4 text-sm leading-relaxed text-silver">{faq.answer}</p>
-                    ) : null}
+                    <div
+                      className={cn(
+                        'grid transition-[grid-template-rows,opacity] duration-300 ease-out',
+                        open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0',
+                      )}
+                    >
+                      <div className="overflow-hidden">
+                        <p className="pb-4 text-sm leading-relaxed text-silver">{faq.answer}</p>
+                      </div>
+                    </div>
                   </div>
                 )
               })}
@@ -169,21 +181,27 @@ export function CarDetailView({ car, isLoggedIn, userEmail }: CarDetailViewProps
 
           <div className="mt-10">
             <h2 className="text-xl font-semibold text-soft">Recent reviews</h2>
-            <div className="mt-4 grid gap-4 md:grid-cols-2">
-              {reviews.map((r) => (
-                <Card key={r.id} className={cn(cardSurfaceHover)}>
-                  <CardContent>
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="font-semibold text-soft">{r.author}</p>
-                      <span className="text-xs text-electric">{r.rating.toFixed(1)} ★</span>
-                    </div>
-                    <p className="mt-1 text-xs text-silver">{r.role}</p>
-                    <p className="mt-3 text-sm leading-relaxed text-silver">{r.text}</p>
-                    <p className="mt-3 text-xs text-silver/70">{r.date}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
+            {reviews.length === 0 ? (
+              <p className="mt-4 rounded-2xl border border-stroke bg-matte/[0.35] px-5 py-8 text-center text-sm leading-relaxed text-muted">
+                Be the first to review this vehicle after your trip.
+              </p>
+            ) : (
+              <div className="mt-4 grid gap-4 md:grid-cols-2">
+                {reviews.map((r) => (
+                  <Card key={r.id} className={cn(cardSurfaceHover)}>
+                    <CardContent>
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="font-semibold text-soft">{r.author}</p>
+                        <span className="text-xs text-electric">{r.rating.toFixed(1)} ★</span>
+                      </div>
+                      <p className="mt-1 text-xs text-silver">{r.role}</p>
+                      <p className="mt-3 text-sm leading-relaxed text-silver">{r.text}</p>
+                      <p className="mt-3 text-xs text-silver/70">{r.date}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -197,7 +215,7 @@ export function CarDetailView({ car, isLoggedIn, userEmail }: CarDetailViewProps
               </p>
             </div>
 
-            <CarDetailBookingPanel car={car} isLoggedIn={isLoggedIn} userEmail={userEmail} />
+            <CarDetailBookingPanel car={car} isLoggedIn={isLoggedIn} kycApproved={kycApproved} />
 
             <Button size="lg" variant="secondary" className="w-full" to="/fleet">
               Back to fleet

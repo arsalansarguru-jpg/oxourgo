@@ -29,6 +29,7 @@ export function FleetVehicleCreateForm({ embedded, onCreated }: Props) {
           const res = await adminCreateVehicleAction({
             name: String(formData.get('name') ?? ''),
             brand: String(formData.get('brand') ?? ''),
+            city: String(formData.get('city') ?? '').trim() || null,
             year: Number(formData.get('year') ?? 0),
             registration_number: String(formData.get('registration_number') ?? ''),
             fuel_type: String(formData.get('fuel_type') ?? 'petrol'),
@@ -43,11 +44,11 @@ export function FleetVehicleCreateForm({ embedded, onCreated }: Props) {
             setError(res.message)
             return
           }
-            if (res.id && onCreated) {
-              router.refresh()
-              onCreated(res.id)
-              return
-            }
+          if (res.id && onCreated) {
+            router.refresh()
+            onCreated(res.id)
+            return
+          }
           if (res.id) router.push(`/admin/fleet/${res.id}`)
           else router.push('/admin/fleet')
           router.refresh()

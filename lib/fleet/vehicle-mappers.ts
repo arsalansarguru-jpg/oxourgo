@@ -89,8 +89,33 @@ function toFleetCategory(pricePerDay: number): FleetCarCategory {
   return 'Hatchback'
 }
 
-function toCarCategory(pricePerDay: number): CarCategory {
-  return toFleetCategory(pricePerDay) as CarCategory
+const KNOWN_FLEET_CATEGORIES: FleetCarCategory[] = ['SUV', 'Sedan', 'Hatchback', 'Luxury', 'Budget']
+
+function isFleetCarCategory(value: string | null | undefined): value is FleetCarCategory {
+  return Boolean(value && (KNOWN_FLEET_CATEGORIES as readonly string[]).includes(value))
+}
+
+/** Name-aware segment hints so Thar / Creta / Sonet are never mis-tagged as Sedans from price alone (H1). */
+function inferCatalogCategoryFromName(brand: string, name: string, pricePerDay: number): FleetCarCategory {
+  const blob = `${brand} ${name}`.toLowerCase()
+  if (
+    /thar|creta|sonet|fortuner|scorpio|nexon|harrier|hector|xuv|seltos|venue|elevate|compass|meridian|safari|tucson|kodiaq|gloster/.test(
+      blob,
+    )
+  ) {
+    return 'SUV'
+  }
+  return toFleetCategory(pricePerDay)
+}
+
+function resolveCatalogCategory(row: VehicleRow, pricePerDay: number): FleetCarCategory {
+  const raw = row.catalog_category?.trim()
+  if (isFleetCarCategory(raw)) return raw
+  return inferCatalogCategoryFromName(row.brand, row.name, pricePerDay)
+}
+
+function toCarCategory(row: VehicleRow, pricePerDay: number): CarCategory {
+  return resolveCatalogCategory(row, pricePerDay) as CarCategory
 }
 
 function toCarStatus(row: VehicleRow): CarStatus {
@@ -115,8 +140,9 @@ export function mapVehicleRowToFleetCar(row: VehicleRow): FleetCar {
     securityDeposit: parseMoneyIntRupees(row.security_deposit),
     availability: toAvailabilityLabel(row),
     featured: Boolean(row.featured),
-    category: toFleetCategory(price),
+    category: resolveCatalogCategory(row, price),
     imageUrl,
+    city: row.city,
   }
 }
 
@@ -125,11 +151,20 @@ export function mapVehicleRowToCar(row: VehicleRow): Car {
   const imageUrl = resolveVehicleImageUrl(row.image, row.brand)
   const name = row.name.trim() || `${row.brand} ${modelFromListingName(row.brand, row.name)}`.trim()
   const gallery = [imageUrl, imageUrl, imageUrl]
+  const reg = row.registration_number?.trim()
+  const specs: Record<string, string> = {
+    Brand: row.brand,
+    Year: String(row.year),
+    Fuel: toFleetFuel(row.fuel_type),
+    Transmission: toTransmission(row.transmission) === 'Auto' ? 'Automatic' : 'Manual',
+    Seats: String(row.seats),
+  }
+  if (reg) specs.Registration = reg
   return {
     id: row.id,
     name,
     status: toCarStatus(row),
-    category: toCarCategory(price),
+    category: toCarCategory(row, price),
     rating: 0,
     reviews: 0,
     fuel: toCarFuel(row.fuel_type),
@@ -140,14 +175,7 @@ export function mapVehicleRowToCar(row: VehicleRow): Car {
     gallery,
     featured: Boolean(row.featured),
     description: `${name} (${row.year}) — verified Oxour Go fleet vehicle with transparent daily pricing and concierge support across Mumbai.`,
-    specs: {
-      Brand: row.brand,
-      Year: String(row.year),
-      Registration: row.registration_number || '—',
-      Fuel: toFleetFuel(row.fuel_type),
-      Transmission: toTransmission(row.transmission) === 'Auto' ? 'Automatic' : 'Manual',
-      Seats: String(row.seats),
-    },
+    specs,
     securityDeposit: parseMoneyIntRupees(row.security_deposit),
   }
 }

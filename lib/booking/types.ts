@@ -38,6 +38,7 @@ export type CreateBookingFailure = {
     | 'overlap'
     | 'rpc_missing'
     | 'database'
+    | 'kyc_required'
     | 'unknown'
   message: string
 }

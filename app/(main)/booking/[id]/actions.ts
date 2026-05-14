@@ -32,6 +32,20 @@ export async function createBookingAction(input: CreateBookingInput): Promise<Cr
   try {
     const supabase = await createClient()
 
+    const { data: profileRow } = await supabase
+      .from('profiles')
+      .select('verification_tier')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    if ((profileRow?.verification_tier ?? '') !== 'verified') {
+      return {
+        ok: false,
+        code: 'kyc_required',
+        message: 'Complete identity verification to book a vehicle.',
+      }
+    }
+
     const { data: vehicleRow, error: vehicleErr } = await supabase
       .from('vehicles')
       .select('id,available,price_per_day')

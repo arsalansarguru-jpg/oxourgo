@@ -1,13 +1,14 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Fuel, Gauge, Star, Users } from 'lucide-react'
+import { Fuel, Gauge, Users } from 'lucide-react'
 import { cardLiftSpring } from '@/animations/presets'
 import type { Car } from '@/types/car'
 import { formatInr } from '@/lib/format'
 import { cn } from '@/lib/utils/cn'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import { ReviewBadge } from '@/components/marketing/review-badge'
 import { Card, CardContent } from '@/components/ui/Card'
 import { cardMetaChip, cardSurfaceHoverAccent, cardTitle } from '@/components/ui/card-tokens'
 
@@ -53,11 +54,7 @@ export function CarCard({ car, className, imageClassName }: CarCardProps) {
           <div>
             <h3 className={cardTitle}>{car.name}</h3>
             <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted">
-              <span className="inline-flex items-center gap-1">
-                <Star className="h-3.5 w-3.5 text-electric" />
-                {car.rating}
-                <span className="text-muted">({car.reviews} reviews)</span>
-              </span>
+              <ReviewBadge rating={car.rating} count={car.reviews} />
             </div>
           </div>
           <div className="grid grid-cols-3 gap-2">

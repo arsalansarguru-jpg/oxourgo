@@ -19,7 +19,6 @@ import type { Car } from '@/types/car'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
-import { Badge } from '@/components/ui/Badge'
 import { PricingBreakdown } from '@/components/booking/pricing-breakdown'
 import { cardEyebrow } from '@/components/ui/card-tokens'
 
@@ -32,10 +31,11 @@ type AvailState =
 export type CarDetailBookingPanelProps = {
   car: Car
   isLoggedIn: boolean
-  userEmail: string | null
+  /** Mirrors `profiles.verification_tier === 'verified'` (KYC cleared for booking). */
+  kycApproved: boolean
 }
 
-export function CarDetailBookingPanel({ car, isLoggedIn, userEmail }: CarDetailBookingPanelProps) {
+export function CarDetailBookingPanel({ car, isLoggedIn, kycApproved }: CarDetailBookingPanelProps) {
   const router = useRouter()
   const defaults = useMemo(() => defaultPickupReturnIso(), [])
   const [pickup, setPickup] = useState(defaults.pickup)
@@ -122,6 +122,7 @@ export function CarDetailBookingPanel({ car, isLoggedIn, userEmail }: CarDetailB
   const canSubmit =
     inventoryAvailable &&
     isLoggedIn &&
+    kycApproved &&
     dates.ok &&
     quote &&
     avail.status === 'ready' &&
@@ -181,15 +182,23 @@ export function CarDetailBookingPanel({ car, isLoggedIn, userEmail }: CarDetailB
         </div>
       ) : null}
 
-      {isLoggedIn ? (
-        <Badge variant="electric" className="w-fit px-3 py-1 text-[11px]">
-          {userEmail ?? 'Signed in'}
-        </Badge>
-      ) : (
+      {isLoggedIn && !kycApproved ? (
+        <div className="rounded-xl border border-amber-400/25 bg-amber-500/[0.08] px-4 py-3 text-sm text-amber-50/95">
+          <p className="font-medium text-soft">Complete identity verification to book</p>
+          <p className="mt-1 text-xs leading-relaxed text-muted">
+            Government ID review is required before we can hold a vehicle on the calendar.
+          </p>
+          <Button type="button" size="sm" variant="secondary" className="mt-3 w-full sm:w-auto" to="/dashboard/kyc">
+            Go to KYC center →
+          </Button>
+        </div>
+      ) : null}
+
+      {!isLoggedIn ? (
         <Button size="sm" variant="secondary" className="w-full" to={loginHref}>
           Sign in to book
         </Button>
-      )}
+      ) : null}
 
       <motion.div layout className="rounded-2xl border border-stroke bg-carbon/55 p-4 shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset] backdrop-blur-xl sm:p-5">
         <div className="flex items-center gap-2 text-soft">
@@ -239,10 +248,19 @@ export function CarDetailBookingPanel({ car, isLoggedIn, userEmail }: CarDetailB
 
       <div className="space-y-3">
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Pricing</p>
-        {quote ? (
+        {!dates.ok ? (
+          <p className="text-sm text-amber-100/90">{dates.message}</p>
+        ) : !Number.isFinite(car.pricePerDay) || car.pricePerDay <= 0 ? (
+          <p className="text-sm text-muted">Pricing is unavailable for this listing.</p>
+        ) : quote ? (
           <PricingBreakdown lines={lines} />
         ) : (
-          <p className="text-sm text-muted">Enter valid trip times to see totals.</p>
+          <div className="space-y-2 rounded-xl border border-stroke bg-matte/[0.35] p-4">
+            <div className="h-3 w-[65%] animate-pulse rounded bg-fill-glass-strong" />
+            <div className="h-3 w-[45%] animate-pulse rounded bg-fill-glass-strong" />
+            <div className="h-3 w-[55%] animate-pulse rounded bg-fill-glass-strong" />
+            <p className="text-xs text-muted">Calculating estimate…</p>
+          </div>
         )}
       </div>
 
@@ -252,7 +270,14 @@ export function CarDetailBookingPanel({ car, isLoggedIn, userEmail }: CarDetailB
           Security deposit
         </div>
         <p className="mt-2 text-xs leading-relaxed">
-          {formatInr(car.securityDeposit)} pre-authorization at handoff. Released after return inspection.
+          {car.securityDeposit <= 0 ? (
+            <span className="text-muted">No security deposit required for this vehicle.</span>
+          ) : (
+            <>
+              <span className="font-semibold text-soft">{formatInr(car.securityDeposit)}</span> pre-authorization at
+              handoff. Released after return inspection.
+            </>
+          )}
         </p>
       </div>
 
@@ -310,6 +335,8 @@ export function CarDetailBookingPanel({ car, isLoggedIn, userEmail }: CarDetailB
           </span>
         ) : !isLoggedIn ? (
           'Sign in to reserve'
+        ) : !kycApproved ? (
+          'Verification required'
         ) : (
           'Confirm booking'
         )}

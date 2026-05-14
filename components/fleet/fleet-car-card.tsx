@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Fuel, Gauge, Star, Users } from 'lucide-react'
+import { Fuel, Gauge, Users } from 'lucide-react'
 
 import { cardLiftSpring } from '@/animations/presets'
 import { Badge } from '@/components/ui/Badge'
@@ -42,12 +42,14 @@ export function FleetCarCard({ car, className }: FleetCarCardProps) {
         <CardContent className="flex flex-1 flex-col gap-5">
           <div>
             <h3 className={cardTitle}>{car.displayName}</h3>
-            <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted">
-              <span className="inline-flex items-center gap-1">
-                <Star className="h-3.5 w-3.5 text-electric" />
+            <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted">
+              <Badge variant="electric" className="font-medium">
                 {car.category}
-              </span>
-              <span>{car.year}</span>
+              </Badge>
+              <span className="tabular-nums text-muted">{car.year}</span>
+              {car.city?.trim() ? (
+                <span className="text-muted">· {car.city.trim()}</span>
+              ) : null}
             </div>
           </div>
 

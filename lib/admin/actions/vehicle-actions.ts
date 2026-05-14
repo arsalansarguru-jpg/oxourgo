@@ -12,6 +12,7 @@ import { adminActionDbFailed, logUnknownError, SAFE_USER_MESSAGE } from '@/lib/e
 export async function adminCreateVehicleAction(input: {
   name: string
   brand: string
+  city?: string | null
   year: number
   registration_number: string
   fuel_type: string
@@ -28,6 +29,7 @@ export async function adminCreateVehicleAction(input: {
   const insert: Database['public']['Tables']['vehicles']['Insert'] = {
     name: input.name.trim(),
     brand: input.brand.trim(),
+    city: input.city?.trim() ? input.city.trim() : null,
     year: input.year,
     registration_number: input.registration_number.trim(),
     fuel_type: input.fuel_type.trim().toLowerCase(),
