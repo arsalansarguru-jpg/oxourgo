@@ -5,10 +5,11 @@ import { revalidatePath } from 'next/cache'
 import type { KycDocumentRow } from '@/lib/customer/kyc-queries'
 import { getAuthenticatedUser } from '@/lib/auth/server'
 import { onKycSubmitted } from '@/lib/notifications/events'
+import { syncProfileKycFromDocuments } from '@/lib/kyc/sync-profile-kyc'
 import { createClient } from '@/lib/supabase/server'
 import { adminActionDbFailed, SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
 
-const docTypes = ['aadhaar', 'license', 'passport', 'selfie'] as const
+const docTypes = ['aadhaar', 'license', 'passport', 'selfie', 'pan'] as const
 
 export async function updateCustomerProfileAction(formData: FormData): Promise<{ ok: boolean; message?: string }> {
   const user = await getAuthenticatedUser()
@@ -36,6 +37,7 @@ export async function updateCustomerProfileAction(formData: FormData): Promise<{
 
   revalidatePath('/dashboard')
   revalidatePath('/dashboard/settings')
+  revalidatePath('/dashboard/kyc')
   return { ok: true }
 }
 
@@ -80,8 +82,18 @@ export async function registerKycDocumentAction(input: {
 
   if (error) return adminActionDbFailed('registerKycDocumentAction', error)
 
+  const syncRes = await syncProfileKycFromDocuments(supabase, user.id)
+  if (!syncRes.ok) {
+    if (data?.id) {
+      await supabase.from('kyc_documents').delete().eq('id', data.id)
+    }
+    await supabase.storage.from('kyc').remove([input.storagePath]).catch(() => {})
+    return { ok: false, message: syncRes.message }
+  }
+
   revalidatePath('/dashboard/kyc')
   revalidatePath('/dashboard')
+  revalidatePath('/dashboard/bookings')
   revalidatePath('/admin/kyc')
   if (data) {
     void onKycSubmitted(user.id, data.id, input.documentType)

@@ -1,4 +1,5 @@
 import type { Car, CarCategory, CarStatus, FuelType, Transmission } from '@/types/car'
+import { VEHICLE_IMAGE_FALLBACK } from '@/constants/vehicle-media'
 import type { FleetCar, FleetCarAvailabilityLabel, FleetCarCategory, FleetCarFuel } from '@/lib/fleet/types'
 import { getPublicStorageObjectUrl } from '@/lib/supabase/storage-public-url'
 
@@ -34,12 +35,9 @@ const brandImageMap: Record<string, string> = {
   kia: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=80',
 }
 
-const fallbackImage =
-  'https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&w=1600&q=80'
-
 export function resolveFleetImageUrl(brand: string): string {
   const key = brand.trim().toLowerCase()
-  return brandImageMap[key] ?? fallbackImage
+  return brandImageMap[key] ?? VEHICLE_IMAGE_FALLBACK
 }
 
 function resolveRowPrimaryImage(row: FleetCarRow): string {

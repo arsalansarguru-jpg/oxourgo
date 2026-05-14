@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import { AdminBookingPdfPanel } from '@/components/admin/admin-booking-pdf-panel'
 import { AdminBookingOpsPanel } from '@/components/admin/admin-booking-ops-panel'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
@@ -87,6 +88,8 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
 
         <AdminBookingOpsPanel booking={booking} />
       </div>
+
+      <AdminBookingPdfPanel bookingId={booking.id} />
 
       <p className="text-center text-sm text-muted">
         <Link href="/admin/bookings" className="font-medium text-electric transition-colors hover:text-electric/85">

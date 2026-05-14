@@ -19,7 +19,7 @@ export default async function AdminKycPage() {
       <AdminPageHeader
         eyebrow="Compliance"
         title="KYC queue"
-        description="Review uploads with signed URLs, transition statuses, and emit audit events. Profile tier auto-promotes when all documents are approved."
+        description="Review uploads with signed URLs, approve or reject with notes, and emit audit events. Customer profiles sync automatically when the license, selfie, and government ID gate clears."
       />
 
       <div className="space-y-4">
@@ -31,7 +31,8 @@ export default async function AdminKycPage() {
                 <p className="font-medium text-soft">{row.user_email ?? row.user_id}</p>
                 <p className="font-mono text-xs text-muted">{row.id}</p>
                 <p className="text-xs text-muted">
-                  Updated {new Date(row.updated_at).toLocaleString()}
+                  Submitted {new Date(row.created_at).toLocaleString()}
+                  {` · Updated ${new Date(row.updated_at).toLocaleString()}`}
                   {row.reviewed_at ? ` · Reviewed ${new Date(row.reviewed_at).toLocaleString()}` : ''}
                 </p>
                 {row.reviewer_note ? (

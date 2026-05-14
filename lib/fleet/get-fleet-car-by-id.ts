@@ -3,7 +3,7 @@ import 'server-only'
 import { createPublicServerSupabaseClient } from '@/lib/supabase/public-server-client'
 import type { Car } from '@/types/car'
 import { mapVehicleRowToCar, type VehicleRow } from '@/lib/fleet/vehicle-mappers'
-import { logFleetVehiclesError } from '@/lib/fleet/public-vehicle-catalog'
+import { logFleetRecoverable } from '@/lib/fleet/fleet-catalog-logging'
 
 /** Public booking / detail vehicle by `vehicles.id`. */
 export async function getFleetCarById(id: string): Promise<Car | null> {
@@ -11,7 +11,7 @@ export async function getFleetCarById(id: string): Promise<Car | null> {
     const publicSupabase = createPublicServerSupabaseClient()
     const { data: v, error: vErr } = await publicSupabase.from('vehicles').select('*').eq('id', id).maybeSingle()
     if (vErr) {
-      logFleetVehiclesError('getFleetCarById.vehicles', vErr)
+      logFleetRecoverable('getFleetCarById.vehicles', vErr)
       return null
     }
     if (!v) return null

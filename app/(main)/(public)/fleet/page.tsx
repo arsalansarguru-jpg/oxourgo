@@ -1,9 +1,21 @@
+import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
 import { FleetView } from '@/features/fleet/fleet-view'
 import { FleetLoading } from '@/features/fleet/fleet-loading'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'Fleet',
+  description:
+    'Browse the Oxour Go luxury fleet — SUVs, sedans, and premium vehicles with live availability and clear daily rates.',
+  openGraph: {
+    title: 'Luxury fleet | Oxour Go',
+    description:
+      'Browse the Oxour Go luxury fleet — SUVs, sedans, and premium vehicles with live availability and clear daily rates.',
+  },
+}
 
 export default async function FleetPage({
   searchParams,

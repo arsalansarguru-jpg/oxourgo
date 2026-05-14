@@ -1,14 +1,11 @@
 import 'server-only'
 
-import {
-  fetchPublicVehicleRows,
-  isVehicleShownOnPublicCatalog,
-  logFleetVehiclesError,
-} from '@/lib/fleet/public-vehicle-catalog'
+import { fetchPublicVehicleRows, isVehicleShownOnPublicCatalog } from '@/lib/fleet/public-vehicle-catalog'
+import { logFleetRecoverable } from '@/lib/fleet/fleet-catalog-logging'
 import type { FleetCar } from '@/lib/fleet/types'
 import { mapVehicleRowToFleetCar, type VehicleRow } from '@/lib/fleet/vehicle-mappers'
 
-export type GetFleetCarsResult = { ok: true; cars: FleetCar[] } | { ok: false }
+export type GetFleetCarsResult = { ok: true; cars: FleetCar[] }
 
 function sortFleetRows(rows: VehicleRow[]): VehicleRow[] {
   const ts = (iso: string | undefined) => {
@@ -23,10 +20,8 @@ function sortFleetRows(rows: VehicleRow[]): VehicleRow[] {
 }
 
 export async function getFleetCars(): Promise<GetFleetCarsResult> {
-  const res = await fetchPublicVehicleRows()
-  if (!res.ok) return { ok: false }
-
-  const listable = res.rows.filter((r) => isVehicleShownOnPublicCatalog(r))
+  const { rows } = await fetchPublicVehicleRows()
+  const listable = rows.filter((r) => isVehicleShownOnPublicCatalog(r))
   const sorted = sortFleetRows(listable)
 
   const cars: FleetCar[] = []
@@ -34,7 +29,7 @@ export async function getFleetCars(): Promise<GetFleetCarsResult> {
     try {
       cars.push(mapVehicleRowToFleetCar(row))
     } catch (e) {
-      logFleetVehiclesError('getFleetCars.mapVehicleRowToFleetCar', { id: row.id, error: e })
+      logFleetRecoverable('getFleetCars.mapVehicleRowToFleetCar', { id: row.id, error: e })
     }
   }
   return { ok: true, cars }

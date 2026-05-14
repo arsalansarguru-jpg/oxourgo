@@ -1,5 +1,5 @@
 /** KYC document types persisted in `public.kyc_documents.document_type`. */
-export const KYC_DOCUMENT_TYPES = ['aadhaar', 'license', 'passport', 'selfie'] as const
+export const KYC_DOCUMENT_TYPES = ['aadhaar', 'license', 'passport', 'selfie', 'pan'] as const
 
 export type KycDocumentTypeId = (typeof KYC_DOCUMENT_TYPES)[number]
 

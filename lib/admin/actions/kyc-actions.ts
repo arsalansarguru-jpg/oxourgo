@@ -6,23 +6,12 @@ import type { AdminActionResult } from '@/lib/admin/actions/types'
 import { writeAdminAudit } from '@/lib/admin/audit'
 import { requireAppRole } from '@/lib/auth/server'
 import { onKycDecision } from '@/lib/notifications/events'
+import { syncProfileKycFromDocuments } from '@/lib/kyc/sync-profile-kyc'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { adminActionDbFailed, logUnknownError, SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
 
 function nowIso() {
   return new Date().toISOString()
-}
-
-async function maybePromoteVerification(admin: ReturnType<typeof createAdminClient>, userId: string) {
-  const { data: docs } = await admin.from('kyc_documents').select('status').eq('user_id', userId)
-  if (!docs?.length) return
-  const allApproved = docs.every((d) => d.status === 'approved')
-  if (allApproved) {
-    await admin
-      .from('profiles')
-      .update({ verification_tier: 'verified', updated_at: nowIso() })
-      .eq('user_id', userId)
-  }
 }
 
 export async function adminSetKycDocumentStatusAction(input: {
@@ -53,8 +42,9 @@ export async function adminSetKycDocumentStatusAction(input: {
 
   if (error) return adminActionDbFailed('adminSetKycDocumentStatusAction', error)
 
-  if (input.status === 'approved') {
-    await maybePromoteVerification(admin, doc.user_id)
+  const syncRes = await syncProfileKycFromDocuments(admin, doc.user_id)
+  if (!syncRes.ok) {
+    return { ok: false, message: syncRes.message }
   }
 
   await writeAdminAudit({
@@ -73,6 +63,8 @@ export async function adminSetKycDocumentStatusAction(input: {
   revalidatePath('/admin/customers')
   revalidatePath(`/admin/customers/${doc.user_id}`)
   revalidatePath('/dashboard/kyc')
+  revalidatePath('/dashboard/bookings')
+  revalidatePath('/dashboard')
   return { ok: true }
 }
 

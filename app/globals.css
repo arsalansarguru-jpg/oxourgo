@@ -178,6 +178,25 @@ html[data-theme='dark'] {
   html[data-theme='light'] ::selection {
     @apply bg-electric/25 text-soft;
   }
+
+  :where(a[href]):not([class*='ring-offset']):focus-visible {
+    @apply rounded-md outline-none ring-2 ring-electric/80 ring-offset-2 ring-offset-matte;
+  }
+
+  html[data-theme='light'] :where(a[href]):not([class*='ring-offset']):focus-visible {
+    @apply ring-offset-white;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 @utility glass-panel {

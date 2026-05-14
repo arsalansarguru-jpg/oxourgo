@@ -3,7 +3,10 @@ import 'server-only'
 import { createClient } from '@supabase/supabase-js'
 
 import { requireSupabasePublicEnv } from '@/lib/env/supabase-public'
+import { createFetchWithTimeout } from '@/lib/supabase/fetch-with-timeout'
 import type { Database } from '@/lib/supabase/database.types'
+
+const PUBLIC_SUPABASE_FETCH_TIMEOUT_MS = 12_000
 
 /**
  * Anonymous Supabase REST client for **public** reads (e.g. `public.vehicles`).
@@ -19,6 +22,9 @@ export function createPublicServerSupabaseClient() {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
+    },
+    global: {
+      fetch: createFetchWithTimeout(PUBLIC_SUPABASE_FETCH_TIMEOUT_MS),
     },
   })
 }

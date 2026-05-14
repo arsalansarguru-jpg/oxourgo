@@ -1,5 +1,6 @@
 const LABELS: Record<string, string> = {
   aadhaar: 'Aadhaar',
+  pan: 'PAN card',
   license: 'Driving license',
   passport: 'Passport',
   selfie: 'Selfie',

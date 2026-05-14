@@ -22,8 +22,19 @@ export default async function DashboardRouteLayout({ children }: { children: Rea
     'Member'
 
   const tier = (profile?.verification_tier as string | undefined) ?? 'basic'
+  const kycLifecycleStatus = (profile?.kyc_status as string | undefined) ?? 'not_started'
   const verificationLabel =
-    tier === 'verified' ? 'Account verified' : tier === 'basic' ? 'Verification in progress' : 'Complete your profile'
+    kycLifecycleStatus === 'approved'
+      ? 'Account verified'
+      : kycLifecycleStatus === 'rejected'
+        ? 'KYC needs your attention'
+        : kycLifecycleStatus === 'pending'
+          ? 'Verification in review'
+          : tier === 'verified'
+            ? 'Account verified'
+            : tier === 'basic'
+              ? 'Verification in progress'
+              : 'Complete your profile'
 
   const [notificationUnread, notificationPreview] = await Promise.all([
     countUnreadNotifications(user.id).catch(() => 0),
@@ -40,6 +51,7 @@ export default async function DashboardRouteLayout({ children }: { children: Rea
         displayName={displayName}
         email={user.email ?? undefined}
         verificationLabel={verificationLabel}
+        kycLifecycleStatus={kycLifecycleStatus}
       >
         {children}
       </CustomerDashboardShell>

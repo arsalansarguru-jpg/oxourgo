@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { CarDetailView } from '@/features/car/car-detail-view'
 import { getAuthenticatedUser } from '@/lib/auth/server'
 import { getFleetCarById } from '@/lib/fleet/get-fleet-car-by-id'
+import { isProfileKycApprovedForBooking } from '@/lib/kyc/kyc-booking-eligible'
 import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
@@ -41,15 +42,17 @@ export default async function CarDetailPage({ params }: { params: Promise<{ id: 
   }
 
   let kycApproved = false
+  let kycStatus: string | null = null
   if (user) {
     const supabase = await createClient()
     const { data: profile } = await supabase
       .from('profiles')
-      .select('verification_tier')
+      .select('verification_tier, kyc_status')
       .eq('user_id', user.id)
       .maybeSingle()
-    kycApproved = (profile?.verification_tier ?? '') === 'verified'
+    kycApproved = isProfileKycApprovedForBooking(profile)
+    kycStatus = (profile?.kyc_status as string | undefined) ?? null
   }
 
-  return <CarDetailView car={car} isLoggedIn={Boolean(user)} kycApproved={kycApproved} />
+  return <CarDetailView car={car} isLoggedIn={Boolean(user)} kycApproved={kycApproved} kycStatus={kycStatus} />
 }

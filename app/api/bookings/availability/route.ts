@@ -2,7 +2,11 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 import { validateTripWindow } from '@/lib/booking/dates'
 import { hasVehicleBookingOverlap } from '@/lib/booking/vehicle-overlap'
-import { logFleetVehiclesError } from '@/lib/fleet/public-vehicle-catalog'
+import { logFleetActionable, logFleetRecoverable } from '@/lib/fleet/fleet-catalog-logging'
+import {
+  fleetSerializedErrorIsMeaningful,
+  serializeFleetErrorDetail,
+} from '@/lib/fleet/fleet-error-serialization'
 import { isVehicleAvailableForBooking, type VehicleRow } from '@/lib/fleet/vehicle-mappers'
 import { createPublicServerSupabaseClient } from '@/lib/supabase/public-server-client'
 
@@ -32,7 +36,7 @@ export async function GET(request: NextRequest) {
       .limit(1)
 
     if (vErr) {
-      logFleetVehiclesError('api/availability.vehicles', vErr)
+      logFleetRecoverable('api/availability.vehicles', vErr)
       return NextResponse.json({ ok: false, error: 'vehicle_lookup_failed' }, { status: 503 })
     }
 
@@ -59,7 +63,7 @@ export async function GET(request: NextRequest) {
     )
 
     if (overlapErr) {
-      logFleetVehiclesError('api/availability.overlap', overlapErr)
+      logFleetRecoverable('api/availability.overlap', overlapErr)
       return NextResponse.json({ ok: false, error: 'availability_unavailable' }, { status: 503 })
     }
     return NextResponse.json({
@@ -70,7 +74,10 @@ export async function GET(request: NextRequest) {
       carAvailable: true,
     })
   } catch (e) {
-    console.error('[api/bookings/availability]', e)
+    const payload = serializeFleetErrorDetail(e)
+    if (payload && fleetSerializedErrorIsMeaningful(payload)) {
+      logFleetActionable('api/availability.unhandled', payload)
+    }
     return NextResponse.json({ ok: false, error: 'availability_failed' }, { status: 500 })
   }
 }

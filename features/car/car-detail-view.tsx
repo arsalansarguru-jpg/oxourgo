@@ -1,9 +1,11 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronDown, Shield } from 'lucide-react'
+
+import { FleetVehicleImg } from '@/components/fleet/fleet-vehicle-img'
+import { VehicleCoverImage } from '@/components/fleet/vehicle-cover-image'
 import type { Car } from '@/types/car'
 import { carDetailFaqs } from '@/data/faqs'
 import { carReviews } from '@/data/reviews'
@@ -26,9 +28,10 @@ type CarDetailViewProps = {
   car: Car
   isLoggedIn: boolean
   kycApproved: boolean
+  kycStatus?: string | null
 }
 
-export function CarDetailView({ car, isLoggedIn, kycApproved }: CarDetailViewProps) {
+export function CarDetailView({ car, isLoggedIn, kycApproved, kycStatus }: CarDetailViewProps) {
   const [activeImage, setActiveImage] = useState(0)
   const [openFaq, setOpenFaq] = useState<string | null>(carDetailFaqs[0]?.id ?? null)
 
@@ -47,11 +50,9 @@ export function CarDetailView({ car, isLoggedIn, kycApproved }: CarDetailViewPro
             )}
           >
             <div className="relative aspect-[16/10]">
-              <Image
+              <VehicleCoverImage
                 src={car.gallery[activeImage] ?? car.imageUrl}
                 alt={car.name}
-                fill
-                unoptimized
                 className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 65vw"
                 priority
@@ -70,13 +71,13 @@ export function CarDetailView({ car, isLoggedIn, kycApproved }: CarDetailViewPro
                   type="button"
                   onClick={() => setActiveImage(idx)}
                   className={cn(
-                    'relative h-16 w-24 shrink-0 overflow-hidden rounded-xl border transition',
+                    'relative h-16 w-24 shrink-0 overflow-hidden rounded-xl border transition-[border-color,box-shadow,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/50 focus-visible:ring-offset-2 focus-visible:ring-offset-matte',
                     idx === activeImage
                       ? 'border-electric/60 ring-2 ring-electric/30'
-                      : 'border-stroke hover:border-stroke-strong',
+                      : 'border-stroke hover:border-stroke-strong hover:-translate-y-0.5',
                   )}
                 >
-                  <Image src={src} alt="" fill unoptimized className="object-cover" sizes="96px" />
+                  <FleetVehicleImg src={src} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
                 </button>
               ))}
             </div>
@@ -215,7 +216,7 @@ export function CarDetailView({ car, isLoggedIn, kycApproved }: CarDetailViewPro
               </p>
             </div>
 
-            <CarDetailBookingPanel car={car} isLoggedIn={isLoggedIn} kycApproved={kycApproved} />
+            <CarDetailBookingPanel car={car} isLoggedIn={isLoggedIn} kycApproved={kycApproved} kycStatus={kycStatus} />
 
             <Button size="lg" variant="secondary" className="w-full" to="/fleet">
               Back to fleet

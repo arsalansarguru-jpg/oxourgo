@@ -11,6 +11,7 @@ import { Card, CardContent } from '@/components/ui/Card'
 import { cardSurfaceBase, cardSurfaceHover, cardSurfaceTransition } from '@/components/ui/card-tokens'
 import { CustomerBookingCard } from '@/components/dashboard/customer-booking-card'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { KycStatusBadge } from '@/components/kyc/kyc-status-badge'
 
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
@@ -33,10 +34,14 @@ export function CustomerDashboardHome({
   bookings,
   kycUploadedCount,
   verificationTier,
+  kycStatus,
+  bookingCleared,
 }: {
   bookings: BookingWithCar[]
   kycUploadedCount: number
   verificationTier: string
+  kycStatus: string
+  bookingCleared: boolean
 }) {
   const now = Date.now()
   const withUi = bookings.map((b) => ({ row: b, ui: deriveCustomerBookingUiStatus(b) }))
@@ -54,13 +59,16 @@ export function CustomerDashboardHome({
     (b) => b.booking_status === 'pending_payment' || b.payment_status.trim().toLowerCase() === 'pending',
   ).length
 
-  const isVerified = verificationTier === 'verified'
+  const isVerified = bookingCleared
 
   return (
     <div className="space-y-10">
       <header className="space-y-3">
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-electric/90">Command center</p>
-        <h1 className="text-3xl font-semibold tracking-[-0.04em] text-soft md:text-[2rem]">Your Oxour journey</h1>
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <h1 className="text-3xl font-semibold tracking-[-0.04em] text-soft md:text-[2rem]">Your Oxour journey</h1>
+          <KycStatusBadge status={kycStatus} className="shrink-0" />
+        </div>
         <p className="max-w-2xl text-sm leading-relaxed text-muted">
           Live bookings, verification, and payments — orchestrated for Mumbai self-drive with concierge-grade polish.
         </p>
@@ -76,8 +84,8 @@ export function CustomerDashboardHome({
         <Stat label="Posted spend" value={formatInr(postedSpend)} hint="Paid or authorized booking totals" />
         <Stat
           label="Verification"
-          value={isVerified ? 'Verified' : 'In progress'}
-          hint={`${kycUploadedCount} document file(s) on record`}
+          value={isVerified ? 'Cleared' : 'In progress'}
+          hint={`${kycUploadedCount} file(s) · tier ${verificationTier}`}
         />
       </div>
 
@@ -96,7 +104,11 @@ export function CustomerDashboardHome({
               {pendingPaymentBookings > 0
                 ? `You have ${pendingPaymentBookings} booking${pendingPaymentBookings === 1 ? '' : 's'} awaiting payment — open Payments or the booking to continue.`
                 : !isVerified
-                  ? 'Upload identity documents to unlock bookings once operations approves your profile.'
+                  ? kycStatus === 'rejected'
+                    ? 'A document was not accepted — open KYC Center for the reviewer note and upload replacements.'
+                    : kycStatus === 'pending'
+                      ? 'Your documents are with operations. We will email you when verification clears and bookings unlock.'
+                      : 'Upload identity documents to unlock bookings once operations approves your profile.'
                   : 'Book, verify identity, or review payments in one tap.'}
             </p>
           </div>

@@ -4,6 +4,7 @@ import { motion } from 'framer-motion'
 import { Fuel, Gauge, Users } from 'lucide-react'
 
 import { cardLiftSpring } from '@/animations/presets'
+import { FleetVehicleImg } from '@/components/fleet/fleet-vehicle-img'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -34,13 +35,10 @@ export function FleetCarCard({ car, className }: FleetCarCardProps) {
         )}
       >
         <div className="relative aspect-[16/10] overflow-hidden bg-carbon-deep">
-          {/* eslint-disable-next-line @next/next/no-img-element -- fleet image URLs come from Supabase (storage or any HTTPS) */}
-          <img
+          <FleetVehicleImg
             src={car.imageUrl}
             alt={car.displayName}
             className="absolute inset-0 h-full w-full object-cover transition-[transform,filter] duration-[620ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/card:scale-[1.06] group-hover/card:brightness-[1.04]"
-            loading="lazy"
-            referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-matte/92 via-matte/[0.12] to-transparent" />
           <div className="absolute left-3 top-3 z-[1] flex flex-wrap gap-2 sm:left-4 sm:top-4">

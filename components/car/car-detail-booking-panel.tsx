@@ -31,11 +31,13 @@ type AvailState =
 export type CarDetailBookingPanelProps = {
   car: Car
   isLoggedIn: boolean
-  /** Mirrors `profiles.verification_tier === 'verified'` (KYC cleared for booking). */
+  /** True when profile KYC gate is cleared for booking. */
   kycApproved: boolean
+  /** From `profiles.kyc_status` for messaging when booking is blocked. */
+  kycStatus?: string | null
 }
 
-export function CarDetailBookingPanel({ car, isLoggedIn, kycApproved }: CarDetailBookingPanelProps) {
+export function CarDetailBookingPanel({ car, isLoggedIn, kycApproved, kycStatus }: CarDetailBookingPanelProps) {
   const router = useRouter()
   const defaults = useMemo(() => defaultPickupReturnIso(), [])
   const [pickup, setPickup] = useState(defaults.pickup)
@@ -201,9 +203,19 @@ export function CarDetailBookingPanel({ car, isLoggedIn, kycApproved }: CarDetai
           <div className="flex items-start gap-2">
             <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-electric" aria-hidden />
             <div className="min-w-0">
-              <p className="font-semibold text-soft">Complete identity verification to continue</p>
+              <p className="font-semibold text-soft">
+                {(kycStatus ?? '').toLowerCase() === 'rejected'
+                  ? 'Verification needs a quick fix'
+                  : (kycStatus ?? '').toLowerCase() === 'pending'
+                    ? 'Verification in progress'
+                    : 'Complete identity verification to continue'}
+              </p>
               <p className="mt-1 text-xs leading-relaxed text-muted">
-                We verify government ID before holding a vehicle on the calendar — a quick, secure step.
+                {(kycStatus ?? '').toLowerCase() === 'rejected'
+                  ? 'One or more documents were not accepted. Open KYC Center to read the reviewer note and upload replacements.'
+                  : (kycStatus ?? '').toLowerCase() === 'pending'
+                    ? 'Our operations desk is reviewing your uploads. Once everything is approved, booking unlocks automatically.'
+                    : 'We verify government ID before holding a vehicle on the calendar — a quick, secure step.'}
               </p>
               <Button type="button" size="sm" variant="secondary" className="mt-4 w-full sm:w-auto" to="/dashboard/kyc">
                 Go to KYC Center

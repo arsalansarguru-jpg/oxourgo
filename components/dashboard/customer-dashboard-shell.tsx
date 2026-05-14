@@ -29,6 +29,8 @@ export type CustomerDashboardShellProps = {
   displayName: string
   email: string | undefined
   verificationLabel: string
+  /** From `profiles.kyc_status` for nav affordances. */
+  kycLifecycleStatus?: string
   children: React.ReactNode
 }
 
@@ -36,6 +38,7 @@ export function CustomerDashboardShell({
   displayName,
   email,
   verificationLabel,
+  kycLifecycleStatus = 'not_started',
   children,
 }: CustomerDashboardShellProps) {
   const pathname = usePathname()
@@ -72,14 +75,31 @@ export function CustomerDashboardShell({
                 key={href}
                 href={href}
                 className={cn(
-                  'flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium tracking-[-0.01em] transition-[color,background-color,box-shadow] duration-200',
+                  'flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-sm font-medium tracking-[-0.01em] transition-[color,background-color,box-shadow] duration-200',
                   active
                     ? 'bg-fill-glass-strong text-soft shadow-[inset_0_0_0_1px_rgba(255,255,255,0.07)]'
                     : 'text-muted hover:bg-fill-glass hover:text-soft',
                 )}
               >
-                <Icon className="h-4 w-4 shrink-0 text-electric/90" aria-hidden />
-                {label}
+                <span className="inline-flex min-w-0 items-center gap-2.5">
+                  <Icon className="h-4 w-4 shrink-0 text-electric/90" aria-hidden />
+                  <span className="truncate">{label}</span>
+                </span>
+                {href === '/dashboard/kyc' && kycLifecycleStatus !== 'approved' ? (
+                  <span
+                    className={cn(
+                      'shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]',
+                      kycLifecycleStatus === 'rejected'
+                        ? 'bg-red-500/15 text-red-200/95'
+                        : kycLifecycleStatus === 'pending'
+                          ? 'bg-electric/20 text-electric'
+                          : 'bg-fill-glass-strong text-muted',
+                    )}
+                    aria-hidden
+                  >
+                    {kycLifecycleStatus === 'rejected' ? '!' : kycLifecycleStatus === 'pending' ? '…' : '•'}
+                  </span>
+                ) : null}
               </Link>
             )
           })}

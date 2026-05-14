@@ -14,8 +14,7 @@ export async function FleetView({ pickup, from, to, location, searchQuery }: Fle
   const result = await getFleetCars()
   return (
     <FleetClientView
-      cars={result.ok ? result.cars : []}
-      loadFailed={!result.ok}
+      cars={result.cars}
       pickup={pickup}
       from={from}
       to={to}

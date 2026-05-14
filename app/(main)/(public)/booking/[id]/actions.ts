@@ -8,6 +8,7 @@ import { hasVehicleBookingOverlap } from '@/lib/booking/vehicle-overlap'
 import type { CreateBookingInput, CreateBookingResult } from '@/lib/booking/types'
 import { getAuthenticatedUser } from '@/lib/auth/server'
 import { onBookingCreated } from '@/lib/notifications/events'
+import { isProfileKycApprovedForBooking } from '@/lib/kyc/kyc-booking-eligible'
 import { createClient } from '@/lib/supabase/server'
 import { isVehicleAvailableForBooking, parseMoneyIntRupees, type VehicleRow } from '@/lib/fleet/vehicle-mappers'
 import type { Database } from '@/lib/supabase/database.types'
@@ -34,11 +35,11 @@ export async function createBookingAction(input: CreateBookingInput): Promise<Cr
 
     const { data: profileRow } = await supabase
       .from('profiles')
-      .select('verification_tier')
+      .select('verification_tier, kyc_status')
       .eq('user_id', user.id)
       .maybeSingle()
 
-    if ((profileRow?.verification_tier ?? '') !== 'verified') {
+    if (!isProfileKycApprovedForBooking(profileRow)) {
       return {
         ok: false,
         code: 'kyc_required',

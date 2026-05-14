@@ -26,8 +26,8 @@ export default async function NotificationsCenterPage() {
           <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-electric/90">Inbox</p>
           <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-soft">Notifications</h1>
           <p className="mt-2 max-w-2xl text-sm text-muted">
-            Booking, KYC, and payment updates appear here in real time when Realtime is enabled for{' '}
-            <code className="rounded bg-fill-glass-strong px-1 font-mono text-xs">notifications</code>.
+            Booking updates, verification outcomes, and payment milestones land here as soon as they are recorded for your
+            account.
           </p>
         </div>
         {rows.some((r) => !r.read_at) ? (

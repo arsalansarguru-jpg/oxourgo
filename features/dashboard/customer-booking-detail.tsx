@@ -7,6 +7,7 @@ import {
   CalendarRange,
   Check,
   Circle,
+  FileText,
   Headphones,
   MapPin,
   Receipt,
@@ -27,6 +28,7 @@ import {
 import { deriveCustomerBookingUiStatus, type CustomerBookingUiStatus } from '@/lib/customer/derive-booking-ui-status'
 import { formatInr } from '@/lib/format'
 import { cn } from '@/lib/utils/cn'
+import { BookingPdfToolkit } from '@/components/booking/booking-pdf-toolkit'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
@@ -160,6 +162,19 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
           </div>
         </div>
       </section>
+
+      <Card className={cn(cardSurfaceTransition, cardSurfaceHover, 'overflow-hidden')}>
+        <CardContent className="p-5 sm:p-7">
+          <div className="flex items-center gap-2">
+            <FileText className="h-5 w-5 text-electric" aria-hidden />
+            <h2 className="text-lg font-semibold tracking-[-0.02em] text-soft">Documents</h2>
+          </div>
+          <p className="mt-2 text-sm text-muted">
+            Official PDFs for this reservation — preview on mobile, download for your records, or print from the preview.
+          </p>
+          <BookingPdfToolkit bookingId={row.id} className="mt-6" />
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-[1fr_minmax(0,340px)] lg:items-start lg:gap-8">
         <div className="space-y-6">

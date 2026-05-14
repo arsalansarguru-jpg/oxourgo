@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback, useRef, useState, useTransition } from 'react'
+import { useCallback, useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { Check, Eye, FileUp, Loader2, ShieldCheck } from 'lucide-react'
@@ -67,12 +67,32 @@ export function KycUploadTile({
 }) {
   const router = useRouter()
   const inputRef = useRef<HTMLInputElement | null>(null)
+  const lastFileRef = useRef<File | null>(null)
   const [dragOver, setDragOver] = useState(false)
   const [progress, setProgress] = useState<number | null>(null)
   const [localError, setLocalError] = useState<string | null>(null)
   const [successFlash, setSuccessFlash] = useState(false)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
   const [previewPending, startPreview] = useTransition()
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl)
+    }
+  }, [previewUrl])
+
+  const replacePreview = useCallback(
+    (file: File | null) => {
+      setPreviewUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev)
+        if (!file) return null
+        if (!file.type.startsWith('image/')) return null
+        return URL.createObjectURL(file)
+      })
+    },
+    [],
+  )
 
   const busy = pending || progress !== null
 
@@ -85,6 +105,8 @@ export function KycUploadTile({
         return
       }
       setLocalError(null)
+      lastFileRef.current = file
+      replacePreview(file)
       startTransition(async () => {
         const {
           data: { session },
@@ -127,6 +149,8 @@ export function KycUploadTile({
             onRegistered(res.document)
           }
           setProgress(null)
+          replacePreview(null)
+          lastFileRef.current = null
           setSuccessFlash(true)
           window.setTimeout(() => setSuccessFlash(false), 3200)
           router.refresh()
@@ -137,7 +161,7 @@ export function KycUploadTile({
         }
       })
     },
-    [anonKey, onRegistered, projectUrl, router, supabase, tile.id, tile.selfie, userId],
+    [anonKey, onRegistered, projectUrl, replacePreview, router, supabase, tile.id, tile.selfie, userId],
   )
 
   const onBrowse = () => inputRef.current?.click()
@@ -235,23 +259,53 @@ export function KycUploadTile({
               <p className="text-xs text-muted tabular-nums">{Math.round(progress * 100)}%</p>
             </div>
           ) : (
-            <div className="space-y-3">
-              <p className="text-sm text-soft">Drag &amp; drop here, or browse</p>
-              <p className="text-xs text-muted">Private bucket · encrypted in transit · max 8MB</p>
-              <Button type="button" variant="secondary" className="w-full" disabled={busy} onClick={onBrowse}>
-                <span className="inline-flex items-center gap-2">
-                  <FileUp className="h-4 w-4" aria-hidden />
-                  Choose file
-                </span>
-              </Button>
+            <div className="space-y-4">
+              {previewUrl ? (
+                <div className="overflow-hidden rounded-lg border border-stroke bg-matte/40 p-2">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- local blob preview */}
+                  <img src={previewUrl} alt="" role="presentation" className="mx-auto max-h-44 w-full object-contain" />
+                </div>
+              ) : lastFileRef.current && !lastFileRef.current.type.startsWith('image/') ? (
+                <p className="text-xs text-muted">
+                  PDF selected: <span className="font-medium text-soft">{lastFileRef.current.name}</span>
+                </p>
+              ) : null}
+              <div className="space-y-3">
+                <p className="text-sm text-soft">Drag &amp; drop here, or browse</p>
+                <p className="text-xs text-muted">Private bucket · encrypted in transit · max 8MB</p>
+                <Button type="button" variant="secondary" className="w-full" disabled={busy} onClick={onBrowse}>
+                  <span className="inline-flex items-center gap-2">
+                    <FileUp className="h-4 w-4" aria-hidden />
+                    Choose file
+                  </span>
+                </Button>
+              </div>
             </div>
           )}
         </div>
 
         {localError ? (
-          <p className="rounded-lg border border-red-400/25 bg-red-500/[0.08] px-3 py-2 text-xs text-red-100/95">
-            {localError}
-          </p>
+          <div className="space-y-2">
+            <p className="rounded-lg border border-red-400/25 bg-red-500/[0.08] px-3 py-2 text-xs text-red-100/95">
+              {localError}
+            </p>
+            {lastFileRef.current ? (
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                className="w-full"
+                disabled={busy}
+                onClick={() => {
+                  setLocalError(null)
+                  const f = lastFileRef.current
+                  if (f) processFile(f)
+                }}
+              >
+                Try again
+              </Button>
+            ) : null}
+          </div>
         ) : null}
 
         {latest?.storage_path ? (
@@ -292,23 +346,22 @@ export function KycUploadTile({
 
 export const KYC_TILES: KycTileConfig[] = [
   {
-    id: 'aadhaar',
-    label: 'Aadhaar',
-    hint: 'Masked or partial number visible uploads only. PDF or clear photo.',
-    accept: KYC_ID_ACCEPT,
-  },
-  {
     id: 'license',
     label: 'Driving license',
     hint: 'Front (and back in one file if possible).',
     accept: KYC_ID_ACCEPT,
   },
   {
-    id: 'passport',
-    label: 'Passport',
-    hint: 'Optional for Indian residents with Aadhaar + license. Required for some international IDs.',
+    id: 'aadhaar',
+    label: 'Aadhaar',
+    hint: 'Masked or partial number visible uploads only. PDF or clear photo.',
     accept: KYC_ID_ACCEPT,
-    required: false,
+  },
+  {
+    id: 'pan',
+    label: 'PAN card',
+    hint: 'Upload a clear photo or PDF of your PAN (alternative to Aadhaar for ID verification).',
+    accept: KYC_ID_ACCEPT,
   },
   {
     id: 'selfie',
@@ -316,5 +369,12 @@ export const KYC_TILES: KycTileConfig[] = [
     hint: 'Hold a neutral expression; face well lit, no filters. Image only.',
     accept: KYC_SELFIE_ACCEPT,
     selfie: true,
+  },
+  {
+    id: 'passport',
+    label: 'Passport',
+    hint: 'Optional for Indian residents with Aadhaar or PAN + license. Required for some international IDs.',
+    accept: KYC_ID_ACCEPT,
+    required: false,
   },
 ]

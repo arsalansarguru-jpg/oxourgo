@@ -16,6 +16,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 
+import { AdminBookingsBulkPdfBar } from '@/components/admin/admin-bookings-bulk-pdf-bar'
 import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 import { AdminStatusPill } from '@/components/admin/admin-status-pill'
 import { Button } from '@/components/ui/Button'
@@ -284,6 +285,8 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
           </span>{' '}
           of <span className="font-semibold text-soft">{totalCount}</span> bookings
         </p>
+
+        {showRows ? <AdminBookingsBulkPdfBar bookingIds={rows.map((b) => b.id)} className="mt-4" /> : null}
       </AdminCardContent>
 
       <div className="relative">

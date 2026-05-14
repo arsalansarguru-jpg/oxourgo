@@ -8,6 +8,7 @@ import { formatInr } from '@/lib/format'
 import { cn } from '@/lib/utils/cn'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
+import { FleetVehicleImg } from '@/components/fleet/fleet-vehicle-img'
 import { ReviewBadge } from '@/components/marketing/review-badge'
 import { Card, CardContent } from '@/components/ui/Card'
 import { cardMetaChip, cardSurfaceHoverAccent, cardTitle } from '@/components/ui/card-tokens'
@@ -34,13 +35,10 @@ export function CarCard({ car, className, imageClassName }: CarCardProps) {
         )}
       >
         <div className={cn('relative aspect-[16/10] overflow-hidden bg-carbon-deep', imageClassName)}>
-          {/* eslint-disable-next-line @next/next/no-img-element -- fleet image URLs come from Supabase (storage or any HTTPS) */}
-          <img
+          <FleetVehicleImg
             src={car.imageUrl}
             alt={car.name}
             className="absolute inset-0 h-full w-full object-cover transition-[transform] duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/card:scale-[1.035]"
-            loading="lazy"
-            referrerPolicy="no-referrer"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-matte/92 via-matte/[0.12] to-transparent" />
           <div className="absolute left-3 top-3 z-[1] flex flex-wrap gap-2 sm:left-4 sm:top-4">

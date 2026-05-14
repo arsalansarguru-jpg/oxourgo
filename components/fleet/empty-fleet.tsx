@@ -1,15 +1,24 @@
-import { CarFront, Search, Sparkles } from 'lucide-react'
+import { CarFront, RefreshCw, Search, Sparkles } from 'lucide-react'
 
 import { BRAND } from '@/constants/brand'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils/cn'
 
+type EmptyFleetKind = 'filtered' | 'catalog'
+
 type Props = {
   onClear: () => void
   className?: string
+  /**
+   * `filtered` — vehicles exist but search/filters hide them (clear filters).
+   * `catalog` — no vehicles returned from the server (refresh or concierge).
+   */
+  kind?: EmptyFleetKind
 }
 
-export function EmptyFleet({ onClear, className }: Props) {
+export function EmptyFleet({ onClear, className, kind = 'filtered' }: Props) {
+  const catalog = kind === 'catalog'
+
   return (
     <div
       className={cn(
@@ -35,17 +44,32 @@ export function EmptyFleet({ onClear, className }: Props) {
         </div>
 
         <div className="relative mt-8 max-w-md space-y-3">
-          <p className="text-lg font-semibold tracking-[-0.02em] text-soft sm:text-xl">No vehicles match your search</p>
+          <p className="text-lg font-semibold tracking-[-0.02em] text-soft sm:text-xl">
+            {catalog ? 'Collection is updating' : 'No vehicles match your search'}
+          </p>
           <p className="text-sm leading-relaxed text-muted">
-            Refine filters or let our concierge curate a match for your itinerary — we reply on WhatsApp within minutes
-            during service hours.
+            {catalog
+              ? 'We could not load live inventory just now. Refresh to retry, or message concierge for a curated shortlist — we respond quickly on WhatsApp.'
+              : 'Refine filters or let our concierge curate a match for your itinerary — we reply on WhatsApp within minutes during service hours.'}
           </p>
         </div>
 
         <div className="relative mt-8 flex w-full max-w-sm flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
-          <Button type="button" variant="secondary" className="w-full min-h-12 sm:w-auto sm:min-w-[10rem]" onClick={onClear}>
-            Clear filters
-          </Button>
+          {catalog ? (
+            <Button
+              type="button"
+              variant="secondary"
+              className="w-full min-h-12 gap-2 sm:w-auto sm:min-w-[10rem]"
+              onClick={onClear}
+            >
+              <RefreshCw className="h-4 w-4 shrink-0" aria-hidden />
+              Refresh
+            </Button>
+          ) : (
+            <Button type="button" variant="secondary" className="w-full min-h-12 sm:w-auto sm:min-w-[10rem]" onClick={onClear}>
+              Clear filters
+            </Button>
+          )}
           <Button
             href={BRAND.whatsapp}
             target="_blank"

@@ -196,8 +196,12 @@ export type Database = {
           phone: string | null
           preferences: Json
           verification_tier: string
+          kyc_status: string
+          kyc_submitted_at: string | null
+          kyc_approved_at: string | null
           admin_notes: string | null
           risk_score: number
+          created_at: string
           updated_at: string
         }
         Insert: {
@@ -207,8 +211,12 @@ export type Database = {
           phone?: string | null
           preferences?: Json
           verification_tier?: string
+          kyc_status?: string
+          kyc_submitted_at?: string | null
+          kyc_approved_at?: string | null
           admin_notes?: string | null
           risk_score?: number
+          created_at?: string
           updated_at?: string
         }
         Update: {
@@ -218,8 +226,12 @@ export type Database = {
           phone?: string | null
           preferences?: Json
           verification_tier?: string
+          kyc_status?: string
+          kyc_submitted_at?: string | null
+          kyc_approved_at?: string | null
           admin_notes?: string | null
           risk_score?: number
+          created_at?: string
           updated_at?: string
         }
         Relationships: []

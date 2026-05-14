@@ -2,10 +2,14 @@ import 'server-only'
 
 import type { PostgrestError } from '@supabase/supabase-js'
 
+import { logFleetRecoverable } from '@/lib/fleet/fleet-catalog-logging'
 import { createPublicServerSupabaseClient } from '@/lib/supabase/public-server-client'
 import type { VehicleRow } from '@/lib/fleet/vehicle-mappers'
 
 export type { VehicleRow } from '@/lib/fleet/vehicle-mappers'
+
+/** Re-export for call sites that still import logging from this module. */
+export { logFleetRecoverable, logFleetActionable, logFleetVehiclesError } from '@/lib/fleet/fleet-catalog-logging'
 
 /**
  * Explicit column list for narrow selects (detail pages, joins).
@@ -30,24 +34,12 @@ export function isVehiclePubliclyListable(availabilityStatus: string | null | un
   return String(availabilityStatus ?? '').trim().toLowerCase() === 'available'
 }
 
-export function logFleetVehiclesError(scope: string, detail: unknown): void {
-  console.error(`[oxour-go/fleet:${scope}]`, detail)
-}
-
-function serializePostgrestError(err: PostgrestError) {
-  return {
-    message: err.message,
-    code: err.code,
-    details: err.details,
-    hint: err.hint,
-  }
-}
-
 /**
  * Loads rows from **`public.vehicles`** with the anon key (no cookie session).
+ * On any failure, returns **`rows: []`** so UI can render an empty fleet state without throwing.
  * Relies on your Supabase **SELECT** policy for `anon` / `authenticated`.
  */
-export async function fetchPublicVehicleRows(): Promise<{ ok: true; rows: VehicleRow[] } | { ok: false }> {
+export async function fetchPublicVehicleRows(): Promise<{ rows: VehicleRow[] }> {
   try {
     const supabase = createPublicServerSupabaseClient()
     const { data, error } = await supabase
@@ -56,19 +48,16 @@ export async function fetchPublicVehicleRows(): Promise<{ ok: true; rows: Vehicl
       .order('created_at', { ascending: false })
 
     if (error) {
-      logFleetVehiclesError('vehicles.select', serializePostgrestError(error))
-      return { ok: false }
+      const pe = error as PostgrestError
+      const blob = `${String(pe.message ?? '')}\n${String(pe.details ?? '')}`
+      const networkish = /ENOTFOUND|ECONNREFUSED|ETIMEDOUT|fetch failed|network|certificate|aborted/i.test(blob)
+      logFleetRecoverable(networkish ? 'vehicles.select.network' : 'vehicles.select', error)
+      return { rows: [] }
     }
 
-    const rows = (data ?? []) as VehicleRow[]
-
-    if (rows.length === 0) {
-      console.warn('[oxour-go/fleet:vehicles.select] Query returned 0 rows (empty catalog or filtered inventory).')
-    }
-
-    return { ok: true, rows }
+    return { rows: (data ?? []) as VehicleRow[] }
   } catch (e) {
-    logFleetVehiclesError('vehicles.select.exception', e)
-    return { ok: false }
+    logFleetRecoverable('vehicles.select.exception', e)
+    return { rows: [] }
   }
 }

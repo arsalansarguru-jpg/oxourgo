@@ -1,23 +1,27 @@
+import { AdminAnalyticsDashboard } from '@/components/admin/analytics/admin-analytics-dashboard'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
-import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
+import { fetchAdminAnalyticsBundle } from '@/lib/admin/data/analytics'
+import { resolveAnalyticsRangeFromSearchParams } from '@/lib/admin/analytics-range'
 
 export const dynamic = 'force-dynamic'
 
-export default function AdminAnalyticsPage() {
+export default async function AdminAnalyticsPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
+  const raw = await searchParams
+  const range = resolveAnalyticsRangeFromSearchParams(raw)
+  const data = await fetchAdminAnalyticsBundle(range)
+
   return (
     <div className="space-y-8">
       <AdminPageHeader
         eyebrow="Intelligence"
         title="Analytics"
-        description="Operational and revenue insights will appear here as your data pipelines connect."
+        description="Revenue, fleet load, and booking intelligence sourced from live Supabase data. Use presets or a custom UTC date range."
       />
-      <AdminCard>
-        <AdminCardContent className="py-12 text-center">
-          <p className="text-sm leading-relaxed text-muted">
-            Charts, cohorts, and fleet utilization views are being prepared for this workspace.
-          </p>
-        </AdminCardContent>
-      </AdminCard>
+      <AdminAnalyticsDashboard data={data} />
     </div>
   )
 }

@@ -3,14 +3,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
-import { ChevronLeft, ChevronRight, RefreshCw, Search, SlidersHorizontal } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Search, SlidersHorizontal } from 'lucide-react'
 
 import { EmptyFleet } from '@/components/fleet/empty-fleet'
 import { FleetCarCard } from '@/components/fleet/fleet-car-card'
 import { FleetFilterDrawer } from '@/components/fleet/fleet-filter-drawer'
 import { FleetGridSkeleton } from '@/components/fleet/fleet-grid-skeleton'
 import { FilterPills } from '@/components/fleet/filter-pills'
-import { DataLoadErrorPanel } from '@/components/ui/data-load-error'
 import { Input } from '@/components/ui/Input'
 import { Section, SectionHeading } from '@/components/ui/Section'
 import { Button } from '@/components/ui/Button'
@@ -21,8 +20,6 @@ const PAGE_SIZE = 12
 
 type FleetClientViewProps = {
   cars: FleetCar[]
-  /** True when the server could not load fleet data (details are server-logged only). */
-  loadFailed?: boolean
   pickup?: string
   from?: string
   to?: string
@@ -57,7 +54,6 @@ function carMatchesFilters(car: FleetCar, active: Set<string>) {
 
 export function FleetClientView({
   cars,
-  loadFailed = false,
   pickup = '',
   from = '',
   to = '',
@@ -132,7 +128,7 @@ export function FleetClientView({
         subtitle="Search, filter, and book verified luxury and premium vehicles across Mumbai hubs."
       />
 
-      {(pickup || from || to || location.trim() || searchQuery.trim()) && !loadFailed && (
+      {(pickup || from || to || location.trim() || searchQuery.trim()) && (
         <div className="mx-auto max-w-3xl rounded-2xl border border-electric/18 bg-gradient-to-br from-electric/[0.07] to-transparent px-4 py-3.5 text-center text-sm leading-relaxed text-muted">
           {pickup ? (
             <span>
@@ -161,21 +157,7 @@ export function FleetClientView({
         </div>
       )}
 
-      {loadFailed ? (
-        <DataLoadErrorPanel
-          title="Unable to load fleet"
-          description="Please refresh the page or try again shortly."
-          onRetry={() => router.refresh()}
-          retryLabel={
-            <>
-              <RefreshCw className="h-4 w-4" aria-hidden />
-              Try again
-            </>
-          }
-        />
-      ) : (
-        <>
-          <div className="sticky top-14 z-40 rounded-2xl border border-stroke bg-matte/[0.88] p-3 shadow-[0_8px_40px_-28px_rgba(0,0,0,0.65)] backdrop-blur-2xl supports-[backdrop-filter]:bg-matte/75 sm:top-[3.5rem] md:top-[3.75rem] md:p-4 lg:sticky">
+      <div className="sticky top-14 z-40 rounded-2xl border border-stroke bg-matte/[0.88] p-3 shadow-[0_8px_40px_-28px_rgba(0,0,0,0.65)] backdrop-blur-2xl supports-[backdrop-filter]:bg-matte/75 sm:top-[3.5rem] md:top-[3.75rem] md:p-4 lg:sticky">
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between lg:gap-6">
                 <div className="min-w-0 flex-1 space-y-2">
@@ -280,23 +262,12 @@ export function FleetClientView({
           ) : null}
 
           {cars.length === 0 ? (
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-8 rounded-2xl border border-stroke bg-matte/[0.5] px-6 py-16 text-center"
-            >
-              <Search className="mx-auto h-10 w-10 text-muted" aria-hidden />
-              <p className="mt-4 text-lg font-semibold text-soft">Collection unavailable</p>
-              <p className="mt-2 text-sm text-muted">
-                No vehicles are listed right now. Refresh or contact concierge for a curated shortlist.
-              </p>
-              <Button type="button" className="mt-6" onClick={() => router.refresh()}>
-                Refresh
-              </Button>
-            </motion.div>
+            <div className="mt-8">
+              <EmptyFleet kind="catalog" onClear={() => void router.refresh()} />
+            </div>
           ) : filtered.length === 0 ? (
             <div className="mt-8">
-              <EmptyFleet onClear={clearAllFilters} />
+              <EmptyFleet kind="filtered" onClear={clearAllFilters} />
             </div>
           ) : (
             <>
@@ -364,8 +335,6 @@ export function FleetClientView({
               ) : null}
             </>
           )}
-        </>
-      )}
     </Section>
   )
 }

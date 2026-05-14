@@ -1,5 +1,6 @@
-import Image from 'next/image'
 import { Calendar, CreditCard, MapPin } from 'lucide-react'
+
+import { VehicleCoverImage } from '@/components/fleet/vehicle-cover-image'
 
 import type { BookingWithCar } from '@/lib/supabase/database.types'
 import {
@@ -39,10 +40,9 @@ export function CustomerBookingFleetCard({ row }: CustomerBookingFleetCardProps)
     >
       <div className="grid gap-5 p-5 sm:p-6 lg:grid-cols-[minmax(0,160px)_1fr] lg:items-stretch lg:gap-8">
         <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-stroke bg-matte/40 lg:aspect-auto lg:min-h-[140px]">
-          <Image
+          <VehicleCoverImage
             src={visual.imageUrl}
             alt={visual.name}
-            fill
             className="object-cover"
             sizes="(max-width: 1024px) 100vw, 200px"
           />

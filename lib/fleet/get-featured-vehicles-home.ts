@@ -1,10 +1,11 @@
 import 'server-only'
 
 import type { Car } from '@/types/car'
-import { fetchPublicVehicleRows, isVehicleShownOnPublicCatalog, logFleetVehiclesError } from '@/lib/fleet/public-vehicle-catalog'
+import { fetchPublicVehicleRows, isVehicleShownOnPublicCatalog } from '@/lib/fleet/public-vehicle-catalog'
+import { logFleetRecoverable } from '@/lib/fleet/fleet-catalog-logging'
 import { mapVehicleRowToCar, type VehicleRow } from '@/lib/fleet/vehicle-mappers'
 
-export type GetFeaturedVehiclesForHomeResult = { ok: true; cars: Car[] } | { ok: false }
+export type GetFeaturedVehiclesForHomeResult = { ok: true; cars: Car[] }
 
 function sortFeaturedFirst(rows: VehicleRow[]): VehicleRow[] {
   const ts = (iso: string | undefined) => {
@@ -20,10 +21,8 @@ function sortFeaturedFirst(rows: VehicleRow[]): VehicleRow[] {
 
 /** Featured rows for homepage; prefers `featured`, otherwise latest available vehicles from `public.vehicles`. */
 export async function getFeaturedVehiclesForHome(limit = 6): Promise<GetFeaturedVehiclesForHomeResult> {
-  const res = await fetchPublicVehicleRows()
-  if (!res.ok) return { ok: false }
-
-  const listable = res.rows.filter((r) => isVehicleShownOnPublicCatalog(r))
+  const { rows } = await fetchPublicVehicleRows()
+  const listable = rows.filter((r) => isVehicleShownOnPublicCatalog(r))
   const sorted = sortFeaturedFirst(listable).slice(0, limit)
 
   const cars: Car[] = []
@@ -31,7 +30,7 @@ export async function getFeaturedVehiclesForHome(limit = 6): Promise<GetFeatured
     try {
       cars.push(mapVehicleRowToCar(row))
     } catch (e) {
-      logFleetVehiclesError('getFeaturedVehiclesForHome.mapVehicleRowToCar', { id: row.id, error: e })
+      logFleetRecoverable('getFeaturedVehiclesForHome.mapVehicleRowToCar', { id: row.id, error: e })
     }
   }
   return { ok: true, cars }

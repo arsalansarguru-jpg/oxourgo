@@ -23,7 +23,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
         id={selectId}
         className={cn(
           'touch-manipulation min-h-12 w-full appearance-none rounded-xl border border-stroke-strong bg-matte/[0.55] px-4 py-3 text-base tracking-[-0.01em] text-soft shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] sm:min-h-11 sm:py-2 sm:text-sm',
-          'transition-[border-color,box-shadow,background-color] duration-300 focus:border-electric/55 focus:bg-matte/[0.65] focus:outline-none focus:ring-2 focus:ring-electric/22',
+          'transition-[border-color,box-shadow,background-color] duration-300 focus-visible:border-electric/55 focus-visible:bg-matte/[0.65] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/22',
           error && 'border-red-400/50',
           className,
         )}
