@@ -3,6 +3,21 @@ import { LegalProse } from '@/components/legal/legal-prose'
 import { Button } from '@/components/ui/Button'
 
 export default function CareersPage() {
+  const subject = encodeURIComponent('Careers at Oxour Go')
+  const body = encodeURIComponent(
+    [
+      'Hi Oxour Go team,',
+      '',
+      'I would like to express interest in joining Oxour Go.',
+      '',
+      'Role focus:',
+      'Relevant experience (2–3 sentences):',
+      'Portfolio / GitHub / LinkedIn:',
+      '',
+      'Thank you,',
+    ].join('\n'),
+  )
+
   return (
     <LegalProse kicker="Join us" title="Careers at Oxour Go">
       <p>
@@ -17,7 +32,7 @@ export default function CareersPage() {
         Send a concise note and portfolio or GitHub to our talent inbox—we read every message.
       </p>
       <div className="pt-4">
-        <Button href={`mailto:${BRAND.email}?subject=Careers%20at%20Oxour%20Go`}>
+        <Button href={`mailto:${BRAND.email}?subject=${subject}&body=${body}`}>
           Email careers
         </Button>
       </div>

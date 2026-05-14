@@ -1,3 +1,5 @@
+import { Search } from 'lucide-react'
+
 import { BRAND } from '@/constants/brand'
 import { Button } from '@/components/ui/Button'
 import { cn } from '@/lib/utils/cn'

@@ -24,6 +24,8 @@ export type KycTileConfig = {
   hint: string
   accept: string
   selfie?: boolean
+  /** When false, tile is optional (e.g. passport for domestic renters). */
+  required?: boolean
 }
 
 function sanitizeFilename(name: string): string {
@@ -162,7 +164,9 @@ export function KycUploadTile({
               {latest.status}
             </Badge>
           ) : (
-            <Badge variant="muted">Required</Badge>
+            <Badge variant={tile.required === false ? 'default' : 'muted'}>
+              {tile.required === false ? 'Optional' : 'Required'}
+            </Badge>
           )}
         </div>
 
@@ -302,8 +306,9 @@ export const KYC_TILES: KycTileConfig[] = [
   {
     id: 'passport',
     label: 'Passport',
-    hint: 'Bio-data page. PDF or image.',
+    hint: 'Optional for Indian residents with Aadhaar + license. Required for some international IDs.',
     accept: KYC_ID_ACCEPT,
+    required: false,
   },
   {
     id: 'selfie',

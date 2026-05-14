@@ -95,9 +95,46 @@ function isFleetCarCategory(value: string | null | undefined): value is FleetCar
   return Boolean(value && (KNOWN_FLEET_CATEGORIES as readonly string[]).includes(value))
 }
 
+/** Normalizes legacy / admin-entered `catalog_category` values before strict enum check (H1). */
+function normalizeDbCatalogCategory(raw: string | null | undefined): FleetCarCategory | null {
+  const t = raw?.trim()
+  if (!t) return null
+  if (isFleetCarCategory(t)) return t
+  const key = t.toLowerCase()
+  const aliases: Record<string, FleetCarCategory> = {
+    suv: 'SUV',
+    sedan: 'Sedan',
+    hatchback: 'Hatchback',
+    luxury: 'Luxury',
+    budget: 'Budget',
+    premium: 'Luxury',
+    crossover: 'SUV',
+    mpv: 'SUV',
+    ev: 'Luxury',
+    electric: 'Luxury',
+    'luxury sedan': 'Luxury',
+    'luxury suv': 'Luxury',
+  }
+  return aliases[key] ?? null
+}
+
 /** Name-aware segment hints so Thar / Creta / Sonet are never mis-tagged as Sedans from price alone (H1). */
-function inferCatalogCategoryFromName(brand: string, name: string, pricePerDay: number): FleetCarCategory {
-  const blob = `${brand} ${name}`.toLowerCase()
+function inferCatalogCategoryFromName(row: VehicleRow, pricePerDay: number): FleetCarCategory {
+  const blob = `${row.brand} ${row.name}`.toLowerCase()
+  const fuel = String(row.fuel_type ?? '')
+    .trim()
+    .toLowerCase()
+  if (fuel === 'electric' || /tesla|byd atto|byd seal|ioniq|e-tron|eqe|eqs|taycan|ev6|zev|nexon ev|i-pace|ix\b|i4\b|macan electric/.test(blob)) {
+    if (pricePerDay >= 10_000) return 'Luxury'
+    if (
+      /thar|creta|sonet|fortuner|scorpio|nexon|harrier|hector|xuv|seltos|venue|elevate|compass|meridian|safari|tucson|kodiaq|gloster|ev6|ioniq/.test(
+        blob,
+      )
+    ) {
+      return 'SUV'
+    }
+    return pricePerDay >= 5000 ? 'Sedan' : 'Hatchback'
+  }
   if (
     /thar|creta|sonet|fortuner|scorpio|nexon|harrier|hector|xuv|seltos|venue|elevate|compass|meridian|safari|tucson|kodiaq|gloster/.test(
       blob,
@@ -109,13 +146,13 @@ function inferCatalogCategoryFromName(brand: string, name: string, pricePerDay: 
 }
 
 function resolveCatalogCategory(row: VehicleRow, pricePerDay: number): FleetCarCategory {
-  const raw = row.catalog_category?.trim()
-  if (isFleetCarCategory(raw)) return raw
-  return inferCatalogCategoryFromName(row.brand, row.name, pricePerDay)
+  const fromDb = normalizeDbCatalogCategory(row.catalog_category)
+  if (fromDb) return fromDb
+  return inferCatalogCategoryFromName(row, pricePerDay)
 }
 
 function toCarCategory(row: VehicleRow, pricePerDay: number): CarCategory {
-  return resolveCatalogCategory(row, pricePerDay) as CarCategory
+  return resolveCatalogCategory(row, pricePerDay)
 }
 
 function toCarStatus(row: VehicleRow): CarStatus {

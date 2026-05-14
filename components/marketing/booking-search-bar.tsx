@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { AlertCircle, Loader2, Search } from 'lucide-react'
+import { AlertCircle, BadgeCheck, Headphones, Loader2, Receipt, Search } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 import { PICKUP_LOCATIONS } from '@/constants/brand'
@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
 import { Input } from '@/components/ui/Input'
 import { TrustBadge } from '@/components/marketing/trust-badge'
-import { BadgeCheck, Headphones, Receipt } from 'lucide-react'
 
 function toYmd(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0')
@@ -37,6 +36,7 @@ export function BookingSearchBar() {
   const [pickup, setPickup] = useState<string>(PICKUP_LOCATIONS[0])
   const [pickupDate, setPickupDate] = useState('')
   const [dropoffDate, setDropoffDate] = useState('')
+  const [keywords, setKeywords] = useState('')
   const [error, setError] = useState<string | null>(null)
 
   const todayYmd = useMemo(() => toYmd(new Date()), [])
@@ -73,6 +73,8 @@ export function BookingSearchBar() {
     q.set('from', pickupDate)
     q.set('to', dropoffDate)
     q.set('location', pickup)
+    const kw = keywords.trim()
+    if (kw) q.set('q', kw)
 
     startTransition(() => {
       router.push(`/fleet?${q.toString()}`)
@@ -128,6 +130,14 @@ export function BookingSearchBar() {
               </>
             )}
           </Button>
+        </div>
+        <div className="mt-4">
+          <Input
+            label="Brand or model (optional)"
+            placeholder="e.g. BMW, Creta, electric"
+            value={keywords}
+            onChange={(e) => setKeywords(e.target.value)}
+          />
         </div>
         {error ? (
           <div className="mt-4 flex items-start gap-2 rounded-xl border border-amber-400/25 bg-amber-500/[0.08] px-3 py-2 text-sm text-amber-50/95">

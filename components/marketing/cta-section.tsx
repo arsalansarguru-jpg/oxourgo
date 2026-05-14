@@ -1,4 +1,4 @@
-import { Phone } from 'lucide-react'
+import { MessageCircle, Phone } from 'lucide-react'
 import { BRAND } from '@/constants/brand'
 import { Button } from '@/components/ui/Button'
 import { Section } from '@/components/ui/Section'
@@ -14,9 +14,20 @@ export function CTASection() {
           <p className="mt-4 text-pretty text-base leading-[1.65] text-muted md:text-lg">
             Book your premium self-drive car now and explore Mumbai in style
           </p>
-          <div className="mx-auto mt-9 flex max-w-lg flex-col items-stretch justify-center gap-3.5 sm:max-w-none sm:flex-row sm:items-center sm:justify-center">
+          <div className="mx-auto mt-9 flex max-w-lg flex-col items-stretch justify-center gap-3.5 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
             <Button size="lg" to="/fleet" className="w-full sm:w-auto">
               Browse Fleet
+            </Button>
+            <Button
+              size="lg"
+              variant="secondary"
+              href={BRAND.whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto"
+            >
+              <MessageCircle className="h-4 w-4" />
+              WhatsApp
             </Button>
             <Button
               size="lg"

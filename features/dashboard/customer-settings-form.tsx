@@ -12,6 +12,19 @@ import { Card, CardContent } from '@/components/ui/Card'
 import { cardSurfaceHover, cardSurfaceTransition } from '@/components/ui/card-tokens'
 import { cn } from '@/lib/utils/cn'
 
+function validateIndianMobile(raw: string): string | null {
+  const t = raw.trim()
+  if (!t) return null
+  const digits = t.replace(/\D/g, '')
+  if (t.startsWith('+')) {
+    if (digits.startsWith('91') && digits.length === 12 && /^[6-9]/.test(digits.slice(2))) return null
+    return 'Use +91 followed by a valid 10-digit Indian mobile.'
+  }
+  if (digits.length === 10 && /^[6-9]/.test(digits)) return null
+  if (digits.length === 12 && digits.startsWith('91') && /^[6-9]/.test(digits.slice(2))) return null
+  return 'Enter a 10-digit mobile or +91… format.'
+}
+
 type Profile = Database['public']['Tables']['profiles']['Row'] | null
 
 export function CustomerSettingsForm({ user, profile }: { user: User; profile: Profile }) {
@@ -19,11 +32,18 @@ export function CustomerSettingsForm({ user, profile }: { user: User; profile: P
   const [phone, setPhone] = useState(profile?.phone ?? '')
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url ?? '')
   const [message, setMessage] = useState<string | null>(null)
+  const [fieldError, setFieldError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     setMessage(null)
+    setFieldError(null)
+    const phoneErr = validateIndianMobile(phone)
+    if (phoneErr) {
+      setFieldError(phoneErr)
+      return
+    }
     const fd = new FormData()
     fd.set('fullName', fullName)
     fd.set('phone', phone)
@@ -49,14 +69,18 @@ export function CustomerSettingsForm({ user, profile }: { user: User; profile: P
           <form className="space-y-5" onSubmit={onSubmit}>
             <Input label="Email (read-only)" value={user.email ?? ''} readOnly disabled />
             <Input label="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} name="fullName" />
-            <Input label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} name="phone" placeholder="+91 …" />
+            <Input label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} name="phone" placeholder="+91 9xxxx xxxxx or 10-digit mobile" />
+            <p className="text-xs text-muted">
+              Profile photo: paste a public HTTPS image URL. Hosted file upload from this screen is planned next.
+            </p>
             <Input
               label="Profile image URL"
               value={avatarUrl}
               onChange={(e) => setAvatarUrl(e.target.value)}
               name="avatarUrl"
-              placeholder="https://… (public avatars bucket URL)"
+              placeholder="https://…"
             />
+            {fieldError ? <p className="text-sm text-amber-200/95">{fieldError}</p> : null}
             {message ? <p className="text-sm text-muted">{message}</p> : null}
             <Button type="submit" disabled={pending}>
               {pending ? (

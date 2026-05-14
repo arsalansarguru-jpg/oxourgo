@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { Calendar, MapPin } from 'lucide-react'
+import { Calendar, CreditCard, MapPin } from 'lucide-react'
 
 import type { BookingWithCar } from '@/lib/supabase/database.types'
 import {
@@ -23,6 +23,8 @@ export type CustomerBookingFleetCardProps = {
 export function CustomerBookingFleetCard({ row }: CustomerBookingFleetCardProps) {
   const visual = resolveBookingVehicleVisual(row)
   const bookingBadge = mapDbBookingStatusToCustomerBadge(row.booking_status)
+  const pay = row.payment_status.trim().toLowerCase()
+  const needsPayment = row.booking_status === 'pending_payment' || pay === 'pending' || pay === 'failed'
   const pickupFmt = new Date(row.pickup_date).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
   const returnFmt = new Date(row.return_date).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
 
@@ -98,6 +100,12 @@ export function CustomerBookingFleetCard({ row }: CustomerBookingFleetCardProps)
             <Button className="w-full" variant="secondary" size="md" to={`/dashboard/bookings/${row.id}`}>
               View booking details
             </Button>
+            {needsPayment ? (
+              <Button className="w-full" size="md" to={`/dashboard/bookings/${row.id}`}>
+                <CreditCard className="h-4 w-4" aria-hidden />
+                Complete payment
+              </Button>
+            ) : null}
           </div>
         </div>
       </div>

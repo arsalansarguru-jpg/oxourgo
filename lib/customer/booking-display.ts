@@ -17,6 +17,20 @@ function firstVehicle(vehicles: BookingWithCar['vehicles']): VehicleSummaryRow |
   return Array.isArray(vehicles) ? vehicles[0] ?? null : vehicles
 }
 
+/** Full listing title for dashboards (brand + model when `name` is model-only). */
+export function formatBookingVehicleTitle(row: BookingWithCar): string {
+  const veh = firstVehicle(row.vehicles)
+  if (!veh) return 'Vehicle'
+  const brand = (veh.brand ?? '').trim()
+  const name = (veh.name ?? '').trim()
+  if (!name && !brand) return 'Vehicle'
+  if (brand && name) {
+    if (name.toLowerCase().startsWith(brand.toLowerCase())) return name
+    return `${brand} ${name}`.trim()
+  }
+  return name || brand
+}
+
 function imageFromVehicleRow(brand: string, image: string | null): string {
   const raw = image?.trim()
   if (!raw) return resolveFleetImageUrl(brand)
@@ -28,9 +42,10 @@ function imageFromVehicleRow(brand: string, image: string | null): string {
 export function resolveBookingVehicleVisual(row: BookingWithCar): BookingVehicleVisual {
   const veh = firstVehicle(row.vehicles)
   if (veh) {
+    const title = formatBookingVehicleTitle(row)
     return {
       imageUrl: imageFromVehicleRow(veh.brand, veh.image),
-      name: veh.name?.trim() || veh.brand,
+      name: title,
       brand: veh.brand,
     }
   }
@@ -68,6 +83,7 @@ export function customerBookingStatusLabel(badge: CustomerBookingStatusBadge): s
 
 const PAYMENT_LABELS: Record<string, string> = {
   pending: 'Pending',
+  authorized: 'Authorized',
   paid: 'Paid',
   failed: 'Failed',
   refunded: 'Refunded',
@@ -101,6 +117,7 @@ export type CustomerPaymentBadgeUiVariant = CustomerBookingStatusBadgeUiVariant 
 
 const PAYMENT_BADGE_VARIANT: Record<string, CustomerPaymentBadgeUiVariant> = {
   pending: 'electric',
+  authorized: 'default',
   paid: 'success',
   failed: 'danger',
   refunded: 'muted',

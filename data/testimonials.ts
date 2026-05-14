@@ -16,7 +16,7 @@ export const testimonials: Testimonial[] = [
     quote:
       'Exceptional service! The BMW I rented was spotless and the booking process was seamless. Perfect for my business trips in Mumbai.',
     rating: 5,
-    verifiedLabel: 'Verified booking · Mar 2025',
+    verifiedLabel: 'Verified booking · Mar 2026',
     initials: 'AM',
   },
   {
@@ -26,7 +26,7 @@ export const testimonials: Testimonial[] = [
     quote:
       'Oxour Go made my Mumbai trip unforgettable. The Audi Q7 was a dream to drive, and the 24/7 support team was incredibly helpful.',
     rating: 5,
-    verifiedLabel: 'Verified booking · Jan 2025',
+    verifiedLabel: 'Verified booking · Jan 2026',
     initials: 'PS',
   },
   {
@@ -36,7 +36,7 @@ export const testimonials: Testimonial[] = [
     quote:
       'Premium quality cars at transparent prices. No hidden charges, verified vehicles, and instant booking. Highly recommended!',
     rating: 5,
-    verifiedLabel: 'Verified booking · Feb 2025',
+    verifiedLabel: 'Verified booking · Feb 2026',
     initials: 'RK',
   },
 ]

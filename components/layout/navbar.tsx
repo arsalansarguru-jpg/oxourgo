@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { ChevronDown, LayoutDashboard, LogOut, Menu, X } from 'lucide-react'
+import { ChevronDown, LayoutDashboard, LogOut, Menu, MessageCircle, X } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 import { AnimatePresence, motion } from 'framer-motion'
 import { BRAND } from '@/constants/brand'
@@ -158,6 +158,15 @@ export function Navbar() {
           </nav>
 
           <div className="flex items-center justify-end gap-1.5 justify-self-end sm:gap-2 lg:gap-2.5">
+            <a
+              href={BRAND.whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border border-stroke bg-fill-glass text-muted shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] transition-[border-color,background-color,color] hover:border-stroke-strong hover:bg-fill-glass-strong hover:text-soft md:inline-flex"
+              aria-label="WhatsApp concierge"
+            >
+              <MessageCircle className="h-[18px] w-[18px]" aria-hidden />
+            </a>
             <ThemeToggle className="hidden md:inline-flex" />
             {ready && user ? (
               <details
@@ -306,6 +315,21 @@ export function Navbar() {
 
                 <div className="mt-1">
                   <ThemeToggle size="comfortable" className="w-full justify-center" />
+                </div>
+
+                <div className="mt-3">
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    href={BRAND.whatsapp}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="min-h-[3.25rem] w-full border-stroke-strong bg-fill-glass-strong text-[15px] font-medium hover:translate-y-0 hover:bg-fill-glass-strong active:translate-y-0"
+                    onClick={() => setOpen(false)}
+                  >
+                    <MessageCircle className="h-[18px] w-[18px] text-electric" aria-hidden />
+                    WhatsApp
+                  </Button>
                 </div>
 
                 <div className="mt-5 grid gap-3 border-t border-stroke pt-5">

@@ -57,30 +57,36 @@ function tripPhaseLine(ui: CustomerBookingUiStatus): string {
 
 function timelineSteps(row: BookingWithCar) {
   const ui = deriveCustomerBookingUiStatus(row)
+  if (row.booking_status === 'cancelled') {
+    return [{ key: 'cancel', label: 'Cancelled', done: true, current: false }]
+  }
   const steps = [
     { key: 'created', label: 'Booking created', done: true },
     {
-      key: 'ops',
-      label: 'Operations review',
+      key: 'payment',
+      label: 'Payment confirmed',
       done: row.booking_status !== 'pending_payment',
     },
     {
       key: 'confirmed',
-      label: 'Confirmed',
+      label: 'Fleet confirmed',
       done:
         row.booking_status === 'confirmed' ||
         row.booking_status === 'completed' ||
         ui === 'active' ||
         ui === 'upcoming',
     },
-    { key: 'pickup', label: 'Pickup', done: new Date() >= new Date(row.pickup_date) },
-    { key: 'return', label: 'Return', done: new Date() > new Date(row.return_date) },
-    { key: 'complete', label: 'Completed', done: ui === 'completed' },
+    { key: 'pickup', label: 'Pickup', done: Date.now() >= new Date(row.pickup_date).getTime() },
+    { key: 'return', label: 'Return', done: Date.now() > new Date(row.return_date).getTime() },
+    { key: 'complete', label: 'Trip closed', done: ui === 'completed' },
   ]
-  if (row.booking_status === 'cancelled') {
-    return [{ key: 'cancel', label: 'Cancelled', done: true }]
-  }
-  return steps
+  let assignedCurrent = false
+  return steps.map((s, i) => {
+    const prevDone = i === 0 || steps[i - 1].done
+    const current = !assignedCurrent && !s.done && prevDone
+    if (current) assignedCurrent = true
+    return { ...s, current }
+  })
 }
 
 export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
@@ -252,10 +258,12 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
                   <h2 className="text-lg font-semibold text-soft">Vehicle</h2>
                 </div>
                 <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2">
-                  <div>
-                    <dt className="text-muted">Registration</dt>
-                    <dd className="mt-1 font-medium text-soft">{vehicle.registration_number}</dd>
-                  </div>
+                  {vehicle.registration_number?.trim() ? (
+                    <div>
+                      <dt className="text-muted">Registration</dt>
+                      <dd className="mt-1 font-medium text-soft">{vehicle.registration_number}</dd>
+                    </div>
+                  ) : null}
                   <div>
                     <dt className="text-muted">Year</dt>
                     <dd className="mt-1 font-medium text-soft">{vehicle.year}</dd>
@@ -282,7 +290,17 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
                 ) : null}
               </CardContent>
             </Card>
-          ) : null}
+          ) : (
+            <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
+              <CardContent className="p-5 sm:p-7">
+                <h2 className="text-lg font-semibold text-soft">Vehicle</h2>
+                <p className="mt-2 text-sm text-muted">
+                  Vehicle details are not attached to this reservation. Contact support with your invoice ref{' '}
+                  <span className="font-mono text-soft">{invoiceRef}</span> if this looks wrong.
+                </p>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Timeline */}
           <Card className={cn(cardSurfaceBase, 'border border-stroke')}>
@@ -293,13 +311,20 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
                   <li key={s.key} className="flex items-center gap-3">
                     <span
                       className={cn(
-                        'flex h-9 w-9 shrink-0 items-center justify-center rounded-full border',
-                        s.done ? 'border-emerald-400/40 bg-emerald-500/15 text-emerald' : 'border-stroke-strong text-muted',
+                        'flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-xs font-semibold',
+                        s.done
+                          ? 'border-emerald-400/40 bg-emerald-500/15 text-emerald'
+                          : s.current
+                            ? 'border-electric/50 bg-electric/15 text-electric shadow-[0_0_0_3px_rgba(59,130,246,0.18)]'
+                            : 'border-stroke-strong text-muted',
                       )}
                     >
-                      {s.done ? <Check className="h-4 w-4" aria-hidden /> : <Circle className="h-4 w-4" aria-hidden />}
+                      {s.done ? <Check className="h-4 w-4" aria-hidden /> : s.current ? '●' : <Circle className="h-4 w-4" aria-hidden />}
                     </span>
-                    <p className="font-medium text-soft">{s.label}</p>
+                    <div>
+                      <p className={cn('font-medium', s.current ? 'text-soft' : 'text-soft/90')}>{s.label}</p>
+                      {s.current ? <p className="text-xs text-electric/90">Current step</p> : null}
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -317,7 +342,7 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
                 </span>
                 <div>
                   <h3 className="font-semibold text-soft">Cancellation</h3>
-                  <p className="mt-1 text-xs font-medium uppercase tracking-wide text-amber-100/80">Placeholder</p>
+                  <p className="mt-1 text-xs font-medium uppercase tracking-wide text-muted/90">Policy</p>
                 </div>
               </div>
               {isCancelled ? (

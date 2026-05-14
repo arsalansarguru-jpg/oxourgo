@@ -89,6 +89,16 @@ export function Footer() {
                   {BRAND.email}
                 </a>
               </li>
+              <li>
+                <a
+                  href={BRAND.whatsapp}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="transition-colors duration-300 hover:text-soft"
+                >
+                  WhatsApp concierge
+                </a>
+              </li>
             </ul>
           </div>
         </div>

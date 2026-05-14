@@ -25,6 +25,8 @@ type FleetClientViewProps = {
   to?: string
   /** Pre-fills text search (e.g. from homepage search or destination cards). */
   location?: string
+  /** Keyword search from `?q=` (takes precedence over `location` when both are set). */
+  searchQuery?: string
 }
 
 function carMatchesFilters(car: FleetCar, active: Set<string>) {
@@ -57,6 +59,7 @@ export function FleetClientView({
   from = '',
   to = '',
   location = '',
+  searchQuery = '',
 }: FleetClientViewProps) {
   const router = useRouter()
   const [query, setQuery] = useState('')
@@ -64,9 +67,11 @@ export function FleetClientView({
   const [page, setPage] = useState(1)
 
   useEffect(() => {
-    const loc = location.trim()
-    if (loc) setQuery(loc)
-  }, [location])
+    const fromQ = searchQuery.trim()
+    const fromLoc = location.trim()
+    const text = fromQ || fromLoc
+    if (text) setQuery(text)
+  }, [location, searchQuery])
 
   const toggle = (id: FleetFilterId) => {
     setActiveFilters((prev) => {
@@ -114,7 +119,7 @@ export function FleetClientView({
         subtitle="Search, filter, and book verified luxury and premium economy vehicles across Mumbai hubs."
       />
 
-      {(pickup || from || to || location.trim()) && !loadFailed && (
+      {(pickup || from || to || location.trim() || searchQuery.trim()) && !loadFailed && (
         <div className="mx-auto max-w-3xl rounded-2xl border border-electric/18 bg-gradient-to-br from-electric/[0.07] to-transparent px-4 py-3.5 text-center text-sm leading-relaxed text-muted">
           {pickup ? (
             <span>
@@ -131,7 +136,11 @@ export function FleetClientView({
               To: <span className="font-semibold text-soft">{to}</span>
             </span>
           ) : null}
-          {location.trim() ? (
+          {searchQuery.trim() ? (
+            <span className="ml-2 block sm:inline">
+              Keywords: <span className="font-semibold text-soft">{searchQuery.trim()}</span>
+            </span>
+          ) : location.trim() ? (
             <span className="ml-2 block sm:inline">
               Search: <span className="font-semibold text-soft">{location.trim()}</span>
             </span>

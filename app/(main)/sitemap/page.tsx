@@ -22,12 +22,10 @@ export default function SitemapPage() {
     <Section className="pt-10 pb-16">
       <h1 className="text-3xl font-bold text-soft md:text-4xl">Sitemap</h1>
       <p className="mt-3 max-w-2xl text-silver">
-        Quick navigation to every public surface of Oxour Go. Vehicle detail and booking URLs use slugs
-        from the fleet (for example,{' '}
-        <Link href="/car/bmw-5-series" className="text-electric hover:underline">
-          /car/bmw-5-series
-        </Link>
-        ).
+        The fleet page accepts optional query parameters for hub dates and text search:{' '}
+        <span className="font-mono text-soft">pickup</span>, <span className="font-mono text-soft">from</span>,{' '}
+        <span className="font-mono text-soft">to</span>, <span className="font-mono text-soft">location</span>, and{' '}
+        <span className="font-mono text-soft">q</span> (brand or model keywords).
       </p>
       <ul className="mt-8 grid gap-2 sm:grid-cols-2">
         {links.map((l) => (

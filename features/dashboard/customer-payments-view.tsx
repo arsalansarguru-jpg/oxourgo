@@ -1,19 +1,12 @@
 import type { BookingWithCar } from '@/lib/supabase/database.types'
 import type { PaymentEventRow } from '@/lib/customer/payment-queries'
+import { formatBookingVehicleTitle } from '@/lib/customer/booking-display'
 import { formatInr } from '@/lib/format'
 import { cn } from '@/lib/utils/cn'
 import { Badge } from '@/components/ui/Badge'
+import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
 import { cardSurfaceBase, cardSurfaceHover, cardSurfaceTransition } from '@/components/ui/card-tokens'
-
-function carName(row: BookingWithCar) {
-  const v = row.vehicles
-  if (v) {
-    const veh = Array.isArray(v) ? v[0] : v
-    if (veh) return (veh.name ?? `${veh.brand}`).trim() || '—'
-  }
-  return '—'
-}
 
 export function CustomerPaymentsView({
   bookings,
@@ -28,8 +21,8 @@ export function CustomerPaymentsView({
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-electric/90">Ledger</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-soft">Payments</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted">
-          Rental totals from bookings plus optional ledger rows in the payment_events table. Invoices are
-          placeholders until Razorpay sync is wired.
+          Rental totals from your bookings plus optional ledger rows. Open a booking to complete payment when
+          status is still pending.
         </p>
       </header>
 
@@ -43,16 +36,22 @@ export function CustomerPaymentsView({
                 <th className="px-4 py-3">Vehicle</th>
                 <th className="px-4 py-3">Amount</th>
                 <th className="px-4 py-3">Payment</th>
+                <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-stroke">
               {bookings.map((b) => (
                 <tr key={b.id} className="text-muted">
                   <td className="px-4 py-3 font-mono text-xs text-soft">OX-{b.id.replace(/-/g, '').slice(0, 10).toUpperCase()}</td>
-                  <td className="px-4 py-3 text-soft">{carName(b)}</td>
+                  <td className="px-4 py-3 text-soft">{formatBookingVehicleTitle(b)}</td>
                   <td className="px-4 py-3 tabular-nums text-soft">{formatInr(b.total_rupees)}</td>
                   <td className="px-4 py-3">
                     <Badge variant={b.payment_status === 'paid' ? 'success' : 'electric'}>{b.payment_status}</Badge>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Button size="sm" variant="secondary" to={`/dashboard/bookings/${b.id}`}>
+                      View
+                    </Button>
                   </td>
                 </tr>
               ))}
@@ -73,7 +72,7 @@ export function CustomerPaymentsView({
               <Card key={b.id} className={cn(cardSurfaceHover, cardSurfaceTransition)}>
                 <CardContent className="p-5">
                   <p className="text-xs font-medium uppercase tracking-wide text-muted">Per booking</p>
-                  <p className="mt-1 font-semibold text-soft">{carName(b)}</p>
+                  <p className="mt-1 font-semibold text-soft">{formatBookingVehicleTitle(b)}</p>
                   <p className="mt-3 text-2xl font-semibold tabular-nums text-soft">{formatInr(dep)}</p>
                   <p className="mt-1 text-xs text-muted">Pre-auth at pickup · released after inspection (ops workflow).</p>
                 </CardContent>

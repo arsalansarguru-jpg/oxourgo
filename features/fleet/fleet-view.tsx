@@ -6,9 +6,11 @@ type FleetViewProps = {
   from?: string
   to?: string
   location?: string
+  /** Keyword prefill for fleet text search (homepage / deep links). */
+  searchQuery?: string
 }
 
-export async function FleetView({ pickup, from, to, location }: FleetViewProps) {
+export async function FleetView({ pickup, from, to, location, searchQuery }: FleetViewProps) {
   const result = await getFleetCars()
   return (
     <FleetClientView
@@ -18,6 +20,7 @@ export async function FleetView({ pickup, from, to, location }: FleetViewProps) 
       from={from}
       to={to}
       location={location}
+      searchQuery={searchQuery}
     />
   )
 }

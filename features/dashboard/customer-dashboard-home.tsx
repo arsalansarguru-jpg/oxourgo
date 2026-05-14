@@ -1,8 +1,9 @@
 import Link from 'next/link'
-import { ArrowUpRight, Car, ShieldCheck, Sparkles } from 'lucide-react'
+import { ArrowUpRight, Car, CreditCard, ShieldCheck, Sparkles } from 'lucide-react'
 
 import type { BookingWithCar } from '@/lib/supabase/database.types'
 import { deriveCustomerBookingUiStatus } from '@/lib/customer/derive-booking-ui-status'
+import { formatBookingVehicleTitle } from '@/lib/customer/booking-display'
 import { formatInr } from '@/lib/format'
 import { cn } from '@/lib/utils/cn'
 import { Button } from '@/components/ui/Button'
@@ -10,15 +11,6 @@ import { Card, CardContent } from '@/components/ui/Card'
 import { cardSurfaceBase, cardSurfaceHover, cardSurfaceTransition } from '@/components/ui/card-tokens'
 import { CustomerBookingCard } from '@/components/dashboard/customer-booking-card'
 import { EmptyState } from '@/components/ui/EmptyState'
-
-function carLabel(row: BookingWithCar): string {
-  const v = row.vehicles
-  if (v) {
-    const veh = Array.isArray(v) ? v[0] : v
-    if (veh) return (veh.name ?? `${veh.brand}`).trim() || 'Vehicle'
-  }
-  return 'Vehicle'
-}
 
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
@@ -32,21 +24,37 @@ function Stat({ label, value, hint }: { label: string; value: string; hint?: str
   )
 }
 
+function isPostedPayment(paymentStatus: string): boolean {
+  const p = paymentStatus.trim().toLowerCase()
+  return p === 'paid' || p === 'authorized'
+}
+
 export function CustomerDashboardHome({
   bookings,
   kycUploadedCount,
+  verificationTier,
 }: {
   bookings: BookingWithCar[]
   kycUploadedCount: number
+  verificationTier: string
 }) {
   const now = Date.now()
   const withUi = bookings.map((b) => ({ row: b, ui: deriveCustomerBookingUiStatus(b) }))
 
   const active = withUi.filter(({ ui, row }) => ui === 'active' || (ui === 'upcoming' && new Date(row.pickup_date).getTime() <= now + 36 * 60 * 60 * 1000))
-  const upcoming = withUi.filter(({ ui }) => ui === 'upcoming')
+  /** Matches `/dashboard/bookings` partition: pending payment + future confirmed. */
+  const upcoming = withUi.filter(({ ui }) => ui === 'upcoming' || ui === 'pending_review')
   const spotlight = [...active, ...upcoming].slice(0, 3)
 
-  const lifetime = bookings.reduce((s, b) => s + b.total_rupees, 0)
+  const postedSpend = bookings
+    .filter((b) => b.booking_status !== 'cancelled' && isPostedPayment(b.payment_status))
+    .reduce((s, b) => s + b.total_rupees, 0)
+
+  const pendingPaymentBookings = bookings.filter(
+    (b) => b.booking_status === 'pending_payment' || b.payment_status.trim().toLowerCase() === 'pending',
+  ).length
+
+  const isVerified = verificationTier === 'verified'
 
   return (
     <div className="space-y-10">
@@ -60,9 +68,17 @@ export function CustomerDashboardHome({
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <Stat label="Active trips" value={String(withUi.filter((x) => x.ui === 'active').length)} hint="On the road now" />
-        <Stat label="Upcoming" value={String(upcoming.length)} hint="Confirmed ahead" />
-        <Stat label="Lifetime spend" value={formatInr(lifetime)} hint="Posted rental totals" />
-        <Stat label="KYC uploads" value={String(kycUploadedCount)} hint="Submitted documents" />
+        <Stat
+          label="Upcoming & pending"
+          value={String(upcoming.length)}
+          hint="Includes payment-pending and confirmed ahead"
+        />
+        <Stat label="Posted spend" value={formatInr(postedSpend)} hint="Paid or authorized booking totals" />
+        <Stat
+          label="Verification"
+          value={isVerified ? 'Verified' : 'In progress'}
+          hint={`${kycUploadedCount} document file(s) on record`}
+        />
       </div>
 
       <div
@@ -76,17 +92,31 @@ export function CustomerDashboardHome({
           </div>
           <div>
             <p className="font-medium text-soft">Quick actions</p>
-            <p className="mt-1 text-sm text-muted">Book, verify identity, or review payments in one tap.</p>
+            <p className="mt-1 text-sm text-muted">
+              {pendingPaymentBookings > 0
+                ? `You have ${pendingPaymentBookings} booking${pendingPaymentBookings === 1 ? '' : 's'} awaiting payment — open Payments or the booking to continue.`
+                : !isVerified
+                  ? 'Upload identity documents to unlock bookings once operations approves your profile.'
+                  : 'Book, verify identity, or review payments in one tap.'}
+            </p>
           </div>
         </div>
         <div className="flex flex-wrap gap-2">
+          {pendingPaymentBookings > 0 ? (
+            <Button to="/dashboard/payments" className="min-h-11">
+              <CreditCard className="mr-1.5 h-4 w-4" aria-hidden />
+              Complete payment
+            </Button>
+          ) : null}
           <Button to="/fleet" className="min-h-11">
             Book a vehicle
           </Button>
-          <Button variant="secondary" to="/dashboard/kyc" className="min-h-11">
-            <ShieldCheck className="mr-1.5 h-4 w-4" aria-hidden />
-            KYC center
-          </Button>
+          {!isVerified ? (
+            <Button variant="secondary" to="/dashboard/kyc" className="min-h-11">
+              <ShieldCheck className="mr-1.5 h-4 w-4" aria-hidden />
+              KYC center
+            </Button>
+          ) : null}
           <Button variant="secondary" to="/dashboard/payments" className="min-h-11">
             Payments
           </Button>
@@ -120,7 +150,7 @@ export function CustomerDashboardHome({
               <CustomerBookingCard
                 key={row.id}
                 bookingId={row.id}
-                carLabel={carLabel(row)}
+                carLabel={formatBookingVehicleTitle(row)}
                 uiStatus={ui}
                 pickupAt={row.pickup_date}
                 returnAt={row.return_date}

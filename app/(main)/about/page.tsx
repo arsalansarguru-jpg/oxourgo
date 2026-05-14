@@ -1,5 +1,6 @@
 import Link from 'next/link'
 
+import { BRAND } from '@/constants/brand'
 import { LegalProse } from '@/components/legal/legal-prose'
 import { Button } from '@/components/ui/Button'
 
@@ -34,9 +35,12 @@ export default function AboutPage() {
         </Link>
         .
       </p>
-      <div className="pt-6">
+      <div className="flex flex-col gap-3 pt-6 sm:flex-row sm:flex-wrap sm:items-center">
         <Button size="lg" to="/fleet">
           Browse the fleet
+        </Button>
+        <Button size="lg" variant="secondary" href={BRAND.whatsapp} target="_blank" rel="noopener noreferrer">
+          WhatsApp concierge
         </Button>
       </div>
     </LegalProse>

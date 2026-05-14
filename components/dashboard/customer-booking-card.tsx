@@ -1,10 +1,11 @@
 import Link from 'next/link'
-import { Calendar, ChevronRight, MapPin } from 'lucide-react'
+import { Calendar, ChevronRight, CreditCard, MapPin } from 'lucide-react'
 
 import type { CustomerBookingUiStatus } from '@/lib/customer/derive-booking-ui-status'
 import { formatInr } from '@/lib/format'
 import { cn } from '@/lib/utils/cn'
 import { Badge } from '@/components/ui/Badge'
+import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
 import { cardSurfaceHover, cardSurfaceTransition } from '@/components/ui/card-tokens'
 
@@ -17,7 +18,7 @@ const statusVariant: Record<CustomerBookingUiStatus, 'electric' | 'success' | 'm
 }
 
 function bookingUiLabel(ui: CustomerBookingUiStatus): string {
-  if (ui === 'pending_review') return 'Pending review'
+  if (ui === 'pending_review') return 'Pending payment'
   return ui
 }
 
@@ -46,6 +47,8 @@ export function CustomerBookingCard({
 }: CustomerBookingCardProps) {
   const pickupFmt = new Date(pickupAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
   const returnFmt = new Date(returnAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+  const pay = paymentStatus.trim().toLowerCase()
+  const needsPayment = uiStatus === 'pending_review' || pay === 'pending' || pay === 'failed'
 
   return (
     <Card className={cn(cardSurfaceTransition, cardSurfaceHover, 'overflow-hidden')}>
@@ -78,6 +81,14 @@ export function CustomerBookingCard({
             <ChevronRight className="h-5 w-5 text-muted sm:hidden" aria-hidden />
           </div>
         </Link>
+        {needsPayment ? (
+          <div className="flex flex-wrap justify-end gap-2 border-t border-stroke px-4 py-3 sm:px-5">
+            <Button size="sm" to={`/dashboard/bookings/${bookingId}`} className="gap-2">
+              <CreditCard className="h-4 w-4" aria-hidden />
+              Pay or review booking
+            </Button>
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   )

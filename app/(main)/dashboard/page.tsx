@@ -4,6 +4,7 @@ import { CustomerDashboardHome } from '@/features/dashboard/customer-dashboard-h
 import { getAuthenticatedUser } from '@/lib/auth/server'
 import { listBookingsForUser, unwrapListBookingsResult } from '@/lib/customer/bookings-queries'
 import { listKycDocuments } from '@/lib/customer/kyc-queries'
+import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,10 +14,20 @@ export default async function DashboardPage() {
     redirect(`/login?${new URLSearchParams({ redirect: '/dashboard' }).toString()}`)
   }
 
-  const [bookingsResult, kycDocs] = await Promise.all([
+  const supabase = await createClient()
+  const [bookingsResult, kycDocs, profileRes] = await Promise.all([
     listBookingsForUser(user.id),
     listKycDocuments(user.id),
+    supabase.from('profiles').select('verification_tier').eq('user_id', user.id).maybeSingle(),
   ])
 
-  return <CustomerDashboardHome bookings={unwrapListBookingsResult(bookingsResult)} kycUploadedCount={kycDocs.length} />
+  const verificationTier = (profileRes.data?.verification_tier as string | undefined) ?? 'basic'
+
+  return (
+    <CustomerDashboardHome
+      bookings={unwrapListBookingsResult(bookingsResult)}
+      kycUploadedCount={kycDocs.length}
+      verificationTier={verificationTier}
+    />
+  )
 }
