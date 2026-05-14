@@ -18,9 +18,7 @@ export async function POST(request: Request) {
     const result = await runTripReminderJob()
     return NextResponse.json({ ok: true, ...result })
   } catch (e) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : 'job_failed' },
-      { status: 500 },
-    )
+    console.error('[api/cron/trip-reminders]', e)
+    return NextResponse.json({ ok: false, error: 'job_failed' }, { status: 500 })
   }
 }

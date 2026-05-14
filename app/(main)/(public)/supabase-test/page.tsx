@@ -1,16 +1,22 @@
 import type { Metadata } from 'next'
+import { headers } from 'next/headers'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
 
 import { SupabaseBrowserCheck } from '@/components/dev/supabase-browser-check'
 import { Section, SectionHeading } from '@/components/ui/Section'
+import { isSupabaseDiagnosticRouteAllowed } from '@/lib/dev/allow-supabase-diagnostic-route'
 import { readSupabasePublicEnv } from '@/lib/env/supabase-public'
 import { createClient } from '@/lib/supabase/server'
 
-export const metadata: Metadata = {
+import { buildPageMetadata } from '@/lib/seo/build-page-metadata'
+
+export const metadata: Metadata = buildPageMetadata({
   title: 'Supabase connection test',
-  description: 'Internal check for Supabase URL, keys, and SSR/browser clients.',
+  description: 'Internal diagnostics for Supabase URL, keys, and SSR/browser clients.',
+  path: '/supabase-test',
   robots: { index: false, follow: false },
-}
+})
 
 function maskKey(key: string) {
   if (key.length <= 14) return '••••••••'
@@ -56,6 +62,12 @@ async function probeServerClient() {
 }
 
 export default async function SupabaseTestPage() {
+  const h = await headers()
+  const host = h.get('x-forwarded-host') ?? h.get('host') ?? ''
+  if (!isSupabaseDiagnosticRouteAllowed(host)) {
+    notFound()
+  }
+
   const env = readSupabasePublicEnv()
 
   let postgrest: Awaited<ReturnType<typeof probePostgREST>> | null = null
@@ -70,7 +82,7 @@ export default async function SupabaseTestPage() {
       <SectionHeading
         eyebrow="Diagnostics"
         title="Supabase connection"
-        subtitle="Verifies public env, PostgREST reachability, and the SSR/browser Supabase clients. Remove or protect this route in production."
+        subtitle="Development and local use only. Gated in production unless an operator enables the documented server flag."
       />
 
       <div className="mx-auto flex max-w-2xl flex-col gap-8 text-left">

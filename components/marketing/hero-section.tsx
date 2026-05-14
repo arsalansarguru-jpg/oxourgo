@@ -155,7 +155,6 @@ export function HeroSection() {
                     src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1600&q=80"
                     alt="Luxury performance vehicle on a cinematic night drive"
                     fill
-                    unoptimized
                     className="object-cover object-[center_42%] opacity-[0.93] transition-[transform,opacity,filter] duration-[880ms] ease-[cubic-bezier(0.22,1,0.36,1)] sm:object-center group-hover:scale-[1.028] group-hover:opacity-[0.98] group-hover:brightness-[1.03]"
                     sizes="(max-width:640px) 100vw,(max-width:1024px) 90vw,44vw"
                     priority

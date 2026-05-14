@@ -1,4 +1,15 @@
+import type { Metadata } from 'next'
+
 import { LegalProse } from '@/components/legal/legal-prose'
+import { buildPageMetadata } from '@/lib/seo/build-page-metadata'
+
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Cookie policy',
+  description:
+    'How Oxour Go uses essential, analytics, and marketing cookies on the luxury self-drive marketing site and how to control them.',
+  path: '/cookies',
+  keywords: ['Oxour Go cookies', 'privacy controls', 'analytics cookies'],
+})
 
 export default function CookiesPage() {
   return (

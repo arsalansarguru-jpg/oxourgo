@@ -3,6 +3,7 @@ import 'server-only'
 import { escapeIlikePattern } from '@/lib/admin/bookings-search'
 import type { BookingWithCar } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { logPostgrestError } from '@/lib/errors/safe-user-message'
 
 const bookingSelect = `
   id,
@@ -81,16 +82,25 @@ async function buildBookingSearchOrExpression(
     orParts.push(`vehicle_id.eq.${rawSearch}`)
   }
 
-  const { data: profileHits } = await admin.from('profiles').select('user_id').ilike('full_name', pat).limit(150)
+  const { data: profileHits, error: profileSearchErr } = await admin
+    .from('profiles')
+    .select('user_id')
+    .ilike('full_name', pat)
+    .limit(150)
+  if (profileSearchErr) {
+    logPostgrestError('[buildBookingSearchOrExpression] profiles', profileSearchErr)
+  }
   const userIdsFromProfiles = [...new Set((profileHits ?? []).map((p) => p.user_id).filter(Boolean))]
   if (userIdsFromProfiles.length) {
     orParts.push(`user_id.in.(${userIdsFromProfiles.join(',')})`)
   }
 
-  const [{ data: vName }, { data: vBrand }] = await Promise.all([
+  const [{ data: vName, error: vNameErr }, { data: vBrand, error: vBrandErr }] = await Promise.all([
     admin.from('vehicles').select('id').ilike('name', pat).limit(80),
     admin.from('vehicles').select('id').ilike('brand', pat).limit(80),
   ])
+  if (vNameErr) logPostgrestError('[buildBookingSearchOrExpression] vehicles.name', vNameErr)
+  if (vBrandErr) logPostgrestError('[buildBookingSearchOrExpression] vehicles.brand', vBrandErr)
   const vehicleIds = [...new Set([...(vName ?? []), ...(vBrand ?? [])].map((v) => v.id).filter(Boolean))]
   if (vehicleIds.length) {
     orParts.push(`vehicle_id.in.(${vehicleIds.join(',')})`)
@@ -119,6 +129,9 @@ export async function adminListBookingsPage(params: AdminBookingsListParams = {}
     countQ = countQ.or(orExpr)
   }
   const { count: headCount, error: countErr } = await countQ
+  if (countErr) {
+    logPostgrestError('[adminListBookingsPage] count', countErr)
+  }
   const totalCount = countErr ? 0 : typeof headCount === 'number' ? headCount : 0
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
@@ -142,6 +155,9 @@ export async function adminListBookingsPage(params: AdminBookingsListParams = {}
 
   const { data, error } = await dataQ.range(from, to)
 
+  if (error) {
+    logPostgrestError('[adminListBookingsPage] data', error)
+  }
   if (error || !data) {
     return { rows: [], totalCount, page, pageSize }
   }
@@ -172,7 +188,7 @@ export async function adminEnrichBookingsForAdminList(rows: BookingWithCar[]): P
   const admin = createAdminClient()
   const uniqueIds = [...new Set(rows.map((r) => r.user_id))]
 
-  const [{ data: profiles }, ...emailResults] = await Promise.all([
+  const [{ data: profiles, error: profilesErr }, ...emailResults] = await Promise.all([
     admin.from('profiles').select('user_id, full_name').in('user_id', uniqueIds),
     ...uniqueIds.map(async (uid) => {
       try {
@@ -184,6 +200,10 @@ export async function adminEnrichBookingsForAdminList(rows: BookingWithCar[]): P
       }
     }),
   ])
+
+  if (profilesErr) {
+    logPostgrestError('[adminEnrichBookingsForAdminList] profiles', profilesErr)
+  }
 
   const nameByUserId = new Map((profiles ?? []).map((p) => [p.user_id, p.full_name?.trim() || null]))
   const emailByUserId = new Map<string, string | null>()
@@ -207,7 +227,11 @@ export async function adminGetBooking(id: string): Promise<BookingWithCar | null
   const admin = createAdminClient()
   const { data, error } = await admin.from('bookings').select(bookingSelect).eq('id', id).maybeSingle()
 
-  if (error || !data) return null
+  if (error) {
+    logPostgrestError('[adminGetBooking]', error)
+    return null
+  }
+  if (!data) return null
   return data as unknown as BookingWithCar
 }
 
@@ -220,6 +244,9 @@ export async function adminListBookingsForUser(userId: string): Promise<BookingW
     .order('pickup_date', { ascending: false })
     .limit(100)
 
+  if (error) {
+    logPostgrestError('[adminListBookingsForUser]', error)
+  }
   if (error || !data) return []
   return data as unknown as BookingWithCar[]
 }

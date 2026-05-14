@@ -15,11 +15,21 @@ export const metadata: Metadata = {
   description: 'Your Oxour Go member hub — bookings, verification, and trip details in one place.',
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>
+}) {
   const user = await getAuthenticatedUser()
   if (!user) {
     redirect(`/login?${new URLSearchParams({ redirect: '/dashboard' }).toString()}`)
   }
+
+  const q = await searchParams
+  const accessNotice =
+    q.error === 'forbidden'
+      ? 'That area is restricted to operations staff. You are on your member dashboard.'
+      : null
 
   const supabase = await createClient()
   const [bookingsResult, kycDocs, profileRes] = await Promise.all([
@@ -40,6 +50,7 @@ export default async function DashboardPage() {
       verificationTier={verificationTier}
       kycStatus={kycStatus}
       bookingCleared={bookingCleared}
+      accessNotice={accessNotice}
     />
   )
 }

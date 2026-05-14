@@ -2,6 +2,7 @@ import 'server-only'
 
 import { enumerateUtcDays, toUtcYmd, type AnalyticsResolvedRange } from '@/lib/admin/analytics-range'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { logPostgrestError } from '@/lib/errors/safe-user-message'
 
 type BookingLite = {
   id: string
@@ -58,7 +59,7 @@ async function sumPostedRevenue(
     }
     const { data, error } = await q
     if (error) {
-      console.error('[adminAnalytics] sumPostedRevenue', error.message)
+      logPostgrestError('[adminAnalytics] sumPostedRevenue', error)
       break
     }
     const rows = (data ?? []) as Pick<BookingLite, 'total_rupees' | 'booking_status' | 'payment_status'>[]
@@ -163,6 +164,12 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
     sumPostedRevenue(admin, { fromMonthStart: true }),
   ])
 
+  if (vehiclesRes.error) logPostgrestError('[fetchAdminAnalyticsBundle] vehicles', vehiclesRes.error)
+  if (profilesCountRes.error) logPostgrestError('[fetchAdminAnalyticsBundle] profilesCount', profilesCountRes.error)
+  if (pendingKycRes.error) logPostgrestError('[fetchAdminAnalyticsBundle] pendingKycCount', pendingKycRes.error)
+  if (activeBookingsRes.error) logPostgrestError('[fetchAdminAnalyticsBundle] activeBookingsCount', activeBookingsRes.error)
+  if (profilesGrowthRes.error) logPostgrestError('[fetchAdminAnalyticsBundle] profilesGrowth', profilesGrowthRes.error)
+
   const vehicles = (vehiclesRes.data ?? []) as VehicleLite[]
   const vehicleMap = new Map(vehicles.map((v) => [v.id, v]))
   const bookableIds = new Set(vehicles.filter((v) => v.available !== false).map((v) => v.id))
@@ -186,7 +193,7 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
       .range(off, off + BOOKING_PAGE - 1)
 
     if (error) {
-      console.error('[fetchAdminAnalyticsBundle] bookings page', error.message)
+      logPostgrestError('[fetchAdminAnalyticsBundle] bookings page', error)
       break
     }
     const chunk = (data ?? []) as BookingLite[]
@@ -213,7 +220,7 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
       .order('pickup_date', { ascending: true })
       .range(off, off + BOOKING_PAGE - 1)
     if (error) {
-      console.error('[fetchAdminAnalyticsBundle] overlap bookings', error.message)
+      logPostgrestError('[fetchAdminAnalyticsBundle] overlap bookings', error)
       break
     }
     const chunk = (data ?? []) as BookingLite[]

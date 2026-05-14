@@ -1,4 +1,15 @@
+import type { Metadata } from 'next'
+
 import { LegalProse } from '@/components/legal/legal-prose'
+import { buildPageMetadata } from '@/lib/seo/build-page-metadata'
+
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Refund policy',
+  description:
+    'Oxour Go cancellation windows, refund timelines, security deposit holds, and no-show policy for Mumbai self-drive bookings.',
+  path: '/refund',
+  keywords: ['Oxour Go refund', 'cancellation policy', 'deposit release'],
+})
 
 export default function RefundPage() {
   return (

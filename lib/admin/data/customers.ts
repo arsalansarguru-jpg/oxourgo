@@ -2,6 +2,7 @@ import 'server-only'
 
 import type { Database } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { logPostgrestError, logUnknownError } from '@/lib/errors/safe-user-message'
 
 export type AdminCustomerRow = {
   userId: string
@@ -17,25 +18,35 @@ export type AdminCustomerRow = {
 export async function adminListCustomers(): Promise<AdminCustomerRow[]> {
   const admin = createAdminClient()
   const { data: page, error: listErr } = await admin.auth.admin.listUsers({ page: 1, perPage: 100 })
-  if (listErr || !page?.users?.length) return []
+  if (listErr) {
+    logUnknownError('[adminListCustomers] auth.listUsers', listErr)
+    return []
+  }
+  if (!page?.users?.length) return []
 
   const ids = page.users.map((u) => u.id)
-  const { data: profiles } = await admin.from('profiles').select('*').in('user_id', ids)
+  const { data: profiles, error: profilesErr } = await admin.from('profiles').select('*').in('user_id', ids)
+  if (profilesErr) {
+    logPostgrestError('[adminListCustomers] profiles', profilesErr)
+  }
 
   const profileByUser = new Map((profiles ?? []).map((p) => [p.user_id, p]))
 
   const rows: AdminCustomerRow[] = []
   for (const u of page.users) {
-    const { count: total } = await admin
+    const { count: total, error: totalErr } = await admin
       .from('bookings')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', u.id)
 
-    const { count: cancelled } = await admin
+    const { count: cancelled, error: cancelledErr } = await admin
       .from('bookings')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', u.id)
       .eq('booking_status', 'cancelled')
+
+    if (totalErr) logPostgrestError('[adminListCustomers] bookings.total', totalErr)
+    if (cancelledErr) logPostgrestError('[adminListCustomers] bookings.cancelled', cancelledErr)
 
     const t = total ?? 0
     const c = cancelled ?? 0
@@ -58,22 +69,32 @@ export async function adminListCustomers(): Promise<AdminCustomerRow[]> {
 
 export async function adminGetCustomer(userId: string): Promise<AdminCustomerRow | null> {
   const admin = createAdminClient()
-  const { data: userData, error } = await admin.auth.admin.getUserById(userId)
-  if (error || !userData?.user) return null
+  const { data: userData, error: userErr } = await admin.auth.admin.getUserById(userId)
+  if (userErr) {
+    logUnknownError('[adminGetCustomer] auth.getUserById', userErr)
+    return null
+  }
+  if (!userData?.user) return null
   const u = userData.user
 
-  const { data: profile } = await admin.from('profiles').select('*').eq('user_id', userId).maybeSingle()
+  const { data: profile, error: profileErr } = await admin.from('profiles').select('*').eq('user_id', userId).maybeSingle()
+  if (profileErr) {
+    logPostgrestError('[adminGetCustomer] profiles', profileErr)
+  }
 
-  const { count: total } = await admin
+  const { count: total, error: totalErr } = await admin
     .from('bookings')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
 
-  const { count: cancelled } = await admin
+  const { count: cancelled, error: cancelledErr } = await admin
     .from('bookings')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
     .eq('booking_status', 'cancelled')
+
+  if (totalErr) logPostgrestError('[adminGetCustomer] bookings.total', totalErr)
+  if (cancelledErr) logPostgrestError('[adminGetCustomer] bookings.cancelled', cancelledErr)
 
   const t = total ?? 0
   const c = cancelled ?? 0

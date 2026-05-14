@@ -12,6 +12,10 @@
 
 # testing
 /coverage
+/test-results/
+/playwright-report/
+/blob-report/
+/tests/e2e/.auth/customer.json
 
 # production
 /dist

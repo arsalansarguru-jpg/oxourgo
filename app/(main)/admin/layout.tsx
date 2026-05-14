@@ -1,10 +1,15 @@
 import { redirect } from 'next/navigation'
+import type { Metadata } from 'next'
 
 import { AdminCard } from '@/components/admin/admin-card'
 import { AdminShell } from '@/components/admin/admin-shell'
 import { listOpsAlertsForAdmin } from '@/lib/admin/data/ops-alerts'
 import { getAuthSessionSummary } from '@/lib/auth/server'
 import { roleAtLeast } from '@/lib/auth/roles'
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+}
 
 export const dynamic = 'force-dynamic'
 
@@ -18,8 +23,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   const hasServiceRole = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY?.trim())
-  if (!hasServiceRole) {
-    console.error('[admin layout] Privileged server access is not configured; admin data may be incomplete.')
+  if (!hasServiceRole && process.env.NODE_ENV === 'development') {
+    console.warn('[admin layout] SUPABASE_SERVICE_ROLE_KEY is unset; some admin data requires server configuration.')
   }
 
   let opsInitialUnread = 0

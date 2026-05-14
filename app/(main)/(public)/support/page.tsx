@@ -1,6 +1,16 @@
-import { getAuthenticatedUser } from '@/lib/auth/server'
+import type { Metadata } from 'next'
 
+import { getAuthenticatedUser } from '@/lib/auth/server'
+import { buildPageMetadata } from '@/lib/seo/build-page-metadata'
 import { SupportView } from '@/features/support/support-view'
+
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Support & concierge',
+  description:
+    '24×7 Oxour Go support for bookings, billing, roadside assistance, and Mumbai self-drive questions — with human escalation when you need it.',
+  path: '/support',
+  keywords: ['Oxour Go support', 'luxury rental help', 'Mumbai roadside', 'concierge'],
+})
 
 export default async function SupportPage() {
   const user = await getAuthenticatedUser()

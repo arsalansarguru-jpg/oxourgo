@@ -7,10 +7,14 @@ import { safeNextPath } from '@/lib/auth/safe-next-path'
 import { readSupabasePublicEnv } from '@/lib/env/supabase-public'
 import { createClient } from '@/lib/supabase/server'
 
-export const metadata: Metadata = {
+import { buildPageMetadata } from '@/lib/seo/build-page-metadata'
+
+export const metadata: Metadata = buildPageMetadata({
   title: 'Sign in',
-  description: 'Secure sign-in to Oxour Go — luxury self-drive in Mumbai.',
-}
+  description: 'Secure sign-in to Oxour Go for bookings, KYC uploads, trip management, and payments.',
+  path: '/login',
+  robots: { index: false, follow: false },
+})
 
 export default async function LoginPage({
   searchParams,

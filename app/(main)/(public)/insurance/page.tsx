@@ -1,4 +1,15 @@
+import type { Metadata } from 'next'
+
 import { LegalProse } from '@/components/legal/legal-prose'
+import { buildPageMetadata } from '@/lib/seo/build-page-metadata'
+
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Insurance & protection',
+  description:
+    'Motor insurance, deductibles, optional protection bundles, and claims reporting for Oxour Go luxury self-drive rentals in Mumbai.',
+  path: '/insurance',
+  keywords: ['rental insurance Mumbai', 'Oxour Go coverage', 'motor insurance self drive'],
+})
 
 export default function InsurancePage() {
   return (

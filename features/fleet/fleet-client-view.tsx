@@ -121,7 +121,7 @@ export function FleetClientView({
   const gridLayoutKey = `${debouncedQuery}|${[...activeFilters].sort().join(',')}|${currentPage}`
 
   return (
-    <Section className="pt-6 md:pt-10">
+    <Section className="pt-6 md:pt-10" data-testid="fleet-page">
       <SectionHeading
         eyebrow="Fleet"
         title="Browse the collection"

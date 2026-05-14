@@ -1,4 +1,15 @@
+import type { Metadata } from 'next'
+
 import { LegalProse } from '@/components/legal/legal-prose'
+import { buildPageMetadata } from '@/lib/seo/build-page-metadata'
+
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Privacy policy',
+  description:
+    'How Oxour Go collects, uses, and protects personal data for luxury self-drive rentals in Mumbai — including identity verification and subprocessors.',
+  path: '/privacy',
+  keywords: ['Oxour Go privacy', 'data protection', 'rental GDPR India'],
+})
 
 export default function PrivacyPage() {
   return (

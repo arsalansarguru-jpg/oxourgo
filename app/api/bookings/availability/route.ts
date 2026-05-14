@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
+import { allowIpRateLimit, clientIpFromRequestHeaders } from '@/lib/api/simple-ip-rate-limit'
 import { validateTripWindow } from '@/lib/booking/dates'
 import { hasVehicleBookingOverlap } from '@/lib/booking/vehicle-overlap'
 import { logFleetActionable, logFleetRecoverable } from '@/lib/fleet/fleet-catalog-logging'
@@ -9,9 +10,18 @@ import {
 } from '@/lib/fleet/fleet-error-serialization'
 import { isVehicleAvailableForBooking, type VehicleRow } from '@/lib/fleet/vehicle-mappers'
 import { createPublicServerSupabaseClient } from '@/lib/supabase/public-server-client'
+import { isUuidString } from '@/lib/validation/uuid'
+
+const AVAILABILITY_RATE_LIMIT = 90
+const AVAILABILITY_WINDOW_MS = 60_000
 
 /** Query param is vehicle UUID (`carId` kept for clients; `vehicleId` alias supported). */
 export async function GET(request: NextRequest) {
+  const ip = clientIpFromRequestHeaders(request.headers)
+  if (!allowIpRateLimit(`availability:${ip}`, AVAILABILITY_RATE_LIMIT, AVAILABILITY_WINDOW_MS)) {
+    return NextResponse.json({ ok: false, error: 'rate_limited' }, { status: 429 })
+  }
+
   const { searchParams } = new URL(request.url)
   const inventoryId = searchParams.get('vehicleId') ?? searchParams.get('carId')
   const pickup = searchParams.get('pickup')
@@ -19,6 +29,10 @@ export async function GET(request: NextRequest) {
 
   if (!inventoryId || !pickup || !ret) {
     return NextResponse.json({ ok: false, error: 'missing_params' }, { status: 400 })
+  }
+
+  if (!isUuidString(inventoryId)) {
+    return NextResponse.json({ ok: false, error: 'invalid_vehicle_id' }, { status: 400 })
   }
 
   const dates = validateTripWindow(pickup, ret)

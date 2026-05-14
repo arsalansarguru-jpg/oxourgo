@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { logPostgrestError } from '@/lib/errors/safe-user-message'
 
 export type OpsAlertListItem = {
   id: string
@@ -15,9 +16,16 @@ export type OpsAlertListItem = {
 export async function listOpsAlertsForAdmin(adminUserId: string, limit = 60): Promise<OpsAlertListItem[]> {
   const admin = createAdminClient()
   const { data: alerts, error } = await admin.from('ops_alerts').select('*').order('created_at', { ascending: false }).limit(limit)
-  if (error || !alerts?.length) return []
+  if (error) {
+    logPostgrestError('[listOpsAlertsForAdmin] ops_alerts', error)
+    return []
+  }
+  if (!alerts?.length) return []
 
-  const { data: dismissals } = await admin.from('ops_alert_dismissals').select('alert_id').eq('admin_user_id', adminUserId)
+  const { data: dismissals, error: dismissErr } = await admin.from('ops_alert_dismissals').select('alert_id').eq('admin_user_id', adminUserId)
+  if (dismissErr) {
+    logPostgrestError('[listOpsAlertsForAdmin] dismissals', dismissErr)
+  }
   const dismissed = new Set((dismissals ?? []).map((d) => d.alert_id))
 
   return alerts.map((a) => ({

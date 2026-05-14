@@ -1,8 +1,18 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 
 import { BRAND } from '@/constants/brand'
 import { LegalProse } from '@/components/legal/legal-prose'
 import { Button } from '@/components/ui/Button'
+import { buildPageMetadata } from '@/lib/seo/build-page-metadata'
+
+export const metadata: Metadata = buildPageMetadata({
+  title: 'About Oxour Go',
+  description:
+    'Learn how Oxour Go delivers verified self-drive luxury vehicles in Mumbai with transparent pricing, inspections, and concierge-grade support.',
+  path: '/about',
+  keywords: ['about Oxour Go', 'luxury mobility Mumbai', 'verified fleet'],
+})
 
 export default function AboutPage() {
   return (

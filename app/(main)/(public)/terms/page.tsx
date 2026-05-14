@@ -1,4 +1,15 @@
+import type { Metadata } from 'next'
+
 import { LegalProse } from '@/components/legal/legal-prose'
+import { buildPageMetadata } from '@/lib/seo/build-page-metadata'
+
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Terms & conditions',
+  description:
+    'Oxour Go rental terms — identity verification, permitted use, pricing, cancellations, and governing law for Mumbai self-drive bookings.',
+  path: '/terms',
+  keywords: ['Oxour Go terms', 'rental agreement', 'self drive terms India'],
+})
 
 export default function TermsPage() {
   return (

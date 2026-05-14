@@ -1,5 +1,6 @@
 import { AdminFleetManager } from '@/components/admin/fleet/admin-fleet-manager'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
+import { getAdminLoaderUiMessage } from '@/lib/admin/admin-data-load-errors'
 import { adminGetFleetDashboardMetrics, adminListVehiclesPage } from '@/lib/admin/data/fleet'
 
 export const dynamic = 'force-dynamic'
@@ -70,7 +71,7 @@ export default async function AdminFleetPage({
     })
   } catch (e) {
     console.error('[AdminFleetPage] list', e)
-    loadError = 'Unable to load the fleet catalog. Check your Supabase connection and try again.'
+    loadError = getAdminLoaderUiMessage(e, 'Unable to load the fleet catalog. Please try again.')
   }
 
   try {

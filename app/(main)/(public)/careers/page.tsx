@@ -1,6 +1,17 @@
+import type { Metadata } from 'next'
+
 import { BRAND } from '@/constants/brand'
 import { LegalProse } from '@/components/legal/legal-prose'
 import { Button } from '@/components/ui/Button'
+import { buildPageMetadata } from '@/lib/seo/build-page-metadata'
+
+export const metadata: Metadata = buildPageMetadata({
+  title: 'Careers',
+  description:
+    'Join Oxour Go — operations, fleet, and engineering roles building premium self-drive luxury mobility in Mumbai.',
+  path: '/careers',
+  keywords: ['Oxour Go careers', 'Mumbai mobility jobs', 'luxury fleet operations'],
+})
 
 export default function CareersPage() {
   const subject = encodeURIComponent('Careers at Oxour Go')

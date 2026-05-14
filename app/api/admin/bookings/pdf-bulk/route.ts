@@ -7,6 +7,7 @@ import { loadAdminBookingPdfPayload } from '@/lib/pdf/load-booking-payload-for-p
 import { renderBookingPdfBuffer } from '@/lib/pdf/render-booking-pdf'
 import { getAuthSessionSummary } from '@/lib/auth/server'
 import { roleAtLeast } from '@/lib/auth/roles'
+import { isUuidString } from '@/lib/validation/uuid'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -16,10 +17,6 @@ const MAX_IDS = 20
 type Body = {
   ids?: unknown
   doc?: unknown
-}
-
-function isUuid(s: string): boolean {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s)
 }
 
 export async function POST(req: Request) {
@@ -43,7 +40,7 @@ export async function POST(req: Request) {
   const rawIds = Array.isArray(json.ids) ? json.ids : []
   const ids = rawIds
     .map((x) => (typeof x === 'string' ? x.trim() : ''))
-    .filter((x) => x && isUuid(x))
+    .filter((x) => x && isUuidString(x))
     .slice(0, MAX_IDS)
 
   if (!ids.length) {

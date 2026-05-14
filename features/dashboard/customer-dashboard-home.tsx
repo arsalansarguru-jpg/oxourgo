@@ -36,12 +36,15 @@ export function CustomerDashboardHome({
   verificationTier,
   kycStatus,
   bookingCleared,
+  accessNotice,
 }: {
   bookings: BookingWithCar[]
   kycUploadedCount: number
   verificationTier: string
   kycStatus: string
   bookingCleared: boolean
+  /** Shown when middleware redirects a non-admin away from `/admin`. */
+  accessNotice?: string | null
 }) {
   const now = Date.now()
   const withUi = bookings.map((b) => ({ row: b, ui: deriveCustomerBookingUiStatus(b) }))
@@ -63,6 +66,14 @@ export function CustomerDashboardHome({
 
   return (
     <div className="space-y-10">
+      {accessNotice ? (
+        <div
+          role="status"
+          className="rounded-xl border border-amber-400/25 bg-amber-500/[0.06] px-4 py-3 text-sm text-soft"
+        >
+          {accessNotice}
+        </div>
+      ) : null}
       <header className="space-y-3">
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-electric/90">Command center</p>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">

@@ -1,8 +1,10 @@
 import 'server-only'
 
+import { assertNoPostgrestError } from '@/lib/admin/admin-data-load-errors'
 import { escapeIlikePattern } from '@/lib/admin/bookings-search'
 import type { Database } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { logPostgrestError } from '@/lib/errors/safe-user-message'
 
 export type AdminVehicleRow = Database['public']['Tables']['vehicles']['Row']
 
@@ -79,10 +81,7 @@ export async function adminListVehiclesPage(params: AdminFleetListParams = {}): 
 
   const countQ = applyFleetListFilters(admin, params, 'count')
   const { count: headCount, error: countErr } = await countQ
-  if (countErr) {
-    console.error('[adminListVehiclesPage] count', countErr)
-    throw new Error(countErr.message || 'Unable to count fleet vehicles')
-  }
+  assertNoPostgrestError('[adminListVehiclesPage] count', countErr, 'admin_fleet_count')
   const totalCount = typeof headCount === 'number' ? headCount : 0
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
@@ -96,10 +95,7 @@ export async function adminListVehiclesPage(params: AdminFleetListParams = {}): 
 
   const { data, error } = await dataQ.range(from, to)
 
-  if (error) {
-    console.error('[adminListVehiclesPage] data', error)
-    throw new Error(error.message || 'Unable to load fleet vehicles')
-  }
+  assertNoPostgrestError('[adminListVehiclesPage] data', error, 'admin_fleet_list')
   if (!data) {
     return { rows: [], totalCount, page, pageSize }
   }
@@ -120,7 +116,11 @@ export async function adminListVehicles(): Promise<AdminVehicleRow[]> {
 export async function adminGetVehicle(id: string): Promise<AdminVehicleRow | null> {
   const admin = createAdminClient()
   const { data, error } = await admin.from('vehicles').select('*').eq('id', id).maybeSingle()
-  if (error || !data) return null
+  if (error) {
+    logPostgrestError('[adminGetVehicle]', error)
+    return null
+  }
+  if (!data) return null
   return data as AdminVehicleRow
 }
 
@@ -140,6 +140,7 @@ export async function adminGetFleetDashboardMetrics(): Promise<AdminFleetDashboa
   ])
 
   if (vErr) {
+    logPostgrestError('[adminGetFleetDashboardMetrics] vehicles', vErr)
     return {
       totalVehicles: 0,
       availableVehicles: 0,
@@ -148,6 +149,9 @@ export async function adminGetFleetDashboardMetrics(): Promise<AdminFleetDashboa
       vehiclesOnTripToday: 0,
       bookableUtilizationPercent: 0,
     }
+  }
+  if (bErr) {
+    logPostgrestError('[adminGetFleetDashboardMetrics] bookings', bErr)
   }
 
   const list = (vehicles ?? []) as Pick<AdminVehicleRow, 'id' | 'available' | 'featured' | 'price_per_day'>[]

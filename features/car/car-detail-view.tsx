@@ -44,7 +44,7 @@ export function CarDetailView({ car, isLoggedIn, kycApproved, kycStatus }: CarDe
 
   return (
     <Section className="pt-8">
-      <div className="grid min-w-0 gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+      <article className="grid min-w-0 gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
         <div className="min-w-0">
           <div
             className={cn(
@@ -82,7 +82,13 @@ export function CarDetailView({ car, isLoggedIn, kycApproved, kycStatus }: CarDe
                       : 'border-stroke hover:border-stroke-strong hover:-translate-y-0.5',
                   )}
                 >
-                  <FleetVehicleImg src={src} alt="" className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+                  <FleetVehicleImg
+                    src={src}
+                    alt=""
+                    variant="thumbnail"
+                    className="absolute inset-0 h-full w-full object-cover"
+                    loading="lazy"
+                  />
                 </button>
               ))}
             </div>
@@ -239,7 +245,7 @@ export function CarDetailView({ car, isLoggedIn, kycApproved, kycStatus }: CarDe
             </Link>
           </p>
         </aside>
-      </div>
+      </article>
 
       <div
         className="pointer-events-none fixed inset-x-0 z-[48] lg:hidden"
