@@ -21,14 +21,24 @@ export function FleetCarCard({ car, className }: FleetCarCardProps) {
   const available = car.availability === 'Available'
 
   return (
-    <motion.div whileHover={{ y: -5 }} transition={cardLiftSpring} className={cn('h-full', className)}>
-      <Card className={cn('group/card flex h-full flex-col overflow-hidden', cardSurfaceHoverAccent)}>
+    <motion.div
+      whileHover={{ y: -6 }}
+      transition={cardLiftSpring}
+      className={cn('h-full', className)}
+    >
+      <Card
+        className={cn(
+          'group/card flex h-full flex-col overflow-hidden transition-[box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
+          cardSurfaceHoverAccent,
+          'hover:border-electric/35 hover:shadow-[0_0_0_1px_rgba(59,130,246,0.28),0_22px_56px_-28px_rgba(59,130,246,0.32),var(--shadow-card)]',
+        )}
+      >
         <div className="relative aspect-[16/10] overflow-hidden bg-carbon-deep">
           {/* eslint-disable-next-line @next/next/no-img-element -- fleet image URLs come from Supabase (storage or any HTTPS) */}
           <img
             src={car.imageUrl}
             alt={car.displayName}
-            className="absolute inset-0 h-full w-full object-cover transition-[transform] duration-[520ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/card:scale-[1.035]"
+            className="absolute inset-0 h-full w-full object-cover transition-[transform,filter] duration-[620ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/card:scale-[1.06] group-hover/card:brightness-[1.04]"
             loading="lazy"
             referrerPolicy="no-referrer"
           />

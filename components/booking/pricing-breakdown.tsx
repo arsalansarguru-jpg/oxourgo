@@ -15,11 +15,15 @@ export type PricingLine = {
 
 type PricingBreakdownProps = {
   lines: PricingLine[]
+  /** When set, shown as total (must match quote; avoids drift vs server). */
+  totalRupees?: number
+  eyebrow?: string
   className?: string
 }
 
-export function PricingBreakdown({ lines, className }: PricingBreakdownProps) {
-  const total = lines.reduce((s, l) => s + l.amount, 0)
+export function PricingBreakdown({ lines, totalRupees, eyebrow = 'Transparent pricing', className }: PricingBreakdownProps) {
+  const computedTotal = lines.reduce((s, l) => s + l.amount, 0)
+  const total = totalRupees ?? computedTotal
   return (
     <div
       className={cn(
@@ -30,7 +34,7 @@ export function PricingBreakdown({ lines, className }: PricingBreakdownProps) {
         className,
       )}
     >
-      <p className={cardEyebrow}>Transparent pricing</p>
+      <p className={cardEyebrow}>{eyebrow}</p>
       <ul className="mt-5 space-y-3.5">
         {lines.map((line) => (
           <li key={line.label} className="flex items-start justify-between gap-4 text-sm">

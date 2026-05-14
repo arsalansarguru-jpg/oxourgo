@@ -23,14 +23,19 @@ export function DestinationCard({ destination, className }: DestinationCardProps
   const href = `/fleet?location=${encodeURIComponent(destination.fleetLocationQuery)}`
 
   return (
-    <motion.div whileHover={{ y: -5 }} transition={cardLiftSpring} className={className}>
+    <motion.div
+      whileHover={{ y: -5 }}
+      transition={cardLiftSpring}
+      className={cn('overflow-hidden rounded-2xl', className)}
+    >
       <Link
         href={href}
         className={cn(
           cardSurfaceBase,
           cardSurfaceTransition,
           cardSurfaceHover,
-          'group/card relative block cursor-pointer overflow-hidden',
+          'group/card relative block cursor-pointer overflow-hidden rounded-2xl transition-[box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
+          'hover:border-electric/30 hover:shadow-[0_0_0_1px_rgba(59,130,246,0.22),0_20px_50px_-26px_rgba(59,130,246,0.28)]',
         )}
       >
         <div className="relative aspect-[4/3] bg-carbon-deep">

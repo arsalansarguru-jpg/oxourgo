@@ -9,8 +9,8 @@ export function FleetLoading() {
         title="Browse the collection"
         subtitle="Loading vehicles…"
       />
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {Array.from({ length: 6 }).map((_, i) => (
+      <div className="grid gap-6 sm:gap-7 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+        {Array.from({ length: 9 }).map((_, i) => (
           <CarCardSkeleton key={i} />
         ))}
       </div>

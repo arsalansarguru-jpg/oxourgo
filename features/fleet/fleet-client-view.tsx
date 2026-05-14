@@ -2,16 +2,19 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
-import { ChevronLeft, ChevronRight, RefreshCw, Search } from 'lucide-react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ChevronLeft, ChevronRight, RefreshCw, Search, SlidersHorizontal } from 'lucide-react'
 
 import { EmptyFleet } from '@/components/fleet/empty-fleet'
 import { FleetCarCard } from '@/components/fleet/fleet-car-card'
+import { FleetFilterDrawer } from '@/components/fleet/fleet-filter-drawer'
+import { FleetGridSkeleton } from '@/components/fleet/fleet-grid-skeleton'
 import { FilterPills } from '@/components/fleet/filter-pills'
 import { DataLoadErrorPanel } from '@/components/ui/data-load-error'
 import { Input } from '@/components/ui/Input'
 import { Section, SectionHeading } from '@/components/ui/Section'
 import { Button } from '@/components/ui/Button'
+import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import type { FleetCar, FleetFilterId } from '@/lib/fleet/types'
 
 const PAGE_SIZE = 12
@@ -62,15 +65,17 @@ export function FleetClientView({
   searchQuery = '',
 }: FleetClientViewProps) {
   const router = useRouter()
-  const [query, setQuery] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const debouncedQuery = useDebouncedValue(searchInput, 280)
   const [activeFilters, setActiveFilters] = useState<Set<string>>(() => new Set())
   const [page, setPage] = useState(1)
+  const [filtersOpen, setFiltersOpen] = useState(false)
 
   useEffect(() => {
     const fromQ = searchQuery.trim()
     const fromLoc = location.trim()
     const text = fromQ || fromLoc
-    if (text) setQuery(text)
+    if (text) setSearchInput(text)
   }, [location, searchQuery])
 
   const toggle = (id: FleetFilterId) => {
@@ -80,16 +85,17 @@ export function FleetClientView({
       else next.add(id)
       return next
     })
+    setPage(1)
   }
 
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
+    const q = debouncedQuery.trim().toLowerCase()
     return cars.filter((car) => {
       const haystack = `${car.displayName} ${car.brand} ${car.model} ${car.city ?? ''}`.toLowerCase()
       if (q && !haystack.includes(q)) return false
       return carMatchesFilters(car, activeFilters)
     })
-  }, [cars, query, activeFilters])
+  }, [cars, debouncedQuery, activeFilters])
 
   const total = filtered.length
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
@@ -105,18 +111,25 @@ export function FleetClientView({
   }, [filtered, currentPage])
 
   const activeFilterCount = activeFilters.size
+  const hasSearch = debouncedQuery.trim().length > 0
+  const refinementCount = activeFilterCount + (hasSearch ? 1 : 0)
+  const isSearchDebouncing = searchInput.trim() !== debouncedQuery.trim()
+
   const clearAllFilters = () => {
     setActiveFilters(new Set())
-    setQuery('')
+    setSearchInput('')
     setPage(1)
+    setFiltersOpen(false)
   }
+
+  const gridLayoutKey = `${debouncedQuery}|${[...activeFilters].sort().join(',')}|${currentPage}`
 
   return (
     <Section className="pt-6 md:pt-10">
       <SectionHeading
         eyebrow="Fleet"
         title="Browse the collection"
-        subtitle="Search, filter, and book verified luxury and premium economy vehicles across Mumbai hubs."
+        subtitle="Search, filter, and book verified luxury and premium vehicles across Mumbai hubs."
       />
 
       {(pickup || from || to || location.trim() || searchQuery.trim()) && !loadFailed && (
@@ -162,107 +175,192 @@ export function FleetClientView({
         />
       ) : (
         <>
-          <div className="rounded-2xl border border-stroke bg-matte/[0.72] p-3 shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset] backdrop-blur-xl backdrop-saturate-150 transition-[border-color,box-shadow] duration-300 sm:p-4 lg:sticky lg:top-[3.75rem] lg:z-30 supports-[backdrop-filter]:bg-matte/55">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div className="relative w-full lg:max-w-sm">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-silver" />
-                <Input
-                  aria-label="Search fleet"
-                  placeholder="Search by brand, model, or hub…"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <div className="flex flex-col gap-3 lg:items-end">
-                <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-                  {activeFilterCount > 0 ? (
-                    <span className="inline-flex items-center rounded-full border border-electric/30 bg-electric/10 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-electric">
-                      Filters ({activeFilterCount})
+          <div className="sticky top-14 z-40 rounded-2xl border border-stroke bg-matte/[0.88] p-3 shadow-[0_8px_40px_-28px_rgba(0,0,0,0.65)] backdrop-blur-2xl supports-[backdrop-filter]:bg-matte/75 sm:top-[3.5rem] md:top-[3.75rem] md:p-4 lg:sticky">
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between lg:gap-6">
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div className="relative w-full lg:max-w-md">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 z-[1] h-4 w-4 -translate-y-1/2 text-silver" />
+                    <Input
+                      aria-label="Search fleet"
+                      placeholder="Search by brand, model, or hub…"
+                      value={searchInput}
+                      onChange={(e) => {
+                        setSearchInput(e.target.value)
+                        setPage(1)
+                      }}
+                      className="pl-10"
+                    />
+                  </div>
+                  {isSearchDebouncing ? (
+                    <p className="flex items-center gap-1.5 text-[11px] font-medium text-electric/90">
+                      <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-electric" aria-hidden />
+                      Refining results…
+                    </p>
+                  ) : null}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 lg:shrink-0 lg:justify-end">
+                  {refinementCount > 0 ? (
+                    <span className="inline-flex min-h-9 items-center rounded-full border border-electric/35 bg-electric/12 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-electric">
+                      {refinementCount} active
                     </span>
                   ) : null}
-                  {activeFilterCount > 0 || query.trim() ? (
-                    <Button type="button" variant="secondary" size="sm" onClick={clearAllFilters}>
+                  {refinementCount > 0 ? (
+                    <Button type="button" variant="secondary" size="sm" className="min-h-10" onClick={clearAllFilters}>
                       Clear all
                     </Button>
                   ) : null}
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 lg:hidden"
+                    onClick={() => setFiltersOpen(true)}
+                  >
+                    <SlidersHorizontal className="h-4 w-4" aria-hidden />
+                    Filters
+                    {refinementCount > 0 ? (
+                      <span className="inline-flex min-w-[1.25rem] items-center justify-center rounded-full bg-electric px-1.5 py-0.5 text-[11px] font-bold text-white">
+                        {refinementCount}
+                      </span>
+                    ) : null}
+                  </Button>
                 </div>
-                <FilterPills active={activeFilters} onToggle={toggle} className="lg:justify-end" />
+              </div>
+
+              <div className="hidden border-t border-stroke/80 pt-4 md:block">
+                <FilterPills active={activeFilters} onToggle={toggle} layout="stacked" />
               </div>
             </div>
           </div>
 
-          {!loadFailed && cars.length > 0 ? (
-            <p className="mt-4 text-sm text-muted">
-              Showing{' '}
-              <span className="font-semibold text-soft">
-                {total === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, total)}
-              </span>{' '}
-              of <span className="font-semibold text-soft">{total}</span> vehicles
+          <FleetFilterDrawer
+            open={filtersOpen}
+            onClose={() => setFiltersOpen(false)}
+            footer={
+              <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+                <Button type="button" variant="secondary" className="w-full sm:w-auto" onClick={clearAllFilters}>
+                  Clear all
+                </Button>
+                <Button type="button" className="w-full sm:w-auto" onClick={() => setFiltersOpen(false)}>
+                  View results
+                </Button>
+              </div>
+            }
+          >
+            <FilterPills active={activeFilters} onToggle={toggle} layout="stacked" />
+          </FleetFilterDrawer>
+
+          {cars.length > 0 ? (
+            <motion.p
+              layout
+              className="text-sm text-muted"
+              initial={false}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.25 }}
+            >
+              <span className="font-semibold text-soft">{total}</span> vehicle{total === 1 ? '' : 's'} match
+              {total > 0 ? (
+                <>
+                  {' '}
+                  · Showing{' '}
+                  <span className="font-semibold text-soft">
+                    {total === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, total)}
+                  </span>
+                </>
+              ) : null}
               {total > PAGE_SIZE ? (
                 <span className="text-silver/70">
                   {' '}
                   · Page {currentPage} of {totalPages}
                 </span>
               ) : null}
-            </p>
+            </motion.p>
           ) : null}
 
           {cars.length === 0 ? (
-            <div className="mt-8 rounded-2xl border border-stroke bg-matte/[0.5] px-6 py-16 text-center">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mt-8 rounded-2xl border border-stroke bg-matte/[0.5] px-6 py-16 text-center"
+            >
               <Search className="mx-auto h-10 w-10 text-muted" aria-hidden />
-              <p className="mt-4 text-lg font-semibold text-soft">No vehicles to show</p>
+              <p className="mt-4 text-lg font-semibold text-soft">Collection unavailable</p>
               <p className="mt-2 text-sm text-muted">
-                Nothing is listed yet. Try refreshing or contact concierge on WhatsApp.
+                No vehicles are listed right now. Refresh or contact concierge for a curated shortlist.
               </p>
               <Button type="button" className="mt-6" onClick={() => router.refresh()}>
                 Refresh
               </Button>
-            </div>
+            </motion.div>
           ) : filtered.length === 0 ? (
             <div className="mt-8">
               <EmptyFleet onClear={clearAllFilters} />
             </div>
           ) : (
             <>
-              <motion.div layout className="mt-8 grid gap-6 sm:gap-7 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
-                {slice.map((car) => (
-                  <motion.div
-                    key={car.id}
-                    layout
-                    transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                  >
-                    <FleetCarCard car={car} />
-                  </motion.div>
-                ))}
-              </motion.div>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={gridLayoutKey}
+                  layout
+                  initial={{ opacity: 0.88, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0.8, y: -4 }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  className="mt-8"
+                >
+                  {isSearchDebouncing ? (
+                    <FleetGridSkeleton count={PAGE_SIZE} />
+                  ) : (
+                    <div className="grid gap-6 sm:gap-7 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+                      {slice.map((car) => (
+                        <motion.div
+                          key={car.id}
+                          layout
+                          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                        >
+                          <FleetCarCard car={car} />
+                        </motion.div>
+                      ))}
+                    </div>
+                  )}
+                </motion.div>
+              </AnimatePresence>
 
-              {totalPages > 1 ? (
-                <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
+              {totalPages > 1 && !isSearchDebouncing ? (
+                <motion.div
+                  layout
+                  className="mt-10 flex flex-wrap items-center justify-center gap-2"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
                   <Button
                     type="button"
                     variant="secondary"
                     size="sm"
+                    className="min-h-11 min-w-[5.5rem]"
                     disabled={currentPage <= 1}
                     onClick={() => setPage((p) => Math.max(1, p - 1))}
                   >
                     <ChevronLeft className="h-4 w-4" aria-hidden />
                     Prev
                   </Button>
-                  <span className="px-2 text-sm text-muted">
+                  <span className="min-w-[5rem] px-2 text-center text-sm text-muted">
                     {currentPage} / {totalPages}
                   </span>
                   <Button
                     type="button"
                     variant="secondary"
                     size="sm"
+                    className="min-h-11 min-w-[5.5rem]"
                     disabled={currentPage >= totalPages}
                     onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   >
                     Next
                     <ChevronRight className="h-4 w-4" aria-hidden />
                   </Button>
-                </div>
+                </motion.div>
               ) : null}
             </>
           )}

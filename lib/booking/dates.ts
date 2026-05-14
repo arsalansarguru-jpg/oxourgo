@@ -38,13 +38,16 @@ export function validateTripWindow(
   if (returnMs <= pickupMs) {
     return { ok: false, message: 'Return must be after pickup.' }
   }
+  if (pickupMs < nowMs) {
+    return { ok: false, message: 'Pickup cannot be in the past.' }
+  }
   const minPickup = nowMs + MIN_LEAD_HOURS * 60 * 60 * 1000
   if (pickupMs < minPickup) {
     return { ok: false, message: `Pickup must be at least ${MIN_LEAD_HOURS} hours from now.` }
   }
   const rentalDays = rentalDaysBetween(pickupMs, returnMs)
   if (rentalDays < 1) {
-    return { ok: false, message: 'Trip must span at least one rental day.' }
+    return { ok: false, message: 'Minimum rental is one day.' }
   }
   if (rentalDays > MAX_RENTAL_DAYS) {
     return { ok: false, message: `Maximum rental is ${MAX_RENTAL_DAYS} days.` }

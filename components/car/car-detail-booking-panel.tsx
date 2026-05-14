@@ -4,22 +4,22 @@ import { useCallback, useEffect, useMemo, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { AlertTriangle, CalendarRange, CheckCircle2, Loader2, MapPin, Shield } from 'lucide-react'
+import { AlertTriangle, CalendarRange, CheckCircle2, Loader2, MapPin, Sparkles } from 'lucide-react'
 
 import { createBookingAction } from '@/app/(main)/(public)/booking/[id]/actions'
 import { customerBookingFailureCopy } from '@/lib/booking/customer-booking-failure-copy'
 import { SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
-import { BRAND } from '@/constants/brand'
-import { formatInr } from '@/lib/format'
-import { computeBookingQuote } from '@/lib/booking/pricing'
-import { validateTripWindow } from '@/lib/booking/dates'
+import { safeAvailabilityReason } from '@/lib/booking/safe-availability-reason'
 import { defaultPickupReturnIso } from '@/lib/booking/dates'
+import { validateTripWindow } from '@/lib/booking/dates'
+import { BRAND } from '@/constants/brand'
 import { MUMBAI_HUBS } from '@/lib/booking/constants'
+import { useBookingPrice } from '@/hooks/use-booking-price'
 import type { Car } from '@/types/car'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
-import { PricingBreakdown } from '@/components/booking/pricing-breakdown'
+import { BookingSummaryCard } from '@/components/booking/booking-summary-card'
 import { cardEyebrow } from '@/components/ui/card-tokens'
 
 type AvailState =
@@ -45,28 +45,14 @@ export function CarDetailBookingPanel({ car, isLoggedIn, kycApproved }: CarDetai
   const [returnHub, setReturnHub] = useState<string>(MUMBAI_HUBS[1])
   const [avail, setAvail] = useState<AvailState>({ status: 'idle' })
   const [formError, setFormError] = useState<string | null>(null)
+  const [submitUi, setSubmitUi] = useState<'idle' | 'success'>('idle')
   const [pending, startTransition] = useTransition()
 
-  const dates = useMemo(() => validateTripWindow(pickup, returnAt), [pickup, returnAt])
-
-  const quote = useMemo(() => {
-    if (!dates.ok) return null
-    const p = car.pricePerDay
-    if (!Number.isFinite(p) || p <= 0) return null
-    return computeBookingQuote(p, dates.rentalDays)
-  }, [car.pricePerDay, dates])
-
-  const lines = useMemo(() => {
-    if (!quote) return []
-    return [
-      {
-        label: `Rental (${quote.rentalDays} days × ${formatInr(car.pricePerDay)})`,
-        amount: quote.subtotalRupees,
-      },
-      { label: 'Concierge & connectivity', amount: quote.convenienceFeeRupees, hint: 'Transparent service fee' },
-      { label: 'GST', amount: quote.gstRupees },
-    ]
-  }, [quote, car.pricePerDay])
+  const { dates, quote, pricingLines, hasValidQuote } = useBookingPrice({
+    pricePerDay: car.pricePerDay,
+    pickup,
+    returnAt,
+  })
 
   const loginHref = `/login?${new URLSearchParams({ redirect: `/car/${car.id}` }).toString()}`
 
@@ -102,7 +88,7 @@ export function CarDetailBookingPanel({ car, isLoggedIn, kycApproved }: CarDetai
       setAvail({
         status: 'ready',
         available: Boolean(body.available),
-        reason: body.reason,
+        reason: safeAvailabilityReason(body.reason) ?? safeAvailabilityReason(body.hint),
       })
     } catch (e) {
       console.error('[car-detail-booking-panel] checkAvailability', e)
@@ -127,24 +113,32 @@ export function CarDetailBookingPanel({ car, isLoggedIn, kycApproved }: CarDetai
     quote &&
     avail.status === 'ready' &&
     avail.available &&
-    !pending
+    !pending &&
+    submitUi !== 'success'
+
+  const pricingLoading = avail.status === 'checking' && dates.ok && Boolean(quote)
 
   const onSubmit = () => {
     setFormError(null)
+    setSubmitUi('idle')
     if (!inventoryAvailable) {
       setFormError('This vehicle is not available to book.')
       return
     }
     if (!dates.ok || !quote) {
-      setFormError(dates.ok ? 'Unable to compute pricing.' : dates.message)
+      setFormError(dates.ok ? 'Unable to compute pricing for this listing.' : dates.message)
       return
     }
     if (!isLoggedIn) {
       setFormError('Sign in to complete your reservation.')
       return
     }
+    if (!kycApproved) {
+      setFormError('Complete identity verification to continue.')
+      return
+    }
     if (avail.status !== 'ready' || !avail.available) {
-      setFormError('Choose times that are available.')
+      setFormError('Choose times that are available on our calendar.')
       return
     }
 
@@ -161,37 +155,62 @@ export function CarDetailBookingPanel({ car, isLoggedIn, kycApproved }: CarDetai
         setFormError(customerBookingFailureCopy(result.code))
         return
       }
-      router.push('/dashboard/bookings')
-      router.refresh()
+      setSubmitUi('success')
+      setFormError(null)
+      window.setTimeout(() => {
+        router.push('/dashboard/bookings')
+        router.refresh()
+      }, 720)
     })
   }
 
+  const unavailableReason =
+    avail.status === 'ready' && !avail.available
+      ? safeAvailabilityReason(avail.reason) ?? 'Those windows are not available. Try adjacent dates.'
+      : null
+
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 sm:space-y-6">
       <div>
         <p className={cardEyebrow}>Reserve</p>
         <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-soft">Book this vehicle</h2>
         <p className="mt-2 text-sm leading-relaxed text-muted">
-          Pickup and return times, Mumbai hubs, and live calendar check — same vault-grade flow as checkout.
+          Concierge-handled hubs, live calendar sync, and transparent pricing — refined for Oxour Go members.
         </p>
       </div>
 
       {!inventoryAvailable ? (
-        <div className="rounded-xl border border-amber-400/25 bg-amber-500/[0.08] px-4 py-3 text-sm text-amber-50/95">
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="rounded-xl border border-amber-400/25 bg-amber-500/[0.08] px-4 py-3 text-sm text-amber-50/95"
+        >
           This listing is unavailable. Browse the fleet for similar options.
-        </div>
+        </motion.div>
       ) : null}
 
       {isLoggedIn && !kycApproved ? (
-        <div className="rounded-xl border border-amber-400/25 bg-amber-500/[0.08] px-4 py-3 text-sm text-amber-50/95">
-          <p className="font-medium text-soft">Complete identity verification to book</p>
-          <p className="mt-1 text-xs leading-relaxed text-muted">
-            Government ID review is required before we can hold a vehicle on the calendar.
-          </p>
-          <Button type="button" size="sm" variant="secondary" className="mt-3 w-full sm:w-auto" to="/dashboard/kyc">
-            Go to KYC center →
-          </Button>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, y: 6 }}
+          animate={{ opacity: 1, y: 0 }}
+          role="region"
+          id="kyc-booking-gate"
+          aria-label="Verification required"
+          className="rounded-xl border border-electric/25 bg-electric/[0.07] px-4 py-4 text-sm shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset]"
+        >
+          <div className="flex items-start gap-2">
+            <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-electric" aria-hidden />
+            <div className="min-w-0">
+              <p className="font-semibold text-soft">Complete identity verification to continue</p>
+              <p className="mt-1 text-xs leading-relaxed text-muted">
+                We verify government ID before holding a vehicle on the calendar — a quick, secure step.
+              </p>
+              <Button type="button" size="sm" variant="secondary" className="mt-4 w-full sm:w-auto" to="/dashboard/kyc">
+                Go to KYC Center
+              </Button>
+            </div>
+          </div>
+        </motion.div>
       ) : null}
 
       {!isLoggedIn ? (
@@ -205,11 +224,21 @@ export function CarDetailBookingPanel({ car, isLoggedIn, kycApproved }: CarDetai
           <CalendarRange className="h-4 w-4 text-electric" aria-hidden />
           <h3 className="text-sm font-semibold tracking-[-0.02em]">Trip window</h3>
         </div>
-        <p className="mt-1 text-xs text-muted">Pickup at least 2 hours ahead. Up to 60 days.</p>
-        <div className="mt-4 grid gap-3">
+        <p className="mt-1 text-xs text-muted">Pickup cannot be in the past. Minimum one rental day. GST 18% on rental + concierge.</p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-1">
           <Input label="Pickup" type="datetime-local" value={pickup} onChange={(e) => setPickup(e.target.value)} />
           <Input label="Return" type="datetime-local" value={returnAt} onChange={(e) => setReturnAt(e.target.value)} />
         </div>
+        {!dates.ok ? (
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="mt-3 text-xs font-medium text-amber-200/95"
+            role="alert"
+          >
+            {dates.message}
+          </motion.p>
+        ) : null}
       </motion.div>
 
       <motion.div layout className="rounded-2xl border border-stroke bg-carbon/55 p-4 shadow-[0_1px_0_0_rgba(255,255,255,0.05)_inset] backdrop-blur-xl sm:p-5">
@@ -246,40 +275,18 @@ export function CarDetailBookingPanel({ car, isLoggedIn, kycApproved }: CarDetai
         </div>
       </motion.div>
 
-      <div className="space-y-3">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Pricing</p>
-        {!dates.ok ? (
-          <p className="text-sm text-amber-100/90">{dates.message}</p>
-        ) : !Number.isFinite(car.pricePerDay) || car.pricePerDay <= 0 ? (
-          <p className="text-sm text-muted">Pricing is unavailable for this listing.</p>
-        ) : quote ? (
-          <PricingBreakdown lines={lines} />
-        ) : (
-          <div className="space-y-2 rounded-xl border border-stroke bg-matte/[0.35] p-4">
-            <div className="h-3 w-[65%] animate-pulse rounded bg-fill-glass-strong" />
-            <div className="h-3 w-[45%] animate-pulse rounded bg-fill-glass-strong" />
-            <div className="h-3 w-[55%] animate-pulse rounded bg-fill-glass-strong" />
-            <p className="text-xs text-muted">Calculating estimate…</p>
-          </div>
-        )}
-      </div>
-
-      <div className="rounded-xl border border-stroke bg-matte/[0.35] p-4 text-sm text-muted">
-        <div className="flex items-center gap-2 font-medium text-soft">
-          <Shield className="h-4 w-4 text-electric" aria-hidden />
-          Security deposit
-        </div>
-        <p className="mt-2 text-xs leading-relaxed">
-          {car.securityDeposit <= 0 ? (
-            <span className="text-muted">No security deposit required for this vehicle.</span>
-          ) : (
-            <>
-              <span className="font-semibold text-soft">{formatInr(car.securityDeposit)}</span> pre-authorization at
-              handoff. Released after return inspection.
-            </>
-          )}
-        </p>
-      </div>
+      <BookingSummaryCard
+        vehicleName={car.name}
+        vehicleImageUrl={car.imageUrl}
+        pickup={pickup}
+        returnAt={returnAt}
+        rentalDays={dates.ok ? dates.rentalDays : null}
+        showPricing={hasValidQuote}
+        pricingLoading={pricingLoading}
+        pricingLines={pricingLines}
+        quote={quote}
+        securityDeposit={car.securityDeposit}
+      />
 
       <div className="rounded-xl border border-stroke bg-matte/[0.35] p-4">
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted">Availability</p>
@@ -287,7 +294,7 @@ export function CarDetailBookingPanel({ car, isLoggedIn, kycApproved }: CarDetai
           {avail.status === 'checking' ? (
             <>
               <Loader2 className="mt-0.5 h-4 w-4 shrink-0 animate-spin text-electric" aria-hidden />
-              <span className="text-muted">Checking calendar…</span>
+              <span className="text-muted">Syncing live calendar…</span>
             </>
           ) : avail.status === 'error' ? (
             <>
@@ -303,23 +310,37 @@ export function CarDetailBookingPanel({ car, isLoggedIn, kycApproved }: CarDetai
             ) : (
               <>
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-300" aria-hidden />
-                <span className="text-amber-100/90">{avail.reason ?? 'Unavailable for these times.'}</span>
+                <span className="text-amber-100/90">{unavailableReason}</span>
               </>
             )
           ) : (
-            <span className="text-muted">Adjust dates to check availability.</span>
+            <span className="text-muted">Adjust dates to refresh availability.</span>
           )}
         </div>
       </div>
 
       <AnimatePresence mode="wait">
-        {formError ? (
+        {submitUi === 'success' ? (
+          <motion.div
+            key="ok"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0 }}
+            className="flex gap-3 rounded-xl border border-emerald-500/30 bg-emerald-500/[0.09] px-4 py-3 text-sm text-emerald-50/95"
+          >
+            <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald" aria-hidden />
+            <p className="leading-relaxed">
+              <span className="font-semibold text-soft">Booking confirmed.</span> Taking you to your trips…
+            </p>
+          </motion.div>
+        ) : formError ? (
           <motion.div
             key="err"
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
             className="flex gap-3 rounded-xl border border-stroke bg-fill-glass px-3 py-2.5 text-sm text-muted shadow-[var(--shadow-card)]"
+            role="alert"
           >
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400/90" aria-hidden />
             <p className="leading-relaxed text-soft">{formError}</p>
@@ -327,16 +348,29 @@ export function CarDetailBookingPanel({ car, isLoggedIn, kycApproved }: CarDetai
         ) : null}
       </AnimatePresence>
 
-      <Button type="button" size="lg" className="w-full" disabled={!canSubmit} onClick={onSubmit}>
+      <Button
+        type="button"
+        size="lg"
+        className="w-full"
+        disabled={!canSubmit}
+        aria-disabled={!canSubmit}
+        aria-describedby={!kycApproved && isLoggedIn ? 'kyc-booking-gate' : undefined}
+        onClick={onSubmit}
+      >
         {pending ? (
           <span className="inline-flex items-center gap-2">
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
             Confirming…
           </span>
+        ) : submitUi === 'success' ? (
+          <span className="inline-flex items-center gap-2">
+            <CheckCircle2 className="h-4 w-4" aria-hidden />
+            Confirmed
+          </span>
         ) : !isLoggedIn ? (
           'Sign in to reserve'
         ) : !kycApproved ? (
-          'Verification required'
+          'Complete verification to book'
         ) : (
           'Confirm booking'
         )}
