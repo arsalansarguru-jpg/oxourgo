@@ -1,5 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 
+import { BookingRealtimeSubscriber } from '@/features/dashboard/booking-realtime-subscriber'
 import { CustomerBookingDetail } from '@/features/dashboard/customer-booking-detail'
 import { getAuthenticatedUser } from '@/lib/auth/server'
 import { getBookingForUser } from '@/lib/customer/bookings-queries'
@@ -16,5 +17,10 @@ export default async function CustomerBookingDetailPage({ params }: { params: Pr
   if (!row) {
     notFound()
   }
-  return <CustomerBookingDetail row={row} />
+  return (
+    <>
+      <BookingRealtimeSubscriber bookingId={row.id} />
+      <CustomerBookingDetail row={row} />
+    </>
+  )
 }

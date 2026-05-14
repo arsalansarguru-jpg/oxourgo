@@ -80,6 +80,31 @@ export async function onBookingCancelled(bookingId: string, note?: string | null
   })
 }
 
+export async function onTripStarted(bookingId: string): Promise<void> {
+  const ctx = await getBookingNotifyContext(bookingId)
+  if (!ctx) return
+  const car = ctx.car_label ? `${ctx.car_label}` : 'Your vehicle'
+  await notifyCustomer({
+    userId: ctx.user_id,
+    type: 'trip_started',
+    title: 'Trip started',
+    body: `${car} handoff is complete. Have a safe journey.`,
+    metadata: { booking_id: bookingId },
+  })
+}
+
+export async function onTripCompleted(bookingId: string): Promise<void> {
+  const ctx = await getBookingNotifyContext(bookingId)
+  if (!ctx) return
+  await notifyCustomer({
+    userId: ctx.user_id,
+    type: 'trip_completed',
+    title: 'Trip completed',
+    body: 'Thank you for choosing Oxour Go. We hope to see you on the road again soon.',
+    metadata: { booking_id: bookingId },
+  })
+}
+
 export async function onPaymentStatusChanged(
   bookingId: string,
   paymentStatus: string,

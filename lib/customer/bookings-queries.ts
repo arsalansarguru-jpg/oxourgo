@@ -19,6 +19,13 @@ const bookingSelect = `
   total_rupees,
   booking_status,
   payment_status,
+  ops_note,
+  approved_at,
+  handed_over_at,
+  returned_at,
+  completed_at,
+  pickup_checklist,
+  return_checklist,
   created_at,
   updated_at,
   vehicles (

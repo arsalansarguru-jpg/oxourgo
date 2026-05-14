@@ -25,7 +25,9 @@ import {
   adminApproveBookingAction,
   adminCancelBookingAction,
   adminMarkBookingActiveAction,
-  adminSetBookingStatusAction,
+  adminMarkCompletedAction,
+  adminMarkHandedOverAction,
+  adminMarkReturnedAction,
 } from '@/lib/admin/actions/booking-actions'
 import {
   bookingVehicleTitle,
@@ -351,7 +353,9 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
                     const canApprove = b.booking_status === 'pending_payment'
                     const canMarkActive = b.booking_status === 'pending_payment'
                     const canCancel = b.booking_status !== 'cancelled' && b.booking_status !== 'completed'
-                    const canComplete = b.booking_status === 'confirmed'
+                    const canHandOver = b.booking_status === 'confirmed'
+                    const canReturn = b.booking_status === 'active' && !b.returned_at
+                    const canComplete = b.booking_status === 'active'
 
                     return (
                       <tr key={b.id} className="admin-table-row">
@@ -462,6 +466,34 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
                                 Mark active
                               </Button>
                             ) : null}
+                            {canHandOver ? (
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="secondary"
+                                className="min-h-8 w-full max-w-[9.5rem] gap-1 px-2.5 text-[11px]"
+                                disabled={busy || isPending}
+                                onClick={() =>
+                                  runBookingAction(b.id, () => adminMarkHandedOverAction(b.id), 'Marked handed over.')
+                                }
+                              >
+                                Hand over
+                              </Button>
+                            ) : null}
+                            {canReturn ? (
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="secondary"
+                                className="min-h-8 w-full max-w-[9.5rem] gap-1 px-2.5 text-[11px]"
+                                disabled={busy || isPending}
+                                onClick={() =>
+                                  runBookingAction(b.id, () => adminMarkReturnedAction(b.id), 'Return logged.')
+                                }
+                              >
+                                Mark returned
+                              </Button>
+                            ) : null}
                             {canComplete ? (
                               <Button
                                 type="button"
@@ -470,11 +502,11 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
                                 className="min-h-8 w-full max-w-[9.5rem] gap-1 px-2.5 text-[11px]"
                                 disabled={busy || isPending}
                                 onClick={() => {
-                                  if (!window.confirm('Mark this booking as completed?')) return
+                                  if (!window.confirm('Mark this trip as completed?')) return
                                   void runBookingAction(
                                     b.id,
-                                    () => adminSetBookingStatusAction(b.id, 'completed'),
-                                    'Marked completed.',
+                                    () => adminMarkCompletedAction(b.id),
+                                    'Trip completed.',
                                   )
                                 }}
                               >
@@ -526,7 +558,9 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
                 const canApprove = b.booking_status === 'pending_payment'
                 const canMarkActive = b.booking_status === 'pending_payment'
                 const canCancel = b.booking_status !== 'cancelled' && b.booking_status !== 'completed'
-                const canComplete = b.booking_status === 'confirmed'
+                const canHandOver = b.booking_status === 'confirmed'
+                const canReturn = b.booking_status === 'active' && !b.returned_at
+                const canComplete = b.booking_status === 'active'
 
                 return (
                   <div key={b.id} className="space-y-4 p-4">
@@ -594,6 +628,34 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
                           Active
                         </Button>
                       ) : null}
+                      {canHandOver ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          className="min-h-9 flex-1 gap-1 text-xs"
+                          disabled={busy || isPending}
+                          onClick={() =>
+                            runBookingAction(b.id, () => adminMarkHandedOverAction(b.id), 'Marked handed over.')
+                          }
+                        >
+                          Hand over
+                        </Button>
+                      ) : null}
+                      {canReturn ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="secondary"
+                          className="min-h-9 flex-1 gap-1 text-xs"
+                          disabled={busy || isPending}
+                          onClick={() =>
+                            runBookingAction(b.id, () => adminMarkReturnedAction(b.id), 'Return logged.')
+                          }
+                        >
+                          Returned
+                        </Button>
+                      ) : null}
                       {canComplete ? (
                         <Button
                           type="button"
@@ -602,12 +664,8 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
                           className="min-h-9 flex-1 gap-1 text-xs"
                           disabled={busy || isPending}
                           onClick={() => {
-                            if (!window.confirm('Mark this booking as completed?')) return
-                            void runBookingAction(
-                              b.id,
-                              () => adminSetBookingStatusAction(b.id, 'completed'),
-                              'Marked completed.',
-                            )
+                            if (!window.confirm('Mark this trip as completed?')) return
+                            void runBookingAction(b.id, () => adminMarkCompletedAction(b.id), 'Trip completed.')
                           }}
                         >
                           <CircleCheck className="h-3.5 w-3.5" aria-hidden />

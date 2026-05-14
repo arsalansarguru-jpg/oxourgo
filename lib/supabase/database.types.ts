@@ -143,6 +143,19 @@ export type Database = {
           booking_status: string
           payment_status: string
           ops_note: string | null
+          admin_internal_notes: string | null
+          approved_at: string | null
+          handed_over_at: string | null
+          returned_at: string | null
+          completed_at: string | null
+          approved_by: string | null
+          handed_over_by: string | null
+          completed_by: string | null
+          deposit_held_rupees: number | null
+          deposit_refunded_at: string | null
+          deposit_refunded_rupees: number | null
+          pickup_checklist: Json
+          return_checklist: Json
           created_at: string
           updated_at: string
         }
@@ -163,6 +176,19 @@ export type Database = {
           booking_status?: string
           payment_status?: string
           ops_note?: string | null
+          admin_internal_notes?: string | null
+          approved_at?: string | null
+          handed_over_at?: string | null
+          returned_at?: string | null
+          completed_at?: string | null
+          approved_by?: string | null
+          handed_over_by?: string | null
+          completed_by?: string | null
+          deposit_held_rupees?: number | null
+          deposit_refunded_at?: string | null
+          deposit_refunded_rupees?: number | null
+          pickup_checklist?: Json
+          return_checklist?: Json
           created_at?: string
           updated_at?: string
         }
@@ -183,6 +209,19 @@ export type Database = {
           booking_status?: string
           payment_status?: string
           ops_note?: string | null
+          admin_internal_notes?: string | null
+          approved_at?: string | null
+          handed_over_at?: string | null
+          returned_at?: string | null
+          completed_at?: string | null
+          approved_by?: string | null
+          handed_over_by?: string | null
+          completed_by?: string | null
+          deposit_held_rupees?: number | null
+          deposit_refunded_at?: string | null
+          deposit_refunded_rupees?: number | null
+          pickup_checklist?: Json
+          return_checklist?: Json
           created_at?: string
           updated_at?: string
         }

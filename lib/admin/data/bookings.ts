@@ -22,6 +22,19 @@ const bookingSelect = `
   booking_status,
   payment_status,
   ops_note,
+  approved_at,
+  handed_over_at,
+  returned_at,
+  completed_at,
+  approved_by,
+  handed_over_by,
+  completed_by,
+  deposit_held_rupees,
+  deposit_refunded_at,
+  deposit_refunded_rupees,
+  pickup_checklist,
+  return_checklist,
+  admin_internal_notes,
   created_at,
   updated_at,
   vehicles (
@@ -249,4 +262,30 @@ export async function adminListBookingsForUser(userId: string): Promise<BookingW
   }
   if (error || !data) return []
   return data as unknown as BookingWithCar[]
+}
+
+export type AdminBookingCustomerProfile = {
+  full_name: string | null
+  phone: string | null
+  kyc_status: string
+}
+
+export async function adminGetBookingCustomerProfile(userId: string): Promise<AdminBookingCustomerProfile | null> {
+  const admin = createAdminClient()
+  const { data, error } = await admin
+    .from('profiles')
+    .select('full_name, phone, kyc_status')
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (error) {
+    logPostgrestError('[adminGetBookingCustomerProfile]', error)
+    return null
+  }
+  if (!data) return null
+  return {
+    full_name: data.full_name ?? null,
+    phone: data.phone ?? null,
+    kyc_status: data.kyc_status ?? 'not_started',
+  }
 }

@@ -40,11 +40,12 @@ function resolveVehicle(row: BookingWithCar) {
   return Array.isArray(v) ? v[0] ?? null : v
 }
 
-function tripPhaseLine(ui: CustomerBookingUiStatus): string {
+function tripPhaseLine(ui: CustomerBookingUiStatus, row: BookingWithCar): string {
   switch (ui) {
     case 'active':
       return 'Your vehicle is on hire — drive safe and enjoy the road.'
     case 'upcoming':
+      if (row.booking_status === 'confirmed') return 'Your booking is approved. We will see you at pickup.'
       return 'Upcoming trip — hubs and handoff details are locked in below.'
     case 'pending_review':
       return 'We are confirming payment and fleet allocation. You will be notified shortly.'
@@ -58,33 +59,39 @@ function tripPhaseLine(ui: CustomerBookingUiStatus): string {
 }
 
 function timelineSteps(row: BookingWithCar) {
-  const ui = deriveCustomerBookingUiStatus(row)
   if (row.booking_status === 'cancelled') {
     return [{ key: 'cancel', label: 'Cancelled', done: true, current: false }]
   }
+  if (row.booking_status === 'completed') {
+    return [
+      { key: 'p', label: 'Pending review', done: true, current: false },
+      { key: 'a', label: 'Approved', done: true, current: false },
+      { key: 's', label: 'Pickup scheduled', done: true, current: false },
+      { key: 't', label: 'Active trip', done: true, current: false },
+      { key: 'r', label: 'Vehicle returned', done: true, current: false },
+      { key: 'c', label: 'Trip completed', done: true, current: false },
+    ]
+  }
+
+  const pendingDone = row.booking_status !== 'pending_payment'
+  const approvedDone = pendingDone && ['confirmed', 'active'].includes(row.booking_status)
+  const activeDone =
+    row.booking_status === 'active' || Boolean(row.handed_over_at) || row.booking_status === 'completed'
+  const returnedDone = Boolean(row.returned_at) || row.booking_status === 'completed'
+  const completedDone = row.booking_status === 'completed'
+
   const steps = [
-    { key: 'created', label: 'Booking created', done: true },
-    {
-      key: 'payment',
-      label: 'Payment confirmed',
-      done: row.booking_status !== 'pending_payment',
-    },
-    {
-      key: 'confirmed',
-      label: 'Fleet confirmed',
-      done:
-        row.booking_status === 'confirmed' ||
-        row.booking_status === 'completed' ||
-        ui === 'active' ||
-        ui === 'upcoming',
-    },
-    { key: 'pickup', label: 'Pickup', done: Date.now() >= new Date(row.pickup_date).getTime() },
-    { key: 'return', label: 'Return', done: Date.now() > new Date(row.return_date).getTime() },
-    { key: 'complete', label: 'Trip closed', done: ui === 'completed' },
+    { key: 'p', label: 'Pending review', done: pendingDone },
+    { key: 'a', label: 'Approved', done: approvedDone },
+    { key: 's', label: 'Pickup scheduled', done: approvedDone },
+    { key: 't', label: 'Active trip', done: activeDone },
+    { key: 'r', label: 'Vehicle returned', done: returnedDone },
+    { key: 'c', label: 'Trip completed', done: completedDone },
   ]
+
   let assignedCurrent = false
   return steps.map((s, i) => {
-    const prevDone = i === 0 || steps[i - 1].done
+    const prevDone = i === 0 || steps[i - 1]!.done
     const current = !assignedCurrent && !s.done && prevDone
     if (current) assignedCurrent = true
     return { ...s, current }
@@ -94,7 +101,13 @@ function timelineSteps(row: BookingWithCar) {
 export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
   const vehicle = resolveVehicle(row)
   const visual = resolveBookingVehicleVisual(row)
-  const ui = deriveCustomerBookingUiStatus(row)
+  const ui = deriveCustomerBookingUiStatus({
+    booking_status: row.booking_status,
+    pickup_date: row.pickup_date,
+    return_date: row.return_date,
+    handed_over_at: row.handed_over_at,
+    returned_at: row.returned_at,
+  })
   const bookingBadge = mapDbBookingStatusToCustomerBadge(row.booking_status)
   const steps = timelineSteps(row)
   const securityDeposit = vehicle?.security_deposit
@@ -139,7 +152,7 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
                 <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-soft drop-shadow-sm md:text-4xl lg:text-[2.5rem] lg:leading-tight">
                   {visual.name}
                 </h1>
-                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-silver/95 md:text-base">{tripPhaseLine(ui)}</p>
+                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-silver/95 md:text-base">{tripPhaseLine(ui, row)}</p>
                 <p className="mt-3 font-mono text-[11px] text-muted/90">Ref · {invoiceRef}</p>
               </div>
               <div className="flex flex-col gap-4 lg:items-end lg:text-right">
@@ -253,6 +266,23 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
                   <span>Total paid / due</span>
                   <span className="tabular-nums">{formatInr(row.total_rupees)}</span>
                 </li>
+                {row.deposit_held_rupees != null ? (
+                  <li className="flex justify-between gap-4 border-t border-stroke pt-3 text-muted">
+                    <span>Deposit held (booking)</span>
+                    <span className="tabular-nums text-soft">{formatInr(row.deposit_held_rupees)}</span>
+                  </li>
+                ) : null}
+                {row.deposit_refunded_rupees != null ? (
+                  <li className="flex justify-between gap-4 text-muted">
+                    <span>Deposit refunded</span>
+                    <span className="tabular-nums text-soft">{formatInr(row.deposit_refunded_rupees)}</span>
+                  </li>
+                ) : null}
+                {row.deposit_refunded_at ? (
+                  <li className="text-xs text-muted">
+                    Refund recorded {new Date(row.deposit_refunded_at).toLocaleString()}
+                  </li>
+                ) : null}
               </ul>
               {securityDeposit != null ? (
                 <p className="mt-5 rounded-xl border border-stroke bg-fill-glass px-3 py-2.5 text-xs leading-relaxed text-muted">
@@ -360,6 +390,12 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
                   <p className="mt-1 text-xs font-medium uppercase tracking-wide text-muted/90">Policy</p>
                 </div>
               </div>
+              {isCancelled && row.ops_note?.trim() ? (
+                <p className="mt-3 rounded-xl border border-stroke bg-matte/40 px-3 py-2 text-sm text-muted">
+                  <span className="font-medium text-soft">Note: </span>
+                  {row.ops_note.trim()}
+                </p>
+              ) : null}
               {isCancelled ? (
                 <p className="text-sm leading-relaxed text-silver/95">
                   This booking is already cancelled. For deposit release timing or refunds, reach out to concierge with

@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils/cn'
 const styles: Record<string, string> = {
   pending_payment: 'border-amber-400/35 bg-amber-500/10 text-amber-100',
   confirmed: 'border-emerald-400/35 bg-emerald-500/10 text-emerald',
+  active: 'border-sky-400/40 bg-sky-500/12 text-sky-100',
   cancelled: 'border-stroke-strong bg-fill-glass-strong text-muted',
   completed: 'border-sky-400/35 bg-sky-500/10 text-sky-100',
   pending: 'border-amber-400/35 bg-amber-500/10 text-amber-100',

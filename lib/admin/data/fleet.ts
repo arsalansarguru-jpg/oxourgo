@@ -133,7 +133,7 @@ export async function adminGetFleetDashboardMetrics(): Promise<AdminFleetDashboa
     admin
       .from('bookings')
       .select('vehicle_id')
-      .in('booking_status', ['confirmed', 'pending_payment'])
+      .in('booking_status', ['confirmed', 'pending_payment', 'active'])
       .not('vehicle_id', 'is', null)
       .lte('pickup_date', today)
       .gte('return_date', today),

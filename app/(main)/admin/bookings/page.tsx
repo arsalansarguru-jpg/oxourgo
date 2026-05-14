@@ -10,7 +10,8 @@ export const dynamic = 'force-dynamic'
 const STATUS_TABS = [
   { label: 'All', param: '' },
   { label: 'Pending', param: 'pending_payment' },
-  { label: 'Active', param: 'confirmed' },
+  { label: 'Approved', param: 'confirmed' },
+  { label: 'On trip', param: 'active' },
   { label: 'Completed', param: 'completed' },
   { label: 'Cancelled', param: 'cancelled' },
 ] as const

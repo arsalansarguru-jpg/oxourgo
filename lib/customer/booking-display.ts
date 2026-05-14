@@ -3,7 +3,7 @@ import { getPublicStorageObjectUrl } from '@/lib/supabase/storage-public-url'
 import { resolveFleetImageUrl } from '@/lib/fleet/mappers'
 
 /** Customer-facing booking lifecycle labels (maps from DB `booking_status`). */
-export type CustomerBookingStatusBadge = 'pending' | 'confirmed' | 'cancelled' | 'completed'
+export type CustomerBookingStatusBadge = 'pending' | 'scheduled' | 'on_trip' | 'cancelled' | 'completed'
 
 export type BookingVehicleVisual = {
   imageUrl: string
@@ -61,20 +61,23 @@ export function mapDbBookingStatusToCustomerBadge(status: string): CustomerBooki
     case 'pending_payment':
       return 'pending'
     case 'confirmed':
-      return 'confirmed'
+      return 'scheduled'
+    case 'active':
+      return 'on_trip'
     case 'cancelled':
       return 'cancelled'
     case 'completed':
       return 'completed'
     default:
-      return 'confirmed'
+      return 'scheduled'
   }
 }
 
 export function customerBookingStatusLabel(badge: CustomerBookingStatusBadge): string {
   const labels: Record<CustomerBookingStatusBadge, string> = {
-    pending: 'Pending',
-    confirmed: 'Confirmed',
+    pending: 'Pending review',
+    scheduled: 'Pickup scheduled',
+    on_trip: 'Active trip',
     cancelled: 'Cancelled',
     completed: 'Completed',
   }
@@ -108,7 +111,8 @@ export const CUSTOMER_BOOKING_STATUS_BADGE_VARIANT: Record<
   CustomerBookingStatusBadgeUiVariant
 > = {
   pending: 'electric',
-  confirmed: 'success',
+  scheduled: 'success',
+  on_trip: 'electric',
   cancelled: 'danger',
   completed: 'muted',
 }

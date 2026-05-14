@@ -27,7 +27,7 @@ function postedRevenueEligible(b: Pick<BookingLite, 'booking_status' | 'payment_
 
 function bookingSuccessForConversion(b: Pick<BookingLite, 'booking_status'>): boolean {
   const s = (b.booking_status ?? '').trim().toLowerCase()
-  return s === 'confirmed' || s === 'completed'
+  return s === 'confirmed' || s === 'active' || s === 'completed'
 }
 
 function overlapsDay(pickup: string, ret: string, day: string): boolean {
@@ -150,7 +150,7 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
     admin
       .from('bookings')
       .select('id', { count: 'exact', head: true })
-      .in('booking_status', ['confirmed', 'pending_payment'])
+      .in('booking_status', ['confirmed', 'pending_payment', 'active'])
       .not('vehicle_id', 'is', null)
       .lte('pickup_date', today)
       .gte('return_date', today),

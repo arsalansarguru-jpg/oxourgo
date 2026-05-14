@@ -6,11 +6,21 @@ import { AdminBookingOpsPanel } from '@/components/admin/admin-booking-ops-panel
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 import { AdminStatusPill } from '@/components/admin/admin-status-pill'
-import { adminGetBooking } from '@/lib/admin/data/bookings'
+import { adminGetBooking, adminGetBookingCustomerProfile } from '@/lib/admin/data/bookings'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatInr } from '@/lib/format'
+import { KycStatusBadge } from '@/components/kyc/kyc-status-badge'
 
 export const dynamic = 'force-dynamic'
+
+function fmtTs(iso: string | null | undefined) {
+  if (!iso) return '—'
+  try {
+    return new Date(iso).toLocaleString()
+  } catch {
+    return '—'
+  }
+}
 
 export default async function AdminBookingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -22,14 +32,18 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
   }
   if (!booking) notFound()
 
-  let customerEmail: string | null = null
-  try {
-    const admin = createAdminClient()
-    const { data } = await admin.auth.admin.getUserById(booking.user_id)
-    customerEmail = data?.user?.email ?? null
-  } catch {
-    customerEmail = null
-  }
+  const [customerEmail, customerProfile] = await Promise.all([
+    (async () => {
+      try {
+        const admin = createAdminClient()
+        const { data } = await admin.auth.admin.getUserById(booking.user_id)
+        return data?.user?.email ?? null
+      } catch {
+        return null
+      }
+    })(),
+    adminGetBookingCustomerProfile(booking.user_id),
+  ])
 
   const vehJoin = booking.vehicles
   const veh = Array.isArray(vehJoin) ? vehJoin[0] : vehJoin
@@ -50,15 +64,71 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
 
       {booking.ops_note ? (
         <p className="rounded-2xl border border-white/[0.08] bg-white/[0.04] px-5 py-4 text-sm leading-relaxed text-muted shadow-[var(--shadow-card)] backdrop-blur-md">
-          <span className="font-medium text-soft">Ops note: </span>
+          <span className="font-medium text-soft">Customer / ops note: </span>
           {booking.ops_note}
         </p>
       ) : null}
 
+      <AdminCard>
+        <AdminCardContent className="space-y-4 p-5 sm:p-7">
+          <h2 className="text-lg font-semibold text-soft">Customer &amp; compliance</h2>
+          <dl className="grid gap-3 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="text-muted">Display name</dt>
+              <dd className="font-medium text-soft">{customerProfile?.full_name?.trim() || '—'}</dd>
+            </div>
+            <div>
+              <dt className="text-muted">Phone</dt>
+              <dd className="text-soft">{customerProfile?.phone?.trim() || '—'}</dd>
+            </div>
+            <div>
+              <dt className="text-muted">Email</dt>
+              <dd className="break-all text-soft">{customerEmail ?? '—'}</dd>
+            </div>
+            <div className="flex flex-col gap-2">
+              <dt className="text-muted">KYC</dt>
+              <dd className="flex flex-wrap items-center gap-2">
+                <KycStatusBadge status={customerProfile?.kyc_status ?? 'not_started'} />
+                <Link
+                  href={`/admin/kyc/review/${booking.user_id}`}
+                  className="text-xs font-semibold text-electric underline-offset-4 hover:underline"
+                >
+                  Open KYC dossier →
+                </Link>
+              </dd>
+            </div>
+          </dl>
+        </AdminCardContent>
+      </AdminCard>
+
+      <AdminCard>
+        <AdminCardContent className="space-y-4 p-5 sm:p-7">
+          <h2 className="text-lg font-semibold text-soft">Lifecycle timestamps</h2>
+          <dl className="grid gap-3 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="text-muted">Approved at</dt>
+              <dd className="text-soft">{fmtTs(booking.approved_at)}</dd>
+            </div>
+            <div>
+              <dt className="text-muted">Handed over at</dt>
+              <dd className="text-soft">{fmtTs(booking.handed_over_at)}</dd>
+            </div>
+            <div>
+              <dt className="text-muted">Returned at</dt>
+              <dd className="text-soft">{fmtTs(booking.returned_at)}</dd>
+            </div>
+            <div>
+              <dt className="text-muted">Completed at</dt>
+              <dd className="text-soft">{fmtTs(booking.completed_at)}</dd>
+            </div>
+          </dl>
+        </AdminCardContent>
+      </AdminCard>
+
       <div className="grid gap-8 lg:grid-cols-2">
         <AdminCard>
           <AdminCardContent className="space-y-4 text-sm">
-            <h2 className="text-lg font-semibold tracking-[-0.02em] text-soft">Trip</h2>
+            <h2 className="text-lg font-semibold tracking-[-0.02em] text-soft">Trip &amp; pricing</h2>
             <dl className="grid gap-2.5">
               <div className="flex justify-between gap-4">
                 <dt className="text-muted">Pickup</dt>
@@ -72,6 +142,18 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
                 <dt className="text-muted">Days</dt>
                 <dd className="text-soft">{booking.rental_days}</dd>
               </div>
+              <div className="flex justify-between gap-4 border-t border-white/[0.08] pt-3 text-muted">
+                <dt>Subtotal</dt>
+                <dd className="tabular-nums text-soft">{formatInr(booking.subtotal_rupees)}</dd>
+              </div>
+              <div className="flex justify-between gap-4 text-muted">
+                <dt>Concierge &amp; connectivity</dt>
+                <dd className="tabular-nums text-soft">{formatInr(booking.convenience_fee_rupees)}</dd>
+              </div>
+              <div className="flex justify-between gap-4 text-muted">
+                <dt>GST</dt>
+                <dd className="tabular-nums text-soft">{formatInr(booking.gst_rupees)}</dd>
+              </div>
               <div className="flex justify-between gap-4 border-t border-white/[0.08] pt-3 text-base font-semibold">
                 <dt className="text-soft">Total</dt>
                 <dd className="tabular-nums text-soft">{formatInr(booking.total_rupees)}</dd>
@@ -82,6 +164,12 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
                   <dd className="tabular-nums text-soft">{formatInr(veh.security_deposit)}</dd>
                 </div>
               ) : null}
+              <div className="flex justify-between gap-4 text-xs text-muted">
+                <dt>Deposit tracked (booking)</dt>
+                <dd className="tabular-nums text-soft">
+                  {booking.deposit_held_rupees != null ? formatInr(booking.deposit_held_rupees) : '—'}
+                </dd>
+              </div>
             </dl>
           </AdminCardContent>
         </AdminCard>
@@ -89,7 +177,13 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
         <AdminBookingOpsPanel booking={booking} />
       </div>
 
-      <AdminBookingPdfPanel bookingId={booking.id} />
+      <AdminCard>
+        <AdminCardContent className="space-y-2 p-5 sm:p-7">
+          <h2 className="text-lg font-semibold text-soft">Documents &amp; agreements</h2>
+          <p className="text-sm text-muted">Generate PDFs for concierge, customer email, or audit packs.</p>
+          <AdminBookingPdfPanel bookingId={booking.id} />
+        </AdminCardContent>
+      </AdminCard>
 
       <p className="text-center text-sm text-muted">
         <Link href="/admin/bookings" className="font-medium text-electric transition-colors hover:text-electric/85">
