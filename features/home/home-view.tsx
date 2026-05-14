@@ -1,7 +1,11 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import { useEffect, useRef } from 'react'
 import type { Car } from '@/types/car'
+
+import { captureClientEvent } from '@/lib/analytics/capture-client'
+import { BOOKING_FUNNEL, POSTHOG_EVENTS } from '@/lib/analytics/posthog-events'
 import { HeroSection } from '@/components/marketing/hero-section'
 import { Section } from '@/components/ui/Section'
 
@@ -35,6 +39,18 @@ type HomeViewProps = {
 }
 
 export function HomeView({ featuredCars, featuredLoadFailed = false }: HomeViewProps) {
+  const homeTracked = useRef(false)
+  useEffect(() => {
+    if (homeTracked.current) return
+    homeTracked.current = true
+    captureClientEvent(POSTHOG_EVENTS.homepageViewed, {
+      funnel: BOOKING_FUNNEL,
+      step: 'homepage',
+      featured_count: featuredCars.length,
+      featured_load_failed: featuredLoadFailed,
+    })
+  }, [featuredCars.length, featuredLoadFailed])
+
   return (
     <>
       <HeroSection />

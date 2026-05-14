@@ -6,6 +6,8 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { Check, Eye, FileUp, Loader2, ShieldCheck } from 'lucide-react'
 
 import { registerKycDocumentAction } from '@/app/(main)/dashboard/actions'
+import { captureClientEvent } from '@/lib/analytics/capture-client'
+import { POSTHOG_EVENTS } from '@/lib/analytics/posthog-events'
 import type { KycDocumentRow } from '@/lib/customer/kyc-queries'
 import { SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
 import type { Database } from '@/lib/supabase/database.types'
@@ -145,6 +147,12 @@ export function KycUploadTile({
             return
           }
 
+          captureClientEvent(POSTHOG_EVENTS.kycSubmissionSuccess, {
+            document_type: tile.id,
+            byte_size_bucket:
+              file.size < 500_000 ? 'lt_500kb' : file.size < 2_000_000 ? '500kb_2mb' : '2mb_plus',
+          })
+
           if (res.document) {
             onRegistered(res.document)
           }
@@ -184,8 +192,18 @@ export function KycUploadTile({
             </div>
           </div>
           {latest ? (
-            <Badge variant={latest.status === 'approved' ? 'success' : latest.status === 'rejected' ? 'muted' : 'electric'}>
-              {latest.status}
+            <Badge
+              variant={
+                latest.status === 'approved'
+                  ? 'success'
+                  : latest.status === 'rejected'
+                    ? 'muted'
+                    : latest.status === 'resubmission_required'
+                      ? 'electric'
+                      : 'electric'
+              }
+            >
+              {latest.status.replace(/_/g, ' ')}
             </Badge>
           ) : (
             <Badge variant={tile.required === false ? 'default' : 'muted'}>
@@ -333,12 +351,18 @@ export function KycUploadTile({
           </Button>
         ) : null}
 
-        {latest?.reviewer_note && latest.status === 'rejected' ? (
-          <p className="rounded-lg border border-stroke bg-fill-glass px-3 py-2 text-xs text-muted">
-            <span className="font-medium text-soft">Reviewer: </span>
-            {latest.reviewer_note}
-          </p>
-        ) : null}
+        {(() => {
+          const rr = latest?.rejection_reason?.trim()
+          const legacy = latest?.status === 'rejected' ? latest?.reviewer_note?.trim() : null
+          const visible = rr || legacy
+          if (!visible || (latest?.status !== 'rejected' && latest?.status !== 'resubmission_required')) return null
+          return (
+            <p className="rounded-lg border border-stroke bg-fill-glass px-3 py-2 text-xs text-muted">
+              <span className="font-medium text-soft">{latest?.status === 'resubmission_required' ? 'Please update: ' : 'Note: '}</span>
+              {visible}
+            </p>
+          )
+        })()}
       </CardContent>
     </Card>
   )

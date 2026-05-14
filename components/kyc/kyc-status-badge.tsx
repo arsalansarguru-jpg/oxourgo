@@ -8,6 +8,7 @@ const LABELS: Record<KycLifecycleStatus, string> = {
   pending: 'KYC · In review',
   approved: 'KYC · Approved',
   rejected: 'KYC · Action needed',
+  resubmission_required: 'KYC · Resubmit documents',
 }
 
 export function KycStatusBadge({
@@ -18,9 +19,19 @@ export function KycStatusBadge({
   className?: string
 }) {
   const raw = (status ?? 'not_started').trim().toLowerCase()
-  const s = (['not_started', 'pending', 'approved', 'rejected'].includes(raw) ? raw : 'not_started') as KycLifecycleStatus
+  const s = (
+    ['not_started', 'pending', 'approved', 'rejected', 'resubmission_required'].includes(raw) ? raw : 'not_started'
+  ) as KycLifecycleStatus
   const variant =
-    s === 'approved' ? 'success' : s === 'rejected' ? 'muted' : s === 'pending' ? 'electric' : 'default'
+    s === 'approved'
+      ? 'success'
+      : s === 'rejected'
+        ? 'muted'
+        : s === 'resubmission_required'
+          ? 'electric'
+          : s === 'pending'
+            ? 'electric'
+            : 'default'
   return (
     <Badge variant={variant} className={className}>
       {LABELS[s]}

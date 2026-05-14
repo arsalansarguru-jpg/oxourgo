@@ -1,10 +1,13 @@
 'use client'
 
+import { useEffect } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 
 import { AuthPanel } from '@/components/auth/auth-panel'
 import { LoginHeroPanel } from '@/components/auth/login-hero-panel'
+import { captureClientEvent } from '@/lib/analytics/capture-client'
+import { POSTHOG_EVENTS } from '@/lib/analytics/posthog-events'
 import { BRAND } from '@/constants/brand'
 
 const ease = [0.22, 1, 0.36, 1] as const
@@ -16,6 +19,10 @@ type LoginViewProps = {
 }
 
 export function LoginView({ initialAuthError, redirectTo }: LoginViewProps) {
+  useEffect(() => {
+    captureClientEvent(POSTHOG_EVENTS.loginPageViewed, { step: 'login_page' })
+  }, [])
+
   return (
     <div className="relative min-h-[calc(100dvh-3.25rem)] sm:min-h-[calc(100dvh-3.5rem)] lg:min-h-[calc(100dvh-4rem)]">
       <div

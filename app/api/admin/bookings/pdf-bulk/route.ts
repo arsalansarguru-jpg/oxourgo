@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import JSZip from 'jszip'
 
+import { captureRouteException } from '@/lib/monitoring/capture-route-exception'
+import { oxourWrapRouteHandler } from '@/lib/monitoring/oxour-wrap-route-handler'
 import { parseBookingPdfDocKind } from '@/lib/pdf/booking-payload'
 import { bookingPdfFilename } from '@/lib/pdf/booking-pdf-filename'
 import { loadAdminBookingPdfPayload } from '@/lib/pdf/load-booking-payload-for-pdf'
@@ -19,7 +21,7 @@ type Body = {
   doc?: unknown
 }
 
-export async function POST(req: Request) {
+async function adminBookingPdfBulkPOST(req: Request) {
   const session = await getAuthSessionSummary()
   if (!session || !roleAtLeast(session.appRole, 'ops_admin')) {
     return NextResponse.json({ ok: false, code: 'forbidden', message: 'Admin access required.' }, { status: 403 })
@@ -72,9 +74,16 @@ export async function POST(req: Request) {
     })
   } catch (e) {
     console.error('[api/admin/bookings/pdf-bulk]', e)
+    captureRouteException('admin', 'POST /api/admin/bookings/pdf-bulk', e)
     return NextResponse.json(
       { ok: false, code: 'export_failed', message: 'Bulk export failed. Try fewer bookings or retry.' },
       { status: 500 },
     )
   }
 }
+
+export const POST = oxourWrapRouteHandler(
+  { method: 'POST', parameterizedRoute: '/api/admin/bookings/pdf-bulk' },
+  'admin',
+  adminBookingPdfBulkPOST,
+)

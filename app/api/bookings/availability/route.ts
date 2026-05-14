@@ -3,6 +3,8 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { allowIpRateLimit, clientIpFromRequestHeaders } from '@/lib/api/simple-ip-rate-limit'
 import { validateTripWindow } from '@/lib/booking/dates'
 import { hasVehicleBookingOverlap } from '@/lib/booking/vehicle-overlap'
+import { captureRouteException } from '@/lib/monitoring/capture-route-exception'
+import { oxourWrapRouteHandler } from '@/lib/monitoring/oxour-wrap-route-handler'
 import { logFleetActionable, logFleetRecoverable } from '@/lib/fleet/fleet-catalog-logging'
 import {
   fleetSerializedErrorIsMeaningful,
@@ -15,8 +17,7 @@ import { isUuidString } from '@/lib/validation/uuid'
 const AVAILABILITY_RATE_LIMIT = 90
 const AVAILABILITY_WINDOW_MS = 60_000
 
-/** Query param is vehicle UUID (`carId` kept for clients; `vehicleId` alias supported). */
-export async function GET(request: NextRequest) {
+async function availabilityGET(request: NextRequest) {
   const ip = clientIpFromRequestHeaders(request.headers)
   if (!allowIpRateLimit(`availability:${ip}`, AVAILABILITY_RATE_LIMIT, AVAILABILITY_WINDOW_MS)) {
     return NextResponse.json({ ok: false, error: 'rate_limited' }, { status: 429 })
@@ -92,6 +93,13 @@ export async function GET(request: NextRequest) {
     if (payload && fleetSerializedErrorIsMeaningful(payload)) {
       logFleetActionable('api/availability.unhandled', payload)
     }
+    captureRouteException('booking', 'GET /api/bookings/availability', e)
     return NextResponse.json({ ok: false, error: 'availability_failed' }, { status: 500 })
   }
 }
+
+export const GET = oxourWrapRouteHandler(
+  { method: 'GET', parameterizedRoute: '/api/bookings/availability' },
+  'booking',
+  availabilityGET,
+)

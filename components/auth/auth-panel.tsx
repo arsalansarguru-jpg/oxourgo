@@ -14,6 +14,8 @@ import {
 } from 'lucide-react'
 
 import { BrandLogo } from '@/components/layout/brand-logo'
+import { captureClientEvent, identifyClientUser } from '@/lib/analytics/capture-client'
+import { POSTHOG_EVENTS } from '@/lib/analytics/posthog-events'
 import { DataLoadErrorPanel } from '@/components/ui/data-load-error'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -211,6 +213,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
     resetFlowMessages()
     setPending('google')
     try {
+      captureClientEvent(POSTHOG_EVENTS.authMethodStarted, { method: 'google' })
       const { data, error: err } = await sb.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -247,6 +250,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
     }
     setPending('email')
     try {
+      captureClientEvent(POSTHOG_EVENTS.authMethodStarted, { method: 'email_magic_link' })
       const { error: err } = await sb.auth.signInWithOtp({
         email: trimmed,
         options: {
@@ -275,6 +279,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
     }
     setPending('otp-send')
     try {
+      captureClientEvent(POSTHOG_EVENTS.authMethodStarted, { method: 'phone_otp_send' })
       const { error: err } = await sb.auth.signInWithOtp({
         phone: e164,
         options: {
@@ -314,6 +319,13 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
         setError(formatAuthError(err))
         return
       }
+      const {
+        data: { session },
+      } = await sb.auth.getSession()
+      if (session?.user?.id) {
+        identifyClientUser(session.user.id)
+      }
+      captureClientEvent(POSTHOG_EVENTS.loginCompleted, { method: 'phone_otp' })
       router.push(nextPath)
       router.refresh()
     } catch (e) {

@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 
+import { captureRouteException } from '@/lib/monitoring/capture-route-exception'
+import { oxourWrapRouteHandler } from '@/lib/monitoring/oxour-wrap-route-handler'
 import { runTripReminderJob } from '@/lib/notifications/jobs/trip-reminders'
 
 /**
@@ -7,7 +9,7 @@ import { runTripReminderJob } from '@/lib/notifications/jobs/trip-reminders'
  * Set CRON_SECRET and call with: Authorization: Bearer <CRON_SECRET>
  * Wire from Supabase Scheduled Triggers, Vercel Cron, or similar.
  */
-export async function POST(request: Request) {
+async function tripRemindersPOST(request: Request) {
   const secret = process.env.CRON_SECRET?.trim()
   const auth = request.headers.get('authorization')
   if (!secret || auth !== `Bearer ${secret}`) {
@@ -19,6 +21,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, ...result })
   } catch (e) {
     console.error('[api/cron/trip-reminders]', e)
+    captureRouteException('admin', 'POST /api/cron/trip-reminders', e)
     return NextResponse.json({ ok: false, error: 'job_failed' }, { status: 500 })
   }
 }
+
+export const POST = oxourWrapRouteHandler(
+  { method: 'POST', parameterizedRoute: '/api/cron/trip-reminders' },
+  'admin',
+  tripRemindersPOST,
+)

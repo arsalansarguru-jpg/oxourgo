@@ -244,6 +244,7 @@ export type Database = {
           storage_path: string
           status: string
           reviewer_note: string | null
+          rejection_reason: string | null
           reviewed_at: string | null
           reviewed_by: string | null
           byte_size: number | null
@@ -259,6 +260,7 @@ export type Database = {
           storage_path: string
           status?: string
           reviewer_note?: string | null
+          rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           byte_size?: number | null
@@ -274,6 +276,7 @@ export type Database = {
           storage_path?: string
           status?: string
           reviewer_note?: string | null
+          rejection_reason?: string | null
           reviewed_at?: string | null
           reviewed_by?: string | null
           byte_size?: number | null

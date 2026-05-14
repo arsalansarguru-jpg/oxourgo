@@ -70,6 +70,20 @@ export function KycCenterClient({
     return { steps, pct: Math.round((doneCount / steps.length) * 100) }
   }, [latestMap, initialProfile.full_name, initialProfile.phone])
 
+  const aggregateIssue = useMemo(() => {
+    const st = initialProfile.kyc_status
+    if (st !== 'rejected' && st !== 'resubmission_required') return null
+    for (const d of docs) {
+      if (d.status === 'rejected' || d.status === 'resubmission_required') {
+        const msg = d.rejection_reason?.trim() || (d.status === 'rejected' ? d.reviewer_note?.trim() : null)
+        if (msg) return msg
+      }
+    }
+    return st === 'resubmission_required'
+      ? 'We need an updated document. Please upload a clearer file from the tiles below.'
+      : 'We could not approve your documents yet. Please review the notes on each tile and upload again.'
+  }, [docs, initialProfile.kyc_status])
+
   if (!supabase || !projectUrl || !anonKey) {
     return (
       <DataLoadErrorPanel
@@ -80,6 +94,13 @@ export function KycCenterClient({
   }
 
   const latestForTile = (t: KycDocumentTypeId) => latestMap.get(t) as KycDocumentRow | undefined
+
+  const submissionBadgeVariant = (status: string) => {
+    if (status === 'approved') return 'success' as const
+    if (status === 'rejected') return 'muted' as const
+    if (status === 'resubmission_required') return 'electric' as const
+    return 'electric' as const
+  }
 
   return (
     <div className="min-w-0 space-y-8">
@@ -104,6 +125,19 @@ export function KycCenterClient({
           </div>
         </div>
       </header>
+
+      {aggregateIssue ? (
+        <div
+          className={cn(
+            cardSurfaceBase,
+            'rounded-2xl border border-amber-400/25 bg-gradient-to-br from-amber-500/[0.08] to-transparent p-4 sm:rounded-3xl sm:p-5',
+          )}
+          role="status"
+        >
+          <p className="text-xs font-semibold uppercase tracking-wide text-amber-100/95">Verification update</p>
+          <p className="mt-2 text-sm leading-relaxed text-soft">{aggregateIssue}</p>
+        </div>
+      ) : null}
 
       <div
         className={cn(
@@ -206,9 +240,7 @@ export function KycCenterClient({
                     {d.reviewed_at ? ` · Reviewed ${new Date(d.reviewed_at).toLocaleString()}` : null}
                   </p>
                 </div>
-                <Badge variant={d.status === 'approved' ? 'success' : d.status === 'rejected' ? 'muted' : 'electric'}>
-                  {d.status}
-                </Badge>
+                <Badge variant={submissionBadgeVariant(d.status)}>{d.status.replace(/_/g, ' ')}</Badge>
               </li>
             ))}
           </ul>

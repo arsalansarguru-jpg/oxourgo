@@ -16,6 +16,7 @@ const styles: Record<string, string> = {
   reviewing: 'border-violet-400/35 bg-violet-500/10 text-violet-100',
   approved: 'border-emerald-400/35 bg-emerald-500/10 text-emerald',
   rejected: 'border-red-400/40 bg-red-500/10 text-red-200',
+  resubmission_required: 'border-amber-400/40 bg-amber-500/12 text-amber-100',
   available: 'border-emerald-400/35 bg-emerald-500/10 text-emerald',
   unavailable: 'border-stroke-strong bg-fill-glass-strong text-muted',
   maintenance: 'border-amber-400/35 bg-amber-500/10 text-amber-100',

@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { AlertTriangle, CalendarRange, CheckCircle2, Loader2, MapPin, Sparkles } from 'lucide-react'
 
 import { createBookingAction } from '@/app/(main)/(public)/booking/[id]/actions'
+import { captureClientEvent } from '@/lib/analytics/capture-client'
+import { BOOKING_FUNNEL, POSTHOG_EVENTS } from '@/lib/analytics/posthog-events'
 import { customerBookingFailureCopy } from '@/lib/booking/customer-booking-failure-copy'
 import { SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
 import { safeAvailabilityReason } from '@/lib/booking/safe-availability-reason'
@@ -27,6 +29,13 @@ type AvailState =
   | { status: 'checking' }
   | { status: 'ready'; available: boolean; reason?: string }
   | { status: 'error'; message: string }
+
+function totalRupeesBand(total: number): string {
+  if (total < 50_000) return 'lt_50k'
+  if (total < 100_000) return '50k_100k'
+  if (total < 200_000) return '100k_200k'
+  return 'gte_200k'
+}
 
 export type CarDetailBookingPanelProps = {
   car: Car
@@ -144,6 +153,13 @@ export function CarDetailBookingPanel({ car, isLoggedIn, kycApproved, kycStatus 
       return
     }
 
+    captureClientEvent(POSTHOG_EVENTS.bookingAttempt, {
+      funnel: BOOKING_FUNNEL,
+      step: 'booking_attempt',
+      vehicle_id: car.id,
+      rental_days: dates.ok ? dates.rentalDays : undefined,
+    })
+
     startTransition(async () => {
       const result = await createBookingAction({
         carId: car.id,
@@ -157,6 +173,13 @@ export function CarDetailBookingPanel({ car, isLoggedIn, kycApproved, kycStatus 
         setFormError(customerBookingFailureCopy(result.code))
         return
       }
+      captureClientEvent(POSTHOG_EVENTS.bookingCompleted, {
+        funnel: BOOKING_FUNNEL,
+        step: 'booking_complete',
+        vehicle_id: car.id,
+        rental_days: quote.rentalDays,
+        total_band: totalRupeesBand(quote.totalRupees),
+      })
       setSubmitUi('success')
       setFormError(null)
       window.setTimeout(() => {

@@ -127,16 +127,29 @@ export async function onKycDecision(
   userId: string,
   documentId: string,
   documentType: string,
-  status: 'approved' | 'rejected',
-  note?: string | null,
+  status: 'approved' | 'rejected' | 'resubmission_required',
+  customerNote?: string | null,
 ): Promise<void> {
+  const label = documentType.replace(/_/g, ' ')
   if (status === 'approved') {
     await notifyCustomer({
       userId,
       type: 'kyc_approved',
       title: 'KYC approved',
-      body: `Your ${documentType.replace(/_/g, ' ')} document was approved.`,
+      body: `Your ${label} document was approved.`,
       metadata: { kyc_document_id: documentId, document_type: documentType },
+    })
+    return
+  }
+  if (status === 'resubmission_required') {
+    await notifyCustomer({
+      userId,
+      type: 'kyc_rejected',
+      title: 'KYC resubmission requested',
+      body: customerNote?.trim()
+        ? `Please upload a new ${label} document. ${customerNote.trim()}`
+        : `Please upload a new ${label} document with the corrections we need.`,
+      metadata: { kyc_document_id: documentId, document_type: documentType, kyc_decision: 'resubmission_required' },
     })
     return
   }
@@ -144,9 +157,9 @@ export async function onKycDecision(
     userId,
     type: 'kyc_rejected',
     title: 'KYC needs attention',
-    body: note?.trim()
-      ? `Your ${documentType.replace(/_/g, ' ')} document was rejected: ${note.trim()}`
-      : `Your ${documentType.replace(/_/g, ' ')} document was rejected. Please upload a clearer copy.`,
+    body: customerNote?.trim()
+      ? `Your ${label} document was rejected: ${customerNote.trim()}`
+      : `Your ${label} document was rejected. Please upload a clearer copy.`,
     metadata: { kyc_document_id: documentId, document_type: documentType },
   })
 }

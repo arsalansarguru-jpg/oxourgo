@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 
+import { captureRouteException } from '@/lib/monitoring/capture-route-exception'
+import { oxourWrapRouteHandler } from '@/lib/monitoring/oxour-wrap-route-handler'
 import { parseBookingPdfDocKind } from '@/lib/pdf/booking-payload'
 import { bookingPdfFilename } from '@/lib/pdf/booking-pdf-filename'
 import { loadCustomerBookingPdfPayload } from '@/lib/pdf/load-booking-payload-for-pdf'
@@ -9,7 +11,7 @@ import { createClient } from '@/lib/supabase/server'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+async function customerBookingPdfGET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const url = new URL(req.url)
   const doc = parseBookingPdfDocKind(url.searchParams.get('doc'))
@@ -42,9 +44,16 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     })
   } catch (e) {
     console.error('[api/bookings/pdf]', e)
+    captureRouteException('booking', 'GET /api/bookings/[id]/pdf', e)
     return NextResponse.json(
       { ok: false, code: 'pdf_failed', message: 'Unable to generate PDF. Please try again.' },
       { status: 500 },
     )
   }
 }
+
+export const GET = oxourWrapRouteHandler(
+  { method: 'GET', parameterizedRoute: '/api/bookings/[id]/pdf' },
+  'booking',
+  customerBookingPdfGET,
+)

@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight, Search, SlidersHorizontal } from 'lucide-react'
 
+import { captureClientEvent } from '@/lib/analytics/capture-client'
+import { BOOKING_FUNNEL, POSTHOG_EVENTS } from '@/lib/analytics/posthog-events'
 import { EmptyFleet } from '@/components/fleet/empty-fleet'
 import { FleetCarCard } from '@/components/fleet/fleet-car-card'
 import { FleetFilterDrawer } from '@/components/fleet/fleet-filter-drawer'
@@ -110,6 +112,24 @@ export function FleetClientView({
   const hasSearch = debouncedQuery.trim().length > 0
   const refinementCount = activeFilterCount + (hasSearch ? 1 : 0)
   const isSearchDebouncing = searchInput.trim() !== debouncedQuery.trim()
+
+  useEffect(() => {
+    if (isSearchDebouncing) return
+    const handle = window.setTimeout(() => {
+      const len = debouncedQuery.trim().length
+      const textBucket = len === 0 ? 'none' : len <= 8 ? 'short' : len <= 20 ? 'medium' : 'long'
+      captureClientEvent(POSTHOG_EVENTS.fleetSearch, {
+        funnel: BOOKING_FUNNEL,
+        step: 'fleet_search',
+        text_bucket: textBucket,
+        has_text: len > 0,
+        filter_count: activeFilters.size,
+        page: currentPage,
+        has_date_context: Boolean(pickup || from || to),
+      })
+    }, 360)
+    return () => window.clearTimeout(handle)
+  }, [activeFilters, currentPage, debouncedQuery, from, isSearchDebouncing, pickup, to])
 
   const clearAllFilters = () => {
     setActiveFilters(new Set())

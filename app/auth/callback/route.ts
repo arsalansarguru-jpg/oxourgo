@@ -1,6 +1,8 @@
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
+import { captureServerPosthogEvent } from '@/lib/analytics/posthog-server'
+import { POSTHOG_EVENTS } from '@/lib/analytics/posthog-events'
 import { safeNextPath } from '@/lib/auth/safe-next-path'
 import { readSupabasePublicEnv } from '@/lib/env/supabase-public'
 import { createClient } from '@/lib/supabase/server'
@@ -32,6 +34,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(
         new URL(`/login?error=${encodeURIComponent('Sign-in failed. Please try again.')}`, origin),
       )
+    }
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (user) {
+      await captureServerPosthogEvent({
+        distinctId: user.id,
+        event: POSTHOG_EVENTS.loginCompleted,
+        properties: { method: 'oauth_or_magic_link' },
+      })
     }
   }
 

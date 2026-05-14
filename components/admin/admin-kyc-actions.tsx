@@ -9,6 +9,7 @@ import { AdminStatusPill } from '@/components/admin/admin-status-pill'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 
+/** Compact row actions for legacy queues; prefer the dossier review screen for full workflow. */
 export function AdminKycActions({ row }: { row: KycQueueRow }) {
   const router = useRouter()
   const [pending, start] = useTransition()
@@ -25,7 +26,7 @@ export function AdminKycActions({ row }: { row: KycQueueRow }) {
         disabled={pending}
         onClick={() => {
           start(async () => {
-            const r = await adminGetKycSignedUrlAction(row.id)
+            const r = await adminGetKycSignedUrlAction(row.id, 900)
             if (!r.ok) {
               setMsg(r.message)
               return
@@ -48,6 +49,7 @@ export function AdminKycActions({ row }: { row: KycQueueRow }) {
               documentId: row.id,
               status: 'reviewing',
               reviewer_note: null,
+              rejection_reason: null,
             })
             if (!r.ok) setMsg(r.message)
             router.refresh()
@@ -65,6 +67,7 @@ export function AdminKycActions({ row }: { row: KycQueueRow }) {
               documentId: row.id,
               status: 'approved',
               reviewer_note: String(fd.get('note') ?? '') || null,
+              rejection_reason: null,
             })
             if (!r.ok) setMsg(r.message)
             router.refresh()
@@ -77,13 +80,14 @@ export function AdminKycActions({ row }: { row: KycQueueRow }) {
         </Button>
       </form>
       <form
-        className="flex flex-wrap items-end gap-2"
+        className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end"
         action={(fd) => {
           setMsg(null)
           start(async () => {
             const r = await adminSetKycDocumentStatusAction({
               documentId: row.id,
               status: 'rejected',
+              rejection_reason: String(fd.get('reason') ?? '') || null,
               reviewer_note: String(fd.get('note') ?? '') || null,
             })
             if (!r.ok) setMsg(r.message)
@@ -91,9 +95,32 @@ export function AdminKycActions({ row }: { row: KycQueueRow }) {
           })
         }}
       >
-        <Input name="note" placeholder="Rejection reason" className="min-h-10 max-w-xs" required />
+        <Input name="reason" placeholder="Customer-visible reason (required)" className="min-h-10 max-w-xs" required />
+        <Input name="note" placeholder="Internal note (optional)" className="min-h-10 max-w-xs" />
         <Button type="submit" variant="danger" size="sm" disabled={pending}>
           Reject
+        </Button>
+      </form>
+      <form
+        className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-end"
+        action={(fd) => {
+          setMsg(null)
+          start(async () => {
+            const r = await adminSetKycDocumentStatusAction({
+              documentId: row.id,
+              status: 'resubmission_required',
+              rejection_reason: String(fd.get('reason') ?? '') || null,
+              reviewer_note: String(fd.get('note') ?? '') || null,
+            })
+            if (!r.ok) setMsg(r.message)
+            router.refresh()
+          })
+        }}
+      >
+        <Input name="reason" placeholder="What to fix (required)" className="min-h-10 max-w-xs" required />
+        <Input name="note" placeholder="Internal note (optional)" className="min-h-10 max-w-xs" />
+        <Button type="submit" variant="secondary" size="sm" disabled={pending}>
+          Resubmit
         </Button>
       </form>
       {msg ? <p className="w-full text-xs text-red-300">{msg}</p> : null}

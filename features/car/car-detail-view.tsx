@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ChevronDown, Shield } from 'lucide-react'
 
@@ -22,6 +22,8 @@ import {
   cardSurfaceTransition,
 } from '@/components/ui/card-tokens'
 import { CarDetailBookingPanel } from '@/components/car/car-detail-booking-panel'
+import { captureClientEvent } from '@/lib/analytics/capture-client'
+import { BOOKING_FUNNEL, POSTHOG_EVENTS } from '@/lib/analytics/posthog-events'
 import { ReviewBadge } from '@/components/marketing/review-badge'
 
 type CarDetailViewProps = {
@@ -35,6 +37,19 @@ export function CarDetailView({ car, isLoggedIn, kycApproved, kycStatus }: CarDe
   const [activeImage, setActiveImage] = useState(0)
   const [openFaq, setOpenFaq] = useState<string | null>(carDetailFaqs[0]?.id ?? null)
   const bookingAnchorRef = useRef<HTMLDivElement>(null)
+  const openedTracked = useRef(false)
+
+  useEffect(() => {
+    if (openedTracked.current) return
+    openedTracked.current = true
+    captureClientEvent(POSTHOG_EVENTS.vehicleDetailOpened, {
+      funnel: BOOKING_FUNNEL,
+      step: 'vehicle_detail',
+      vehicle_id: car.id,
+      category: car.category,
+      status: car.status,
+    })
+  }, [car.category, car.id, car.status])
 
   const reviews = useMemo(() => carReviews.filter((r) => r.carId === car.id), [car.id])
 

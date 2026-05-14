@@ -1,6 +1,6 @@
 /** Pure helpers: derive profile KYC lifecycle from document rows (latest per type). */
 
-export type KycLifecycleStatus = 'not_started' | 'pending' | 'approved' | 'rejected'
+export type KycLifecycleStatus = 'not_started' | 'pending' | 'approved' | 'rejected' | 'resubmission_required'
 
 export type KycDocMinimal = { document_type: string; status: string; created_at: string }
 
@@ -13,14 +13,19 @@ export function pickLatestDocPerType(docs: KycDocMinimal[]): Map<string, KycDocM
   return map
 }
 
+function isPendingLike(status?: string): boolean {
+  return status === 'pending' || status === 'reviewing'
+}
+
 /** Govt ID slot: Aadhaar or PAN satisfies the gate once either is approved. */
-function idGate(latest: Map<string, KycDocMinimal>): 'ok' | 'rejected' | 'pending' | 'missing' {
+function idGate(latest: Map<string, KycDocMinimal>): 'ok' | 'rejected' | 'pending' | 'missing' | 'resubmit' {
   const a = latest.get('aadhaar')
   const p = latest.get('pan')
   const hasA = Boolean(a)
   const hasP = Boolean(p)
   if (!hasA && !hasP) return 'missing'
   if (a?.status === 'approved' || p?.status === 'approved') return 'ok'
+  if (a?.status === 'resubmission_required' || p?.status === 'resubmission_required') return 'resubmit'
   if (hasA && hasP) {
     if (a?.status === 'rejected' && p?.status === 'rejected') return 'rejected'
     return 'pending'
@@ -38,10 +43,24 @@ export function computeKycLifecycleFromDocuments(docs: KycDocMinimal[]): KycLife
   const selfie = latest.get('selfie')
   const idg = idGate(latest)
 
-  if (license?.status === 'rejected' || selfie?.status === 'rejected') return 'rejected'
-  if (idg === 'rejected') return 'rejected'
-
   if (license?.status === 'approved' && selfie?.status === 'approved' && idg === 'ok') return 'approved'
+
+  if (idg === 'missing') return 'pending'
+
+  if (isPendingLike(license?.status) || isPendingLike(selfie?.status) || idg === 'pending') {
+    return 'pending'
+  }
+
+  if (
+    license?.status === 'resubmission_required' ||
+    selfie?.status === 'resubmission_required' ||
+    idg === 'resubmit'
+  ) {
+    return 'resubmission_required'
+  }
+
+  if (license?.status === 'rejected' || selfie?.status === 'rejected' || idg === 'rejected') return 'rejected'
+
   return 'pending'
 }
 
