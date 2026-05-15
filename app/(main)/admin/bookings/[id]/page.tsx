@@ -9,6 +9,7 @@ import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 import { AdminStatusPill } from '@/components/admin/admin-status-pill'
 import { adminGetBooking, adminGetBookingCustomerProfile } from '@/lib/admin/data/bookings'
 import { adminGetBookingInspectionBundle } from '@/lib/admin/data/booking-inspection'
+import { adminGetBookingFinancialSummary } from '@/lib/admin/data/financials'
 import { adminListPaymentEventsForBooking } from '@/lib/admin/data/payments'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatInr } from '@/lib/format'
@@ -36,7 +37,7 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
   }
   if (!booking) notFound()
 
-  const [customerEmail, customerProfile, paymentTimeline, inspection] = await Promise.all([
+  const [customerEmail, customerProfile, paymentTimeline, inspection, financialSummary] = await Promise.all([
     (async () => {
       try {
         const admin = createAdminClient()
@@ -49,6 +50,7 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
     adminGetBookingCustomerProfile(booking.user_id),
     adminListPaymentEventsForBooking(id),
     adminGetBookingInspectionBundle(id, booking.customer_handover_signature_path),
+    adminGetBookingFinancialSummary(id),
   ])
 
   const vehJoin = booking.vehicles
@@ -212,7 +214,7 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
           </AdminCardContent>
         </AdminCard>
 
-        <AdminBookingOpsPanel booking={booking} inspection={inspection} />
+        <AdminBookingOpsPanel booking={booking} inspection={inspection} financialSummary={financialSummary} />
       </div>
 
       <AdminCard>

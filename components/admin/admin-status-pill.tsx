@@ -30,6 +30,8 @@ const styles: Record<string, string> = {
   deposit_release: 'border-stroke-strong bg-fill-glass-strong text-muted',
   posted: 'border-emerald-400/35 bg-emerald-500/10 text-emerald',
   void: 'border-stroke-strong bg-fill-glass-strong text-muted',
+  partially_refunded: 'border-sky-400/35 bg-sky-500/10 text-sky-100',
+  withheld: 'border-red-400/35 bg-red-500/10 text-red-200',
 }
 
 export function AdminStatusPill({ value }: { value: string }) {

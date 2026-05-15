@@ -35,7 +35,7 @@ function asChecklistRecord(j: Json | null | undefined): Record<string, boolean> 
   return out
 }
 
-async function insertInspectionEvent(
+export async function insertInspectionEvent(
   admin: ReturnType<typeof createAdminClient>,
   input: { bookingId: string; eventType: string; payload?: Json; actorUserId: string },
 ) {
@@ -199,6 +199,13 @@ export async function adminSaveReturnInspectionAction(input: {
       entityType: 'booking',
       entityId: input.bookingId,
     })
+
+    if (input.markCompleted) {
+      const { adminSyncFinancialsAfterReturnAction } = await import(
+        '@/lib/admin/actions/deposit-financial-actions'
+      )
+      await adminSyncFinancialsAfterReturnAction(input.bookingId)
+    }
 
     revalidatePath(`/admin/bookings/${input.bookingId}`)
     revalidatePath('/dashboard/bookings')
@@ -379,64 +386,21 @@ export async function adminApplyBookingPenaltiesAction(input: {
   penaltyLateRupees: number
   penaltyExtraKmRupees: number
   depositPenaltyTotalRupees: number
+  penaltyFuelRupees?: number
+  penaltyCleaningRupees?: number
+  penaltyTrafficRupees?: number
+  manualOverride?: boolean
 }): Promise<AdminActionResult> {
-  return runInstrumentedServerAction('adminApplyBookingPenaltiesAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
-    const admin = createAdminClient()
-
-    const nums = [
-      input.penaltyDamageRupees,
-      input.penaltyLateRupees,
-      input.penaltyExtraKmRupees,
-      input.depositPenaltyTotalRupees,
-    ]
-    for (const n of nums) {
-      if (!Number.isFinite(n) || n < 0 || n > 1_000_000_000) {
-        return { ok: false, message: 'Invalid penalty amounts.' }
-      }
-    }
-
-    const { data: row, error: fetchErr } = await admin.from('bookings').select('booking_status').eq('id', input.bookingId).single()
-    if (fetchErr || !row) return { ok: false, message: 'Booking not found.' }
-    if (row.booking_status === 'cancelled') {
-      return { ok: false, message: 'Penalties cannot be applied to a cancelled booking.' }
-    }
-
-    const ts = nowIso()
-    const { error } = await admin
-      .from('bookings')
-      .update({
-        penalty_damage_rupees: Math.round(input.penaltyDamageRupees),
-        penalty_late_rupees: Math.round(input.penaltyLateRupees),
-        penalty_extra_km_rupees: Math.round(input.penaltyExtraKmRupees),
-        deposit_penalty_total_rupees: Math.round(input.depositPenaltyTotalRupees),
-        updated_at: ts,
-      })
-      .eq('id', input.bookingId)
-
-    if (error) return adminActionDbFailed('adminApplyBookingPenaltiesAction', error)
-
-    await insertInspectionEvent(admin, {
-      bookingId: input.bookingId,
-      eventType: 'penalty_updated',
-      payload: {
-        penalty_damage_rupees: Math.round(input.penaltyDamageRupees),
-        penalty_late_rupees: Math.round(input.penaltyLateRupees),
-        penalty_extra_km_rupees: Math.round(input.penaltyExtraKmRupees),
-        deposit_penalty_total_rupees: Math.round(input.depositPenaltyTotalRupees),
-      },
-      actorUserId: user.id,
-    })
-
-    await writeAdminAudit({
-      actorUserId: user.id,
-      action: 'booking.penalties',
-      entityType: 'booking',
-      entityId: input.bookingId,
-    })
-
-    revalidatePath(`/admin/bookings/${input.bookingId}`)
-    revalidatePath('/dashboard/bookings')
-    return { ok: true }
+  const { adminApplyBookingPenaltiesFullAction } = await import('@/lib/admin/actions/deposit-financial-actions')
+  return adminApplyBookingPenaltiesFullAction({
+    bookingId: input.bookingId,
+    penaltyLateRupees: input.penaltyLateRupees,
+    penaltyFuelRupees: input.penaltyFuelRupees ?? 0,
+    penaltyExtraKmRupees: input.penaltyExtraKmRupees,
+    penaltyCleaningRupees: input.penaltyCleaningRupees ?? 0,
+    penaltyDamageRupees: input.penaltyDamageRupees,
+    penaltyTrafficRupees: input.penaltyTrafficRupees ?? 0,
+    depositPenaltyTotalRupees: input.depositPenaltyTotalRupees,
+    manualOverride: input.manualOverride,
   })
 }

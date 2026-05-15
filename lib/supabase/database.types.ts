@@ -160,6 +160,18 @@ export type Database = {
           deposit_held_rupees: number | null
           deposit_refunded_at: string | null
           deposit_refunded_rupees: number | null
+          deposit_amount: number | null
+          deposit_status: string
+          refund_amount: number
+          penalty_total: number
+          deductions: Json
+          refund_processed_at: string | null
+          penalty_fuel_rupees: number
+          penalty_cleaning_rupees: number
+          penalty_traffic_rupees: number
+          penalty_notes: Json
+          financial_manual_override: boolean
+          deposit_received_at: string | null
           pickup_checklist: Json
           return_checklist: Json
           pickup_fuel_level: number | null
@@ -213,6 +225,18 @@ export type Database = {
           deposit_held_rupees?: number | null
           deposit_refunded_at?: string | null
           deposit_refunded_rupees?: number | null
+          deposit_amount?: number | null
+          deposit_status?: string
+          refund_amount?: number
+          penalty_total?: number
+          deductions?: Json
+          refund_processed_at?: string | null
+          penalty_fuel_rupees?: number
+          penalty_cleaning_rupees?: number
+          penalty_traffic_rupees?: number
+          penalty_notes?: Json
+          financial_manual_override?: boolean
+          deposit_received_at?: string | null
           pickup_checklist?: Json
           return_checklist?: Json
           pickup_fuel_level?: number | null
@@ -266,6 +290,18 @@ export type Database = {
           deposit_held_rupees?: number | null
           deposit_refunded_at?: string | null
           deposit_refunded_rupees?: number | null
+          deposit_amount?: number | null
+          deposit_status?: string
+          refund_amount?: number
+          penalty_total?: number
+          deductions?: Json
+          refund_processed_at?: string | null
+          penalty_fuel_rupees?: number
+          penalty_cleaning_rupees?: number
+          penalty_traffic_rupees?: number
+          penalty_notes?: Json
+          financial_manual_override?: boolean
+          deposit_received_at?: string | null
           pickup_checklist?: Json
           return_checklist?: Json
           pickup_fuel_level?: number | null

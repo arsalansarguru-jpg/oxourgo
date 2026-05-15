@@ -285,8 +285,12 @@ export async function adminMarkReturnedAction(bookingId: string): Promise<AdminA
       entityId: bookingId,
     })
 
+    const { adminSyncFinancialsAfterReturnAction } = await import('@/lib/admin/actions/deposit-financial-actions')
+    await adminSyncFinancialsAfterReturnAction(bookingId)
+
     revalidatePath('/admin/bookings')
     revalidatePath(`/admin/bookings/${bookingId}`)
+    revalidatePath('/admin/financials')
     revalidatePath('/dashboard')
     revalidatePath('/dashboard/bookings')
     return { ok: true }

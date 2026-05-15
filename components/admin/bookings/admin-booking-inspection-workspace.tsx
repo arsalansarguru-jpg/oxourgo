@@ -6,7 +6,6 @@ import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from
 
 import type { AdminInspectionBundle } from '@/lib/admin/data/booking-inspection'
 import {
-  adminApplyBookingPenaltiesAction,
   adminSavePickupInspectionAction,
   adminSaveReturnInspectionAction,
   adminUploadBookingInspectionPhotoAction,
@@ -184,7 +183,13 @@ export function AdminBookingInspectionWorkspace({
   const canEditPickup = booking.booking_status === 'pending_payment' || booking.booking_status === 'confirmed'
 
   const penaltiesTotal =
-    (booking.penalty_damage_rupees ?? 0) + (booking.penalty_late_rupees ?? 0) + (booking.penalty_extra_km_rupees ?? 0)
+    booking.penalty_total ??
+    (booking.penalty_damage_rupees ?? 0) +
+      (booking.penalty_late_rupees ?? 0) +
+      (booking.penalty_extra_km_rupees ?? 0) +
+      (booking.penalty_fuel_rupees ?? 0) +
+      (booking.penalty_cleaning_rupees ?? 0) +
+      (booking.penalty_traffic_rupees ?? 0)
   const outstandingPenalties =
     penaltiesTotal > 0 && booking.booking_status !== 'completed' && booking.booking_status !== 'cancelled'
 
@@ -613,40 +618,26 @@ export function AdminBookingInspectionWorkspace({
         ) : null}
 
         {tab === 'penalties' ? (
-          <form
-            className="grid max-w-lg gap-4"
-            onSubmit={(e) => {
-              e.preventDefault()
-              const fd = new FormData(e.currentTarget)
-              run(async () =>
-                adminApplyBookingPenaltiesAction({
-                  bookingId: booking.id,
-                  penaltyDamageRupees: Number(fd.get('pd') ?? 0),
-                  penaltyLateRupees: Number(fd.get('pl') ?? 0),
-                  penaltyExtraKmRupees: Number(fd.get('pk') ?? 0),
-                  depositPenaltyTotalRupees: Number(fd.get('dd') ?? 0),
-                }),
-              )
-            }}
-          >
-            <Input name="pd" type="number" min={0} label="Damage charges (₹)" defaultValue={booking.penalty_damage_rupees ?? 0} />
-            <Input name="pl" type="number" min={0} label="Late return (₹)" defaultValue={booking.penalty_late_rupees ?? 0} />
-            <Input name="pk" type="number" min={0} label="Extra km (₹)" defaultValue={booking.penalty_extra_km_rupees ?? 0} />
-            <Input
-              name="dd"
-              type="number"
-              min={0}
-              label="Deposit applied to penalties (₹)"
-              defaultValue={booking.deposit_penalty_total_rupees ?? 0}
-            />
-            <p className="text-xs text-muted">
-              Total penalties:{' '}
-              <span className="font-semibold text-soft">{formatInr(penaltiesTotal)}</span>. Does not post rental payment lines.
+          <div className="max-w-lg space-y-3 text-sm text-muted">
+            <p>
+              Total penalties: <span className="font-semibold text-soft">{formatInr(penaltiesTotal)}</span>
+              {booking.deposit_penalty_total_rupees ? (
+                <>
+                  {' '}
+                  · Deposit applied:{' '}
+                  <span className="font-semibold text-soft">{formatInr(booking.deposit_penalty_total_rupees)}</span>
+                </>
+              ) : null}
             </p>
-            <Button type="submit" variant="secondary" disabled={pending}>
-              Save penalties
-            </Button>
-          </form>
+            <p className="text-xs leading-relaxed">
+              Use the <span className="font-medium text-soft">Financial settlement</span> panel below to edit all six
+              penalty categories, mark deposit received, and process refunds. Rental payment lines are not affected.
+            </p>
+            <p className="text-xs">
+              Deposit status:{' '}
+              <span className="font-medium uppercase tracking-wide text-soft">{booking.deposit_status ?? 'pending'}</span>
+            </p>
+          </div>
         ) : null}
 
         {tab === 'timeline' ? (

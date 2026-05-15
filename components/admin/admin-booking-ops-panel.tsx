@@ -10,7 +10,6 @@ import {
   adminMarkHandedOverAction,
   adminMarkReturnedAction,
   adminRejectBookingAction,
-  adminSetBookingDepositTrackingAction,
   adminSetBookingInternalNotesAction,
   adminSetBookingPaymentStatusAction,
   adminSetBookingStatusAction,
@@ -30,14 +29,18 @@ import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 import { AdminBookingInspectionWorkspace } from '@/components/admin/bookings/admin-booking-inspection-workspace'
+import { AdminBookingFinancialPanel } from '@/components/admin/financials/admin-booking-financial-panel'
 import type { AdminInspectionBundle } from '@/lib/admin/data/booking-inspection'
+import type { AdminBookingFinancialSummary } from '@/lib/admin/data/financials'
 
 export function AdminBookingOpsPanel({
   booking,
   inspection,
+  financialSummary,
 }: {
   booking: BookingWithCar
   inspection: AdminInspectionBundle
+  financialSummary?: AdminBookingFinancialSummary | null
 }) {
   const router = useRouter()
   const [pending, start] = useTransition()
@@ -115,56 +118,7 @@ export function AdminBookingOpsPanel({
 
       <AdminBookingInspectionWorkspace booking={booking} inspection={inspection} />
 
-      <AdminCard>
-        <AdminCardContent className="space-y-4">
-          <h2 className="text-lg font-semibold text-soft">Refundable deposit tracking</h2>
-          <form
-            className="grid gap-3 sm:grid-cols-2"
-            onSubmit={(e) => {
-              e.preventDefault()
-              const fd = new FormData(e.currentTarget)
-              const held = fd.get('held')?.toString().trim()
-              const refundedAt = fd.get('refunded_at')?.toString().trim()
-              const refunded = fd.get('refunded')?.toString().trim()
-              run(async () =>
-                adminSetBookingDepositTrackingAction({
-                  bookingId: booking.id,
-                  depositHeldRupees: held === '' ? null : Number(held),
-                  depositRefundedAt: refundedAt === '' ? null : refundedAt || null,
-                  depositRefundedRupees: refunded === '' ? null : Number(refunded),
-                }),
-              )
-            }}
-          >
-            <Input
-              name="held"
-              type="number"
-              label="Deposit held (₹)"
-              defaultValue={booking.deposit_held_rupees ?? ''}
-              className="min-h-10"
-            />
-            <Input
-              name="refunded_at"
-              label="Refunded at (ISO)"
-              placeholder="2026-01-15T10:00:00.000Z"
-              defaultValue={booking.deposit_refunded_at ?? ''}
-              className="min-h-10"
-            />
-            <Input
-              name="refunded"
-              type="number"
-              label="Amount refunded (₹)"
-              defaultValue={booking.deposit_refunded_rupees ?? ''}
-              className="min-h-10"
-            />
-            <div className="flex items-end">
-              <Button type="submit" variant="secondary" disabled={pending}>
-                Save deposit fields
-              </Button>
-            </div>
-          </form>
-        </AdminCardContent>
-      </AdminCard>
+      <AdminBookingFinancialPanel booking={booking} summary={financialSummary} />
 
       <AdminCard>
         <AdminCardContent className="space-y-4">

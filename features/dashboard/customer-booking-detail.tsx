@@ -34,6 +34,7 @@ import {
 import { bookingPaymentBreakdown, formatPaymentMethodLabel, payAtPickupInstructions } from '@/lib/payments/booking-payment'
 import { deriveCustomerBookingUiStatus, type CustomerBookingUiStatus } from '@/lib/customer/derive-booking-ui-status'
 import { getPublicSiteUrl } from '@/lib/env/site-url'
+import { CustomerBookingFinancialSection } from '@/features/dashboard/customer-booking-financial-section'
 import { formatInr } from '@/lib/format'
 import type { BookingWithCar } from '@/lib/supabase/database.types'
 import { cn } from '@/lib/utils/cn'
@@ -145,7 +146,13 @@ export function CustomerBookingDetail({
   const pickupCondition = parseConditionNotes(row.pickup_condition_notes)
   const returnCondition = parseConditionNotes(row.return_condition_notes)
   const penaltiesTotal =
-    (row.penalty_damage_rupees ?? 0) + (row.penalty_late_rupees ?? 0) + (row.penalty_extra_km_rupees ?? 0)
+    row.penalty_total ??
+    (row.penalty_damage_rupees ?? 0) +
+      (row.penalty_late_rupees ?? 0) +
+      (row.penalty_extra_km_rupees ?? 0) +
+      (row.penalty_fuel_rupees ?? 0) +
+      (row.penalty_cleaning_rupees ?? 0) +
+      (row.penalty_traffic_rupees ?? 0)
   const siteBase = getPublicSiteUrl().replace(/\/+$/, '')
   const whatsAppPrefilled = buildWhatsAppPrefilledUrl(
     bookingSupportPrefilledMessage({
@@ -370,37 +377,7 @@ export function CustomerBookingDetail({
                 </dl>
               ) : null}
 
-              {penaltiesTotal > 0 || (row.deposit_penalty_total_rupees ?? 0) > 0 ? (
-                <div className="mt-6 rounded-2xl border border-amber-400/20 bg-amber-500/[0.06] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-amber-100/90">Deposit &amp; charges</p>
-                  <ul className="mt-3 space-y-2 text-sm text-silver/95">
-                    {(row.penalty_damage_rupees ?? 0) > 0 ? (
-                      <li className="flex justify-between gap-4">
-                        <span>Damage</span>
-                        <span className="tabular-nums">{formatInr(row.penalty_damage_rupees ?? 0)}</span>
-                      </li>
-                    ) : null}
-                    {(row.penalty_late_rupees ?? 0) > 0 ? (
-                      <li className="flex justify-between gap-4">
-                        <span>Late return</span>
-                        <span className="tabular-nums">{formatInr(row.penalty_late_rupees ?? 0)}</span>
-                      </li>
-                    ) : null}
-                    {(row.penalty_extra_km_rupees ?? 0) > 0 ? (
-                      <li className="flex justify-between gap-4">
-                        <span>Extra distance</span>
-                        <span className="tabular-nums">{formatInr(row.penalty_extra_km_rupees ?? 0)}</span>
-                      </li>
-                    ) : null}
-                    {(row.deposit_penalty_total_rupees ?? 0) > 0 ? (
-                      <li className="flex justify-between gap-4 border-t border-stroke pt-2 font-medium text-soft">
-                        <span>Applied from deposit</span>
-                        <span className="tabular-nums">{formatInr(row.deposit_penalty_total_rupees ?? 0)}</span>
-                      </li>
-                    ) : null}
-                  </ul>
-                </div>
-              ) : null}
+              <CustomerBookingFinancialSection row={row} />
 
               {row.returned_at || row.return_fuel_level != null || row.return_odometer_km != null ? (
                 <div className="mt-6 border-t border-stroke pt-6">
