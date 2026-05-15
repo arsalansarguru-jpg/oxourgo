@@ -9,6 +9,9 @@ export const BUSINESS_PHONE_E164_DIGITS = '919833133343'
 /** Same line as voice; `wa.me` path segment. */
 export const BUSINESS_WHATSAPP_E164_DIGITS = '919833133343'
 
+/** Fixed concierge entry — requirements specify this exact origin for CTAs. */
+export const CONCIERGE_WHATSAPP_ME = 'https://wa.me/919833133343'
+
 export const BUSINESS_SUPPORT_EMAIL = 'hello@oxourgo.com'
 
 function digitsOnly(value: string): string {
@@ -67,7 +70,7 @@ export function getBusinessSupportEmail(): string {
   return override || BUSINESS_SUPPORT_EMAIL
 }
 
-const DEFAULT_WHATSAPP_PREFILL = "Hi Oxour Go, I'd like to book a luxury self-drive in Mumbai."
+const DEFAULT_WHATSAPP_PREFILL = 'Hi Oxour Go, I want to book a luxury self-drive in Mumbai.'
 
 export type VehicleInquiryContext = {
   vehicleName?: string | null
@@ -76,28 +79,45 @@ export type VehicleInquiryContext = {
   pickupHub?: string | null
 }
 
-/** Prefilled WhatsApp message for a specific vehicle / trip context. */
-export function getVehicleInquiryWhatsAppUrl(context?: VehicleInquiryContext): string {
-  const name = context?.vehicleName?.trim()
-  const parts = [
-    name
-      ? `Hi Oxour Go, I'm interested in the ${name} for a self-drive in Mumbai.`
-      : "Hi Oxour Go, I'm interested in a vehicle from your fleet for a self-drive in Mumbai.",
-  ]
-  if (context?.pickupHub?.trim()) parts.push(`Preferred hub: ${context.pickupHub.trim()}.`)
-  if (context?.tripFrom?.trim() && context?.tripTo?.trim()) {
-    parts.push(`Dates: ${context.tripFrom.trim()} to ${context.tripTo.trim()}.`)
+/** Prefilled booking message for concierge (vehicle + optional trip dates). */
+export function buildConciergeBookingPrefill(context?: VehicleInquiryContext): string {
+  const rawName = context?.vehicleName?.trim()
+  const displayName = rawName && rawName.length > 0 ? rawName : 'a vehicle from your fleet'
+  const from = context?.tripFrom?.trim()
+  const to = context?.tripTo?.trim()
+
+  let core: string
+  if (from && to) {
+    core = `Hi Oxour Go, I want to book the ${displayName} from ${from} to ${to}.`
+  } else if (from) {
+    core = `Hi Oxour Go, I want to book the ${displayName} from ${from}. Please help me choose a return date.`
+  } else if (rawName) {
+    core = `Hi Oxour Go, I want to book the ${rawName}. Please share available dates.`
+  } else {
+    core = DEFAULT_WHATSAPP_PREFILL
   }
-  parts.push('Please share availability and next steps.')
-  return getBusinessWhatsAppUrl(parts.join(' '))
+
+  const hub = context?.pickupHub?.trim()
+  if (hub) {
+    return `${core} Preferred hub: ${hub}.`
+  }
+  return core
 }
 
-/** Public WhatsApp deep link (`wa.me`). */
+/** Vehicle-aware concierge URL (`wa.me` + encoded prefill). */
+export function getVehicleInquiryWhatsAppUrl(context?: VehicleInquiryContext): string {
+  return getBusinessWhatsAppUrl(buildConciergeBookingPrefill(context))
+}
+
+/** Alias — booking CTAs on dashboards and marketing. */
+export function getConciergeBookingWhatsAppUrl(context?: VehicleInquiryContext): string {
+  return getVehicleInquiryWhatsAppUrl(context)
+}
+
+/** Public WhatsApp deep link (`wa.me`); always uses {@link CONCIERGE_WHATSAPP_ME}. */
 export function getBusinessWhatsAppUrl(prefillText?: string): string {
-  const d = getBusinessWhatsAppE164Digits()
-  const base = `https://wa.me/${d}`
-  const text = prefillText?.trim() || DEFAULT_WHATSAPP_PREFILL
-  return `${base}?text=${encodeURIComponent(text)}`
+  const text = (prefillText?.trim() || DEFAULT_WHATSAPP_PREFILL).slice(0, 480)
+  return `${CONCIERGE_WHATSAPP_ME}?text=${encodeURIComponent(text)}`
 }
 
 /** Stable snapshot for UI shells (footer, nav, metadata). */

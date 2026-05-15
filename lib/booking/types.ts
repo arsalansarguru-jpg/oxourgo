@@ -41,6 +41,7 @@ export type CreateBookingFailure = {
     | 'rpc_missing'
     | 'database'
     | 'kyc_required'
+    | 'concierge_only'
     | 'unknown'
   message: string
 }

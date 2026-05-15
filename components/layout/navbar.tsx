@@ -164,7 +164,7 @@ export function Navbar() {
               target="_blank"
               rel="noopener noreferrer"
               className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border border-stroke bg-fill-glass text-muted shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] transition-[border-color,background-color,color] hover:border-stroke-strong hover:bg-fill-glass-strong hover:text-soft md:inline-flex"
-              aria-label="WhatsApp concierge"
+              aria-label="Book on WhatsApp"
             >
               <MessageCircle className="h-[18px] w-[18px]" aria-hidden />
             </a>
@@ -218,7 +218,7 @@ export function Navbar() {
             <WhatsAppInquiryButton
               size="sm"
               className="hidden h-9 px-4 text-[13px] font-semibold shadow-[0_12px_36px_-16px_rgba(59,130,246,0.55)] hover:translate-y-0 active:translate-y-0 sm:inline-flex"
-              label="WhatsApp inquiry"
+              label="Book on WhatsApp"
             />
 
             <button
@@ -300,27 +300,15 @@ export function Navbar() {
                 </div>
 
                 <div className="mt-3">
-                  <Button
-                    variant="secondary"
+                  <WhatsAppInquiryButton
                     size="lg"
-                    href={BRAND.whatsapp}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="min-h-[3.25rem] w-full border-stroke-strong bg-fill-glass-strong text-[15px] font-medium hover:translate-y-0 hover:bg-fill-glass-strong active:translate-y-0"
+                    className="min-h-[3.25rem] w-full text-[15px] font-semibold shadow-[0_16px_48px_-20px_rgba(59,130,246,0.55)] hover:translate-y-0 active:translate-y-0"
+                    label="Book on WhatsApp"
                     onClick={() => setOpen(false)}
-                  >
-                    <MessageCircle className="h-[18px] w-[18px] text-electric" aria-hidden />
-                    WhatsApp
-                  </Button>
+                  />
                 </div>
 
                 <div className="mt-5 grid gap-3 border-t border-stroke pt-5">
-                  <WhatsAppInquiryButton
-                    size="lg"
-                    className="min-h-[3.25rem] w-full text-[15px] font-semibold shadow-[0_16px_48px_-20px_rgba(59,130,246,0.55)]"
-                    label="WhatsApp inquiry"
-                    onClick={() => setOpen(false)}
-                  />
                   {ready && user ? (
                     <Button
                       variant="outline"

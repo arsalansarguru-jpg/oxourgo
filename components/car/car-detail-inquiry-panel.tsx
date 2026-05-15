@@ -29,11 +29,11 @@ export function CarDetailInquiryPanel({ car, tripFrom, tripTo, tripPickup }: Car
       <div>
         <p className={cardEyebrow}>Concierge booking</p>
         <h2 id="inquiry-heading" className="mt-1 text-xl font-semibold tracking-[-0.03em] text-soft">
-          Inquire on WhatsApp
+          Book on WhatsApp
         </h2>
         <p className="mt-3 text-sm leading-relaxed text-muted">
-          Online checkout is being finalized. Our Mumbai team will confirm availability, pricing, and documents
-          over WhatsApp — usually within minutes during service hours.
+          Our concierge confirms availability, dates, and documents over WhatsApp — typically within minutes during service
+          hours.
         </p>
       </div>
 
@@ -55,9 +55,9 @@ export function CarDetailInquiryPanel({ car, tripFrom, tripTo, tripPickup }: Car
         </div>
       )}
 
-      <WhatsAppInquiryButton vehicle={vehicle} size="lg" className="w-full" label="Inquire on WhatsApp" />
+      <WhatsAppInquiryButton vehicle={vehicle} size="lg" className="w-full min-h-[3.25rem] sm:min-h-[3.125rem]" label="Book on WhatsApp" />
 
-      <Button size="lg" variant="secondary" className="w-full gap-2" href={`tel:${BRAND.phoneTel}`}>
+      <Button size="lg" variant="secondary" className="w-full min-h-[3.25rem] gap-2 sm:min-h-[3.125rem]" href={`tel:${BRAND.phoneTel}`}>
         <Phone className="h-4 w-4 shrink-0" aria-hidden />
         Call {BRAND.phoneDisplay}
       </Button>

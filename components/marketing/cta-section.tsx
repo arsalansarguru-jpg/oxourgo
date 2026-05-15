@@ -24,10 +24,10 @@ export function CTASection() {
               href={BRAND.whatsapp}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-full sm:w-auto"
+              className="w-full min-h-[3.25rem] sm:w-auto sm:min-h-[3.125rem]"
             >
               <MessageCircle className="h-4 w-4" />
-              WhatsApp
+              Book on WhatsApp
             </Button>
             <Button
               size="lg"

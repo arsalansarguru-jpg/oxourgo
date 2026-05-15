@@ -113,7 +113,7 @@ export function FleetCarCard({ car, className, tripFrom, tripTo, tripPickup }: F
                 }}
                 size="md"
                 className="w-full min-[400px]:w-auto"
-                label="Inquire"
+                label="Book on WhatsApp"
               />
             ) : (
               <Button size="md" variant="secondary" disabled className="w-full min-[400px]:w-auto">

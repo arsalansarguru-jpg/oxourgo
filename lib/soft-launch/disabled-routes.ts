@@ -19,22 +19,22 @@ export function isSoftLaunchDisabledRoute(pathname: string): boolean {
 export function softLaunchInquiryMessageForPath(pathname: string): string {
   const path = pathname.split('?')[0] ?? pathname
   if (path.startsWith('/booking') || path.startsWith('/car/')) {
-    return "Hi Oxour Go, I'd like help completing a booking inquiry for a vehicle on your website."
+    return 'Hi Oxour Go, I want to book a luxury self-drive in Mumbai — please help me choose a vehicle and dates.'
   }
   if (path.startsWith('/dashboard/kyc') || path.startsWith('/kyc')) {
-    return "Hi Oxour Go, I'd like help with identity verification for a self-drive booking."
+    return 'Hi Oxour Go, I want to book a vehicle and need help with identity verification.'
   }
   if (path.startsWith('/dashboard')) {
-    return "Hi Oxour Go, I'd like help with my reservation or account on your website."
+    return 'Hi Oxour Go, I want to book or manage a reservation — please help on WhatsApp.'
   }
   if (path.startsWith('/admin')) {
-    return "Hi Oxour Go, I'm reaching out regarding operations on the website."
+    return 'Hi Oxour Go, I want to book a luxury self-drive in Mumbai.'
   }
   if (path.startsWith('/profile')) {
-    return "Hi Oxour Go, I'd like to update my profile details for a booking inquiry."
+    return 'Hi Oxour Go, I want to book a vehicle and need help updating my profile details.'
   }
   if (path.startsWith('/login')) {
-    return "Hi Oxour Go, I'd like to inquire about booking a luxury self-drive in Mumbai."
+    return 'Hi Oxour Go, I want to book a luxury self-drive in Mumbai.'
   }
-  return "Hi Oxour Go, I'd like to book a luxury self-drive in Mumbai."
+  return 'Hi Oxour Go, I want to book a luxury self-drive in Mumbai.'
 }

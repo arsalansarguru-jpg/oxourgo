@@ -17,7 +17,7 @@ type WhatsAppInquiryButtonProps = Omit<ComponentProps<typeof Button>, 'href' | '
 export function WhatsAppInquiryButton({
   vehicle,
   prefillText,
-  label = 'WhatsApp inquiry',
+  label = 'Book on WhatsApp',
   className,
   children,
   ...props

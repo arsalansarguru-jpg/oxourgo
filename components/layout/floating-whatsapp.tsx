@@ -47,7 +47,7 @@ export function FloatingWhatsApp({ position, className }: FloatingWhatsAppProps)
         className,
       )}
       style={{ backgroundColor: WA_BG }}
-      aria-label="Chat on WhatsApp"
+      aria-label="Book on WhatsApp"
     >
       <WhatsAppGlyph className="h-7 w-7 md:h-8 md:w-8" />
     </a>

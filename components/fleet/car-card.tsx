@@ -82,7 +82,7 @@ export function CarCard({ car, className, imageClassName }: CarCardProps) {
               <WhatsAppInquiryButton
                 vehicle={{ vehicleName: car.name }}
                 size="md"
-                label="Inquire"
+                label="Book on WhatsApp"
               />
             ) : (
               <Button size="md" variant="secondary" disabled>

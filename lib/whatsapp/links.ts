@@ -1,17 +1,15 @@
-import { getBusinessPhoneE164Digits, getBusinessWhatsAppUrl } from '@/lib/business-contact'
+import { getBusinessWhatsAppUrl } from '@/lib/business-contact'
 
-/** Digits-only path segment after `wa.me/`. */
+/** @deprecated Prefer {@link getBusinessWhatsAppUrl}; digits kept for backwards compatibility. */
 export function getWhatsAppBusinessDigits(): string {
-  return getBusinessPhoneE164Digits()
+  return '919833133343'
 }
 
 /**
  * Opens WhatsApp with a prefilled message (keep under ~500 chars for client compatibility).
  */
-export function buildWhatsAppPrefilledUrl(message: string, digits?: string): string {
-  const d = digits ?? getWhatsAppBusinessDigits()
-  const text = message.trim().slice(0, 480)
-  return `https://wa.me/${d}?text=${encodeURIComponent(text)}`
+export function buildWhatsAppPrefilledUrl(message: string): string {
+  return getBusinessWhatsAppUrl(message.trim().slice(0, 480))
 }
 
 export function conciergeWhatsAppUrl(): string {
@@ -30,7 +28,7 @@ export function bookingSupportPrefilledMessage(params: {
     `Hi Oxour Go — regarding my booking (ref ${ref}).`,
     params.carLabel ? `Vehicle: ${params.carLabel}.` : undefined,
     params.pickupSummary ? `Pickup: ${params.pickupSummary}.` : undefined,
-    `Dashboard: ${params.siteUrl}/dashboard/bookings/${params.bookingId}`,
+    `Please reply here with next steps.`,
   ].filter(Boolean) as string[]
   return lines.join(' ')
 }
@@ -41,9 +39,10 @@ export function tripReminderPrefilledMessage(params: {
   carLabel: string
   whenSummary: string
 }): string {
+  const ref = params.bookingId.replace(/-/g, '').slice(0, 10).toUpperCase()
   return [
-    `Hi Oxour Go — quick note on my upcoming trip (${params.carLabel}, ${params.whenSummary}).`,
-    `Booking: ${params.siteUrl}/dashboard/bookings/${params.bookingId}`,
+    `Hi Oxour Go — pickup reminder for ${params.carLabel} (${params.whenSummary}).`,
+    `Booking ref ${ref}.`,
   ].join(' ')
 }
 
@@ -53,8 +52,9 @@ export function returnReminderPrefilledMessage(params: {
   carLabel: string
   returnSummary: string
 }): string {
+  const ref = params.bookingId.replace(/-/g, '').slice(0, 10).toUpperCase()
   return [
     `Hi Oxour Go — coordinating return for ${params.carLabel} (${params.returnSummary}).`,
-    `Booking: ${params.siteUrl}/dashboard/bookings/${params.bookingId}`,
+    `Booking ref ${ref}.`,
   ].join(' ')
 }

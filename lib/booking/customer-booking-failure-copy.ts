@@ -14,6 +14,8 @@ export function customerBookingFailureCopy(code: CreateBookingFailure['code']): 
       return 'Those dates are not available. Try different times.'
     case 'kyc_required':
       return 'Complete identity verification before you can confirm a booking.'
+    case 'concierge_only':
+      return 'Finish your reservation with our WhatsApp concierge — same premium fleet, human confirmation.'
     case 'rpc_missing':
       return 'Reservations are temporarily unavailable. Please try again shortly.'
     case 'database':

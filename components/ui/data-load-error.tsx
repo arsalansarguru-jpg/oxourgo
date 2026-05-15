@@ -11,6 +11,10 @@ export type DataLoadErrorPanelProps = {
   onRetry?: () => void
   /** In-app navigation retry (server components). */
   retryTo?: string
+  /** External link retry (e.g. WhatsApp concierge). */
+  retryHref?: string
+  retryTarget?: string
+  retryRel?: string
   retryLabel?: ReactNode
 }
 
@@ -23,6 +27,9 @@ export function DataLoadErrorPanel({
   className,
   onRetry,
   retryTo,
+  retryHref,
+  retryTarget = '_blank',
+  retryRel = 'noopener noreferrer',
   retryLabel = 'Try again',
 }: DataLoadErrorPanelProps) {
   return (
@@ -34,7 +41,11 @@ export function DataLoadErrorPanel({
     >
       <h3 className="text-lg font-semibold tracking-[-0.02em] text-soft">{title}</h3>
       <p className="mt-2 text-sm leading-relaxed text-muted">{description}</p>
-      {retryTo ? (
+      {retryHref ? (
+        <Button className="mt-5" variant="secondary" href={retryHref} target={retryTarget} rel={retryRel}>
+          {retryLabel}
+        </Button>
+      ) : retryTo ? (
         <Button className="mt-5" variant="secondary" to={retryTo}>
           {retryLabel}
         </Button>

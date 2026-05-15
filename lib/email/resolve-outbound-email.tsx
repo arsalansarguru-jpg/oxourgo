@@ -3,6 +3,7 @@ import 'server-only'
 import * as React from 'react'
 
 import { BRAND } from '@/constants/brand'
+import { getVehicleInquiryWhatsAppUrl } from '@/lib/business-contact'
 import { getPublicSiteUrl } from '@/lib/env/site-url'
 import {
   CustomerBookingApprovedEmail,
@@ -212,7 +213,13 @@ export async function resolveOutboundEmail(job: OutboundJobRow): Promise<Resolve
       to,
       subject: `${BRAND.name} · Booking update`,
       react: (
-        <CustomerBookingRejectedEmail firstName={firstName} carLabel={car} note={note} fleetUrl={`${site}/fleet`} />
+        <CustomerBookingRejectedEmail
+          firstName={firstName}
+          carLabel={car}
+          note={note}
+          fleetUrl={`${site}/fleet`}
+          whatsAppUrl={getVehicleInquiryWhatsAppUrl(car ? { vehicleName: car } : undefined)}
+        />
       ),
     }
   }
@@ -273,16 +280,19 @@ export async function resolveOutboundEmail(job: OutboundJobRow): Promise<Resolve
 
   if (key === 'customer_trip_completed') {
     const dash = bookingId ? `${site}/dashboard/bookings/${bookingId}` : `${site}/dashboard`
-    const msg = `Hi ${BRAND.name} — thank you for a great trip.`
+    let whatsAppUrl = getVehicleInquiryWhatsAppUrl()
+    if (bookingId) {
+      const tripRow = await loadBookingById(bookingId)
+      const priorCar = tripRow ? carLabelFromBooking(tripRow) : null
+      if (priorCar) {
+        whatsAppUrl = getVehicleInquiryWhatsAppUrl({ vehicleName: priorCar })
+      }
+    }
     return {
       to,
       subject: `${BRAND.name} · Trip complete`,
       react: (
-        <CustomerTripCompletedEmail
-          firstName={firstName}
-          dashboardUrl={dash}
-          whatsAppUrl={buildWhatsAppPrefilledUrl(msg)}
-        />
+        <CustomerTripCompletedEmail firstName={firstName} dashboardUrl={dash} whatsAppUrl={whatsAppUrl} />
       ),
     }
   }

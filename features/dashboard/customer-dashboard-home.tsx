@@ -1,10 +1,11 @@
 import Link from 'next/link'
-import { ArrowUpRight, Car, CreditCard, ShieldCheck, Sparkles } from 'lucide-react'
+import { ArrowUpRight, Car, CreditCard, MessageCircle, ShieldCheck, Sparkles } from 'lucide-react'
 
 import type { BookingWithCar } from '@/lib/supabase/database.types'
 import { deriveCustomerBookingUiStatus } from '@/lib/customer/derive-booking-ui-status'
 import { formatBookingVehicleTitle } from '@/lib/customer/booking-display'
 import { isPostedRentalPayment } from '@/lib/payments/booking-payment'
+import { getBusinessWhatsAppUrl, getConciergeBookingWhatsAppUrl } from '@/lib/business-contact'
 import { formatInr } from '@/lib/format'
 import { cn } from '@/lib/utils/cn'
 import { Button } from '@/components/ui/Button'
@@ -66,6 +67,14 @@ export function CustomerDashboardHome({
 
   const isVerified = bookingCleared
 
+  const bookConciergeUrl = getConciergeBookingWhatsAppUrl()
+  const paymentConciergeUrl = getBusinessWhatsAppUrl(
+    'Hi Oxour Go, I need help completing payment for my reservation.',
+  )
+  const verificationConciergeUrl = getBusinessWhatsAppUrl(
+    'Hi Oxour Go, I need help with identity verification for my booking.',
+  )
+
   return (
     <div className="space-y-10">
       {accessNotice ? (
@@ -83,7 +92,7 @@ export function CustomerDashboardHome({
           <KycStatusBadge status={kycStatus} className="shrink-0" />
         </div>
         <p className="max-w-2xl text-sm leading-relaxed text-muted">
-          Live bookings, verification, and payments — orchestrated for Mumbai self-drive with concierge-grade polish.
+          Track trips here — new bookings and payments are coordinated with concierge on WhatsApp for a smoother launch.
         </p>
       </header>
 
@@ -115,36 +124,54 @@ export function CustomerDashboardHome({
             <p className="font-medium text-soft">Quick actions</p>
             <p className="mt-1 text-sm text-muted">
               {pendingPaymentBookings > 0
-                ? `You have ${pendingPaymentBookings} booking${pendingPaymentBookings === 1 ? '' : 's'} awaiting payment — open Payments or the booking to continue.`
+                ? `You have ${pendingPaymentBookings} booking${pendingPaymentBookings === 1 ? '' : 's'} awaiting payment — message us on WhatsApp and we will guide you through settlement.`
                 : !isVerified
                   ? kycStatus === 'rejected'
-                    ? 'A document was not accepted — open KYC Center for the reviewer note and upload replacements.'
+                    ? 'A document was not accepted — WhatsApp us with your booking reference and we will help you fix verification.'
                     : kycStatus === 'pending'
-                      ? 'Your documents are with operations. We will email you when verification clears and bookings unlock.'
-                      : 'Upload identity documents to unlock bookings once operations approves your profile.'
-                  : 'Book, verify identity, or review payments in one tap.'}
+                      ? 'Your documents are with operations — we will confirm on WhatsApp when verification clears.'
+                      : 'Share identity documents via WhatsApp concierge so we can unlock reservations faster.'
+                  : 'Planning another drive? Message concierge with your preferred dates and vehicle.'}
             </p>
           </div>
         </div>
         <div className="flex flex-wrap gap-3">
+          <Button
+            href={bookConciergeUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="min-h-11 touch-manipulation"
+          >
+            <MessageCircle className="mr-1.5 h-4 w-4" aria-hidden />
+            Book on WhatsApp
+          </Button>
+          <Button variant="secondary" to="/fleet" className="min-h-11 touch-manipulation">
+            Browse fleet
+          </Button>
           {pendingPaymentBookings > 0 ? (
-            <Button to="/dashboard/payments" className="min-h-11">
+            <Button
+              variant="secondary"
+              href={paymentConciergeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="min-h-11 touch-manipulation"
+            >
               <CreditCard className="mr-1.5 h-4 w-4" aria-hidden />
-              Complete payment
+              Payment help
             </Button>
           ) : null}
-          <Button to="/fleet" className="min-h-11">
-            Book a vehicle
-          </Button>
           {!isVerified ? (
-            <Button variant="secondary" to="/dashboard/kyc" className="min-h-11">
+            <Button
+              variant="secondary"
+              href={verificationConciergeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="min-h-11 touch-manipulation"
+            >
               <ShieldCheck className="mr-1.5 h-4 w-4" aria-hidden />
-              KYC center
+              Verification help
             </Button>
           ) : null}
-          <Button variant="secondary" to="/dashboard/payments" className="min-h-11">
-            Payments
-          </Button>
         </div>
       </div>
 

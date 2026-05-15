@@ -36,14 +36,14 @@ test.describe('production smoke', () => {
     await expectAnonymousBlockedFromProtectedArea(page, '/admin')
   })
 
-  test('booking happy path: fleet → car → reserve panel', async ({ page }) => {
+  test('fleet → car detail from listing', async ({ page }) => {
     await page.goto('/fleet', { waitUntil: 'domcontentloaded' })
-    const book = page.getByRole('link', { name: 'Book' }).first()
-    const n = await book.count()
-    test.skip(n === 0, 'No bookable vehicles in catalog — skip booking smoke')
-    await book.click()
+    const carLink = page.locator('a[href^="/car/"]').first()
+    await expect(carLink).toBeVisible({ timeout: 15_000 })
+    await carLink.click()
     await expect(page).toHaveURL(/\/car\/[0-9a-f-]{36}/i)
     await expect(page.locator('#vehicle-reserve')).toBeVisible({ timeout: 20_000 })
+    await expect(page.getByRole('link', { name: /Book on WhatsApp/i }).first()).toBeVisible({ timeout: 10_000 })
   })
 
   test('booking dashboard requires sign-in when logged out', async ({ page }) => {

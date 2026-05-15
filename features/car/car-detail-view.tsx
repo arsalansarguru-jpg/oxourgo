@@ -273,8 +273,7 @@ export function CarDetailView({
       <div
         className="pointer-events-none fixed inset-x-0 z-[48] lg:hidden"
         style={{ bottom: 'var(--mobile-fab-clearance)' }}
-        role="region"
-        aria-label="Reserve this vehicle"
+        aria-label="Book on WhatsApp"
       >
         <div className="pointer-events-auto mx-auto max-w-lg px-[var(--spacing-edge)]">
           <div className="flex items-center justify-between gap-3 rounded-2xl border border-stroke bg-matte/[0.94] px-4 py-3 shadow-[0_-12px_48px_-20px_rgba(0,0,0,0.72)] backdrop-blur-2xl supports-[backdrop-filter]:bg-matte/80">
@@ -291,7 +290,7 @@ export function CarDetailView({
               }}
               size="lg"
               className="shrink-0 touch-manipulation"
-              label="WhatsApp"
+              label="Book on WhatsApp"
             />
           </div>
         </div>

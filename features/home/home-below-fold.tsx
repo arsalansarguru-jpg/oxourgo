@@ -35,8 +35,8 @@ const features = [
   },
   {
     icon: Clock,
-    title: 'Instant Booking',
-    description: 'Book your dream car in under 60 seconds',
+    title: 'Concierge booking',
+    description: 'Lock dates with our WhatsApp team — fast confirmations and transparent pricing',
   },
 ] as const
 

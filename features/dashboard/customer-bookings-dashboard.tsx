@@ -1,9 +1,10 @@
-import Link from 'next/link'
+
 import { Ban, CalendarClock, Car, CheckCircle2, PlayCircle } from 'lucide-react'
 
 import type { BookingWithCar } from '@/lib/supabase/database.types'
 import type { ListBookingsForUserResult } from '@/lib/customer/bookings-queries'
 import { deriveCustomerBookingUiStatus } from '@/lib/customer/derive-booking-ui-status'
+import { getBusinessWhatsAppUrl } from '@/lib/business-contact'
 import { CustomerBookingFleetCard } from '@/components/dashboard/customer-booking-fleet-card'
 import { DataLoadErrorPanel } from '@/components/ui/data-load-error'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -33,14 +34,21 @@ function KycBookingsGate({ bookingCleared, kycStatus }: { bookingCleared: boolea
                 : 'Upload your driving license, Aadhaar or PAN, and a selfie so we can unlock reservations.'}
           </p>
           <p className="text-xs text-muted">
-            Need help?{' '}
-            <Link href="/support" className="text-electric hover:underline">
-              Support
-            </Link>
+            Prefer WhatsApp?{' '}
+            <span className="text-soft">Our concierge verifies documents on chat.</span>
           </p>
         </div>
-        <Button type="button" variant="secondary" className="w-full shrink-0 sm:w-auto" to="/dashboard/kyc">
-          KYC center
+        <Button
+          type="button"
+          variant="secondary"
+          className="w-full shrink-0 touch-manipulation sm:w-auto"
+          href={getBusinessWhatsAppUrl(
+            'Hi Oxour Go, I need help completing identity verification for my booking.',
+          )}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Verification on WhatsApp
         </Button>
       </div>
     </div>
@@ -113,8 +121,11 @@ export function CustomerBookingsDashboard({ result, bookingCleared, kycStatus }:
         <KycBookingsGate bookingCleared={bookingCleared} kycStatus={kycStatus} />
         <DataLoadErrorPanel
           title="Unable to load reservations"
-          description="Please refresh the page or try again shortly."
-          retryTo="/dashboard/bookings"
+          description="Please refresh the page or reach concierge on WhatsApp if this persists."
+          retryHref={getBusinessWhatsAppUrl(
+            'Hi Oxour Go, I cannot load my bookings on the website — please help.',
+          )}
+          retryLabel="WhatsApp concierge"
         />
       </div>
     )

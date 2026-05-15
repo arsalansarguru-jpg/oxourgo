@@ -89,9 +89,16 @@ export type CustomerBookingRejectedProps = {
   carLabel: string | null
   note: string | null
   fleetUrl: string
+  whatsAppUrl: string
 }
 
-export function CustomerBookingRejectedEmail({ firstName, carLabel, note, fleetUrl }: CustomerBookingRejectedProps) {
+export function CustomerBookingRejectedEmail({
+  firstName,
+  carLabel,
+  note,
+  fleetUrl,
+  whatsAppUrl,
+}: CustomerBookingRejectedProps) {
   const greet = firstName?.trim() ? `${firstName.trim()},` : 'Hello,'
   return (
     <OxourEmailLayout preview="Update on your Oxour Go booking request.">
@@ -102,7 +109,14 @@ export function CustomerBookingRejectedEmail({ firstName, carLabel, note, fleetU
         We were not able to approve this request{carLabel ? ` for ${carLabel}` : ''}.
         {note ? ` Note from operations: ${note}` : ' Please choose another vehicle or adjust your dates.'}
       </Text>
-      <EmailPrimaryButton href={fleetUrl} label="Browse fleet" />
+      <EmailPrimaryButton href={whatsAppUrl} label="Book on WhatsApp" />
+      <EmailMutedRule />
+      <Text style={{ ...bodyStyle(), fontSize: '14px', color: emailTheme.muted }}>
+        Prefer browsing first?{' '}
+        <a href={fleetUrl} style={{ color: emailTheme.electric }}>
+          View fleet
+        </a>
+      </Text>
     </OxourEmailLayout>
   )
 }
@@ -184,11 +198,11 @@ export function CustomerTripCompletedEmail({ firstName, dashboardUrl, whatsAppUr
       <Text style={bodyStyle()}>
         {greet} your trip is complete. Thank you for trusting Oxour Go — we would be honoured to host you again.
       </Text>
-      <EmailPrimaryButton href={dashboardUrl} label="Book again" />
+      <EmailPrimaryButton href={whatsAppUrl} label="Book on WhatsApp" />
       <Text style={{ ...bodyStyle(), fontSize: '14px', color: emailTheme.muted, marginTop: '16px' }}>
-        Feedback or receipts?{' '}
-        <a href={whatsAppUrl} style={{ color: emailTheme.electric }}>
-          WhatsApp
+        Trip archive and receipts:{' '}
+        <a href={dashboardUrl} style={{ color: emailTheme.electric }}>
+          Open dashboard
         </a>
       </Text>
     </OxourEmailLayout>
