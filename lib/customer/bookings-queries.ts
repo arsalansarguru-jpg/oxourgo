@@ -18,7 +18,13 @@ const bookingSelect = `
   gst_rupees,
   total_rupees,
   booking_status,
+  payment_method,
   payment_status,
+  amount_due,
+  amount_paid,
+  payment_received_at,
+  payment_received_by,
+  payment_notes,
   ops_note,
   approved_at,
   handed_over_at,
@@ -26,6 +32,20 @@ const bookingSelect = `
   completed_at,
   pickup_checklist,
   return_checklist,
+  pickup_fuel_level,
+  return_fuel_level,
+  pickup_odometer_km,
+  return_odometer_km,
+  pickup_condition_notes,
+  return_condition_notes,
+  penalty_damage_rupees,
+  penalty_late_rupees,
+  penalty_extra_km_rupees,
+  deposit_penalty_total_rupees,
+  customer_handover_signature_path,
+  customer_handover_signed_at,
+  pickup_inspection_completed_at,
+  return_inspection_completed_at,
   created_at,
   updated_at,
   vehicles (
@@ -86,4 +106,28 @@ export async function getBookingForUser(bookingId: string, userId: string): Prom
 
   if (error || !data) return null
   return data as unknown as BookingWithCar
+}
+
+export type CustomerInspectionPhotoRow = {
+  id: string
+  phase: string
+  slot: string
+  storage_path: string
+}
+
+/** RLS: rows only for bookings the current user owns. */
+export async function listInspectionPhotosForBooking(bookingId: string): Promise<CustomerInspectionPhotoRow[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('booking_inspection_photos')
+    .select('id, phase, slot, storage_path')
+    .eq('booking_id', bookingId)
+    .order('phase')
+    .order('slot')
+
+  if (error) {
+    console.error('[listInspectionPhotosForBooking]', error.message)
+    return []
+  }
+  return (data ?? []) as CustomerInspectionPhotoRow[]
 }

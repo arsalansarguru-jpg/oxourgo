@@ -86,11 +86,12 @@ export function customerBookingStatusLabel(badge: CustomerBookingStatusBadge): s
 
 const PAYMENT_LABELS: Record<string, string> = {
   pending: 'Pending',
-  authorized: 'Authorized',
-  paid: 'Paid',
-  failed: 'Failed',
+  received: 'Received',
+  partial: 'Partial payment',
   refunded: 'Refunded',
-  partial: 'Partial',
+  authorized: 'Received',
+  paid: 'Received',
+  failed: 'Pending',
 }
 
 /** Human-readable payment status for dashboard UI. */
@@ -121,11 +122,12 @@ export type CustomerPaymentBadgeUiVariant = CustomerBookingStatusBadgeUiVariant 
 
 const PAYMENT_BADGE_VARIANT: Record<string, CustomerPaymentBadgeUiVariant> = {
   pending: 'electric',
-  authorized: 'default',
-  paid: 'success',
-  failed: 'danger',
-  refunded: 'muted',
+  received: 'success',
   partial: 'default',
+  refunded: 'muted',
+  authorized: 'success',
+  paid: 'success',
+  failed: 'electric',
 }
 
 export function paymentStatusBadgeVariant(raw: string): CustomerPaymentBadgeUiVariant {

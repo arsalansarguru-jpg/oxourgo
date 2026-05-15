@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 
 import { markAllNotificationsReadAction } from '@/app/(main)/dashboard/notifications/actions'
 import { CustomerNotificationRow } from '@/features/dashboard/customer-notification-row'
+import { groupNotificationsByDay } from '@/lib/customer/notification-groups'
 import { listNotificationsForUser } from '@/lib/customer/notifications-queries'
 import { getAuthenticatedUser } from '@/lib/auth/server'
 import { Button } from '@/components/ui/Button'
@@ -18,6 +19,7 @@ export default async function NotificationsCenterPage() {
   }
 
   const rows = await listNotificationsForUser(user.id)
+  const groups = groupNotificationsByDay(rows)
 
   return (
     <div className="min-w-0 space-y-8">
@@ -48,11 +50,18 @@ export default async function NotificationsCenterPage() {
           to="/fleet"
         />
       ) : (
-        <ul className="space-y-3">
-          {rows.map((row) => (
-            <CustomerNotificationRow key={row.id} row={row} />
+        <div className="space-y-10">
+          {groups.map((group) => (
+            <section key={group.sortKey} className="space-y-3">
+              <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">{group.label}</h2>
+              <ul className="space-y-3">
+                {group.rows.map((row) => (
+                  <CustomerNotificationRow key={row.id} row={row} />
+                ))}
+              </ul>
+            </section>
           ))}
-        </ul>
+        </div>
       )}
 
       <p className="text-center text-sm text-muted">

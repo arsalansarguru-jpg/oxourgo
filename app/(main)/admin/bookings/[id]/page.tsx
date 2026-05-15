@@ -3,12 +3,16 @@ import { notFound } from 'next/navigation'
 
 import { AdminBookingPdfPanel } from '@/components/admin/admin-booking-pdf-panel'
 import { AdminBookingOpsPanel } from '@/components/admin/admin-booking-ops-panel'
+import { AdminBookingPaymentTimeline } from '@/components/admin/admin-booking-payment-timeline'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 import { AdminStatusPill } from '@/components/admin/admin-status-pill'
 import { adminGetBooking, adminGetBookingCustomerProfile } from '@/lib/admin/data/bookings'
+import { adminGetBookingInspectionBundle } from '@/lib/admin/data/booking-inspection'
+import { adminListPaymentEventsForBooking } from '@/lib/admin/data/payments'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatInr } from '@/lib/format'
+import { formatPaymentMethodLabel } from '@/lib/payments/booking-payment'
 import { KycStatusBadge } from '@/components/kyc/kyc-status-badge'
 
 export const dynamic = 'force-dynamic'
@@ -32,7 +36,7 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
   }
   if (!booking) notFound()
 
-  const [customerEmail, customerProfile] = await Promise.all([
+  const [customerEmail, customerProfile, paymentTimeline, inspection] = await Promise.all([
     (async () => {
       try {
         const admin = createAdminClient()
@@ -43,6 +47,8 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
       }
     })(),
     adminGetBookingCustomerProfile(booking.user_id),
+    adminListPaymentEventsForBooking(id),
+    adminGetBookingInspectionBundle(id, booking.customer_handover_signature_path),
   ])
 
   const vehJoin = booking.vehicles
@@ -125,6 +131,38 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
         </AdminCardContent>
       </AdminCard>
 
+      <AdminCard>
+        <AdminCardContent className="space-y-4 p-5 sm:p-7">
+          <h2 className="text-lg font-semibold text-soft">Payment snapshot</h2>
+          <dl className="grid gap-3 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="text-muted">Method</dt>
+              <dd className="text-soft">{formatPaymentMethodLabel(booking.payment_method)}</dd>
+            </div>
+            <div>
+              <dt className="text-muted">Rental collected</dt>
+              <dd className="tabular-nums text-soft">{formatInr(booking.amount_paid ?? 0)}</dd>
+            </div>
+            <div>
+              <dt className="text-muted">Balance due</dt>
+              <dd className="tabular-nums text-soft">{formatInr(booking.amount_due ?? 0)}</dd>
+            </div>
+            <div>
+              <dt className="text-muted">Received at</dt>
+              <dd className="text-soft">{fmtTs(booking.payment_received_at)}</dd>
+            </div>
+          </dl>
+        </AdminCardContent>
+      </AdminCard>
+
+      <AdminCard>
+        <AdminCardContent className="space-y-4 p-5 sm:p-7">
+          <h2 className="text-lg font-semibold text-soft">Payment history</h2>
+          <p className="text-sm text-muted">Ledger lines and operational entries for this booking.</p>
+          <AdminBookingPaymentTimeline events={paymentTimeline} />
+        </AdminCardContent>
+      </AdminCard>
+
       <div className="grid gap-8 lg:grid-cols-2">
         <AdminCard>
           <AdminCardContent className="space-y-4 text-sm">
@@ -174,7 +212,7 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
           </AdminCardContent>
         </AdminCard>
 
-        <AdminBookingOpsPanel booking={booking} />
+        <AdminBookingOpsPanel booking={booking} inspection={inspection} />
       </div>
 
       <AdminCard>

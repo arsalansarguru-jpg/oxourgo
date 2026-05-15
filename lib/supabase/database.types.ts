@@ -141,7 +141,13 @@ export type Database = {
           gst_rupees: number
           total_rupees: number
           booking_status: string
+          payment_method: string
           payment_status: string
+          amount_due: number
+          amount_paid: number
+          payment_received_at: string | null
+          payment_received_by: string | null
+          payment_notes: string | null
           ops_note: string | null
           admin_internal_notes: string | null
           approved_at: string | null
@@ -156,6 +162,20 @@ export type Database = {
           deposit_refunded_rupees: number | null
           pickup_checklist: Json
           return_checklist: Json
+          pickup_fuel_level: number | null
+          return_fuel_level: number | null
+          pickup_odometer_km: number | null
+          return_odometer_km: number | null
+          pickup_condition_notes: Json
+          return_condition_notes: Json
+          penalty_damage_rupees: number
+          penalty_late_rupees: number
+          penalty_extra_km_rupees: number
+          deposit_penalty_total_rupees: number
+          customer_handover_signature_path: string | null
+          customer_handover_signed_at: string | null
+          pickup_inspection_completed_at: string | null
+          return_inspection_completed_at: string | null
           created_at: string
           updated_at: string
         }
@@ -174,7 +194,13 @@ export type Database = {
           gst_rupees?: number
           total_rupees: number
           booking_status?: string
+          payment_method?: string
           payment_status?: string
+          amount_due?: number
+          amount_paid?: number
+          payment_received_at?: string | null
+          payment_received_by?: string | null
+          payment_notes?: string | null
           ops_note?: string | null
           admin_internal_notes?: string | null
           approved_at?: string | null
@@ -189,6 +215,20 @@ export type Database = {
           deposit_refunded_rupees?: number | null
           pickup_checklist?: Json
           return_checklist?: Json
+          pickup_fuel_level?: number | null
+          return_fuel_level?: number | null
+          pickup_odometer_km?: number | null
+          return_odometer_km?: number | null
+          pickup_condition_notes?: Json
+          return_condition_notes?: Json
+          penalty_damage_rupees?: number | null
+          penalty_late_rupees?: number | null
+          penalty_extra_km_rupees?: number | null
+          deposit_penalty_total_rupees?: number | null
+          customer_handover_signature_path?: string | null
+          customer_handover_signed_at?: string | null
+          pickup_inspection_completed_at?: string | null
+          return_inspection_completed_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -207,7 +247,13 @@ export type Database = {
           gst_rupees?: number
           total_rupees?: number
           booking_status?: string
+          payment_method?: string
           payment_status?: string
+          amount_due?: number
+          amount_paid?: number
+          payment_received_at?: string | null
+          payment_received_by?: string | null
+          payment_notes?: string | null
           ops_note?: string | null
           admin_internal_notes?: string | null
           approved_at?: string | null
@@ -222,8 +268,79 @@ export type Database = {
           deposit_refunded_rupees?: number | null
           pickup_checklist?: Json
           return_checklist?: Json
+          pickup_fuel_level?: number | null
+          return_fuel_level?: number | null
+          pickup_odometer_km?: number | null
+          return_odometer_km?: number | null
+          pickup_condition_notes?: Json
+          return_condition_notes?: Json
+          penalty_damage_rupees?: number
+          penalty_late_rupees?: number
+          penalty_extra_km_rupees?: number
+          deposit_penalty_total_rupees?: number
+          customer_handover_signature_path?: string | null
+          customer_handover_signed_at?: string | null
+          pickup_inspection_completed_at?: string | null
+          return_inspection_completed_at?: string | null
           created_at?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      booking_inspection_events: {
+        Row: {
+          id: string
+          booking_id: string
+          event_type: string
+          payload: Json
+          actor_user_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          booking_id: string
+          event_type: string
+          payload?: Json
+          actor_user_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          booking_id?: string
+          event_type?: string
+          payload?: Json
+          actor_user_id?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      booking_inspection_photos: {
+        Row: {
+          id: string
+          booking_id: string
+          phase: string
+          slot: string
+          storage_path: string
+          created_at: string
+          created_by: string | null
+        }
+        Insert: {
+          id?: string
+          booking_id: string
+          phase: string
+          slot: string
+          storage_path: string
+          created_at?: string
+          created_by?: string | null
+        }
+        Update: {
+          id?: string
+          booking_id?: string
+          phase?: string
+          slot?: string
+          storage_path?: string
+          created_at?: string
+          created_by?: string | null
         }
         Relationships: []
       }
@@ -434,6 +551,57 @@ export type Database = {
         }
         Relationships: []
       }
+      outbound_jobs: {
+        Row: {
+          id: string
+          channel: string
+          template_key: string
+          idempotency_key: string
+          payload: Json
+          to_email: string | null
+          to_e164: string | null
+          status: string
+          attempts: number
+          next_run_at: string
+          last_error: string | null
+          correlation_id: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          channel?: string
+          template_key: string
+          idempotency_key: string
+          payload?: Json
+          to_email?: string | null
+          to_e164?: string | null
+          status?: string
+          attempts?: number
+          next_run_at?: string
+          last_error?: string | null
+          correlation_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          channel?: string
+          template_key?: string
+          idempotency_key?: string
+          payload?: Json
+          to_email?: string | null
+          to_e164?: string | null
+          status?: string
+          attempts?: number
+          next_run_at?: string
+          last_error?: string | null
+          correlation_id?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payment_events: {
         Row: {
           id: string
@@ -473,6 +641,10 @@ export type Database = {
     }
     Views: Record<never, never>
     Functions: {
+      claim_outbound_jobs_batch: {
+        Args: { p_batch_size?: number }
+        Returns: Database['public']['Tables']['outbound_jobs']['Row'][]
+      }
       has_booking_overlap: {
         Args: {
           p_car_id: string

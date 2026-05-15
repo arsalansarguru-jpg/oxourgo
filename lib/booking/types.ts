@@ -21,6 +21,8 @@ export type CreateBookingInput = {
   returnAtIso: string
   pickupLocation: string
   returnLocation: string
+  /** Defaults to pay_at_pickup. Online settlement is not wired yet. */
+  paymentMethod?: 'pay_at_pickup' | 'pay_online'
 }
 
 export type CreateBookingSuccess = {

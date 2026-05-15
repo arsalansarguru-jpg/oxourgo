@@ -1,95 +1,52 @@
-import Link from 'next/link'
-
-import { AdminPageHeader } from '@/components/admin/admin-page-header'
-import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
-import { AdminStatusPill } from '@/components/admin/admin-status-pill'
-import { adminBookingPaymentSummary, adminListPaymentEvents } from '@/lib/admin/data/payments'
-import { formatInr } from '@/lib/format'
+import { AdminPaymentsPageBody } from '@/components/admin/payments/admin-payments-page-body'
+import {
+  adminBookingPaymentSummary,
+  adminListPaymentEvents,
+  adminPaymentOperationsMetrics,
+  adminPaymentsBoardRows,
+  type AdminPaymentOpsMetrics,
+  type PaymentsBoardFilter,
+} from '@/lib/admin/data/payments'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AdminPaymentsPage() {
-  let events: Awaited<ReturnType<typeof adminListPaymentEvents>> = []
+function parseFilter(raw: string | undefined): PaymentsBoardFilter {
+  const v = (raw ?? '').trim().toLowerCase()
+  if (v === 'pending' || v === 'received' || v === 'refunded' || v === 'partial') return v
+  return 'all'
+}
+
+const emptyMetrics: AdminPaymentOpsMetrics = {
+  pendingCollectionRupees: 0,
+  collectedRentalRupees: 0,
+  pendingBookingCount: 0,
+  grossPendingContractRupees: 0,
+}
+
+export default async function AdminPaymentsPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
+  const sp = await searchParams
+  const filter = parseFilter(sp.status)
+
+  let metrics = emptyMetrics
   let summary: Awaited<ReturnType<typeof adminBookingPaymentSummary>> = []
+  let rows: Awaited<ReturnType<typeof adminPaymentsBoardRows>> = []
+  let events: Awaited<ReturnType<typeof adminListPaymentEvents>> = []
+
   try {
-    events = await adminListPaymentEvents()
-    summary = await adminBookingPaymentSummary()
+    ;[metrics, summary, rows, events] = await Promise.all([
+      adminPaymentOperationsMetrics(),
+      adminBookingPaymentSummary(),
+      adminPaymentsBoardRows(filter),
+      adminListPaymentEvents(120),
+    ])
   } catch {
-    events = []
+    metrics = emptyMetrics
     summary = []
+    rows = []
+    events = []
   }
 
   return (
-    <div className="space-y-8">
-      <AdminPageHeader
-        eyebrow="Finance"
-        title="Payments monitoring"
-        description="Ledger lines from payment_events plus booking-level payment_status distribution. Refund and deposit rows are placeholders until PSP wiring."
-      />
-
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {summary.map((s) => (
-          <AdminCard key={s.payment_status} className="p-5 transition-transform duration-300 hover:-translate-y-0.5">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
-              {s.payment_status.replace(/_/g, ' ')}
-            </p>
-            <p className="mt-3 text-3xl font-semibold tabular-nums tracking-[-0.03em] text-soft">{s.count}</p>
-            <p className="mt-1 text-xs text-muted">Bookings</p>
-          </AdminCard>
-        ))}
-      </div>
-
-      <AdminCard className="overflow-hidden">
-        <AdminCardContent className="p-0">
-          <div className="border-b border-white/[0.06] px-6 py-5">
-            <h2 className="text-lg font-semibold tracking-[-0.02em] text-soft">Recent payment events</h2>
-          </div>
-          <div className="overflow-x-auto scroll-touch">
-            <table className="w-full min-w-[900px] text-left text-sm">
-              <thead className="admin-table-head">
-                <tr>
-                  <th className="px-4 py-3.5 font-medium">When</th>
-                  <th className="px-4 py-3.5 font-medium">Title</th>
-                  <th className="px-4 py-3.5 font-medium">Direction</th>
-                  <th className="px-4 py-3.5 font-medium">Status</th>
-                  <th className="px-4 py-3.5 font-medium">Amount</th>
-                  <th className="px-4 py-3.5 font-medium">Booking</th>
-                </tr>
-              </thead>
-              <tbody>
-                {events.map((e) => (
-                  <tr key={e.id} className="admin-table-row">
-                    <td className="px-4 py-3 text-muted">{new Date(e.created_at).toLocaleString()}</td>
-                    <td className="px-4 py-3 text-soft">{e.title}</td>
-                    <td className="px-4 py-3">
-                      <AdminStatusPill value={e.direction} />
-                    </td>
-                    <td className="px-4 py-3">
-                      <AdminStatusPill value={e.status} />
-                    </td>
-                    <td className="px-4 py-3 tabular-nums text-soft">{formatInr(e.amount_rupees)}</td>
-                    <td className="px-4 py-3 text-right">
-                      {e.booking_id ? (
-                        <Link
-                          href={`/admin/bookings/${e.booking_id}`}
-                          className="font-medium text-electric transition-colors hover:text-electric/85"
-                        >
-                          Open
-                        </Link>
-                      ) : (
-                        '—'
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          {events.length === 0 ? (
-            <p className="p-6 text-sm text-muted">No payment_events yet — placeholders can be created from a booking.</p>
-          ) : null}
-        </AdminCardContent>
-      </AdminCard>
-    </div>
+    <AdminPaymentsPageBody filter={filter} metrics={metrics} summary={summary} rows={rows} events={events} />
   )
 }

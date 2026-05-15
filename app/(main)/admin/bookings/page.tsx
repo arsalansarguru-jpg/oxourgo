@@ -37,7 +37,7 @@ export default async function AdminBookingsPage({
   const rawPayment = typeof q.payment === 'string' ? q.payment.trim() : ''
   const payment = rawPayment || undefined
   const allowedPayment =
-    !payment || ['pending', 'authorized', 'paid', 'failed', 'refunded'].includes(payment)
+    !payment || ['pending', 'received', 'partial', 'refunded'].includes(payment)
   const safePayment = allowedPayment && payment ? payment : undefined
 
   const searchRaw = typeof q.q === 'string' ? q.q.trim().slice(0, 160) : ''

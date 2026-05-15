@@ -9,8 +9,10 @@ export const NOTIFICATION_TYPES = [
   'payment_pending',
   'payment_updated',
   'trip_reminder',
+  'return_reminder',
   'trip_started',
   'trip_completed',
+  'invoice_sent',
 ] as const
 
 export type NotificationTypeId = (typeof NOTIFICATION_TYPES)[number]

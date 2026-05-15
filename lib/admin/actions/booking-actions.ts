@@ -6,6 +6,7 @@ import type { AdminActionResult } from '@/lib/admin/actions/types'
 import { writeAdminAudit } from '@/lib/admin/audit'
 import { requireAppRole } from '@/lib/auth/server'
 import { hasVehicleBookingOverlap } from '@/lib/booking/vehicle-overlap'
+import { validatePickupInspectionForHandover, validateReturnInspectionForCheckpoint } from '@/lib/admin/booking-inspection-validate'
 import {
   onBookingApproved,
   onBookingCancelled,
@@ -18,8 +19,12 @@ import type { Database, Json } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { adminActionDbFailed } from '@/lib/errors/safe-user-message'
 import { runInstrumentedServerAction } from '@/lib/monitoring/instrument-server-action'
+import {
+  adminMarkBookingPaymentReceivedAction,
+  adminMarkBookingPaymentRefundedAction,
+} from '@/lib/admin/actions/payment-actions'
 
-const PAYMENT_STATUSES = ['pending', 'authorized', 'paid', 'failed', 'refunded'] as const
+const PAYMENT_STATUSES = ['pending', 'received', 'partial', 'refunded'] as const
 const BOOKING_STATUSES = ['pending_payment', 'confirmed', 'active', 'completed', 'cancelled'] as const
 
 function nowIso() {
@@ -213,6 +218,9 @@ export async function adminMarkHandedOverAction(bookingId: string): Promise<Admi
       return { ok: false, message: 'Handover is only available once the booking is approved (confirmed).' }
     }
 
+    const inspection = await validatePickupInspectionForHandover(admin, bookingId)
+    if (!inspection.ok) return inspection
+
     const ts = nowIso()
     const { error } = await admin
       .from('bookings')
@@ -261,6 +269,9 @@ export async function adminMarkReturnedAction(bookingId: string): Promise<AdminA
     if (row.returned_at) {
       return { ok: true }
     }
+
+    const inspection = await validateReturnInspectionForCheckpoint(admin, bookingId)
+    if (!inspection.ok) return inspection
 
     const ts = nowIso()
     const { error } = await admin.from('bookings').update({ returned_at: ts, updated_at: ts }).eq('id', bookingId)
@@ -333,20 +344,46 @@ export async function adminSetBookingPaymentStatusAction(
       return { ok: false, message: 'Invalid payment status.' }
     }
 
+    if (payment_status === 'received') {
+      return adminMarkBookingPaymentReceivedAction(bookingId)
+    }
+    if (payment_status === 'refunded') {
+      return adminMarkBookingPaymentRefundedAction(bookingId)
+    }
+    if (payment_status === 'partial') {
+      return {
+        ok: false,
+        message: 'Partial payments require an amount — use Mark partial payment on the booking.',
+      }
+    }
+
     const admin = createAdminClient()
-    const { data: prevRow } = await admin.from('bookings').select('payment_status').eq('id', bookingId).maybeSingle()
-    const previous = prevRow?.payment_status ?? null
+    const { data: prevRow, error: prevErr } = await admin
+      .from('bookings')
+      .select('payment_status, total_rupees')
+      .eq('id', bookingId)
+      .maybeSingle()
+
+    if (prevErr || !prevRow) return { ok: false, message: 'Booking not found.' }
+
+    const previous = prevRow.payment_status ?? null
+    const total = Math.max(0, Math.round(Number(prevRow.total_rupees ?? 0)))
+    const ts = nowIso()
 
     const patch: Database['public']['Tables']['bookings']['Update'] = {
-      payment_status,
-      updated_at: nowIso(),
+      payment_status: 'pending',
+      amount_paid: 0,
+      amount_due: total,
+      payment_received_at: null,
+      payment_received_by: null,
+      updated_at: ts,
     }
-    const { error } = await admin.from('bookings').update(patch).eq('id', bookingId)
 
+    const { error } = await admin.from('bookings').update(patch).eq('id', bookingId)
     if (error) return adminActionDbFailed('adminSetBookingPaymentStatusAction', error)
 
-    if (previous !== payment_status) {
-      void onPaymentStatusChanged(bookingId, payment_status, previous)
+    if (previous !== 'pending') {
+      void onPaymentStatusChanged(bookingId, 'pending', previous)
     }
 
     await writeAdminAudit({
@@ -354,7 +391,7 @@ export async function adminSetBookingPaymentStatusAction(
       action: 'booking.payment_status',
       entityType: 'booking',
       entityId: bookingId,
-      payload: { payment_status },
+      payload: { payment_status: 'pending' },
     })
 
     revalidatePath('/admin/bookings')

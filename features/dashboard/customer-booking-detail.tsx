@@ -5,6 +5,7 @@ import {
   Ban,
   Calendar,
   CalendarRange,
+  Camera,
   Check,
   Circle,
   FileText,
@@ -15,8 +16,13 @@ import {
   Wallet,
 } from 'lucide-react'
 
+import { BookingPdfToolkit } from '@/components/booking/booking-pdf-toolkit'
+import { Badge } from '@/components/ui/Badge'
+import { Button } from '@/components/ui/Button'
+import { Card, CardContent } from '@/components/ui/Card'
+import { cardEyebrow, cardSurfaceBase, cardSurfaceHover, cardSurfaceTransition } from '@/components/ui/card-tokens'
 import { BRAND } from '@/constants/brand'
-import type { BookingWithCar } from '@/lib/supabase/database.types'
+import { parseConditionNotes } from '@/lib/booking/inspection'
 import {
   CUSTOMER_BOOKING_STATUS_BADGE_VARIANT,
   customerBookingStatusLabel,
@@ -25,14 +31,13 @@ import {
   paymentStatusBadgeVariant,
   resolveBookingVehicleVisual,
 } from '@/lib/customer/booking-display'
+import { bookingPaymentBreakdown, formatPaymentMethodLabel, payAtPickupInstructions } from '@/lib/payments/booking-payment'
 import { deriveCustomerBookingUiStatus, type CustomerBookingUiStatus } from '@/lib/customer/derive-booking-ui-status'
+import { getPublicSiteUrl } from '@/lib/env/site-url'
 import { formatInr } from '@/lib/format'
+import type { BookingWithCar } from '@/lib/supabase/database.types'
 import { cn } from '@/lib/utils/cn'
-import { BookingPdfToolkit } from '@/components/booking/booking-pdf-toolkit'
-import { Badge } from '@/components/ui/Badge'
-import { Button } from '@/components/ui/Button'
-import { Card, CardContent } from '@/components/ui/Card'
-import { cardEyebrow, cardSurfaceBase, cardSurfaceHover, cardSurfaceTransition } from '@/components/ui/card-tokens'
+import { bookingSupportPrefilledMessage, buildWhatsAppPrefilledUrl } from '@/lib/whatsapp/links'
 
 function resolveVehicle(row: BookingWithCar) {
   const v = row.vehicles
@@ -67,7 +72,9 @@ function timelineSteps(row: BookingWithCar) {
       { key: 'p', label: 'Pending review', done: true, current: false },
       { key: 'a', label: 'Approved', done: true, current: false },
       { key: 's', label: 'Pickup scheduled', done: true, current: false },
-      { key: 't', label: 'Active trip', done: true, current: false },
+      { key: 'insp_p', label: 'Pickup inspection', done: true, current: false },
+      { key: 't', label: 'On trip', done: true, current: false },
+      { key: 'insp_r', label: 'Return inspection', done: true, current: false },
       { key: 'r', label: 'Vehicle returned', done: true, current: false },
       { key: 'c', label: 'Trip completed', done: true, current: false },
     ]
@@ -75,8 +82,12 @@ function timelineSteps(row: BookingWithCar) {
 
   const pendingDone = row.booking_status !== 'pending_payment'
   const approvedDone = pendingDone && ['confirmed', 'active'].includes(row.booking_status)
+  const pickupInspDone =
+    Boolean(row.pickup_inspection_completed_at) || Boolean(row.handed_over_at) || row.booking_status === 'active'
   const activeDone =
     row.booking_status === 'active' || Boolean(row.handed_over_at) || row.booking_status === 'completed'
+  const returnInspDone =
+    Boolean(row.return_inspection_completed_at) || Boolean(row.returned_at) || row.booking_status === 'completed'
   const returnedDone = Boolean(row.returned_at) || row.booking_status === 'completed'
   const completedDone = row.booking_status === 'completed'
 
@@ -84,7 +95,9 @@ function timelineSteps(row: BookingWithCar) {
     { key: 'p', label: 'Pending review', done: pendingDone },
     { key: 'a', label: 'Approved', done: approvedDone },
     { key: 's', label: 'Pickup scheduled', done: approvedDone },
-    { key: 't', label: 'Active trip', done: activeDone },
+    { key: 'insp_p', label: 'Pickup inspection', done: pickupInspDone },
+    { key: 't', label: 'On trip', done: activeDone },
+    { key: 'insp_r', label: 'Return inspection', done: returnInspDone },
     { key: 'r', label: 'Vehicle returned', done: returnedDone },
     { key: 'c', label: 'Trip completed', done: completedDone },
   ]
@@ -98,7 +111,18 @@ function timelineSteps(row: BookingWithCar) {
   })
 }
 
-export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
+export type CustomerBookingInspectionView = {
+  photos: { phase: string; slot: string; url: string | null }[]
+  signatureUrl: string | null
+}
+
+export function CustomerBookingDetail({
+  row,
+  inspection,
+}: {
+  row: BookingWithCar
+  inspection?: CustomerBookingInspectionView | null
+}) {
   const vehicle = resolveVehicle(row)
   const visual = resolveBookingVehicleVisual(row)
   const ui = deriveCustomerBookingUiStatus({
@@ -111,12 +135,26 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
   const bookingBadge = mapDbBookingStatusToCustomerBadge(row.booking_status)
   const steps = timelineSteps(row)
   const securityDeposit = vehicle?.security_deposit
+  const payBreakdown = bookingPaymentBreakdown(row)
   const inventoryId = vehicle?.id
   const invoiceRef = `OX-${row.id.replace(/-/g, '').slice(0, 10).toUpperCase()}`
   const isCancelled = row.booking_status === 'cancelled'
 
   const pickupFmt = new Date(row.pickup_date).toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short' })
   const returnFmt = new Date(row.return_date).toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short' })
+  const pickupCondition = parseConditionNotes(row.pickup_condition_notes)
+  const returnCondition = parseConditionNotes(row.return_condition_notes)
+  const penaltiesTotal =
+    (row.penalty_damage_rupees ?? 0) + (row.penalty_late_rupees ?? 0) + (row.penalty_extra_km_rupees ?? 0)
+  const siteBase = getPublicSiteUrl().replace(/\/+$/, '')
+  const whatsAppPrefilled = buildWhatsAppPrefilledUrl(
+    bookingSupportPrefilledMessage({
+      bookingId: row.id,
+      siteUrl: siteBase,
+      carLabel: vehicle?.name?.trim() || vehicle?.brand || null,
+      pickupSummary: pickupFmt,
+    }),
+  )
 
   return (
     <div className="space-y-8 pb-4 md:space-y-10 md:pb-8">
@@ -175,6 +213,49 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
           </div>
         </div>
       </section>
+
+      <Card className={cn(cardSurfaceTransition, cardSurfaceHover, 'overflow-hidden')}>
+        <CardContent className="p-5 sm:p-7">
+          <div className="flex items-center gap-2">
+            <Wallet className="h-5 w-5 text-electric" aria-hidden />
+            <h2 className="text-lg font-semibold tracking-[-0.02em] text-soft">Payment &amp; settlement</h2>
+          </div>
+          <p className="mt-2 text-sm text-muted">
+            Method: <span className="font-medium text-soft">{formatPaymentMethodLabel(row.payment_method)}</span> · Status{' '}
+            <span className="font-medium text-soft">{formatPaymentStatusLabel(row.payment_status)}</span>
+          </p>
+          <dl className="mt-6 grid gap-4 sm:grid-cols-3">
+            <div className="rounded-2xl border border-stroke bg-matte/[0.35] p-4">
+              <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">Booking amount</dt>
+              <dd className="mt-2 text-xl font-semibold tabular-nums text-soft">{formatInr(payBreakdown.bookingTotalRupees)}</dd>
+            </div>
+            <div className="rounded-2xl border border-stroke bg-matte/[0.35] p-4">
+              <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">Security deposit</dt>
+              <dd className="mt-2 text-xl font-semibold tabular-nums text-soft">{formatInr(payBreakdown.securityDepositRupees)}</dd>
+              <p className="mt-2 text-xs text-muted">Pre-auth at pickup — separate from rental balance.</p>
+            </div>
+            <div className="rounded-2xl border border-stroke bg-matte/[0.35] p-4">
+              <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">Pending rental</dt>
+              <dd className="mt-2 text-xl font-semibold tabular-nums text-electric">{formatInr(payBreakdown.pendingRentalRupees)}</dd>
+              <p className="mt-2 text-xs text-muted">Collected so far: {formatInr(payBreakdown.collectedRentalRupees)}</p>
+            </div>
+          </dl>
+          {row.payment_method === 'pay_online' ? (
+            <p className="mt-6 rounded-xl border border-stroke bg-fill-glass px-3 py-2.5 text-sm text-muted">
+              Online checkout is on the roadmap — concierge will coordinate if your reservation moves off pay-at-pickup.
+            </p>
+          ) : (
+            <div className="mt-6 rounded-2xl border border-emerald-400/15 bg-emerald-500/[0.06] p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-emerald-100/90">Pay at pickup</p>
+              <ul className="mt-3 list-disc space-y-2 pl-4 text-sm leading-relaxed text-silver/95">
+                {payAtPickupInstructions().map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <Card className={cn(cardSurfaceTransition, cardSurfaceHover, 'overflow-hidden')}>
         <CardContent className="p-5 sm:p-7">
@@ -242,6 +323,131 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
             </CardContent>
           </Card>
 
+          <Card className={cn(cardSurfaceTransition, cardSurfaceHover, 'overflow-hidden')}>
+            <CardContent className="p-5 sm:p-7">
+              <div className="flex items-center gap-2">
+                <Camera className="h-5 w-5 text-electric" aria-hidden />
+                <h2 className="text-lg font-semibold tracking-[-0.02em] text-soft">Handover &amp; return</h2>
+              </div>
+              <p className="mt-2 text-sm text-muted">
+                {row.handed_over_at
+                  ? 'Your trip handover is on file. Below is a summary of what we recorded at pickup and return.'
+                  : 'After pickup, your handover summary and vehicle photos will appear here.'}
+              </p>
+              {row.handed_over_at ? (
+                <dl className="mt-6 grid gap-4 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-stroke bg-matte/[0.35] p-4">
+                    <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">Pickup fuel</dt>
+                    <dd className="mt-2 text-sm font-medium text-soft">
+                      {row.pickup_fuel_level != null ? `${row.pickup_fuel_level}%` : '—'}
+                    </dd>
+                  </div>
+                  <div className="rounded-2xl border border-stroke bg-matte/[0.35] p-4">
+                    <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">Pickup odometer</dt>
+                    <dd className="mt-2 text-sm font-medium text-soft">
+                      {row.pickup_odometer_km != null ? `${row.pickup_odometer_km.toLocaleString()} km` : '—'}
+                    </dd>
+                  </div>
+                  {row.customer_handover_signed_at ? (
+                    <div className="rounded-2xl border border-stroke bg-matte/[0.35] p-4 sm:col-span-2">
+                      <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">Signature</dt>
+                      <dd className="mt-2 text-xs text-muted">
+                        Acknowledged {new Date(row.customer_handover_signed_at).toLocaleString()}
+                      </dd>
+                      {inspection?.signatureUrl ? (
+                        <div className="relative mt-3 h-36 w-full max-w-sm overflow-hidden rounded-xl border border-stroke bg-white">
+                          <Image src={inspection.signatureUrl} alt="Your signature" fill className="object-contain p-2" unoptimized />
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  {pickupCondition.cleanliness?.trim() ? (
+                    <div className="rounded-2xl border border-stroke bg-matte/[0.35] p-4 sm:col-span-2">
+                      <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">Cleanliness at pickup</dt>
+                      <dd className="mt-2 text-sm text-soft">{pickupCondition.cleanliness}</dd>
+                    </div>
+                  ) : null}
+                </dl>
+              ) : null}
+
+              {penaltiesTotal > 0 || (row.deposit_penalty_total_rupees ?? 0) > 0 ? (
+                <div className="mt-6 rounded-2xl border border-amber-400/20 bg-amber-500/[0.06] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-amber-100/90">Deposit &amp; charges</p>
+                  <ul className="mt-3 space-y-2 text-sm text-silver/95">
+                    {(row.penalty_damage_rupees ?? 0) > 0 ? (
+                      <li className="flex justify-between gap-4">
+                        <span>Damage</span>
+                        <span className="tabular-nums">{formatInr(row.penalty_damage_rupees ?? 0)}</span>
+                      </li>
+                    ) : null}
+                    {(row.penalty_late_rupees ?? 0) > 0 ? (
+                      <li className="flex justify-between gap-4">
+                        <span>Late return</span>
+                        <span className="tabular-nums">{formatInr(row.penalty_late_rupees ?? 0)}</span>
+                      </li>
+                    ) : null}
+                    {(row.penalty_extra_km_rupees ?? 0) > 0 ? (
+                      <li className="flex justify-between gap-4">
+                        <span>Extra distance</span>
+                        <span className="tabular-nums">{formatInr(row.penalty_extra_km_rupees ?? 0)}</span>
+                      </li>
+                    ) : null}
+                    {(row.deposit_penalty_total_rupees ?? 0) > 0 ? (
+                      <li className="flex justify-between gap-4 border-t border-stroke pt-2 font-medium text-soft">
+                        <span>Applied from deposit</span>
+                        <span className="tabular-nums">{formatInr(row.deposit_penalty_total_rupees ?? 0)}</span>
+                      </li>
+                    ) : null}
+                  </ul>
+                </div>
+              ) : null}
+
+              {row.returned_at || row.return_fuel_level != null || row.return_odometer_km != null ? (
+                <div className="mt-6 border-t border-stroke pt-6">
+                  <h3 className="text-sm font-semibold text-soft">Return summary</h3>
+                  <dl className="mt-4 grid gap-4 sm:grid-cols-2">
+                    <div className="rounded-2xl border border-stroke bg-matte/[0.35] p-4">
+                      <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">Return fuel</dt>
+                      <dd className="mt-2 text-sm font-medium text-soft">
+                        {row.return_fuel_level != null ? `${row.return_fuel_level}%` : '—'}
+                      </dd>
+                    </div>
+                    <div className="rounded-2xl border border-stroke bg-matte/[0.35] p-4">
+                      <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">Return odometer</dt>
+                      <dd className="mt-2 text-sm font-medium text-soft">
+                        {row.return_odometer_km != null ? `${row.return_odometer_km.toLocaleString()} km` : '—'}
+                      </dd>
+                    </div>
+                    {returnCondition.cleanliness?.trim() ? (
+                      <div className="rounded-2xl border border-stroke bg-matte/[0.35] p-4 sm:col-span-2">
+                        <dt className="text-[11px] font-semibold uppercase tracking-wide text-muted">Cleanliness at return</dt>
+                        <dd className="mt-2 text-sm text-soft">{returnCondition.cleanliness}</dd>
+                      </div>
+                    ) : null}
+                  </dl>
+                </div>
+              ) : null}
+
+              {inspection?.photos?.length ? (
+                <div className="mt-6 border-t border-stroke pt-6">
+                  <h3 className="text-sm font-semibold text-soft">Vehicle photos</h3>
+                  <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {inspection.photos.map((p) =>
+                      p.url ? (
+                        <div key={`${p.phase}-${p.slot}`} className="relative aspect-video overflow-hidden rounded-xl border border-stroke">
+                          <Image src={p.url} alt={`${p.phase} ${p.slot}`} fill className="object-cover" unoptimized />
+                          <span className="absolute bottom-1 left-1 rounded bg-black/55 px-1.5 py-0.5 text-[10px] font-medium uppercase text-white">
+                            {p.phase} · {p.slot}
+                          </span>
+                        </div>
+                      ) : null,
+                    )}
+                  </div>
+                </div>
+              ) : null}
+            </CardContent>
+          </Card>
+
           {/* Amounts */}
           <Card className={cn(cardSurfaceTransition, cardSurfaceHover)}>
             <CardContent className="p-5 sm:p-7">
@@ -263,7 +469,7 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
                   <span className="tabular-nums text-soft">{formatInr(row.gst_rupees)}</span>
                 </li>
                 <li className="flex justify-between gap-4 pt-1 text-base font-semibold text-soft">
-                  <span>Total paid / due</span>
+                  <span>Contract total</span>
                   <span className="tabular-nums">{formatInr(row.total_rupees)}</span>
                 </li>
                 {row.deposit_held_rupees != null ? (
@@ -432,7 +638,7 @@ export function CustomerBookingDetail({ row }: { row: BookingWithCar }) {
                   {BRAND.email}
                 </a>
                 <span className="mx-2 text-muted/40">·</span>
-                <a href={BRAND.whatsapp} className="text-electric hover:underline" target="_blank" rel="noreferrer">
+                <a href={whatsAppPrefilled} className="text-electric hover:underline" target="_blank" rel="noreferrer">
                   WhatsApp
                 </a>
               </p>

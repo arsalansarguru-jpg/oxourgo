@@ -1,6 +1,6 @@
 import type { BookingWithCar } from '@/lib/supabase/database.types'
 import type { PaymentEventRow } from '@/lib/customer/payment-queries'
-import { formatBookingVehicleTitle } from '@/lib/customer/booking-display'
+import { formatBookingVehicleTitle, formatPaymentStatusLabel, paymentStatusBadgeVariant } from '@/lib/customer/booking-display'
 import { formatInr } from '@/lib/format'
 import { cn } from '@/lib/utils/cn'
 import { Badge } from '@/components/ui/Badge'
@@ -46,7 +46,9 @@ export function CustomerPaymentsView({
                   <td className="px-4 py-3 text-soft">{formatBookingVehicleTitle(b)}</td>
                   <td className="px-4 py-3 tabular-nums text-soft">{formatInr(b.total_rupees)}</td>
                   <td className="px-4 py-3">
-                    <Badge variant={b.payment_status === 'paid' ? 'success' : 'electric'}>{b.payment_status}</Badge>
+                    <Badge variant={paymentStatusBadgeVariant(b.payment_status)}>
+                      {formatPaymentStatusLabel(b.payment_status)}
+                    </Badge>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Button size="sm" variant="secondary" to={`/dashboard/bookings/${b.id}`}>

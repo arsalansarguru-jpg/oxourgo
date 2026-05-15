@@ -4,6 +4,7 @@ import { ArrowUpRight, Car, CreditCard, ShieldCheck, Sparkles } from 'lucide-rea
 import type { BookingWithCar } from '@/lib/supabase/database.types'
 import { deriveCustomerBookingUiStatus } from '@/lib/customer/derive-booking-ui-status'
 import { formatBookingVehicleTitle } from '@/lib/customer/booking-display'
+import { isPostedRentalPayment } from '@/lib/payments/booking-payment'
 import { formatInr } from '@/lib/format'
 import { cn } from '@/lib/utils/cn'
 import { Button } from '@/components/ui/Button'
@@ -26,8 +27,7 @@ function Stat({ label, value, hint }: { label: string; value: string; hint?: str
 }
 
 function isPostedPayment(paymentStatus: string): boolean {
-  const p = paymentStatus.trim().toLowerCase()
-  return p === 'paid' || p === 'authorized'
+  return isPostedRentalPayment(paymentStatus)
 }
 
 export function CustomerDashboardHome({
@@ -56,11 +56,13 @@ export function CustomerDashboardHome({
 
   const postedSpend = bookings
     .filter((b) => b.booking_status !== 'cancelled' && isPostedPayment(b.payment_status))
-    .reduce((s, b) => s + b.total_rupees, 0)
+    .reduce((s, b) => s + Math.max(0, Number(b.amount_paid ?? 0)), 0)
 
-  const pendingPaymentBookings = bookings.filter(
-    (b) => b.booking_status === 'pending_payment' || b.payment_status.trim().toLowerCase() === 'pending',
-  ).length
+  const pendingPaymentBookings = bookings.filter((b) => {
+    const p = b.payment_status.trim().toLowerCase()
+    const due = Math.max(0, Number(b.amount_due ?? 0))
+    return b.booking_status === 'pending_payment' || p === 'pending' || (p === 'partial' && due > 0)
+  }).length
 
   const isVerified = bookingCleared
 
@@ -92,7 +94,7 @@ export function CustomerDashboardHome({
           value={String(upcoming.length)}
           hint="Includes payment-pending and confirmed ahead"
         />
-        <Stat label="Posted spend" value={formatInr(postedSpend)} hint="Paid or authorized booking totals" />
+        <Stat label="Posted spend" value={formatInr(postedSpend)} hint="Rental amounts recorded as collected" />
         <Stat
           label="Verification"
           value={isVerified ? 'Cleared' : 'In progress'}

@@ -2,6 +2,8 @@ import 'server-only'
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { notifyCustomer } from '@/lib/notifications/emit'
+import { enqueueOutboundEmail } from '@/lib/notifications/channels/outbound-enqueue'
+import type { Json } from '@/lib/supabase/database.types'
 
 /**
  * Trip reminders for confirmed bookings with pickup in the configured hour window.
@@ -53,6 +55,11 @@ export async function runTripReminderJob(options?: { hoursMin?: number; hoursMax
       title: 'Upcoming trip reminder',
       body: `Pickup for ${label} is scheduled soon (${new Date(b.pickup_date).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })}).`,
       metadata: { booking_id: b.id, pickup_date: b.pickup_date },
+    })
+    void enqueueOutboundEmail({
+      idempotencyKey: `email:customer_trip_reminder:${b.id}`,
+      templateKey: 'customer_trip_reminder',
+      payload: { audience: 'customer', user_id: b.user_id, booking_id: b.id } as Json,
     })
     inserted += 1
   }

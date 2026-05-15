@@ -15,14 +15,20 @@ type BookingLite = {
   total_rupees: number
   booking_status: string
   payment_status: string
+  amount_paid: number
 }
 
 type VehicleLite = { id: string; name: string; brand: string; available: boolean | null }
 
-function postedRevenueEligible(b: Pick<BookingLite, 'booking_status' | 'payment_status'>): boolean {
-  if ((b.booking_status ?? '').trim().toLowerCase() === 'cancelled') return false
+function postedRevenueAmount(b: Pick<BookingLite, 'booking_status' | 'payment_status' | 'amount_paid'>): number {
+  if ((b.booking_status ?? '').trim().toLowerCase() === 'cancelled') return 0
   const p = (b.payment_status ?? '').trim().toLowerCase()
-  return p === 'paid' || p === 'authorized'
+  if (p === 'received' || p === 'partial') return Math.max(0, Number(b.amount_paid ?? 0))
+  return 0
+}
+
+function postedRevenueEligible(b: Pick<BookingLite, 'booking_status' | 'payment_status' | 'amount_paid'>): boolean {
+  return postedRevenueAmount(b) > 0
 }
 
 function bookingSuccessForConversion(b: Pick<BookingLite, 'booking_status'>): boolean {
@@ -46,7 +52,7 @@ async function sumPostedRevenue(
   for (let guard = 0; guard < 40; guard++) {
     let q = admin
       .from('bookings')
-      .select('total_rupees, booking_status, payment_status')
+      .select('total_rupees, booking_status, payment_status, amount_paid')
       .not('booking_status', 'eq', 'cancelled')
       .range(from, from + page - 1)
     if (range && 'startIso' in range) {
@@ -62,9 +68,9 @@ async function sumPostedRevenue(
       logPostgrestError('[adminAnalytics] sumPostedRevenue', error)
       break
     }
-    const rows = (data ?? []) as Pick<BookingLite, 'total_rupees' | 'booking_status' | 'payment_status'>[]
+    const rows = (data ?? []) as Pick<BookingLite, 'total_rupees' | 'booking_status' | 'payment_status' | 'amount_paid'>[]
     for (const r of rows) {
-      if (postedRevenueEligible(r)) sum += Number(r.total_rupees ?? 0)
+      if (postedRevenueEligible(r)) sum += postedRevenueAmount(r)
     }
     if (rows.length < page) break
     from += page
@@ -185,9 +191,8 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
     const { data, error } = await admin
       .from('bookings')
       .select(
-        'id, user_id, vehicle_id, created_at, pickup_date, return_date, rental_days, total_rupees, booking_status, payment_status',
+        'id, user_id, vehicle_id, created_at, pickup_date, return_date, rental_days, total_rupees, booking_status, payment_status, amount_paid',
       )
-      .gte('created_at', range.startIso)
       .lte('created_at', range.endIso)
       .order('created_at', { ascending: true })
       .range(off, off + BOOKING_PAGE - 1)
@@ -213,7 +218,7 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
     const { data, error } = await admin
       .from('bookings')
       .select(
-        'id, user_id, vehicle_id, created_at, pickup_date, return_date, rental_days, total_rupees, booking_status, payment_status',
+        'id, user_id, vehicle_id, created_at, pickup_date, return_date, rental_days, total_rupees, booking_status, payment_status, amount_paid',
       )
       .lte('pickup_date', range.endDay)
       .gte('return_date', range.startDay)
@@ -248,9 +253,10 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
     bookingsCreatedInPeriod += 1
     if (bookingSuccessForConversion(b)) conversionSuccess += 1
     if (postedRevenueEligible(b)) {
-      periodRevenue += Number(b.total_rupees ?? 0)
+      const amt = postedRevenueAmount(b)
+      periodRevenue += amt
       const day = b.created_at.slice(0, 10)
-      if (daySet.has(day)) revenueByDay.set(day, (revenueByDay.get(day) ?? 0) + Number(b.total_rupees ?? 0))
+      if (daySet.has(day)) revenueByDay.set(day, (revenueByDay.get(day) ?? 0) + amt)
     }
     const day = b.created_at.slice(0, 10)
     if (daySet.has(day)) bookingsByDay.set(day, (bookingsByDay.get(day) ?? 0) + 1)
@@ -298,11 +304,11 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
     if (b.vehicle_id) {
       const cur = vehicleRevenue.get(b.vehicle_id) ?? { bookings: 0, revenue: 0 }
       cur.bookings += 1
-      if (postedRevenueEligible(b)) cur.revenue += Number(b.total_rupees ?? 0)
+      if (postedRevenueEligible(b)) cur.revenue += postedRevenueAmount(b)
       vehicleRevenue.set(b.vehicle_id, cur)
     }
     if (postedRevenueEligible(b)) {
-      userRevenue.set(b.user_id, (userRevenue.get(b.user_id) ?? 0) + Number(b.total_rupees ?? 0))
+      userRevenue.set(b.user_id, (userRevenue.get(b.user_id) ?? 0) + postedRevenueAmount(b))
     }
   }
 

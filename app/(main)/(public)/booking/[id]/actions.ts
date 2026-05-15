@@ -104,6 +104,15 @@ export async function createBookingAction(input: CreateBookingInput): Promise<Cr
         }
       }
 
+      const method = input.paymentMethod === 'pay_online' ? 'pay_online' : 'pay_at_pickup'
+      if (method === 'pay_online') {
+        return {
+          ok: false,
+          code: 'validation',
+          message: 'Online checkout is not available yet. Choose pay at pickup.',
+        }
+      }
+
       const insert: Database['public']['Tables']['bookings']['Insert'] = {
         vehicle_id: vehicleRow.id,
         user_id: user.id,
@@ -118,7 +127,10 @@ export async function createBookingAction(input: CreateBookingInput): Promise<Cr
         gst_rupees: quote.gstRupees,
         total_rupees: quote.totalRupees,
         booking_status: 'pending_payment',
+        payment_method: 'pay_at_pickup',
         payment_status: 'pending',
+        amount_due: quote.totalRupees,
+        amount_paid: 0,
       }
 
       const { data: created, error: insErr } = await supabase.from('bookings').insert(insert).select('id').single()

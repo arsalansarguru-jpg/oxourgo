@@ -43,9 +43,8 @@ import { cn } from '@/lib/utils/cn'
 const PAYMENT_FILTER_OPTS = [
   { value: '', label: 'All payments' },
   { value: 'pending', label: 'Pending' },
-  { value: 'authorized', label: 'Authorized' },
-  { value: 'paid', label: 'Paid' },
-  { value: 'failed', label: 'Failed' },
+  { value: 'partial', label: 'Partial' },
+  { value: 'received', label: 'Received' },
   { value: 'refunded', label: 'Refunded' },
 ] as const
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useMemo, useState, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 
 import {
   adminApproveBookingAction,
@@ -10,7 +10,6 @@ import {
   adminMarkHandedOverAction,
   adminMarkReturnedAction,
   adminRejectBookingAction,
-  adminSaveBookingChecklistsAction,
   adminSetBookingDepositTrackingAction,
   adminSetBookingInternalNotesAction,
   adminSetBookingPaymentStatusAction,
@@ -19,43 +18,30 @@ import {
 import {
   adminCreateDepositHoldPlaceholderAction,
   adminCreateRefundPlaceholderAction,
+  adminMarkBookingPartialPaymentAction,
+  adminMarkBookingPaymentReceivedAction,
+  adminMarkBookingPaymentRefundedAction,
 } from '@/lib/admin/actions/payment-actions'
 import type { BookingWithCar } from '@/lib/supabase/database.types'
+import { formatInr } from '@/lib/format'
+import { formatPaymentMethodLabel } from '@/lib/payments/booking-payment'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
+import { AdminBookingInspectionWorkspace } from '@/components/admin/bookings/admin-booking-inspection-workspace'
+import type { AdminInspectionBundle } from '@/lib/admin/data/booking-inspection'
 
-const PICKUP_KEYS = [
-  { id: 'id_verified', label: 'Customer ID verified' },
-  { id: 'vehicle_walkaround', label: 'Vehicle walkaround / photos' },
-  { id: 'fuel_level', label: 'Fuel level recorded' },
-  { id: 'deposit_auth', label: 'Security deposit pre-auth captured' },
-] as const
-
-const RETURN_KEYS = [
-  { id: 'mileage', label: 'Return mileage recorded' },
-  { id: 'fuel_return', label: 'Fuel level at return' },
-  { id: 'damage_check', label: 'Damage inspection complete' },
-  { id: 'keys_returned', label: 'Keys & accessories returned' },
-] as const
-
-function readChecklist(map: unknown): Record<string, boolean> {
-  if (!map || typeof map !== 'object' || Array.isArray(map)) return {}
-  const out: Record<string, boolean> = {}
-  for (const [k, v] of Object.entries(map as Record<string, unknown>)) {
-    out[k] = Boolean(v)
-  }
-  return out
-}
-
-export function AdminBookingOpsPanel({ booking }: { booking: BookingWithCar }) {
+export function AdminBookingOpsPanel({
+  booking,
+  inspection,
+}: {
+  booking: BookingWithCar
+  inspection: AdminInspectionBundle
+}) {
   const router = useRouter()
   const [pending, start] = useTransition()
   const [msg, setMsg] = useState<string | null>(null)
-
-  const pickupState = useMemo(() => readChecklist(booking.pickup_checklist), [booking.pickup_checklist])
-  const returnState = useMemo(() => readChecklist(booking.return_checklist), [booking.return_checklist])
 
   const run = (fn: () => Promise<{ ok: boolean; message?: string }>) => {
     setMsg(null)
@@ -127,67 +113,7 @@ export function AdminBookingOpsPanel({ booking }: { booking: BookingWithCar }) {
         </AdminCardContent>
       </AdminCard>
 
-      <AdminCard key={`checklists-${booking.id}-${booking.updated_at}`}>
-        <AdminCardContent className="space-y-4">
-          <h2 className="text-lg font-semibold text-soft">Pickup &amp; return checklists</h2>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2 rounded-xl border border-stroke bg-matte/[0.35] p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted">Pickup</p>
-              <ul className="space-y-2">
-                {PICKUP_KEYS.map((item) => (
-                  <li key={item.id} className="flex items-center gap-2">
-                    <input
-                      id={`pick-${item.id}`}
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-stroke-strong"
-                      defaultChecked={pickupState[item.id] === true}
-                      disabled={pending}
-                      onChange={(e) => {
-                        run(async () =>
-                          adminSaveBookingChecklistsAction({
-                            bookingId: booking.id,
-                            pickup: { [item.id]: e.target.checked },
-                          }),
-                        )
-                      }}
-                    />
-                    <label htmlFor={`pick-${item.id}`} className="text-sm text-soft">
-                      {item.label}
-                    </label>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="space-y-2 rounded-xl border border-stroke bg-matte/[0.35] p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-muted">Return</p>
-              <ul className="space-y-2">
-                {RETURN_KEYS.map((item) => (
-                  <li key={item.id} className="flex items-center gap-2">
-                    <input
-                      id={`ret-${item.id}`}
-                      type="checkbox"
-                      className="h-4 w-4 rounded border-stroke-strong"
-                      defaultChecked={returnState[item.id] === true}
-                      disabled={pending}
-                      onChange={(e) => {
-                        run(async () =>
-                          adminSaveBookingChecklistsAction({
-                            bookingId: booking.id,
-                            return: { [item.id]: e.target.checked },
-                          }),
-                        )
-                      }}
-                    />
-                    <label htmlFor={`ret-${item.id}`} className="text-sm text-soft">
-                      {item.label}
-                    </label>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </AdminCardContent>
-      </AdminCard>
+      <AdminBookingInspectionWorkspace booking={booking} inspection={inspection} />
 
       <AdminCard>
         <AdminCardContent className="space-y-4">
@@ -269,6 +195,84 @@ export function AdminBookingOpsPanel({ booking }: { booking: BookingWithCar }) {
 
       <AdminCard>
         <AdminCardContent className="space-y-4">
+          <h2 className="text-lg font-semibold text-soft">Rental payment (ops)</h2>
+          <p className="text-xs leading-relaxed text-muted">
+            Method: <span className="font-medium text-soft">{formatPaymentMethodLabel(booking.payment_method)}</span> ·
+            Balance due <span className="font-medium text-soft">{formatInr(booking.amount_due ?? 0)}</span> · Collected{' '}
+            <span className="font-medium text-soft">{formatInr(booking.amount_paid ?? 0)}</span>
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              type="button"
+              disabled={pending}
+              onClick={() => {
+                const note = window.prompt('Optional note for the customer ledger') ?? ''
+                run(() => adminMarkBookingPaymentReceivedAction(booking.id, note || undefined))
+              }}
+            >
+              Mark payment received
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              disabled={pending}
+              onClick={() => {
+                if (!window.confirm('Reset rental payment to pending with full balance due?')) return
+                run(() => adminSetBookingPaymentStatusAction(booking.id, 'pending'))
+              }}
+            >
+              Reset to pending
+            </Button>
+            <Button
+              type="button"
+              variant="danger"
+              disabled={pending}
+              onClick={() => {
+                if (!window.confirm('Mark this booking rental as refunded in ops?')) return
+                const note = window.prompt('Optional refund context') ?? ''
+                run(() => adminMarkBookingPaymentRefundedAction(booking.id, note || undefined))
+              }}
+            >
+              Mark refunded
+            </Button>
+          </div>
+          <form
+            className="grid gap-3 border-t border-stroke pt-4 sm:grid-cols-2"
+            onSubmit={(e) => {
+              e.preventDefault()
+              const fd = new FormData(e.currentTarget)
+              const raw = fd.get('partial_collected')?.toString().trim() ?? ''
+              const note = fd.get('partial_note')?.toString().trim() ?? ''
+              const amount = Number(raw)
+              run(async () =>
+                adminMarkBookingPartialPaymentAction({
+                  bookingId: booking.id,
+                  amountPaidRupees: amount,
+                  note: note || null,
+                }),
+              )
+            }}
+          >
+            <Input
+              name="partial_collected"
+              type="number"
+              label="Partial · cumulative collected (₹)"
+              placeholder="e.g. 15000"
+              defaultValue={booking.amount_paid > 0 ? String(booking.amount_paid) : undefined}
+              className="min-h-10"
+            />
+            <Input name="partial_note" label="Optional note" placeholder="UPI / bank ref" className="min-h-10" />
+            <div className="flex items-end sm:col-span-2">
+              <Button type="submit" variant="secondary" disabled={pending}>
+                Mark partial payment
+              </Button>
+            </div>
+          </form>
+        </AdminCardContent>
+      </AdminCard>
+
+      <AdminCard>
+        <AdminCardContent className="space-y-4">
           <h2 className="text-lg font-semibold text-soft">Statuses</h2>
           <p className="text-xs text-muted">
             Prefer the workflow buttons above. Manual overrides are audited and should be rare.
@@ -289,25 +293,6 @@ export function AdminBookingOpsPanel({ booking }: { booking: BookingWithCar }) {
             <div className="flex items-end">
               <Button type="submit" variant="secondary" disabled={pending}>
                 Update status
-              </Button>
-            </div>
-          </form>
-          <form
-            className="grid gap-4 sm:grid-cols-2"
-            action={(fd) => {
-              run(async () => adminSetBookingPaymentStatusAction(booking.id, String(fd.get('payment_status'))))
-            }}
-          >
-            <Select name="payment_status" label="Payment status" defaultValue={booking.payment_status}>
-              <option value="pending">Pending</option>
-              <option value="authorized">Authorized</option>
-              <option value="paid">Paid</option>
-              <option value="failed">Failed</option>
-              <option value="refunded">Refunded</option>
-            </Select>
-            <div className="flex items-end">
-              <Button type="submit" variant="secondary" disabled={pending}>
-                Update payment
               </Button>
             </div>
           </form>

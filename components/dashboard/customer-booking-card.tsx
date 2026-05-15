@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Calendar, ChevronRight, CreditCard, MapPin } from 'lucide-react'
 
 import type { CustomerBookingUiStatus } from '@/lib/customer/derive-booking-ui-status'
+import { formatPaymentStatusLabel, paymentStatusBadgeVariant } from '@/lib/customer/booking-display'
 import { formatInr } from '@/lib/format'
 import { cn } from '@/lib/utils/cn'
 import { Badge } from '@/components/ui/Badge'
@@ -48,7 +49,8 @@ export function CustomerBookingCard({
   const pickupFmt = new Date(pickupAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
   const returnFmt = new Date(returnAt).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
   const pay = paymentStatus.trim().toLowerCase()
-  const needsPayment = uiStatus === 'pending_review' || pay === 'pending' || pay === 'failed'
+  const duePending = pay === 'pending' || pay === 'partial' || pay === 'failed'
+  const needsPayment = uiStatus === 'pending_review' || duePending
 
   return (
     <Card className={cn(cardSurfaceTransition, cardSurfaceHover, 'overflow-hidden')}>
@@ -61,6 +63,9 @@ export function CustomerBookingCard({
             <div className="flex flex-wrap items-center gap-2">
               <p className="font-semibold tracking-[-0.02em] text-soft">{carLabel}</p>
               <Badge variant={statusVariant[uiStatus]}>{bookingUiLabel(uiStatus)}</Badge>
+              <Badge variant={paymentStatusBadgeVariant(paymentStatus)} className="text-[10px]">
+                {formatPaymentStatusLabel(paymentStatus)}
+              </Badge>
             </div>
             <div className="flex flex-col gap-1 text-xs text-muted sm:text-sm">
               <span className="inline-flex items-center gap-1.5">
@@ -76,7 +81,9 @@ export function CustomerBookingCard({
           <div className="flex shrink-0 items-center justify-between gap-4 sm:flex-col sm:items-end">
             <div className="text-right">
               <p className="text-lg font-semibold tabular-nums text-soft">{formatInr(totalRupees)}</p>
-              <p className="text-[11px] uppercase tracking-wide text-muted">Pay: {paymentStatus}</p>
+              <p className="text-[11px] uppercase tracking-wide text-muted">
+                Pay: {formatPaymentStatusLabel(paymentStatus)}
+              </p>
             </div>
             <ChevronRight className="h-5 w-5 text-muted sm:hidden" aria-hidden />
           </div>

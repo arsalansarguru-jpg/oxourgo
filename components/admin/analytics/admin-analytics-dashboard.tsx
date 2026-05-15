@@ -138,7 +138,7 @@ export function AdminAnalyticsDashboard({ data }: { data: AdminAnalyticsBundle }
           <MetricGlass
             label="Total revenue (posted)"
             value={formatInr(totals.totalRevenueLifetime)}
-            hint="Lifetime · paid or authorized, excl. cancelled"
+            hint="Lifetime rental collected (received + partial), excl. cancelled"
             icon={IndianRupee}
           />
         </motion.div>
