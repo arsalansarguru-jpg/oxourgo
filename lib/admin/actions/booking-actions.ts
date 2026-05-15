@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 
 import type { AdminActionResult } from '@/lib/admin/actions/types'
 import { writeAdminAudit } from '@/lib/admin/audit'
+import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from '@/lib/audit/actions'
 import { requirePermissionForAdminAction } from '@/lib/auth/admin-action-auth'
 import { hasVehicleBookingOverlap } from '@/lib/booking/vehicle-overlap'
 import { validatePickupInspectionForHandover, validateReturnInspectionForCheckpoint } from '@/lib/admin/booking-inspection-validate'
@@ -32,12 +33,16 @@ function nowIso() {
 }
 
 /** Approve pending request: overlap re-check, confirmed + audit + timestamps + notification. */
-async function confirmPendingBookingFromAdmin(bookingId: string, actorUserId: string): Promise<AdminActionResult> {
+async function confirmPendingBookingFromAdmin(
+  bookingId: string,
+  actorUserId: string,
+  actorRole: string,
+): Promise<AdminActionResult> {
   const admin = createAdminClient()
 
   const { data: row, error: fetchErr } = await admin
     .from('bookings')
-    .select('booking_status, vehicle_id, pickup_date, return_date')
+    .select('booking_status, vehicle_id, pickup_date, return_date, user_id')
     .eq('id', bookingId)
     .single()
 
@@ -84,9 +89,13 @@ async function confirmPendingBookingFromAdmin(bookingId: string, actorUserId: st
 
   await writeAdminAudit({
     actorUserId,
-    action: 'booking.approve',
-    entityType: 'booking',
+    actorRole,
+    action: AUDIT_ACTIONS.bookingApproved,
+    entityType: AUDIT_ENTITY_TYPES.booking,
     entityId: bookingId,
+    oldValue: { booking_status: row.booking_status },
+    newValue: { booking_status: 'confirmed' },
+    metadata: { bookingId, userId: row.user_id },
   })
 
   void onBookingApproved(bookingId)
@@ -102,8 +111,8 @@ export async function adminApproveBookingAction(bookingId: string): Promise<Admi
   return runInstrumentedServerAction('adminApproveBookingAction', 'admin', async () => {
     const guard = await requirePermissionForAdminAction('bookings.write')
     if (!guard.ok) return guard
-    const { user } = guard.session
-    return confirmPendingBookingFromAdmin(bookingId, user.id)
+    const { user, appRole } = guard.session
+    return confirmPendingBookingFromAdmin(bookingId, user.id, appRole)
   })
 }
 
@@ -127,7 +136,7 @@ export async function adminMarkBookingActiveAction(bookingId: string): Promise<A
       return { ok: false, message: 'Only pending bookings can be approved.' }
     }
 
-    return confirmPendingBookingFromAdmin(bookingId, user.id)
+    return confirmPendingBookingFromAdmin(bookingId, user.id, guard.session.appRole)
   })
 }
 

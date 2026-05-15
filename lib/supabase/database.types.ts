@@ -848,6 +848,45 @@ export type Database = {
         }
         Relationships: []
       }
+      audit_logs: {
+        Row: {
+          id: string
+          actor_id: string | null
+          actor_role: string | null
+          entity_type: string
+          entity_id: string | null
+          action: string
+          old_value: Json | null
+          new_value: Json | null
+          metadata: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          actor_id?: string | null
+          actor_role?: string | null
+          entity_type: string
+          entity_id?: string | null
+          action: string
+          old_value?: Json | null
+          new_value?: Json | null
+          metadata?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          actor_id?: string | null
+          actor_role?: string | null
+          entity_type?: string
+          entity_id?: string | null
+          action?: string
+          old_value?: Json | null
+          new_value?: Json | null
+          metadata?: Json | null
+          created_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           id: string

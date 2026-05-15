@@ -14,10 +14,12 @@ import { adminGetBookingInspectionBundle } from '@/lib/admin/data/booking-inspec
 import { adminGetBookingFinancialSummary } from '@/lib/admin/data/financials'
 import { adminGetBookingViolationsBundle } from '@/lib/admin/data/violations'
 import { adminListPaymentEventsForBooking } from '@/lib/admin/data/payments'
+import { listAuditLogsForBooking } from '@/lib/admin/data/audit-logs'
 import {
   adminListBookingOpsActivity,
   adminListBookingVehicleAssignments,
 } from '@/lib/admin/data/operations'
+import { AdminAuditTimelineSection } from '@/components/admin/audit/admin-audit-timeline-section'
 import { adminListVehicles } from '@/lib/admin/data/fleet'
 import { canUseOpsOverride, hasPermission } from '@/lib/auth/permissions'
 import { getAuthSessionSummary } from '@/lib/auth/server'
@@ -61,6 +63,7 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
     vehicles,
     opsActivity,
     vehicleAssignments,
+    auditTimeline,
   ] = await Promise.all([
     (async () => {
       try {
@@ -79,6 +82,7 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
     adminListVehicles(),
     adminListBookingOpsActivity(id),
     adminListBookingVehicleAssignments(id),
+    listAuditLogsForBooking(id),
   ])
 
   const vehJoin = booking.vehicles
@@ -195,6 +199,13 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
           <AdminBookingPaymentTimeline events={paymentTimeline} />
         </AdminCardContent>
       </AdminCard>
+
+      <AdminAuditTimelineSection
+        title="Booking activity timeline"
+        description="Approvals, payments, fleet changes, and manual ops recorded for this booking."
+        entries={auditTimeline}
+        compact
+      />
 
       <div className="grid gap-8 lg:grid-cols-2">
         <AdminCard>

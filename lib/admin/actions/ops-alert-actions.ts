@@ -5,6 +5,8 @@ import { revalidatePath } from 'next/cache'
 import { captureServerPosthogEvent } from '@/lib/analytics/posthog-server'
 import { POSTHOG_EVENTS } from '@/lib/analytics/posthog-events'
 import type { AdminActionResult } from '@/lib/admin/actions/types'
+import { writeAdminAudit } from '@/lib/admin/audit'
+import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from '@/lib/audit/actions'
 import { requirePermissionForAdminAction } from '@/lib/auth/admin-action-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { adminActionDbFailed } from '@/lib/errors/safe-user-message'
@@ -29,6 +31,14 @@ export async function dismissOpsAlertAction(alertId: string): Promise<AdminActio
       }
       return adminActionDbFailed('dismissOpsAlertAction', error)
     }
+
+    await writeAdminAudit({
+      actorUserId: user.id,
+      actorRole: guard.session.appRole,
+      action: AUDIT_ACTIONS.adminOpsAlertDismiss,
+      entityType: AUDIT_ENTITY_TYPES.alert,
+      entityId: alertId,
+    })
 
     revalidatePath('/admin')
     revalidatePath('/admin/notifications')

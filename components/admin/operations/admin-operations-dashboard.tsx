@@ -103,9 +103,14 @@ export function AdminOperationsDashboard({
 
         <AdminCard>
           <AdminCardContent className="space-y-3">
-            <div className="flex items-center gap-2">
-              <Activity className="h-5 w-5 text-muted" />
-              <h2 className="text-lg font-semibold text-soft">Admin audit log</h2>
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <Activity className="h-5 w-5 text-muted" />
+                <h2 className="text-lg font-semibold text-soft">Admin audit log</h2>
+              </div>
+              <Link href="/admin/audit" className="text-xs text-electric hover:underline">
+                Full audit →
+              </Link>
             </div>
             {audit.length === 0 ? (
               <p className="text-sm text-muted">No audit events yet.</p>

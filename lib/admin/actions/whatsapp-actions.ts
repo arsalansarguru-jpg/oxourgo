@@ -2,8 +2,10 @@
 
 import { revalidatePath } from 'next/cache'
 
-import { requirePermissionForAdminAction } from '@/lib/auth/admin-action-auth'
 import type { AdminActionResult } from '@/lib/admin/actions/types'
+import { writeAdminAudit } from '@/lib/admin/audit'
+import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from '@/lib/audit/actions'
+import { requirePermissionForAdminAction } from '@/lib/auth/admin-action-auth'
 import { adminActionDbFailed } from '@/lib/errors/safe-user-message'
 import { runInstrumentedServerAction } from '@/lib/monitoring/instrument-server-action'
 import { linkCustomerContactToUser } from '@/lib/whatsapp/contacts'
@@ -21,6 +23,16 @@ export async function adminLinkWhatsAppContactToUserAction(
     if (!guard.ok) return guard
     const result = await linkCustomerContactToUser(contactId, userId)
     if (!result.ok) return { ok: false, message: result.message }
+
+    await writeAdminAudit({
+      actorUserId: guard.session.user.id,
+      actorRole: guard.session.appRole,
+      action: AUDIT_ACTIONS.whatsappLink,
+      entityType: AUDIT_ENTITY_TYPES.whatsapp,
+      entityId: contactId,
+      metadata: { userId, contactId },
+    })
+
     revalidatePath('/admin/whatsapp')
     revalidatePath('/admin/bookings')
     return { ok: true, message: result.message }
@@ -62,6 +74,20 @@ export async function adminCreateWhatsAppBookingFromConversationAction(input: {
     if (!result.ok) {
       return { ok: false, message: result.message }
     }
+
+    await writeAdminAudit({
+      actorUserId: guard.session.user.id,
+      actorRole: guard.session.appRole,
+      action: AUDIT_ACTIONS.whatsappBooking,
+      entityType: AUDIT_ENTITY_TYPES.booking,
+      entityId: result.bookingId,
+      metadata: {
+        bookingId: result.bookingId,
+        conversationId: input.conversationId,
+        contactId: input.contactId,
+        vehicleId: input.vehicleId,
+      },
+    })
 
     revalidatePath('/admin/bookings')
     revalidatePath(`/admin/bookings/${result.bookingId}`)

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 
 import type { AdminActionResult } from '@/lib/admin/actions/types'
 import { writeAdminAudit } from '@/lib/admin/audit'
+import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from '@/lib/audit/actions'
 import { requirePermissionForAdminAction } from '@/lib/auth/admin-action-auth'
 import { onKycDecision } from '@/lib/notifications/events'
 import { syncProfileKycFromDocuments } from '@/lib/kyc/sync-profile-kyc'
@@ -68,15 +69,26 @@ export async function adminSetKycDocumentStatusAction(input: AdminKycSetStatusIn
       return { ok: false, message: syncRes.message }
     }
 
+    const kycAction =
+      input.status === 'approved'
+        ? AUDIT_ACTIONS.kycApproved
+        : input.status === 'rejected'
+          ? AUDIT_ACTIONS.kycRejected
+          : input.status === 'resubmission_required'
+            ? AUDIT_ACTIONS.kycResubmission
+            : `kyc.${input.status}`
+
     await writeAdminAudit({
       actorUserId: user.id,
-      action: `kyc.${input.status}`,
-      entityType: 'kyc_document',
+      actorRole: guard.session.appRole,
+      action: kycAction,
+      entityType: AUDIT_ENTITY_TYPES.kyc,
       entityId: input.documentId,
-      payload: {
-        user_id: doc.user_id,
+      metadata: {
+        userId: doc.user_id,
+        documentType: doc.document_type,
         note: input.reviewer_note ?? null,
-        rejection_reason: rejectionReason,
+        rejectionReason,
       },
     })
 

@@ -5,8 +5,10 @@ import { AdminCustomerOps } from '@/components/admin/admin-customer-ops'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 import { AdminStatusPill } from '@/components/admin/admin-status-pill'
+import { AdminAuditTimelineSection } from '@/components/admin/audit/admin-audit-timeline-section'
 import { adminGetCustomer } from '@/lib/admin/data/customers'
 import { adminListBookingsForUser } from '@/lib/admin/data/bookings'
+import { listAuditLogsForUser } from '@/lib/admin/data/audit-logs'
 import { formatInr } from '@/lib/format'
 
 export const dynamic = 'force-dynamic'
@@ -23,9 +25,12 @@ export default async function AdminCustomerDetailPage({ params }: { params: Prom
   const { id } = await params
   let customer: Awaited<ReturnType<typeof adminGetCustomer>> = null
   let bookings: Awaited<ReturnType<typeof adminListBookingsForUser>> = []
+  let activity: Awaited<ReturnType<typeof listAuditLogsForUser>> = []
   try {
     customer = await adminGetCustomer(id)
-    if (customer) bookings = await adminListBookingsForUser(id)
+    if (customer) {
+      ;[bookings, activity] = await Promise.all([adminListBookingsForUser(id), listAuditLogsForUser(id)])
+    }
   } catch {
     customer = null
   }
@@ -62,6 +67,14 @@ export default async function AdminCustomerDetailPage({ params }: { params: Prom
       </div>
 
       <AdminCustomerOps userId={customer.userId} profile={customer.profile} />
+
+      <AdminAuditTimelineSection
+        title="Customer activity"
+        description="KYC decisions, bookings, payments, and admin actions tied to this customer."
+        entries={activity}
+        compact
+        showEntityLinks
+      />
 
       <AdminCard className="overflow-hidden">
         <AdminCardContent className="p-0">

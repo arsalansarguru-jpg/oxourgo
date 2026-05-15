@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   MessageCircle,
   Scale,
+  ScrollText,
   Settings,
   ShieldCheck,
   SlidersHorizontal,
@@ -37,6 +38,7 @@ export const ADMIN_NAV: readonly AdminNavItem[] = [
   { href: '/admin/financials', label: 'Deposits', icon: Scale, exact: false, permission: 'deposits.read' },
   { href: '/admin/violations', label: 'Violations', icon: Gavel, exact: false, permission: 'penalties.read' },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3, exact: false, permission: 'analytics.read' },
+  { href: '/admin/audit', label: 'Audit log', icon: ScrollText, exact: false, permission: 'admin.audit.read' },
   { href: '/admin/users', label: 'Users', icon: UserCog, exact: false, permission: 'admin.users.manage' },
   { href: '/admin/settings', label: 'Settings', icon: Settings, exact: false, permission: 'settings.read' },
 ] as const
@@ -77,6 +79,7 @@ export function adminTopBarTitle(pathname: string): string {
   if (pathname.startsWith('/admin/financials')) return 'Deposits'
   if (pathname.startsWith('/admin/violations')) return 'Violations'
   if (pathname.startsWith('/admin/analytics')) return 'Analytics'
+  if (pathname.startsWith('/admin/audit')) return 'Audit log'
   if (pathname.startsWith('/admin/users')) return 'Users'
   if (pathname.startsWith('/admin/settings')) return 'Settings'
   if (pathname.startsWith('/admin/notifications')) return 'Alerts'
