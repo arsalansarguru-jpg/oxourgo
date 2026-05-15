@@ -37,7 +37,8 @@ const brandImageMap: Record<string, string> = {
 
 export function resolveFleetImageUrl(brand: string): string {
   const key = brand.trim().toLowerCase()
-  return brandImageMap[key] ?? VEHICLE_IMAGE_FALLBACK
+  if (brandImageMap[key]) return brandImageMap[key]!
+  return VEHICLE_IMAGE_FALLBACK
 }
 
 function resolveRowPrimaryImage(row: FleetCarRow): string {

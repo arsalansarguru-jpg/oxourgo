@@ -30,20 +30,28 @@ function addDaysYmd(ymd: string, days: number): string {
   return toYmd(d)
 }
 
+function defaultTripDates(): { pickup: string; dropoff: string } {
+  const today = toYmd(new Date())
+  return { pickup: today, dropoff: addDaysYmd(today, 2) }
+}
+
 export function BookingSearchBar() {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  const initialDates = useMemo(() => defaultTripDates(), [])
   const [pickup, setPickup] = useState<string>(PICKUP_LOCATIONS[0])
-  const [pickupDate, setPickupDate] = useState('')
-  const [dropoffDate, setDropoffDate] = useState('')
+  const [pickupDate, setPickupDate] = useState(initialDates.pickup)
+  const [dropoffDate, setDropoffDate] = useState(initialDates.dropoff)
   const [keywords, setKeywords] = useState('')
   const [error, setError] = useState<string | null>(null)
+  const [touched, setTouched] = useState({ pickup: false, dropoff: false })
 
   const todayYmd = useMemo(() => toYmd(new Date()), [])
   const dropoffMin = pickupDate || todayYmd
 
   const onSearch = () => {
     setError(null)
+    setTouched({ pickup: true, dropoff: true })
     if (!pickupDate.trim()) {
       setError('Choose a pickup date.')
       return
@@ -56,7 +64,7 @@ export function BookingSearchBar() {
     const r = parseYmd(dropoffDate)
     const t0 = parseYmd(todayYmd)
     if (!p || !r || !t0) {
-      setError('Enter valid calendar dates.')
+      setError('Enter valid dates (YYYY-MM-DD).')
       return
     }
     if (p < t0) {
@@ -81,6 +89,13 @@ export function BookingSearchBar() {
     })
   }
 
+  const syncPickup = (raw: string) => {
+    setPickupDate(raw)
+    if (dropoffDate && raw && dropoffDate <= raw) {
+      setDropoffDate(addDaysYmd(raw, 1))
+    }
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 22 }}
@@ -89,7 +104,15 @@ export function BookingSearchBar() {
       className="relative mx-auto w-full min-w-0 max-w-[var(--container-wide)] xl:max-w-5xl"
     >
       <div className="glass-panel rounded-[1.25rem] p-4 shadow-[var(--shadow-card)] sm:rounded-3xl sm:p-6 lg:p-7">
-        <div className="grid min-w-0 gap-4 sm:gap-5 md:grid-cols-2 md:gap-5 lg:grid-cols-4 lg:items-end lg:gap-5">
+        <div
+          className="grid min-w-0 gap-4 sm:gap-5 md:grid-cols-2 md:gap-5 lg:grid-cols-4 lg:items-end lg:gap-5"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') {
+              e.preventDefault()
+              onSearch()
+            }
+          }}
+        >
           <Select label="Pickup Location" value={pickup} onChange={(e) => setPickup(e.target.value)}>
             {PICKUP_LOCATIONS.map((loc) => (
               <option key={loc} value={loc}>
@@ -100,22 +123,23 @@ export function BookingSearchBar() {
           <Input
             label="Pickup Date"
             type="date"
+            name="pickupDate"
             min={todayYmd}
             value={pickupDate}
-            onChange={(e) => {
-              const v = e.target.value
-              setPickupDate(v)
-              if (dropoffDate && v && dropoffDate <= v) {
-                setDropoffDate(addDaysYmd(v, 1))
-              }
+            onChange={(e) => syncPickup(e.target.value)}
+            onBlur={(e) => {
+              setTouched((t) => ({ ...t, pickup: true }))
+              syncPickup(e.target.value)
             }}
           />
           <Input
             label="Dropoff Date"
             type="date"
+            name="dropoffDate"
             min={dropoffMin ? addDaysYmd(dropoffMin, 1) : todayYmd}
             value={dropoffDate}
             onChange={(e) => setDropoffDate(e.target.value)}
+            onBlur={() => setTouched((t) => ({ ...t, dropoff: true }))}
           />
           <Button type="button" size="lg" className="w-full shrink-0" disabled={isPending} onClick={onSearch}>
             {isPending ? (
@@ -137,9 +161,15 @@ export function BookingSearchBar() {
             placeholder="e.g. BMW, Creta, electric"
             value={keywords}
             onChange={(e) => setKeywords(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                e.preventDefault()
+                onSearch()
+              }
+            }}
           />
         </div>
-        {error ? (
+        {error && (touched.pickup || touched.dropoff) ? (
           <div className="mt-4 flex items-start gap-2 rounded-xl border border-amber-400/25 bg-amber-500/[0.08] px-3 py-2 text-sm text-amber-50/95">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
             <span>{error}</span>

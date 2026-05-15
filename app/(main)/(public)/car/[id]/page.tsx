@@ -40,8 +40,15 @@ export async function generateMetadata({
   })
 }
 
-export default async function CarDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function CarDetailPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>
+  searchParams: Promise<{ from?: string; to?: string; pickup?: string }>
+}) {
   const { id } = await params
+  const q = await searchParams
 
   const [car, user] = await Promise.all([getFleetCarById(id), getAuthenticatedUser()])
   if (!car) {
@@ -66,7 +73,15 @@ export default async function CarDetailPage({ params }: { params: Promise<{ id: 
   return (
     <>
       <JsonLdScript id={`car-product-jsonld-${car.id}`} data={jsonLd} />
-      <CarDetailView car={car} isLoggedIn={Boolean(user)} kycApproved={kycApproved} kycStatus={kycStatus} />
+      <CarDetailView
+        car={car}
+        isLoggedIn={Boolean(user)}
+        kycApproved={kycApproved}
+        kycStatus={kycStatus}
+        tripFrom={q.from}
+        tripTo={q.to}
+        tripPickup={q.pickup}
+      />
     </>
   )
 }

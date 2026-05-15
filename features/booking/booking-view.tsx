@@ -97,7 +97,7 @@ export function BookingView({
   const checkAvailability = useCallback(async () => {
     const v = validateTripWindow(pickup, returnAt)
     if (!v.ok) {
-      setAvail({ status: 'ready', available: false, reason: v.message })
+      setAvail({ status: 'idle' })
       return
     }
     setAvail({ status: 'checking' })
@@ -424,8 +424,10 @@ export function BookingView({
                       <span className="text-amber-100/90">{avail.reason ?? 'Unavailable for these times.'}</span>
                     </>
                   )
+                ) : !dates.ok ? (
+                  <span className="text-muted">Choose pickup and return times to check availability.</span>
                 ) : (
-                  <span className="text-muted">Adjust dates to check availability.</span>
+                  <span className="text-muted">Checking calendar…</span>
                 )}
               </div>
             </div>

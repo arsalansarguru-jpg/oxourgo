@@ -12,6 +12,7 @@ import { BOOKING_FUNNEL, POSTHOG_EVENTS } from '@/lib/analytics/posthog-events'
 import { customerBookingFailureCopy } from '@/lib/booking/customer-booking-failure-copy'
 import { SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
 import { safeAvailabilityReason } from '@/lib/booking/safe-availability-reason'
+import { datetimeRangeFromDateParams } from '@/lib/booking/search-trip-context'
 import { defaultPickupReturnIso } from '@/lib/booking/dates'
 import { validateTripWindow } from '@/lib/booking/dates'
 import { BRAND } from '@/constants/brand'
@@ -44,14 +45,35 @@ export type CarDetailBookingPanelProps = {
   kycApproved: boolean
   /** From `profiles.kyc_status` for messaging when booking is blocked. */
   kycStatus?: string | null
+  tripFrom?: string
+  tripTo?: string
+  tripPickup?: string
 }
 
-export function CarDetailBookingPanel({ car, isLoggedIn, kycApproved, kycStatus }: CarDetailBookingPanelProps) {
+export function CarDetailBookingPanel({
+  car,
+  isLoggedIn,
+  kycApproved,
+  kycStatus,
+  tripFrom,
+  tripTo,
+  tripPickup,
+}: CarDetailBookingPanelProps) {
   const router = useRouter()
-  const defaults = useMemo(() => defaultPickupReturnIso(), [])
+  const defaults = useMemo(() => {
+    const fromSearch = datetimeRangeFromDateParams(tripFrom, tripTo)
+    const base = defaultPickupReturnIso()
+    return {
+      pickup: fromSearch.pickup ?? base.pickup,
+      return: fromSearch.returnAt ?? base.return,
+    }
+  }, [tripFrom, tripTo])
   const [pickup, setPickup] = useState(defaults.pickup)
   const [returnAt, setReturnAt] = useState(defaults.return)
-  const [pickupHub, setPickupHub] = useState<string>(MUMBAI_HUBS[1])
+  const [pickupHub, setPickupHub] = useState<string>(() => {
+    const hub = tripPickup?.trim()
+    return hub && MUMBAI_HUBS.includes(hub as (typeof MUMBAI_HUBS)[number]) ? hub : MUMBAI_HUBS[1]
+  })
   const [sameReturnHub, setSameReturnHub] = useState(true)
   const [returnHub, setReturnHub] = useState<string>(MUMBAI_HUBS[1])
   const [avail, setAvail] = useState<AvailState>({ status: 'idle' })
@@ -70,7 +92,7 @@ export function CarDetailBookingPanel({ car, isLoggedIn, kycApproved, kycStatus 
   const checkAvailability = useCallback(async () => {
     const v = validateTripWindow(pickup, returnAt)
     if (!v.ok) {
-      setAvail({ status: 'ready', available: false, reason: v.message })
+      setAvail({ status: 'idle' })
       return
     }
     setAvail({ status: 'checking' })

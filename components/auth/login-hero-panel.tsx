@@ -9,9 +9,8 @@ import { cn } from '@/lib/utils/cn'
 
 const ease = [0.22, 1, 0.36, 1] as const
 
-/** Cinematic luxury mobility — exterior / night premium feel */
-const HERO_SRC =
-  'https://images.unsplash.com/photo-1619767886558-ef789acc1036?auto=format&fit=crop&w=2000&q=88'
+/** Branded local hero — reliable for production (no hotlink dependency). */
+const HERO_SRC = '/media/destinations/marine-drive.png'
 
 type LoginHeroPanelProps = {
   className?: string

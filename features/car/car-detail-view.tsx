@@ -31,9 +31,20 @@ type CarDetailViewProps = {
   isLoggedIn: boolean
   kycApproved: boolean
   kycStatus?: string | null
+  tripFrom?: string
+  tripTo?: string
+  tripPickup?: string
 }
 
-export function CarDetailView({ car, isLoggedIn, kycApproved, kycStatus }: CarDetailViewProps) {
+export function CarDetailView({
+  car,
+  isLoggedIn,
+  kycApproved,
+  kycStatus,
+  tripFrom,
+  tripTo,
+  tripPickup,
+}: CarDetailViewProps) {
   const [activeImage, setActiveImage] = useState(0)
   const [openFaq, setOpenFaq] = useState<string | null>(carDetailFaqs[0]?.id ?? null)
   const bookingAnchorRef = useRef<HTMLDivElement>(null)
@@ -246,7 +257,15 @@ export function CarDetailView({ car, isLoggedIn, kycApproved, kycStatus }: CarDe
               </p>
             </div>
 
-            <CarDetailBookingPanel car={car} isLoggedIn={isLoggedIn} kycApproved={kycApproved} kycStatus={kycStatus} />
+            <CarDetailBookingPanel
+              car={car}
+              isLoggedIn={isLoggedIn}
+              kycApproved={kycApproved}
+              kycStatus={kycStatus}
+              tripFrom={tripFrom}
+              tripTo={tripTo}
+              tripPickup={tripPickup}
+            />
 
             <Button size="lg" variant="secondary" className="w-full" to="/fleet">
               Back to fleet

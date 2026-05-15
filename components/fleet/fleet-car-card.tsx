@@ -16,9 +16,22 @@ import { cn } from '@/lib/utils/cn'
 type FleetCarCardProps = {
   car: FleetCar
   className?: string
+  tripFrom?: string
+  tripTo?: string
+  tripPickup?: string
 }
 
-export function FleetCarCard({ car, className }: FleetCarCardProps) {
+function buildCarHref(carId: string, trip?: { from?: string; to?: string; pickup?: string }): string {
+  const q = new URLSearchParams()
+  if (trip?.from?.trim()) q.set('from', trip.from.trim())
+  if (trip?.to?.trim()) q.set('to', trip.to.trim())
+  if (trip?.pickup?.trim()) q.set('pickup', trip.pickup.trim())
+  const s = q.toString()
+  return s ? `/car/${carId}?${s}` : `/car/${carId}`
+}
+
+export function FleetCarCard({ car, className, tripFrom, tripTo, tripPickup }: FleetCarCardProps) {
+  const bookHref = buildCarHref(car.id, { from: tripFrom, to: tripTo, pickup: tripPickup })
   const available = car.availability === 'Available'
 
   return (
@@ -85,7 +98,7 @@ export function FleetCarCard({ car, className }: FleetCarCardProps) {
               </p>
             </div>
             {available ? (
-              <Button size="md" to={`/car/${car.id}`} className="w-full min-[400px]:w-auto">
+              <Button size="md" to={bookHref} className="w-full min-[400px]:w-auto">
                 Book
               </Button>
             ) : (

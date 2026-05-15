@@ -21,7 +21,7 @@ export function CustomerPaymentsView({
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-electric/90">Ledger</p>
         <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-soft">Payments</h1>
         <p className="mt-2 max-w-2xl text-sm text-muted">
-          Rental totals from your bookings plus optional ledger rows. Open a booking to complete payment when
+          Rental totals from your bookings and payment history. Open a booking to complete payment when
           status is still pending.
         </p>
       </header>
@@ -109,7 +109,9 @@ export function CustomerPaymentsView({
             </tbody>
           </table>
           {events.length === 0 ? (
-            <p className="px-4 py-6 text-center text-sm text-muted">No ledger rows — optional `payment_events` inserts.</p>
+            <p className="px-4 py-6 text-center text-sm text-muted">
+              No payment activity yet. Completed bookings and receipts will appear here.
+            </p>
           ) : null}
         </div>
       </section>

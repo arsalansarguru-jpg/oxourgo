@@ -1,13 +1,8 @@
-import { BUSINESS_WHATSAPP_URL } from '@/lib/constants'
+import { getBusinessPhoneE164Digits, getBusinessWhatsAppUrl } from '@/lib/business-contact'
 
-const WA_ME = /wa\.me\/(\d+)/i
-
-/** Digits-only path segment after `wa.me/` from the configured business URL. */
-export function getWhatsAppBusinessDigits(url: string = BUSINESS_WHATSAPP_URL): string {
-  const envDigits = typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_WHATSAPP_BUSINESS_E164?.trim() : undefined
-  if (envDigits && /^\d{8,15}$/.test(envDigits)) return envDigits
-  const m = url.match(WA_ME)
-  return m?.[1] ?? '912200000000'
+/** Digits-only path segment after `wa.me/`. */
+export function getWhatsAppBusinessDigits(): string {
+  return getBusinessPhoneE164Digits()
 }
 
 /**
@@ -20,7 +15,7 @@ export function buildWhatsAppPrefilledUrl(message: string, digits?: string): str
 }
 
 export function conciergeWhatsAppUrl(): string {
-  return BUSINESS_WHATSAPP_URL
+  return getBusinessWhatsAppUrl()
 }
 
 export function bookingSupportPrefilledMessage(params: {

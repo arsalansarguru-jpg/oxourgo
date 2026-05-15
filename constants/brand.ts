@@ -8,7 +8,7 @@ import {
 export const BRAND = {
   name: 'Oxour Go',
   tagline: 'Luxury Self-Drive',
-  logoSrc: '/oxour-go-logo.png',
+  logoSrc: '/brand/oxour-go-mark.svg',
   logoAlt:
     'Oxour Go logo: glowing neon blue OG monogram with OXOUR GO wordmark on a dark background',
   phoneDisplay: BUSINESS_PHONE_DISPLAY,

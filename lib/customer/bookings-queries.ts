@@ -67,7 +67,6 @@ const bookingSelect = `
     brand,
     price_per_day,
     image,
-    available,
     transmission,
     fuel_type,
     seats,
@@ -90,13 +89,88 @@ export function unwrapListBookingsResult(result: ListBookingsForUserResult): Boo
   return result.ok ? result.data : []
 }
 
+const bookingSelectMinimal = `
+  id,
+  vehicle_id,
+  user_id,
+  pickup_date,
+  return_date,
+  pickup_location,
+  return_location,
+  rental_days,
+  price_per_day_rupees_snapshot,
+  subtotal_rupees,
+  convenience_fee_rupees,
+  gst_rupees,
+  total_rupees,
+  booking_status,
+  payment_method,
+  payment_status,
+  amount_due,
+  amount_paid,
+  payment_received_at,
+  payment_received_by,
+  payment_notes,
+  ops_note,
+  approved_at,
+  handed_over_at,
+  returned_at,
+  completed_at,
+  deposit_amount,
+  deposit_status,
+  deposit_held_rupees,
+  deposit_refunded_at,
+  deposit_refunded_rupees,
+  deposit_received_at,
+  refund_amount,
+  refund_processed_at,
+  penalty_total,
+  created_at,
+  updated_at,
+  vehicles (
+    id,
+    name,
+    brand,
+    price_per_day,
+    image,
+    transmission,
+    fuel_type,
+    seats,
+    year,
+    registration_number,
+    security_deposit
+  )
+`
+
 export async function listBookingsForUser(userId: string): Promise<ListBookingsForUserResult> {
   const supabase = await createClient()
-  const { data, error } = await supabase
+  let { data, error } = await supabase
     .from('bookings')
     .select(bookingSelect)
     .eq('user_id', userId)
+    .is('deleted_at', null)
     .order('pickup_date', { ascending: false })
+
+  if (error?.message?.includes('deleted_at')) {
+    ;({ data, error } = await supabase
+      .from('bookings')
+      .select(bookingSelect)
+      .eq('user_id', userId)
+      .order('pickup_date', { ascending: false }))
+  }
+
+  if (error) {
+    console.error('[listBookingsForUser] full select', error.message, error.code, error.details)
+    const fallback = await supabase
+      .from('bookings')
+      .select(bookingSelectMinimal)
+      .eq('user_id', userId)
+      .order('pickup_date', { ascending: false })
+    if (!fallback.error) {
+      return { ok: true, data: asBookingRows(fallback.data) }
+    }
+    error = fallback.error
+  }
 
   if (error) {
     console.error('[listBookingsForUser]', error.message, error.code, error.details)
@@ -105,7 +179,11 @@ export async function listBookingsForUser(userId: string): Promise<ListBookingsF
       error: { code: 'query_failed', message: 'Unable to load reservations.' },
     }
   }
-  return { ok: true, data: (data ?? []) as unknown as BookingWithCar[] }
+  return { ok: true, data: asBookingRows(data) }
+}
+
+function asBookingRows(data: unknown): BookingWithCar[] {
+  return (data ?? []) as BookingWithCar[]
 }
 
 export async function getBookingForUser(bookingId: string, userId: string): Promise<BookingWithCar | null> {

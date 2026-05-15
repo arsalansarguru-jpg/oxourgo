@@ -71,7 +71,7 @@ export function CustomerSettingsForm({ user, profile }: { user: User; profile: P
             <Input label="Full name" value={fullName} onChange={(e) => setFullName(e.target.value)} name="fullName" />
             <Input label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} name="phone" placeholder="+91 9xxxx xxxxx or 10-digit mobile" />
             <p className="text-xs text-muted">
-              Profile photo: paste a public HTTPS image URL. Hosted file upload from this screen is planned next.
+              Profile photo: paste a public HTTPS image URL. Contact concierge if you need help updating your photo.
             </p>
             <Input
               label="Profile image URL"

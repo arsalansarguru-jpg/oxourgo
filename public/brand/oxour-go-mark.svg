@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" fill="none" role="img" aria-label="Oxour Go">
+  <rect width="120" height="120" rx="28" fill="#0B0D12"/>
+  <circle cx="60" cy="60" r="42" stroke="#3B82F6" stroke-width="3" opacity="0.35"/>
+  <text x="60" y="68" text-anchor="middle" font-family="system-ui,Segoe UI,sans-serif" font-size="34" font-weight="700" fill="#F4F6FA">OG</text>
+</svg>

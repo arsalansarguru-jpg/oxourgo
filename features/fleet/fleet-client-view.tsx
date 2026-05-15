@@ -17,6 +17,7 @@ import { Section, SectionHeading } from '@/components/ui/Section'
 import { Button } from '@/components/ui/Button'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import type { FleetCar, FleetFilterId } from '@/lib/fleet/types'
+import { carMatchesFilters } from '@/lib/fleet/filter-utils'
 
 const PAGE_SIZE = 12
 
@@ -29,29 +30,6 @@ type FleetClientViewProps = {
   location?: string
   /** Keyword search from `?q=` (takes precedence over `location` when both are set). */
   searchQuery?: string
-}
-
-function carMatchesFilters(car: FleetCar, active: Set<string>) {
-  if (active.size === 0) return true
-
-  const categoryKeys = ['SUV', 'Sedan', 'Hatchback', 'Luxury', 'Budget'] as const
-  const activeCats = categoryKeys.filter((k) => active.has(k))
-  const activeTrans = (['Automatic', 'Manual'] as const).filter((k) => active.has(k))
-
-  const catOk =
-    activeCats.length === 0 ||
-    activeCats.some((key) => {
-      if (key === 'Budget') return car.pricePerDay <= 3500
-      return car.category === key
-    })
-
-  const transOk =
-    activeTrans.length === 0 ||
-    activeTrans.some((key) =>
-      key === 'Automatic' ? car.transmission === 'Auto' : car.transmission === 'Manual',
-    )
-
-  return catOk && transOk
 }
 
 export function FleetClientView({
@@ -232,7 +210,7 @@ export function FleetClientView({
               </div>
 
               <div className="hidden border-t border-stroke/80 pt-4 md:block">
-                <FilterPills active={activeFilters} onToggle={toggle} layout="stacked" />
+                <FilterPills active={activeFilters} onToggle={toggle} layout="stacked" cars={cars} />
               </div>
             </div>
           </div>
@@ -251,7 +229,7 @@ export function FleetClientView({
               </div>
             }
           >
-            <FilterPills active={activeFilters} onToggle={toggle} layout="stacked" />
+            <FilterPills active={activeFilters} onToggle={toggle} layout="stacked" cars={cars} />
           </FleetFilterDrawer>
 
           {cars.length > 0 ? (
@@ -311,7 +289,7 @@ export function FleetClientView({
                           layout
                           transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                         >
-                          <FleetCarCard car={car} />
+                          <FleetCarCard car={car} tripFrom={from} tripTo={to} tripPickup={pickup} />
                         </motion.div>
                       ))}
                     </div>
