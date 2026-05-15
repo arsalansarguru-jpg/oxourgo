@@ -17,6 +17,7 @@ export const ADMIN_ROUTE_RULES: readonly AdminRouteRule[] = [
   { prefix: '/admin/fleet/new', permission: 'fleet.write' },
   { prefix: '/admin/fleet', permission: 'fleet.read' },
   { prefix: '/admin/bookings', permission: 'bookings.read' },
+  { prefix: '/admin/whatsapp', permission: 'bookings.read' },
   { prefix: '/admin/customers', permission: 'customers.read' },
   { prefix: '/admin/payments', permission: 'payments.read' },
   { prefix: '/admin/financials', permission: 'deposits.read' },

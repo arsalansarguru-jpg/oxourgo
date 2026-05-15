@@ -35,11 +35,16 @@ export async function createBookingAction(input: CreateBookingInput): Promise<Cr
       if (!result.ok) {
         if (result.code === 'rpc_missing') reportBookingCreateFailure('rpc_missing')
         else if (result.code === 'database' || result.code === 'overlap') reportBookingCreateFailure('database')
-        return {
-          ok: false,
-          code: result.code === 'kyc_required' ? 'kyc_required' : result.code,
-          message: result.message,
-        }
+        const code =
+          result.code === 'kyc_required' ||
+          result.code === 'validation' ||
+          result.code === 'car_unavailable' ||
+          result.code === 'overlap' ||
+          result.code === 'rpc_missing' ||
+          result.code === 'database'
+            ? result.code
+            : 'unknown'
+        return { ok: false, code, message: result.message }
       }
 
       revalidatePath('/dashboard')

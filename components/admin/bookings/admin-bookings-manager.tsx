@@ -241,6 +241,28 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
               )
             })}
           </div>
+          <div className="flex flex-wrap gap-2">
+            <span className="w-full text-[11px] font-semibold uppercase tracking-[0.14em] text-muted sm:w-auto sm:py-2">
+              Channel
+            </span>
+            {SOURCE_FILTER_OPTS.map((o) => {
+              const active = (listQuery.source || '') === o.value
+              return (
+                <Link
+                  key={o.value || 'all-src'}
+                  href={sourceHref(o.value)}
+                  className={cn(
+                    'rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors duration-300',
+                    active
+                      ? 'border-emerald-400/45 bg-emerald-500/18 text-emerald-300 theme-light:text-emerald-800'
+                      : 'border-white/[0.08] bg-white/[0.03] text-muted hover:border-white/[0.12] hover:text-soft theme-light:border-stroke-strong theme-light:bg-white/70',
+                  )}
+                >
+                  {o.label}
+                </Link>
+              )
+            })}
+          </div>
           <div className="flex items-center gap-2">
             <label htmlFor="bookings-per-page" className="text-xs font-medium text-muted">
               Per page
@@ -255,6 +277,7 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
                   `${pathname}${stringifyBookingsQuery({
                     status: listQuery.status || undefined,
                     payment: listQuery.payment || undefined,
+                    source: listQuery.source || undefined,
                     q: listQuery.q || undefined,
                     page: 1,
                     per: per !== 25 ? per : undefined,
@@ -390,6 +413,7 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
                                 minute: '2-digit',
                               })}
                             </span>
+                            <BookingSourceBadge source={b.booking_source} />
                             <Link
                               href={`/admin/bookings/${b.id}`}
                               className="text-xs font-semibold text-electric hover:text-electric/85"
@@ -601,6 +625,7 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
                     <div className="flex flex-wrap gap-2">
                       <AdminStatusPill value={b.booking_status} />
                       <AdminStatusPill value={b.payment_status} />
+                      <BookingSourceBadge source={b.booking_source} />
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs text-muted">
                       <div>

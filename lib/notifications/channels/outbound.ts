@@ -2,7 +2,7 @@
  * Outbound communications — enqueue via `enqueueOutboundEmail` in `./outbound-enqueue`.
  * Reserved for future channels (WhatsApp API, SMS).
  */
-export type OutboundChannel = 'email'
+export type OutboundChannel = 'email' | 'whatsapp'
 
 export {
   enqueueOutboundEmail,

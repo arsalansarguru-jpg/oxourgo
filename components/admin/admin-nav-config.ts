@@ -5,6 +5,7 @@ import {
   ClipboardList,
   Gavel,
   LayoutDashboard,
+  MessageCircle,
   Scale,
   Settings,
   ShieldCheck,
@@ -26,6 +27,7 @@ export type AdminNavItem = {
 export const ADMIN_NAV: readonly AdminNavItem[] = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true, permission: 'admin.dashboard.read' },
   { href: '/admin/bookings', label: 'Bookings', icon: ClipboardList, exact: false, permission: 'bookings.read' },
+  { href: '/admin/whatsapp', label: 'WhatsApp', icon: MessageCircle, exact: false, permission: 'bookings.read' },
   { href: '/admin/fleet', label: 'Fleet', icon: CarFront, exact: false, permission: 'fleet.read' },
   { href: '/admin/customers', label: 'Customers', icon: Users, exact: false, permission: 'customers.read' },
   { href: '/admin/kyc', label: 'KYC', icon: ShieldCheck, exact: false, permission: 'kyc.read' },
@@ -64,6 +66,7 @@ export function adminTopBarTitle(pathname: string): string {
   if (pathname.startsWith('/admin/fleet')) return 'Fleet'
   if (pathname.startsWith('/admin/bookings/')) return 'Booking detail'
   if (pathname.startsWith('/admin/bookings')) return 'Bookings'
+  if (pathname.startsWith('/admin/whatsapp')) return 'WhatsApp'
   if (pathname.startsWith('/admin/customers/')) return 'Customer detail'
   if (pathname.startsWith('/admin/customers')) return 'Customers'
   if (pathname.startsWith('/admin/kyc')) return 'KYC'

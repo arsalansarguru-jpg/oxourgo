@@ -26,7 +26,7 @@ function parseIntSafe(v: string | undefined, fallback: number): number {
 export default async function AdminBookingsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; payment?: string; q?: string; page?: string; per?: string }>
+  searchParams: Promise<{ status?: string; payment?: string; source?: string; q?: string; page?: string; per?: string }>
 }) {
   const q = await searchParams
   const rawStatus = typeof q.status === 'string' ? q.status.trim() : ''
@@ -39,6 +39,11 @@ export default async function AdminBookingsPage({
   const allowedPayment =
     !payment || ['pending', 'received', 'partial', 'refunded'].includes(payment)
   const safePayment = allowedPayment && payment ? payment : undefined
+
+  const rawSource = typeof q.source === 'string' ? q.source.trim() : ''
+  const source = rawSource || undefined
+  const allowedSource = !source || ['website', 'whatsapp', 'admin_manual'].includes(source)
+  const safeSource = allowedSource && source ? source : undefined
 
   const searchRaw = typeof q.q === 'string' ? q.q.trim().slice(0, 160) : ''
   const search = searchRaw || undefined
@@ -61,6 +66,7 @@ export default async function AdminBookingsPage({
       pageSize,
       booking_status: safeStatus,
       payment_status: safePayment,
+      booking_source: safeSource,
       search,
     })
   } catch (e) {
@@ -81,6 +87,7 @@ export default async function AdminBookingsPage({
           const params = new URLSearchParams()
           if (f.param) params.set('status', f.param)
           if (safePayment) params.set('payment', safePayment)
+          if (safeSource) params.set('source', safeSource)
           if (search) params.set('q', search)
           if (pageSize !== 25) params.set('per', String(pageSize))
           const qs = params.toString()
@@ -108,6 +115,7 @@ export default async function AdminBookingsPage({
         listQuery={{
           status: safeStatus ?? '',
           payment: safePayment ?? '',
+          source: safeSource ?? '',
           q: search ?? '',
           page: pageResult.page,
           pageSize: pageResult.pageSize,

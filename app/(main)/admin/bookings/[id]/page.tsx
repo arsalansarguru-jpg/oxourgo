@@ -16,6 +16,7 @@ import { adminListPaymentEventsForBooking } from '@/lib/admin/data/payments'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatInr } from '@/lib/format'
 import { formatPaymentMethodLabel } from '@/lib/payments/booking-payment'
+import { BookingSourceBadge } from '@/components/admin/bookings/booking-source-badge'
 import { KycStatusBadge } from '@/components/kyc/kyc-status-badge'
 
 export const dynamic = 'force-dynamic'
@@ -72,6 +73,7 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
       <div className="flex flex-wrap gap-2">
         <AdminStatusPill value={booking.booking_status} />
         <AdminStatusPill value={booking.payment_status} />
+        <BookingSourceBadge source={booking.booking_source} />
       </div>
 
       {booking.ops_note ? (

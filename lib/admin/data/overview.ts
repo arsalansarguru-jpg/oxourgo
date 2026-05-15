@@ -9,6 +9,8 @@ export type AdminOverviewStats = {
   bookings: number
   pendingBookings: number
   pendingKyc: number
+  whatsappBookings: number
+  activeWhatsAppConversations: number
 }
 
 export async function adminOverviewStats(): Promise<AdminOverviewStats> {
@@ -25,12 +27,24 @@ export async function adminOverviewStats(): Promise<AdminOverviewStats> {
     .from('kyc_documents')
     .select('id', { count: 'exact', head: true })
     .in('status', ['pending', 'reviewing'])
+  const whatsappBookingsRes = await admin
+    .from('bookings')
+    .select('id', { count: 'exact', head: true })
+    .eq('booking_source', 'whatsapp')
+  const activeWaConversationsRes = await admin
+    .from('whatsapp_conversations')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'active')
 
   if (vehiclesRes.error) logPostgrestError('[adminOverviewStats] vehicles', vehiclesRes.error)
   if (customersRes.error) logPostgrestError('[adminOverviewStats] customers', customersRes.error)
   if (bookingsRes.error) logPostgrestError('[adminOverviewStats] bookings', bookingsRes.error)
   if (pendingBookingsRes.error) logPostgrestError('[adminOverviewStats] pendingBookings', pendingBookingsRes.error)
   if (pendingKycRes.error) logPostgrestError('[adminOverviewStats] pendingKyc', pendingKycRes.error)
+  if (whatsappBookingsRes.error) logPostgrestError('[adminOverviewStats] whatsappBookings', whatsappBookingsRes.error)
+  if (activeWaConversationsRes.error) {
+    logPostgrestError('[adminOverviewStats] activeWhatsAppConversations', activeWaConversationsRes.error)
+  }
 
   return {
     vehicles: vehiclesRes.count ?? 0,
@@ -38,5 +52,7 @@ export async function adminOverviewStats(): Promise<AdminOverviewStats> {
     bookings: bookingsRes.count ?? 0,
     pendingBookings: pendingBookingsRes.count ?? 0,
     pendingKyc: pendingKycRes.count ?? 0,
+    whatsappBookings: whatsappBookingsRes.count ?? 0,
+    activeWhatsAppConversations: activeWaConversationsRes.count ?? 0,
   }
 }
