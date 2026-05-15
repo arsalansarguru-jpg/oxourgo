@@ -1,11 +1,13 @@
 'use client'
 
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { Fuel, Gauge, Users } from 'lucide-react'
 
 import { cardLiftSpring } from '@/animations/presets'
 import { FleetVehicleImg } from '@/components/fleet/fleet-vehicle-img'
 import { Badge } from '@/components/ui/Badge'
+import { WhatsAppInquiryButton } from '@/components/marketing/whatsapp-inquiry-button'
 import { Button } from '@/components/ui/Button'
 import { Card, CardContent } from '@/components/ui/Card'
 import { cardMetaChip, cardSurfaceHoverAccent, cardTitle } from '@/components/ui/card-tokens'
@@ -31,7 +33,7 @@ function buildCarHref(carId: string, trip?: { from?: string; to?: string; pickup
 }
 
 export function FleetCarCard({ car, className, tripFrom, tripTo, tripPickup }: FleetCarCardProps) {
-  const bookHref = buildCarHref(car.id, { from: tripFrom, to: tripTo, pickup: tripPickup })
+  const detailHref = buildCarHref(car.id, { from: tripFrom, to: tripTo, pickup: tripPickup })
   const available = car.availability === 'Available'
 
   return (
@@ -62,7 +64,11 @@ export function FleetCarCard({ car, className, tripFrom, tripTo, tripPickup }: F
 
         <CardContent className="flex flex-1 flex-col gap-5">
           <div>
-            <h3 className={cardTitle}>{car.displayName}</h3>
+            <h3 className={cardTitle}>
+              <Link href={detailHref} className="hover:text-electric">
+                {car.displayName}
+              </Link>
+            </h3>
             <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted">
               <Badge variant="electric" className="font-medium">
                 {car.category}
@@ -98,9 +104,17 @@ export function FleetCarCard({ car, className, tripFrom, tripTo, tripPickup }: F
               </p>
             </div>
             {available ? (
-              <Button size="md" to={bookHref} className="w-full min-[400px]:w-auto">
-                Book
-              </Button>
+              <WhatsAppInquiryButton
+                vehicle={{
+                  vehicleName: car.displayName,
+                  tripFrom,
+                  tripTo,
+                  pickupHub: tripPickup,
+                }}
+                size="md"
+                className="w-full min-[400px]:w-auto"
+                label="Inquire"
+              />
             ) : (
               <Button size="md" variant="secondary" disabled className="w-full min-[400px]:w-auto">
                 Unavailable

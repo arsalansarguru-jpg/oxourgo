@@ -7,6 +7,7 @@ import type { Car } from '@/types/car'
 import { formatInr } from '@/lib/format'
 import { cn } from '@/lib/utils/cn'
 import { Badge } from '@/components/ui/Badge'
+import { WhatsAppInquiryButton } from '@/components/marketing/whatsapp-inquiry-button'
 import { Button } from '@/components/ui/Button'
 import { FleetVehicleImg } from '@/components/fleet/fleet-vehicle-img'
 import { ReviewBadge } from '@/components/marketing/review-badge'
@@ -78,9 +79,11 @@ export function CarCard({ car, className, imageClassName }: CarCardProps) {
               </p>
             </div>
             {available ? (
-              <Button size="md" to={`/car/${car.id}`}>
-                Book
-              </Button>
+              <WhatsAppInquiryButton
+                vehicle={{ vehicleName: car.name }}
+                size="md"
+                label="Inquire"
+              />
             ) : (
               <Button size="md" variant="secondary" disabled>
                 Unavailable

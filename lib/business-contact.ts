@@ -69,6 +69,29 @@ export function getBusinessSupportEmail(): string {
 
 const DEFAULT_WHATSAPP_PREFILL = "Hi Oxour Go, I'd like to book a luxury self-drive in Mumbai."
 
+export type VehicleInquiryContext = {
+  vehicleName?: string | null
+  tripFrom?: string | null
+  tripTo?: string | null
+  pickupHub?: string | null
+}
+
+/** Prefilled WhatsApp message for a specific vehicle / trip context. */
+export function getVehicleInquiryWhatsAppUrl(context?: VehicleInquiryContext): string {
+  const name = context?.vehicleName?.trim()
+  const parts = [
+    name
+      ? `Hi Oxour Go, I'm interested in the ${name} for a self-drive in Mumbai.`
+      : "Hi Oxour Go, I'm interested in a vehicle from your fleet for a self-drive in Mumbai.",
+  ]
+  if (context?.pickupHub?.trim()) parts.push(`Preferred hub: ${context.pickupHub.trim()}.`)
+  if (context?.tripFrom?.trim() && context?.tripTo?.trim()) {
+    parts.push(`Dates: ${context.tripFrom.trim()} to ${context.tripTo.trim()}.`)
+  }
+  parts.push('Please share availability and next steps.')
+  return getBusinessWhatsAppUrl(parts.join(' '))
+}
+
 /** Public WhatsApp deep link (`wa.me`). */
 export function getBusinessWhatsAppUrl(prefillText?: string): string {
   const d = getBusinessWhatsAppE164Digits()

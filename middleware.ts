@@ -3,8 +3,10 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
 import { canAccessAdminPath, appRoleFromJwtMetadata } from '@/lib/auth/route-access'
+import { getBusinessWhatsAppUrl } from '@/lib/business-contact'
 import { isStaffRole } from '@/lib/auth/permissions'
 import { getSupabasePublicEnv } from '@/lib/env/supabase-public'
+import { isSoftLaunchDisabledRoute, softLaunchInquiryMessageForPath } from '@/lib/soft-launch/disabled-routes'
 import type { Database } from '@/lib/supabase/database.types'
 import { updateSession } from '@/lib/supabase/middleware'
 
@@ -18,9 +20,16 @@ function needsAuthenticatedUser(pathname: string): boolean {
 }
 
 export async function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname
+
+  if (isSoftLaunchDisabledRoute(pathname)) {
+    const message = softLaunchInquiryMessageForPath(pathname)
+    return NextResponse.redirect(getBusinessWhatsAppUrl(message))
+  }
+
   const response = await updateSession(request)
 
-  if (!needsAuthenticatedUser(request.nextUrl.pathname)) {
+  if (!needsAuthenticatedUser(pathname)) {
     return response
   }
 
@@ -63,8 +72,6 @@ export async function middleware(request: NextRequest) {
     })
     return redirectResponse
   }
-
-  const pathname = request.nextUrl.pathname
 
   if (pathname.startsWith('/admin')) {
     const appRole = appRoleFromJwtMetadata(user.app_metadata as Record<string, unknown> | undefined)

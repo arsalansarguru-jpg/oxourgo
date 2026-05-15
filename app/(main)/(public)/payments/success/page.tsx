@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { CheckCircle2 } from 'lucide-react'
 
+import { BRAND } from '@/constants/brand'
 import { Button } from '@/components/ui/Button'
 import { Section } from '@/components/ui/Section'
 import { shouldShowOnlinePaymentsComingSoon } from '@/lib/payments/server'
@@ -27,18 +28,16 @@ export default async function PaymentSuccessPage({
           </p>
         ) : (
           <p className="mt-3 text-sm leading-relaxed text-muted">
-            Thank you. Your payment is being confirmed — check your dashboard for status updates.
+            Thank you. Our team will confirm your payment on WhatsApp shortly.
           </p>
         )}
         {bookingId ? (
           <p className="mt-2 font-mono text-xs text-muted">Booking {bookingId.slice(0, 8).toUpperCase()}…</p>
         ) : null}
         <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-center">
-          {bookingId ? (
-            <Button to={`/dashboard/bookings/${bookingId}`}>View booking</Button>
-          ) : (
-            <Button to="/dashboard/bookings">My bookings</Button>
-          )}
+          <Button href={BRAND.whatsapp} target="_blank" rel="noopener noreferrer">
+            WhatsApp concierge
+          </Button>
           <Button variant="secondary" to="/fleet">
             Fleet
           </Button>

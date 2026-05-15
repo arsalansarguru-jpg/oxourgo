@@ -1,0 +1,73 @@
+'use client'
+
+import { Phone } from 'lucide-react'
+
+import { WhatsAppInquiryButton } from '@/components/marketing/whatsapp-inquiry-button'
+import { Button } from '@/components/ui/Button'
+import { cardEyebrow } from '@/components/ui/card-tokens'
+import { BRAND } from '@/constants/brand'
+import type { Car } from '@/types/car'
+
+export type CarDetailInquiryPanelProps = {
+  car: Car
+  tripFrom?: string
+  tripTo?: string
+  tripPickup?: string
+}
+
+/** Inquiry-only booking panel — online checkout is paused; routes guests to concierge. */
+export function CarDetailInquiryPanel({ car, tripFrom, tripTo, tripPickup }: CarDetailInquiryPanelProps) {
+  const vehicle = {
+    vehicleName: car.name,
+    tripFrom,
+    tripTo,
+    pickupHub: tripPickup,
+  }
+
+  return (
+    <section className="space-y-5" aria-labelledby="inquiry-heading">
+      <div>
+        <p className={cardEyebrow}>Concierge booking</p>
+        <h2 id="inquiry-heading" className="mt-1 text-xl font-semibold tracking-[-0.03em] text-soft">
+          Inquire on WhatsApp
+        </h2>
+        <p className="mt-3 text-sm leading-relaxed text-muted">
+          Online checkout is being finalized. Our Mumbai team will confirm availability, pricing, and documents
+          over WhatsApp — usually within minutes during service hours.
+        </p>
+      </div>
+
+      {(tripPickup || tripFrom || tripTo) && (
+        <div className="rounded-xl border border-electric/18 bg-electric/[0.06] px-4 py-3 text-sm text-muted">
+          {tripPickup ? (
+            <p>
+              Hub: <span className="font-semibold text-soft">{tripPickup}</span>
+            </p>
+          ) : null}
+          {tripFrom && tripTo ? (
+            <p className={tripPickup ? 'mt-1' : undefined}>
+              Dates:{' '}
+              <span className="font-semibold text-soft">
+                {tripFrom} → {tripTo}
+              </span>
+            </p>
+          ) : null}
+        </div>
+      )}
+
+      <WhatsAppInquiryButton vehicle={vehicle} size="lg" className="w-full" label="Inquire on WhatsApp" />
+
+      <Button size="lg" variant="secondary" className="w-full gap-2" href={`tel:${BRAND.phoneTel}`}>
+        <Phone className="h-4 w-4 shrink-0" aria-hidden />
+        Call {BRAND.phoneDisplay}
+      </Button>
+
+      <p className="text-center text-xs leading-relaxed text-silver">
+        Prefer email?{' '}
+        <a href={`mailto:${BRAND.email}`} className="text-electric hover:underline">
+          {BRAND.email}
+        </a>
+      </p>
+    </section>
+  )
+}

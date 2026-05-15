@@ -12,7 +12,7 @@ export function CTASection() {
         <div className="relative mx-auto max-w-2xl px-2 text-center sm:px-0">
           <h2 className="text-section-title text-balance text-soft">Ready to Experience Luxury?</h2>
           <p className="mt-4 text-pretty text-base leading-[1.65] text-muted md:text-lg">
-            Book your premium self-drive car now and explore Mumbai in style
+            Message our concierge on WhatsApp to reserve your premium self-drive in Mumbai
           </p>
           <div className="mx-auto mt-9 flex max-w-lg flex-col items-stretch justify-center gap-3.5 sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
             <Button size="lg" to="/fleet" className="w-full sm:w-auto">

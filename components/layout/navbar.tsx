@@ -3,13 +3,14 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { ChevronDown, LayoutDashboard, LogOut, Menu, MessageCircle, X } from 'lucide-react'
+import { ChevronDown, LogOut, Menu, MessageCircle, X } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 import { AnimatePresence, motion } from 'framer-motion'
 import { BRAND } from '@/constants/brand'
 import { useSupabase } from '@/hooks/use-supabase'
 import { useSupabaseAuthUser } from '@/hooks/use-supabase-auth-user'
 import { cn } from '@/lib/utils/cn'
+import { WhatsAppInquiryButton } from '@/components/marketing/whatsapp-inquiry-button'
 import { Button } from '@/components/ui/Button'
 import { BrandLogo } from '@/components/layout/brand-logo'
 import { ThemeToggle } from '@/components/layout/theme-toggle'
@@ -202,14 +203,6 @@ export function Navbar() {
                   )}
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <Link
-                    href="/dashboard"
-                    className="flex items-center gap-2 px-3 py-2.5 text-[13px] font-medium text-soft transition-colors hover:bg-fill-glass-strong"
-                    onClick={() => accountMenuRef.current?.removeAttribute('open')}
-                  >
-                    <LayoutDashboard className="h-4 w-4 text-electric/90" aria-hidden />
-                    Dashboard
-                  </Link>
                   <button
                     type="button"
                     disabled={signingOut}
@@ -221,23 +214,12 @@ export function Navbar() {
                   </button>
                 </div>
               </details>
-            ) : ready && !user ? (
-              <Button
-                variant="secondary"
-                size="sm"
-                to="/login"
-                className="hidden h-9 border-stroke bg-fill-glass px-3.5 text-[13px] font-medium text-soft shadow-none hover:translate-y-0 hover:border-stroke-strong hover:bg-fill-glass-strong active:translate-y-0 sm:inline-flex"
-              >
-                Log in
-              </Button>
             ) : null}
-            <Button
+            <WhatsAppInquiryButton
               size="sm"
-              to="/fleet"
               className="hidden h-9 px-4 text-[13px] font-semibold shadow-[0_12px_36px_-16px_rgba(59,130,246,0.55)] hover:translate-y-0 active:translate-y-0 sm:inline-flex"
-            >
-              Book now
-            </Button>
+              label="WhatsApp inquiry"
+            />
 
             <button
               type="button"
@@ -333,46 +315,22 @@ export function Navbar() {
                 </div>
 
                 <div className="mt-5 grid gap-3 border-t border-stroke pt-5">
-                  <Button
+                  <WhatsAppInquiryButton
                     size="lg"
-                    to="/fleet"
                     className="min-h-[3.25rem] w-full text-[15px] font-semibold shadow-[0_16px_48px_-20px_rgba(59,130,246,0.55)]"
+                    label="WhatsApp inquiry"
                     onClick={() => setOpen(false)}
-                  >
-                    Book now
-                  </Button>
+                  />
                   {ready && user ? (
-                    <>
-                      <Button
-                        variant="secondary"
-                        size="lg"
-                        to="/dashboard"
-                        className="min-h-[3.25rem] w-full border-stroke-strong bg-fill-glass-strong text-[15px] font-medium hover:translate-y-0 hover:bg-fill-glass-strong active:translate-y-0"
-                        onClick={() => setOpen(false)}
-                      >
-                        <LayoutDashboard className="h-[18px] w-[18px] text-electric" aria-hidden />
-                        Dashboard
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        className="min-h-[3.25rem] w-full text-[15px] font-medium hover:translate-y-0 active:translate-y-0"
-                        disabled={signingOut}
-                        onClick={() => void handleSignOut()}
-                      >
-                        <LogOut className="h-[18px] w-[18px]" aria-hidden />
-                        {signingOut ? 'Signing out…' : 'Sign out'}
-                      </Button>
-                    </>
-                  ) : ready && !user ? (
                     <Button
-                      variant="secondary"
+                      variant="outline"
                       size="lg"
-                      to="/login"
-                      className="min-h-[3.25rem] w-full border-stroke-strong bg-fill-glass-strong text-[15px] font-medium hover:translate-y-0 hover:bg-fill-glass-strong active:translate-y-0"
-                      onClick={() => setOpen(false)}
+                      className="min-h-[3.25rem] w-full text-[15px] font-medium hover:translate-y-0 active:translate-y-0"
+                      disabled={signingOut}
+                      onClick={() => void handleSignOut()}
                     >
-                      Log in
+                      <LogOut className="h-[18px] w-[18px]" aria-hidden />
+                      {signingOut ? 'Signing out…' : 'Sign out'}
                     </Button>
                   ) : null}
                 </div>

@@ -21,7 +21,8 @@ import {
   cardSurfaceHover,
   cardSurfaceTransition,
 } from '@/components/ui/card-tokens'
-import { CarDetailBookingPanel } from '@/components/car/car-detail-booking-panel'
+import { CarDetailInquiryPanel } from '@/components/car/car-detail-inquiry-panel'
+import { WhatsAppInquiryButton } from '@/components/marketing/whatsapp-inquiry-button'
 import { captureClientEvent } from '@/lib/analytics/capture-client'
 import { BOOKING_FUNNEL, POSTHOG_EVENTS } from '@/lib/analytics/posthog-events'
 import { ReviewBadge } from '@/components/marketing/review-badge'
@@ -63,10 +64,6 @@ export function CarDetailView({
   }, [car.category, car.id, car.status])
 
   const reviews = useMemo(() => carReviews.filter((r) => r.carId === car.id), [car.id])
-
-  const scrollToBooking = () => {
-    bookingAnchorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
 
   return (
     <Section className="pt-8">
@@ -257,15 +254,7 @@ export function CarDetailView({
               </p>
             </div>
 
-            <CarDetailBookingPanel
-              car={car}
-              isLoggedIn={isLoggedIn}
-              kycApproved={kycApproved}
-              kycStatus={kycStatus}
-              tripFrom={tripFrom}
-              tripTo={tripTo}
-              tripPickup={tripPickup}
-            />
+            <CarDetailInquiryPanel car={car} tripFrom={tripFrom} tripTo={tripTo} tripPickup={tripPickup} />
 
             <Button size="lg" variant="secondary" className="w-full" to="/fleet">
               Back to fleet
@@ -293,9 +282,17 @@ export function CarDetailView({
               <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted">From / day</p>
               <p className="truncate text-lg font-bold tabular-nums text-soft">{formatInr(car.pricePerDay)}</p>
             </div>
-            <Button type="button" size="lg" className="shrink-0 touch-manipulation" onClick={scrollToBooking}>
-              Reserve
-            </Button>
+            <WhatsAppInquiryButton
+              vehicle={{
+                vehicleName: car.name,
+                tripFrom,
+                tripTo,
+                pickupHub: tripPickup,
+              }}
+              size="lg"
+              className="shrink-0 touch-manipulation"
+              label="WhatsApp"
+            />
           </div>
         </div>
       </div>
