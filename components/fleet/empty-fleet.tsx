@@ -45,11 +45,11 @@ export function EmptyFleet({ onClear, className, kind = 'filtered' }: Props) {
 
         <div className="relative mt-8 max-w-md space-y-3">
           <p className="text-lg font-semibold tracking-[-0.02em] text-soft sm:text-xl">
-            {catalog ? 'Collection is updating' : 'No vehicles match your search'}
+            {catalog ? 'No vehicles available right now' : 'No vehicles match your search'}
           </p>
           <p className="text-sm leading-relaxed text-muted">
             {catalog
-              ? 'We could not load live inventory just now. Refresh to retry, or message concierge for a curated shortlist — we respond quickly on WhatsApp.'
+              ? 'Please check again shortly.'
               : 'Refine filters or let our concierge curate a match for your itinerary — we reply on WhatsApp within minutes during service hours.'}
           </p>
         </div>

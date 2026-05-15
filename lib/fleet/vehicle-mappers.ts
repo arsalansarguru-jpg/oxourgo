@@ -28,7 +28,7 @@ function resolveVehicleImageUrl(image: string | null, brand: string): string {
   return url ?? resolveFleetImageUrl(brand)
 }
 
-function modelFromListingName(brand: string, name: string): string {
+export function modelFromListingName(brand: string, name: string): string {
   const b = brand.trim()
   const n = name.trim()
   if (!n) return 'Model'
@@ -162,13 +162,16 @@ function toCarStatus(row: VehicleRow): CarStatus {
 export function mapVehicleRowToFleetCar(row: VehicleRow): FleetCar {
   const price = parseMoneyIntRupees(row.price_per_day)
   const imageUrl = resolveVehicleImageUrl(row.image, row.brand)
-  const displayName = row.name.trim() || `${row.brand} ${modelFromListingName(row.brand, row.name)}`.trim()
+  const listingName = String(row.name ?? '').trim()
+  const displayName = listingName || `${row.brand} ${modelFromListingName(row.brand, listingName)}`.trim()
+  const year =
+    typeof row.year === 'number' && Number.isFinite(row.year) ? row.year : new Date().getFullYear()
   return {
     id: row.id,
     brand: row.brand,
-    model: modelFromListingName(row.brand, row.name),
+    model: modelFromListingName(row.brand, listingName),
     displayName,
-    year: row.year,
+    year,
     registrationNumber: row.registration_number || '—',
     fuel: toFleetFuel(row.fuel_type),
     transmission: toTransmission(row.transmission),
@@ -186,7 +189,8 @@ export function mapVehicleRowToFleetCar(row: VehicleRow): FleetCar {
 export function mapVehicleRowToCar(row: VehicleRow): Car {
   const price = parseMoneyIntRupees(row.price_per_day)
   const imageUrl = resolveVehicleImageUrl(row.image, row.brand)
-  const name = row.name.trim() || `${row.brand} ${modelFromListingName(row.brand, row.name)}`.trim()
+  const listingName = String(row.name ?? '').trim()
+  const name = listingName || `${row.brand} ${modelFromListingName(row.brand, listingName)}`.trim()
   const gallery = [imageUrl, imageUrl, imageUrl]
   const reg = row.registration_number?.trim()
   const specs: Record<string, string> = {

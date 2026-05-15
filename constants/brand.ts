@@ -1,9 +1,6 @@
-import {
-  BUSINESS_EMAIL_PRIMARY,
-  BUSINESS_PHONE_DISPLAY,
-  BUSINESS_PHONE_TEL,
-  BUSINESS_WHATSAPP_URL,
-} from '@/lib/constants'
+import { getBusinessContact } from '@/lib/business-contact'
+
+const contact = getBusinessContact()
 
 export const BRAND = {
   name: 'Oxour Go',
@@ -11,11 +8,11 @@ export const BRAND = {
   logoSrc: '/brand/oxour-go-mark.svg',
   logoAlt:
     'Oxour Go logo: glowing neon blue OG monogram with OXOUR GO wordmark on a dark background',
-  phoneDisplay: BUSINESS_PHONE_DISPLAY,
-  phoneTel: BUSINESS_PHONE_TEL,
-  email: BUSINESS_EMAIL_PRIMARY,
+  phoneDisplay: contact.phoneDisplay,
+  phoneTel: contact.phoneTel,
+  email: contact.supportEmail,
   address: 'Mumbai, Maharashtra, India',
-  whatsapp: BUSINESS_WHATSAPP_URL,
+  whatsapp: contact.whatsappUrl,
 } as const
 
 export const PICKUP_LOCATIONS = ['Andheri', 'Bandra', 'Colaba', 'Juhu', 'Powai'] as const

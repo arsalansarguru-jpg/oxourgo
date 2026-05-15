@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { getBusinessSupportEmail } from '@/lib/business-contact'
 import type { Json } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -83,5 +84,5 @@ export function parseOpsAlertEmails(): string[] {
 export function getEmailFromAddress(): string {
   const v = process.env.EMAIL_FROM?.trim()
   if (v) return v
-  return `Oxour Go <hello@oxourgo.com>`
+  return `Oxour Go <${getBusinessSupportEmail()}>`
 }

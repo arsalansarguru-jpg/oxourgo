@@ -1,9 +1,11 @@
 import Link from 'next/link'
 
-import { BUSINESS_EMAIL_PRIMARY } from '@/lib/constants'
+import { getBusinessSupportEmail } from '@/lib/business-contact'
 
 /** One-line legal strip for authenticated dashboard routes (G3). */
 export function DashboardSlimFooter() {
+  const supportEmail = getBusinessSupportEmail()
+
   return (
     <footer className="border-t border-stroke bg-matte/[0.55] py-4 text-center text-[11px] text-muted backdrop-blur-md supports-[backdrop-filter]:bg-matte/45">
       <p className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1 px-4">
@@ -23,8 +25,8 @@ export function DashboardSlimFooter() {
           Refund Policy
         </Link>
         <span aria-hidden>·</span>
-        <a href={`mailto:${BUSINESS_EMAIL_PRIMARY}`} className="text-electric hover:underline">
-          {BUSINESS_EMAIL_PRIMARY}
+        <a href={`mailto:${supportEmail}`} className="text-electric hover:underline">
+          {supportEmail}
         </a>
       </p>
     </footer>

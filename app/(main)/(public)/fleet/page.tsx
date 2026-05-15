@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
-import { FleetView } from '@/features/fleet/fleet-view'
+import { FleetPageContent } from '@/features/fleet/fleet-page-content'
 import { FleetLoading } from '@/features/fleet/fleet-loading'
 import { buildPageMetadata } from '@/lib/seo/build-page-metadata'
 
@@ -40,7 +40,13 @@ export default async function FleetPage({
 
   return (
     <Suspense fallback={<FleetLoading />}>
-      <FleetView pickup={q.pickup} from={q.from} to={q.to} location={q.location} searchQuery={q.q} />
+      <FleetPageContent
+        pickup={q.pickup}
+        from={q.from}
+        to={q.to}
+        location={q.location}
+        searchQuery={q.q}
+      />
     </Suspense>
   )
 }

@@ -23,6 +23,8 @@ export const VEHICLE_PUBLIC_COLUMNS =
  * If `available` is missing on a row, optional legacy `availability_status` (when present on the object) can hide maintenance-only rows.
  */
 export function isVehicleShownOnPublicCatalog(row: VehicleRow): boolean {
+  if (row.deleted_at) return false
+  if (row.archived_at) return false
   if (typeof row.available === 'boolean') return true
   const s = String(row.availability_status ?? '').trim().toLowerCase()
   if (
@@ -54,6 +56,7 @@ export async function fetchPublicVehicleRows(): Promise<{ rows: VehicleRow[] }> 
     const { data, error } = await supabase
       .from('vehicles')
       .select('*')
+      .is('deleted_at', null)
       .order('created_at', { ascending: false })
 
     if (error) {
