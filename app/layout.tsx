@@ -4,7 +4,7 @@ import Script from 'next/script'
 
 import { AppProviders } from '@/components/providers/app-providers'
 import { OrganizationAndLocalBusinessJsonLd } from '@/components/seo/organization-json-ld'
-import { getMetadataSiteUrl } from '@/lib/seo/site-metadata'
+import { getSiteUrl } from '@/lib/env/site-url'
 
 import './globals.css'
 
@@ -18,7 +18,7 @@ export const viewport: Viewport = {
   ],
 }
 
-const siteUrl = getMetadataSiteUrl()
+const siteUrl = getSiteUrl()
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

@@ -1,8 +1,1 @@
-/** Canonical origin for Open Graph and `metadataBase` (falls back safely in dev). */
-export function getMetadataSiteUrl(): string {
-  const fromEnv = process.env.NEXT_PUBLIC_APP_URL?.trim()
-  if (fromEnv) return fromEnv.replace(/\/+$/, '')
-  const vercel = process.env.VERCEL_URL?.trim()
-  if (vercel) return `https://${vercel.replace(/\/+$/, '')}`
-  return 'http://localhost:3000'
-}
+export { getSiteUrl, getSiteUrl as getMetadataSiteUrl } from '@/lib/env/site-url'

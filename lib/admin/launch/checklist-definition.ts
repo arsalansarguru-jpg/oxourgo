@@ -42,7 +42,7 @@ export const LAUNCH_SECTION_LABELS: Record<LaunchSectionId, string> = {
 
 export const LAUNCH_CHECKLIST_ITEMS: readonly LaunchChecklistItemDef[] = [
   // Domain & SSL
-  { key: 'domain.public_url', section: 'domain_ssl', label: 'Public site URL configured', description: 'NEXT_PUBLIC_APP_URL or Vercel URL resolves for emails and links.', kind: 'auto' },
+  { key: 'domain.public_url', section: 'domain_ssl', label: 'Public site URL configured', description: 'NEXT_PUBLIC_SITE_URL resolves for sitemap, emails, and links.', kind: 'auto' },
   { key: 'domain.https_production', section: 'domain_ssl', label: 'HTTPS in production', description: 'Production deployment serves over TLS.', kind: 'auto' },
   { key: 'domain.custom_verified', section: 'domain_ssl', label: 'Custom domain verified', description: 'DNS points to hosting; apex and www tested.', kind: 'manual' },
   { key: 'domain.ssl_valid', section: 'domain_ssl', label: 'SSL certificate valid', description: 'No expiry warnings; HSTS configured if applicable.', kind: 'manual' },
