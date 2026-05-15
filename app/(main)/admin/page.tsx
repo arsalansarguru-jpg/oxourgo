@@ -1,14 +1,22 @@
-import { AdminDashboardHome } from '@/components/admin/dashboard/admin-dashboard-home'
+import { Suspense } from 'react'
+
+import { AdminCommandCenterLoader } from '@/components/admin/dashboard/admin-command-center-loader'
+import { AdminCommandCenterSkeleton } from '@/components/admin/dashboard/admin-command-center-skeleton'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
+
+export const dynamic = 'force-dynamic'
 
 export default function AdminHomePage() {
   return (
     <div className="space-y-8 lg:space-y-10">
       <AdminPageHeader
-        title="Dashboard"
-        description="Executive view of revenue, fleet load, reservations, and compliance — sample data until live analytics connect."
+        title="Command center"
+        description="Real-time operational HQ — live fleet load, finance pulse, queues, and audit activity across Oxour Go."
+        eyebrow="Operations HQ"
       />
-      <AdminDashboardHome />
+      <Suspense fallback={<AdminCommandCenterSkeleton />}>
+        <AdminCommandCenterLoader />
+      </Suspense>
     </div>
   )
 }
