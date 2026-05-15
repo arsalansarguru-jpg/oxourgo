@@ -13,6 +13,8 @@ const emptyMetrics: AdminFinancialMetrics = {
   pendingRefundsRupees: 0,
   withheldDepositsCount: 0,
   withheldDepositsRupees: 0,
+  outstandingFinesRupees: 0,
+  finesCollectedRupees: 0,
 }
 
 export default async function AdminFinancialsPage({

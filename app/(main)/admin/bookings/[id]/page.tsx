@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 
 import { AdminBookingPdfPanel } from '@/components/admin/admin-booking-pdf-panel'
 import { AdminBookingOpsPanel } from '@/components/admin/admin-booking-ops-panel'
+import { AdminBookingViolationsPanel } from '@/components/admin/violations/admin-booking-violations-panel'
 import { AdminBookingPaymentTimeline } from '@/components/admin/admin-booking-payment-timeline'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
@@ -10,6 +11,7 @@ import { AdminStatusPill } from '@/components/admin/admin-status-pill'
 import { adminGetBooking, adminGetBookingCustomerProfile } from '@/lib/admin/data/bookings'
 import { adminGetBookingInspectionBundle } from '@/lib/admin/data/booking-inspection'
 import { adminGetBookingFinancialSummary } from '@/lib/admin/data/financials'
+import { adminGetBookingViolationsBundle } from '@/lib/admin/data/violations'
 import { adminListPaymentEventsForBooking } from '@/lib/admin/data/payments'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatInr } from '@/lib/format'
@@ -37,7 +39,8 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
   }
   if (!booking) notFound()
 
-  const [customerEmail, customerProfile, paymentTimeline, inspection, financialSummary] = await Promise.all([
+  const [customerEmail, customerProfile, paymentTimeline, inspection, financialSummary, violationsBundle] =
+    await Promise.all([
     (async () => {
       try {
         const admin = createAdminClient()
@@ -51,6 +54,7 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
     adminListPaymentEventsForBooking(id),
     adminGetBookingInspectionBundle(id, booking.customer_handover_signature_path),
     adminGetBookingFinancialSummary(id),
+    adminGetBookingViolationsBundle(id),
   ])
 
   const vehJoin = booking.vehicles
@@ -216,6 +220,8 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
 
         <AdminBookingOpsPanel booking={booking} inspection={inspection} financialSummary={financialSummary} />
       </div>
+
+      <AdminBookingViolationsPanel bookingId={id} bundle={violationsBundle} />
 
       <AdminCard>
         <AdminCardContent className="space-y-2 p-5 sm:p-7">

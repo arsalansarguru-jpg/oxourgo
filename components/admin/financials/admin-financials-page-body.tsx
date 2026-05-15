@@ -24,7 +24,7 @@ export function AdminFinancialsPageBody({
         description="Security deposit lifecycle, trip deductions, and refund settlement — separate from rental payment collection."
       />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-5">
         <OverviewCard
           label="Deposits held"
           value={formatInr(metrics.totalDepositsHeldRupees)}
@@ -45,6 +45,18 @@ export function AdminFinancialsPageBody({
           hint="No refund issued — penalties or disputes"
           accent="rose"
         />
+        <OverviewCard
+          label="Outstanding fines"
+          value={formatInr(metrics.outstandingFinesRupees)}
+          hint="Pending, notified, or disputed violations"
+          accent="amber"
+        />
+        <OverviewCard
+          label="Fines collected"
+          value={formatInr(metrics.finesCollectedRupees)}
+          hint="Paid or deducted from deposit"
+          accent="violet"
+        />
       </div>
 
       <AdminCard>
@@ -54,9 +66,14 @@ export function AdminFinancialsPageBody({
               <h2 className="text-lg font-semibold text-soft">Penalty management</h2>
               <p className="text-sm text-muted">Bookings with active deduction lines — open a booking to settle deposit and refund.</p>
             </div>
-            <Link href="/admin/payments" className="text-xs font-semibold text-electric underline-offset-4 hover:underline">
-              Rental payments →
-            </Link>
+            <div className="flex flex-wrap gap-4">
+              <Link href="/admin/violations" className="text-xs font-semibold text-electric underline-offset-4 hover:underline">
+                Violations →
+              </Link>
+              <Link href="/admin/payments" className="text-xs font-semibold text-electric underline-offset-4 hover:underline">
+                Rental payments →
+              </Link>
+            </div>
           </div>
 
           <div className="overflow-x-auto rounded-2xl border border-white/[0.06]">

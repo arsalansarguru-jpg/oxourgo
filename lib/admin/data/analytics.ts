@@ -3,6 +3,7 @@ import 'server-only'
 import { enumerateUtcDays, toUtcYmd, type AnalyticsResolvedRange } from '@/lib/admin/analytics-range'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logPostgrestError } from '@/lib/errors/safe-user-message'
+import { adminViolationMetrics } from '@/lib/admin/data/violations'
 
 type BookingLite = {
   id: string
@@ -118,6 +119,9 @@ export type AdminAnalyticsBundle = {
     totalCustomers: number
     conversionPct: number
     bookingsCreatedInPeriod: number
+    finesCollectedRupees: number
+    outstandingFinesRupees: number
+    openViolationsCount: number
   }
   series: {
     revenueByDay: AdminAnalyticsSeriesPoint[]
@@ -149,6 +153,7 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
     profilesGrowthRes,
     totalRevenueLifetime,
     monthlyRevenue,
+    violationMetrics,
   ] = await Promise.all([
     admin.from('vehicles').select('id, name, brand, available'),
     admin.from('profiles').select('user_id', { count: 'exact', head: true }),
@@ -168,6 +173,7 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
       .limit(8000),
     sumPostedRevenue(admin),
     sumPostedRevenue(admin, { fromMonthStart: true }),
+    adminViolationMetrics(),
   ])
 
   if (vehiclesRes.error) logPostgrestError('[fetchAdminAnalyticsBundle] vehicles', vehiclesRes.error)
@@ -375,6 +381,9 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
       totalCustomers,
       conversionPct,
       bookingsCreatedInPeriod,
+      finesCollectedRupees: violationMetrics.totalFinesCollectedRupees,
+      outstandingFinesRupees: violationMetrics.outstandingLiabilitiesRupees,
+      openViolationsCount: violationMetrics.openViolationsCount,
     },
     series: {
       revenueByDay: days.map((d) => ({ date: d, value: revenueByDay.get(d) ?? 0 })),

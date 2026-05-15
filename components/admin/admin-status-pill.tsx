@@ -32,6 +32,15 @@ const styles: Record<string, string> = {
   void: 'border-stroke-strong bg-fill-glass-strong text-muted',
   partially_refunded: 'border-sky-400/35 bg-sky-500/10 text-sky-100',
   withheld: 'border-red-400/35 bg-red-500/10 text-red-200',
+  customer_notified: 'border-sky-400/35 bg-sky-500/10 text-sky-100',
+  deducted_from_deposit: 'border-amber-400/35 bg-amber-500/12 text-amber-100',
+  disputed: 'border-red-400/40 bg-red-500/10 text-red-200',
+  traffic_challan: 'border-rose-400/30 bg-rose-500/10 text-rose-100',
+  speeding_fine: 'border-orange-400/30 bg-orange-500/10 text-orange-100',
+  toll_violation: 'border-violet-400/30 bg-violet-500/10 text-violet-100',
+  parking_penalty: 'border-amber-400/30 bg-amber-500/10 text-amber-100',
+  towing_charge: 'border-stroke-strong bg-fill-glass-strong text-soft',
+  damage_liability: 'border-red-400/30 bg-red-500/10 text-red-200',
 }
 
 export function AdminStatusPill({ value }: { value: string }) {

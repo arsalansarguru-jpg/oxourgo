@@ -9,6 +9,7 @@ import {
 import type { BookingWithCar } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logPostgrestError } from '@/lib/errors/safe-user-message'
+import { adminViolationMetrics } from '@/lib/admin/data/violations'
 
 const financialBookingSelect = `
   id,
@@ -52,6 +53,8 @@ export type AdminFinancialMetrics = {
   pendingRefundsRupees: number
   withheldDepositsCount: number
   withheldDepositsRupees: number
+  outstandingFinesRupees: number
+  finesCollectedRupees: number
 }
 
 export type AdminPenaltyRow = {
@@ -88,6 +91,7 @@ function vehicleSecurityDeposit(booking: BookingWithCar): number {
 
 export async function adminFinancialMetrics(): Promise<AdminFinancialMetrics> {
   const admin = createAdminClient()
+  const violationMetrics = await adminViolationMetrics()
   const { data, error } = await admin
     .from('bookings')
     .select('deposit_status, deposit_amount, deposit_held_rupees, refund_amount, penalty_total, deposit_penalty_total_rupees')
@@ -102,6 +106,8 @@ export async function adminFinancialMetrics(): Promise<AdminFinancialMetrics> {
       pendingRefundsRupees: 0,
       withheldDepositsCount: 0,
       withheldDepositsRupees: 0,
+      outstandingFinesRupees: violationMetrics.outstandingLiabilitiesRupees,
+      finesCollectedRupees: violationMetrics.totalFinesCollectedRupees,
     }
   }
 
@@ -137,6 +143,8 @@ export async function adminFinancialMetrics(): Promise<AdminFinancialMetrics> {
     pendingRefundsRupees,
     withheldDepositsCount,
     withheldDepositsRupees,
+    outstandingFinesRupees: violationMetrics.outstandingLiabilitiesRupees,
+    finesCollectedRupees: violationMetrics.totalFinesCollectedRupees,
   }
 }
 

@@ -188,6 +188,7 @@ export type Database = {
           customer_handover_signed_at: string | null
           pickup_inspection_completed_at: string | null
           return_inspection_completed_at: string | null
+          outstanding_fines_rupees: number
           created_at: string
           updated_at: string
         }
@@ -253,6 +254,7 @@ export type Database = {
           customer_handover_signed_at?: string | null
           pickup_inspection_completed_at?: string | null
           return_inspection_completed_at?: string | null
+          outstanding_fines_rupees?: number
           created_at?: string
           updated_at?: string
         }
@@ -318,8 +320,114 @@ export type Database = {
           customer_handover_signed_at?: string | null
           pickup_inspection_completed_at?: string | null
           return_inspection_completed_at?: string | null
+          outstanding_fines_rupees?: number
           created_at?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      booking_violations: {
+        Row: {
+          id: string
+          booking_id: string
+          user_id: string
+          violation_type: string
+          amount_rupees: number
+          reason: string
+          violation_date: string
+          authority_source: string | null
+          notes: string | null
+          status: string
+          challan_storage_path: string | null
+          challan_mime: string | null
+          challan_file_name: string | null
+          amount_paid_rupees: number
+          amount_deducted_rupees: number
+          customer_notified_at: string | null
+          paid_at: string | null
+          deducted_at: string | null
+          resolved_at: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          booking_id: string
+          user_id: string
+          violation_type: string
+          amount_rupees: number
+          reason: string
+          violation_date: string
+          authority_source?: string | null
+          notes?: string | null
+          status?: string
+          challan_storage_path?: string | null
+          challan_mime?: string | null
+          challan_file_name?: string | null
+          amount_paid_rupees?: number
+          amount_deducted_rupees?: number
+          customer_notified_at?: string | null
+          paid_at?: string | null
+          deducted_at?: string | null
+          resolved_at?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          booking_id?: string
+          user_id?: string
+          violation_type?: string
+          amount_rupees?: number
+          reason?: string
+          violation_date?: string
+          authority_source?: string | null
+          notes?: string | null
+          status?: string
+          challan_storage_path?: string | null
+          challan_mime?: string | null
+          challan_file_name?: string | null
+          amount_paid_rupees?: number
+          amount_deducted_rupees?: number
+          customer_notified_at?: string | null
+          paid_at?: string | null
+          deducted_at?: string | null
+          resolved_at?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      booking_violation_events: {
+        Row: {
+          id: string
+          violation_id: string
+          booking_id: string
+          event_type: string
+          payload: Json
+          actor_user_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          violation_id: string
+          booking_id: string
+          event_type: string
+          payload?: Json
+          actor_user_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          violation_id?: string
+          booking_id?: string
+          event_type?: string
+          payload?: Json
+          actor_user_id?: string | null
+          created_at?: string
         }
         Relationships: []
       }

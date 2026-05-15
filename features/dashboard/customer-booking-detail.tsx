@@ -35,6 +35,8 @@ import { bookingPaymentBreakdown, formatPaymentMethodLabel, payAtPickupInstructi
 import { deriveCustomerBookingUiStatus, type CustomerBookingUiStatus } from '@/lib/customer/derive-booking-ui-status'
 import { getPublicSiteUrl } from '@/lib/env/site-url'
 import { CustomerBookingFinancialSection } from '@/features/dashboard/customer-booking-financial-section'
+import { CustomerBookingViolationsSection } from '@/features/dashboard/customer-booking-violations-section'
+import type { CustomerBookingViolationsBundle } from '@/lib/customer/violations-queries'
 import { formatInr } from '@/lib/format'
 import type { BookingWithCar } from '@/lib/supabase/database.types'
 import { cn } from '@/lib/utils/cn'
@@ -120,9 +122,11 @@ export type CustomerBookingInspectionView = {
 export function CustomerBookingDetail({
   row,
   inspection,
+  violationsBundle,
 }: {
   row: BookingWithCar
   inspection?: CustomerBookingInspectionView | null
+  violationsBundle?: CustomerBookingViolationsBundle | null
 }) {
   const vehicle = resolveVehicle(row)
   const visual = resolveBookingVehicleVisual(row)
@@ -378,6 +382,8 @@ export function CustomerBookingDetail({
               ) : null}
 
               <CustomerBookingFinancialSection row={row} />
+
+              {violationsBundle ? <CustomerBookingViolationsSection bundle={violationsBundle} /> : null}
 
               {row.returned_at || row.return_fuel_level != null || row.return_odometer_km != null ? (
                 <div className="mt-6 border-t border-stroke pt-6">

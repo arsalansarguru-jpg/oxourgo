@@ -8,6 +8,7 @@ import {
   CalendarRange,
   CarFront,
   Gauge,
+  Gavel,
   IndianRupee,
   Percent,
   ShieldCheck,
@@ -191,6 +192,22 @@ export function AdminAnalyticsDashboard({ data }: { data: AdminAnalyticsBundle }
             value={String(totals.totalCustomers)}
             hint="Profiles in system"
             icon={Users}
+          />
+        </motion.div>
+        <motion.div variants={section}>
+          <MetricGlass
+            label="Fines collected"
+            value={formatInr(totals.finesCollectedRupees)}
+            hint="Paid or deducted from deposit"
+            icon={Gavel}
+          />
+        </motion.div>
+        <motion.div variants={section}>
+          <MetricGlass
+            label="Outstanding fines"
+            value={formatInr(totals.outstandingFinesRupees)}
+            hint={`${totals.openViolationsCount} open violation(s)`}
+            icon={Gavel}
           />
         </motion.div>
         <motion.div variants={section} className="sm:col-span-2 lg:col-span-3">

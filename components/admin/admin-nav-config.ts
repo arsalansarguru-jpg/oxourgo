@@ -3,6 +3,7 @@ import {
   BarChart3,
   CarFront,
   ClipboardList,
+  Gavel,
   LayoutDashboard,
   Scale,
   Settings,
@@ -19,6 +20,7 @@ export const ADMIN_NAV = [
   { href: '/admin/kyc', label: 'KYC', icon: ShieldCheck, exact: false },
   { href: '/admin/payments', label: 'Payments', icon: Banknote, exact: false },
   { href: '/admin/financials', label: 'Deposits', icon: Scale, exact: false },
+  { href: '/admin/violations', label: 'Violations', icon: Gavel, exact: false },
   { href: '/admin/analytics', label: 'Analytics', icon: BarChart3, exact: false },
   { href: '/admin/settings', label: 'Settings', icon: Settings, exact: false },
 ] as const
@@ -57,6 +59,7 @@ export function adminTopBarTitle(pathname: string): string {
   if (pathname.startsWith('/admin/kyc')) return 'KYC'
   if (pathname.startsWith('/admin/payments')) return 'Payments'
   if (pathname.startsWith('/admin/financials')) return 'Deposits'
+  if (pathname.startsWith('/admin/violations')) return 'Violations'
   if (pathname.startsWith('/admin/analytics')) return 'Analytics'
   if (pathname.startsWith('/admin/settings')) return 'Settings'
   if (pathname.startsWith('/admin/notifications')) return 'Alerts'
