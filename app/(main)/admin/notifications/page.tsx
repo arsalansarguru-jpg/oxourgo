@@ -4,12 +4,12 @@ import { AdminOpsAlertRow } from '@/components/admin/admin-ops-alert-row'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 import { listOpsAlertsForAdmin } from '@/lib/admin/data/ops-alerts'
-import { requireAppRole } from '@/lib/auth/server'
+import { requireAdminPageAccess } from '@/lib/auth/guards'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminNotificationsPage() {
-  const { user } = await requireAppRole('ops_admin')
+  const { user } = await requireAdminPageAccess('/admin/notifications')
   let alerts: Awaited<ReturnType<typeof listOpsAlertsForAdmin>> = []
   try {
     alerts = await listOpsAlertsForAdmin(user.id, 200)

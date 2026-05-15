@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 
 import type { AdminActionResult } from '@/lib/admin/actions/types'
 import { writeAdminAudit } from '@/lib/admin/audit'
-import { requireAppRole } from '@/lib/auth/server'
+import { requirePermissionForAdminAction } from '@/lib/auth/admin-action-auth'
 import type { Database, Json } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { adminActionDbFailed, logUnknownError, SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
@@ -25,7 +25,9 @@ export async function adminCreateVehicleAction(input: {
   available?: boolean
 }): Promise<AdminActionResult & { id?: string }> {
   return runInstrumentedServerAction('adminCreateVehicleAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('fleet.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const insert: Database['public']['Tables']['vehicles']['Insert'] = {
@@ -66,7 +68,9 @@ export async function adminUpdateVehicleAction(
   patch: Database['public']['Tables']['vehicles']['Update'],
 ): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminUpdateVehicleAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('fleet.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const { error } = await admin.from('vehicles').update(patch).eq('id', id)
@@ -95,7 +99,9 @@ export async function adminSetVehicleAvailableAction(id: string, available: bool
 
 export async function adminUploadVehicleImageAction(formData: FormData): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminUploadVehicleImageAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('fleet.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const vehicleId = String(formData.get('vehicleId') ?? '').trim()
     const file = formData.get('file')
     if (!vehicleId || !(file instanceof File) || file.size === 0) {
@@ -148,7 +154,9 @@ export async function adminToggleVehicleFeaturedAction(id: string, featured: boo
 
 export async function adminDeleteVehicleAction(id: string): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminDeleteVehicleAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('fleet.delete')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const { error } = await admin.from('vehicles').delete().eq('id', id)

@@ -2,6 +2,8 @@ import 'server-only'
 
 import type { User } from '@supabase/supabase-js'
 
+import { AuthError } from '@/lib/auth/errors'
+import { hasPermission, type Permission } from '@/lib/auth/permissions'
 import {
   APP_ROLE_APP_METADATA_KEY,
   type AppAuthRole,
@@ -54,18 +56,39 @@ export async function getVerifiedAuthClaims() {
 export async function requireAuthenticatedUser(): Promise<User> {
   const user = await getAuthenticatedUser()
   if (!user) {
-    throw new Error('Unauthorized')
+    throw new AuthError('unauthorized')
   }
   return user
 }
 
+/**
+ * @deprecated Prefer `requirePermission` for admin/staff gates.
+ */
 export async function requireAppRole(minimum: AppAuthRole): Promise<AuthSessionSummary> {
   const summary = await getAuthSessionSummary()
   if (!summary) {
-    throw new Error('Unauthorized')
+    throw new AuthError('unauthorized')
   }
   if (!roleAtLeast(summary.appRole, minimum)) {
-    throw new Error('Forbidden')
+    throw new AuthError('forbidden')
   }
   return summary
+}
+
+export async function requirePermission(permission: Permission): Promise<AuthSessionSummary> {
+  const summary = await getAuthSessionSummary()
+  if (!summary) {
+    throw new AuthError('unauthorized')
+  }
+  if (!hasPermission(summary.appRole, permission)) {
+    throw new AuthError('forbidden')
+  }
+  return summary
+}
+
+export async function getPermissionsForSession(): Promise<Permission[] | null> {
+  const summary = await getAuthSessionSummary()
+  if (!summary) return null
+  const { getPermissionsForRole } = await import('@/lib/auth/permissions')
+  return [...getPermissionsForRole(summary.appRole)]
 }

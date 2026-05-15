@@ -14,7 +14,7 @@ import {
   resolveDepositAmount,
   type PenaltyCategory,
 } from '@/lib/booking/financial'
-import { requireAppRole } from '@/lib/auth/server'
+import { requirePermissionForAdminAction } from '@/lib/auth/admin-action-auth'
 import { adminActionDbFailed } from '@/lib/errors/safe-user-message'
 import { runInstrumentedServerAction } from '@/lib/monitoring/instrument-server-action'
 import type { Json } from '@/lib/supabase/database.types'
@@ -86,7 +86,8 @@ export async function adminRecomputeBookingFinancialsAction(
   options?: { manualDepositAppliedRupees?: number | null; manualOverride?: boolean },
 ): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminRecomputeBookingFinancialsAction', 'payments', async () => {
-    await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('deposits.write')
+    if (!guard.ok) return guard
     const admin = createAdminClient()
     const row = await loadBookingFinancialRow(admin, bookingId)
     if (!row) return { ok: false, message: 'Booking not found.' }
@@ -149,7 +150,9 @@ export async function adminMarkDepositReceivedAction(input: {
   depositAmountRupees?: number | null
 }): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminMarkDepositReceivedAction', 'payments', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('deposits.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
     const row = await loadBookingFinancialRow(admin, input.bookingId)
     if (!row) return { ok: false, message: 'Booking not found.' }
@@ -224,7 +227,9 @@ export async function adminApplyBookingPenaltiesFullAction(
   input: AdminPenaltyFormInput,
 ): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminApplyBookingPenaltiesFullAction', 'payments', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('deposits.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const amounts = {
@@ -329,7 +334,9 @@ export async function adminProcessDepositRefundAction(input: {
   note?: string | null
 }): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminProcessDepositRefundAction', 'payments', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('deposits.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const refund = parsePenaltyAmount(input.refundAmountRupees)
@@ -410,7 +417,9 @@ export async function adminWithholdDepositAction(input: {
   note?: string | null
 }): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminWithholdDepositAction', 'payments', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('deposits.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const row = await loadBookingFinancialRow(admin, input.bookingId)

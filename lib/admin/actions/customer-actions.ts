@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 
 import type { AdminActionResult } from '@/lib/admin/actions/types'
 import { writeAdminAudit } from '@/lib/admin/audit'
-import { requireAppRole } from '@/lib/auth/server'
+import { requirePermissionForAdminAction } from '@/lib/auth/admin-action-auth'
 import type { Database, Json } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { adminActionDbFailed } from '@/lib/errors/safe-user-message'
@@ -20,7 +20,9 @@ export async function adminUpdateCustomerProfileAction(
   >,
 ): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminUpdateCustomerProfileAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('customers.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     if (patch.verification_tier && !(TIERS as readonly string[]).includes(patch.verification_tier)) {
       return { ok: false, message: 'Invalid verification tier.' }
     }

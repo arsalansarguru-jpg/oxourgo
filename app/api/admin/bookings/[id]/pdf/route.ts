@@ -6,16 +6,19 @@ import { parseBookingPdfDocKind } from '@/lib/pdf/booking-payload'
 import { bookingPdfFilename } from '@/lib/pdf/booking-pdf-filename'
 import { loadAdminBookingPdfPayload } from '@/lib/pdf/load-booking-payload-for-pdf'
 import { renderBookingPdfBuffer } from '@/lib/pdf/render-booking-pdf'
+import { hasPermission } from '@/lib/auth/permissions'
 import { getAuthSessionSummary } from '@/lib/auth/server'
-import { roleAtLeast } from '@/lib/auth/roles'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 async function adminBookingPdfGET(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const session = await getAuthSessionSummary()
-  if (!session || !roleAtLeast(session.appRole, 'ops_admin')) {
-    return NextResponse.json({ ok: false, code: 'forbidden', message: 'Admin access required.' }, { status: 403 })
+  if (!session || !hasPermission(session.appRole, 'bookings.read')) {
+    return NextResponse.json(
+      { ok: false, code: 'forbidden', message: 'You do not have permission to download this document.' },
+      { status: 403 },
+    )
   }
 
   const { id } = await params

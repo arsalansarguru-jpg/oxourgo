@@ -16,6 +16,7 @@ import {
   Sparkles,
 } from 'lucide-react'
 
+import { BookingSourceBadge } from '@/components/admin/bookings/booking-source-badge'
 import { AdminBookingsBulkPdfBar } from '@/components/admin/admin-bookings-bulk-pdf-bar'
 import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 import { AdminStatusPill } from '@/components/admin/admin-status-pill'
@@ -48,6 +49,13 @@ const PAYMENT_FILTER_OPTS = [
   { value: 'refunded', label: 'Refunded' },
 ] as const
 
+const SOURCE_FILTER_OPTS = [
+  { value: '', label: 'All channels' },
+  { value: 'website', label: 'Website' },
+  { value: 'whatsapp', label: 'WhatsApp' },
+  { value: 'admin_manual', label: 'Admin manual' },
+] as const
+
 const PAGE_SIZE_OPTS = [10, 25, 50, 100] as const
 
 export type AdminBookingsManagerProps = {
@@ -55,6 +63,7 @@ export type AdminBookingsManagerProps = {
   listQuery: {
     status: string
     payment: string
+    source: string
     q: string
     page: number
     pageSize: number
@@ -72,10 +81,11 @@ function customerDisplayName(row: AdminBookingListItem): string {
 
 function buildBookingsListHref(
   current: AdminBookingsManagerProps['listQuery'],
-  patch: Partial<{ status: string; payment: string; q: string; page: number; per: number }>,
+  patch: Partial<{ status: string; payment: string; source: string; q: string; page: number; per: number }>,
 ) {
   const status = patch.status !== undefined ? patch.status : current.status
   const payment = patch.payment !== undefined ? patch.payment : current.payment
+  const source = patch.source !== undefined ? patch.source : current.source
   const q = patch.q !== undefined ? patch.q : current.q
   const page = patch.page !== undefined ? patch.page : current.page
   const per = patch.per !== undefined ? patch.per : current.pageSize
@@ -83,6 +93,7 @@ function buildBookingsListHref(
   return `/admin/bookings${stringifyBookingsQuery({
     status: status || undefined,
     payment: payment || undefined,
+    source: source || undefined,
     q: q || undefined,
     page: page > 1 ? page : undefined,
     per: per !== 25 ? per : undefined,
@@ -107,6 +118,12 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
   const paymentHref = (payment: string) =>
     buildBookingsListHref(listQuery, {
       payment,
+      page: 1,
+    })
+
+  const sourceHref = (source: string) =>
+    buildBookingsListHref(listQuery, {
+      source,
       page: 1,
     })
 
@@ -157,6 +174,7 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
               `${pathname}${stringifyBookingsQuery({
                 status: listQuery.status || undefined,
                 payment: listQuery.payment || undefined,
+                source: listQuery.source || undefined,
                 q: next || undefined,
                 page: 1,
                 per: listQuery.pageSize !== 25 ? listQuery.pageSize : undefined,
@@ -188,6 +206,7 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
                   `${pathname}${stringifyBookingsQuery({
                     status: listQuery.status || undefined,
                     payment: listQuery.payment || undefined,
+                    source: listQuery.source || undefined,
                     page: 1,
                     per: listQuery.pageSize !== 25 ? listQuery.pageSize : undefined,
                   })}`,

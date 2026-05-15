@@ -2,12 +2,8 @@ import { createServerClient } from '@supabase/ssr'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
-import {
-  APP_ROLE_APP_METADATA_KEY,
-  parseAppAuthRole,
-  roleAtLeast,
-  type AppAuthRole,
-} from '@/lib/auth/roles'
+import { canAccessAdminPath, appRoleFromJwtMetadata } from '@/lib/auth/route-access'
+import { isStaffRole } from '@/lib/auth/permissions'
 import { getSupabasePublicEnv } from '@/lib/env/supabase-public'
 import type { Database } from '@/lib/supabase/database.types'
 import { updateSession } from '@/lib/supabase/middleware'
@@ -19,14 +15,6 @@ const CONFIG_UNAVAILABLE_PATH = '/system/unavailable'
 
 function needsAuthenticatedUser(pathname: string): boolean {
   return PROTECTED_PREFIXES.some((p) => pathname.startsWith(p))
-}
-
-function appRoleFromUser(user: { app_metadata?: Record<string, unknown> }): AppAuthRole {
-  const meta = user.app_metadata ?? {}
-  const raw =
-    (typeof meta[APP_ROLE_APP_METADATA_KEY] === 'string' ? meta[APP_ROLE_APP_METADATA_KEY] : undefined) ??
-    (typeof meta.role === 'string' ? meta.role : undefined)
-  return parseAppAuthRole(raw) ?? 'customer'
 }
 
 export async function middleware(request: NextRequest) {
@@ -76,11 +64,25 @@ export async function middleware(request: NextRequest) {
     return redirectResponse
   }
 
-  if (request.nextUrl.pathname.startsWith('/admin')) {
-    if (!roleAtLeast(appRoleFromUser(user), 'ops_admin')) {
+  const pathname = request.nextUrl.pathname
+
+  if (pathname.startsWith('/admin')) {
+    const appRole = appRoleFromJwtMetadata(user.app_metadata as Record<string, unknown> | undefined)
+
+    if (!isStaffRole(appRole)) {
       const denied = new URL('/dashboard', request.url)
       denied.searchParams.set('error', 'forbidden')
       const redirectResponse = NextResponse.redirect(denied)
+      response.cookies.getAll().forEach((c) => {
+        redirectResponse.cookies.set(c.name, c.value)
+      })
+      return redirectResponse
+    }
+
+    if (pathname !== '/admin/forbidden' && !canAccessAdminPath(appRole, pathname)) {
+      const forbidden = new URL('/admin/forbidden', request.url)
+      forbidden.searchParams.set('from', pathname)
+      const redirectResponse = NextResponse.redirect(forbidden)
       response.cookies.getAll().forEach((c) => {
         redirectResponse.cookies.set(c.name, c.value)
       })

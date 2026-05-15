@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 
 import type { AdminActionResult } from '@/lib/admin/actions/types'
 import { writeAdminAudit } from '@/lib/admin/audit'
-import { requireAppRole } from '@/lib/auth/server'
+import { requirePermissionForAdminAction } from '@/lib/auth/admin-action-auth'
 import {
   conditionNotesToJson,
   type ConditionNotesShape,
@@ -70,7 +70,9 @@ export async function adminSavePickupInspectionAction(input: {
   markCompleted?: boolean
 }): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminSavePickupInspectionAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('bookings.inspect')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const { data: row, error: fetchErr } = await admin
@@ -141,7 +143,9 @@ export async function adminSaveReturnInspectionAction(input: {
   markCompleted?: boolean
 }): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminSaveReturnInspectionAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('bookings.inspect')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const { data: row, error: fetchErr } = await admin
@@ -215,7 +219,9 @@ export async function adminSaveReturnInspectionAction(input: {
 
 export async function adminUploadBookingInspectionPhotoAction(formData: FormData): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminUploadBookingInspectionPhotoAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('bookings.inspect')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const bookingId = String(formData.get('bookingId') ?? '').trim()
     const phaseRaw = String(formData.get('phase') ?? '').trim()
     const slotRaw = String(formData.get('slot') ?? '').trim()
@@ -309,7 +315,9 @@ export async function adminUploadBookingInspectionPhotoAction(formData: FormData
 
 export async function adminUploadHandoverSignatureAction(formData: FormData): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminUploadHandoverSignatureAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('bookings.inspect')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const bookingId = String(formData.get('bookingId') ?? '').trim()
     const file = formData.get('file')
     if (!bookingId || !(file instanceof File) || file.size === 0) {

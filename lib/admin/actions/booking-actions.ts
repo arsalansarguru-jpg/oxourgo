@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 
 import type { AdminActionResult } from '@/lib/admin/actions/types'
 import { writeAdminAudit } from '@/lib/admin/audit'
-import { requireAppRole } from '@/lib/auth/server'
+import { requirePermissionForAdminAction } from '@/lib/auth/admin-action-auth'
 import { hasVehicleBookingOverlap } from '@/lib/booking/vehicle-overlap'
 import { validatePickupInspectionForHandover, validateReturnInspectionForCheckpoint } from '@/lib/admin/booking-inspection-validate'
 import {
@@ -100,7 +100,9 @@ async function confirmPendingBookingFromAdmin(bookingId: string, actorUserId: st
 
 export async function adminApproveBookingAction(bookingId: string): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminApproveBookingAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('bookings.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     return confirmPendingBookingFromAdmin(bookingId, user.id)
   })
 }
@@ -110,7 +112,9 @@ export async function adminApproveBookingAction(bookingId: string): Promise<Admi
  */
 export async function adminMarkBookingActiveAction(bookingId: string): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminMarkBookingActiveAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('bookings.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const { data: row, error: fetchErr } = await admin.from('bookings').select('booking_status').eq('id', bookingId).single()
@@ -129,7 +133,9 @@ export async function adminMarkBookingActiveAction(bookingId: string): Promise<A
 
 export async function adminRejectBookingAction(bookingId: string, note?: string): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminRejectBookingAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('bookings.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const { data: row, error: fetchErr } = await admin.from('bookings').select('booking_status').eq('id', bookingId).single()
@@ -169,7 +175,9 @@ export async function adminRejectBookingAction(bookingId: string, note?: string)
 
 export async function adminCancelBookingAction(bookingId: string, note?: string): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminCancelBookingAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('bookings.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const { data: row, error: fetchErr } = await admin.from('bookings').select('booking_status').eq('id', bookingId).single()
@@ -209,7 +217,9 @@ export async function adminCancelBookingAction(bookingId: string, note?: string)
 
 export async function adminMarkHandedOverAction(bookingId: string): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminMarkHandedOverAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('bookings.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const { data: row, error: fetchErr } = await admin.from('bookings').select('booking_status').eq('id', bookingId).single()
@@ -253,7 +263,9 @@ export async function adminMarkHandedOverAction(bookingId: string): Promise<Admi
 
 export async function adminMarkReturnedAction(bookingId: string): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminMarkReturnedAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('bookings.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const { data: row, error: fetchErr } = await admin
@@ -299,7 +311,9 @@ export async function adminMarkReturnedAction(bookingId: string): Promise<AdminA
 
 export async function adminMarkCompletedAction(bookingId: string): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminMarkCompletedAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('bookings.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const { data: row, error: fetchErr } = await admin.from('bookings').select('booking_status').eq('id', bookingId).single()
@@ -343,7 +357,9 @@ export async function adminSetBookingPaymentStatusAction(
   payment_status: string,
 ): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminSetBookingPaymentStatusAction', 'payments', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('bookings.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     if (!(PAYMENT_STATUSES as readonly string[]).includes(payment_status)) {
       return { ok: false, message: 'Invalid payment status.' }
     }
@@ -412,7 +428,9 @@ export async function adminSetBookingStatusAction(
   booking_status: string,
 ): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminSetBookingStatusAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('bookings.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     if (!(BOOKING_STATUSES as readonly string[]).includes(booking_status)) {
       return { ok: false, message: 'Invalid booking status.' }
     }
@@ -444,7 +462,9 @@ export async function adminSetBookingStatusAction(
 
 export async function adminSetBookingInternalNotesAction(bookingId: string, notes: string): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminSetBookingInternalNotesAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('bookings.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const { error } = await admin
@@ -484,7 +504,9 @@ export async function adminSaveBookingChecklistsAction(input: {
   return?: Record<string, boolean> | null
 }): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminSaveBookingChecklistsAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('bookings.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const { data: row, error: fetchErr } = await admin
@@ -529,7 +551,9 @@ export async function adminSetBookingDepositTrackingAction(input: {
   depositRefundedRupees?: number | null
 }): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminSetBookingDepositTrackingAction', 'payments', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('bookings.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const patch: Database['public']['Tables']['bookings']['Update'] = { updated_at: nowIso() }

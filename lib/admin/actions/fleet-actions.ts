@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache'
 
 import { writeAdminAudit } from '@/lib/admin/audit'
-import { requireAppRole } from '@/lib/auth/server'
+import { requirePermissionForAdminAction } from '@/lib/auth/admin-action-auth'
 import type { AdminActionResult } from '@/lib/admin/actions/types'
 import type { Database, Json } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -24,7 +24,9 @@ export async function adminCreateCarAction(input: {
   featured?: boolean
 }): Promise<AdminActionResult & { id?: string }> {
   return runInstrumentedServerAction('adminCreateCarAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('fleet.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const insert: Database['public']['Tables']['cars']['Insert'] = {
@@ -64,7 +66,9 @@ export async function adminUpdateCarAction(
   patch: Database['public']['Tables']['cars']['Update'],
 ): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminUpdateCarAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('fleet.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const { error } = await admin.from('cars').update(patch).eq('id', id)
@@ -89,7 +93,9 @@ export async function adminUpdateCarAction(
 
 export async function adminDeleteCarAction(id: string): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminDeleteCarAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('fleet.delete')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const { error } = await admin.from('cars').delete().eq('id', id)
@@ -129,7 +135,9 @@ export async function adminSetCarAvailabilityAction(
 
 export async function adminUploadCarCoverAction(formData: FormData): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminUploadCarCoverAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('fleet.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const carId = String(formData.get('carId') ?? '').trim()
     const file = formData.get('file')
     if (!carId || !(file instanceof File) || file.size === 0) {
@@ -177,7 +185,9 @@ export async function adminUploadCarCoverAction(formData: FormData): Promise<Adm
 
 export async function adminAppendGalleryImageAction(formData: FormData): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminAppendGalleryImageAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('fleet.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const carId = String(formData.get('carId') ?? '').trim()
     const file = formData.get('file')
     if (!carId || !(file instanceof File) || file.size === 0) {

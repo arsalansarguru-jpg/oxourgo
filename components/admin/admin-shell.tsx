@@ -15,6 +15,9 @@ import {
   X,
 } from 'lucide-react'
 
+import { RoleBadge } from '@/components/auth/role-badge'
+import type { Permission } from '@/lib/auth/permissions'
+import { hasPermission } from '@/lib/auth/permissions'
 import type { AppAuthRole } from '@/lib/auth/roles'
 import type { OpsAlertListItem } from '@/lib/admin/data/ops-alerts'
 import {
@@ -30,6 +33,7 @@ import { cn } from '@/lib/utils/cn'
 export type AdminShellProps = {
   email: string | undefined
   appRole: AppAuthRole
+  permissions: Permission[]
   opsInitialUnread: number
   opsInitialItems: OpsAlertListItem[]
   children: React.ReactNode
@@ -40,15 +44,20 @@ const SIDEBAR_EASE = 'cubic-bezier(0.22, 1, 0.36, 1)'
 function NavLinks({
   pathname,
   collapsed,
+  permissions,
   onNavigate,
 }: {
   pathname: string
   collapsed?: boolean
+  permissions: Permission[]
   onNavigate?: () => void
 }) {
+  const permissionSet = new Set(permissions)
+  const items = ADMIN_NAV.filter((item) => permissionSet.has(item.permission))
+
   return (
     <>
-      {ADMIN_NAV.map(({ href, label, icon: Icon, exact }) => {
+      {items.map(({ href, label, icon: Icon, exact }) => {
         const active = exact ? pathname === href : pathname === href || pathname.startsWith(`${href}/`)
         return (
           <Link
@@ -132,9 +141,9 @@ function SidebarFooter({
       {expanded ? (
         <>
           <p className="truncate text-[11px] font-medium leading-snug text-soft">{email ?? '—'}</p>
-          <p className="mt-2 inline-flex max-w-full rounded-full border border-white/[0.08] bg-white/[0.045] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
-            <span className="truncate">{appRole.replace('_', ' ')}</span>
-          </p>
+          <div className="mt-2">
+            <RoleBadge role={appRole} />
+          </div>
         </>
       ) : (
         <div className="flex justify-center" title={email ?? 'Account'}>
@@ -144,6 +153,7 @@ function SidebarFooter({
         </div>
       )}
       <div className={cn('mt-4 flex flex-col gap-1.5', !expanded && 'items-center')}>
+        {hasPermission(appRole, 'ops.alerts.read') ? (
         <Link
           href="/admin/notifications"
           onClick={onNavigate}
@@ -156,6 +166,7 @@ function SidebarFooter({
           <Bell className="h-4 w-4 shrink-0 text-silver" aria-hidden />
           {expanded ? <span>Alerts</span> : null}
         </Link>
+        ) : null}
         <Link
           href="/dashboard"
           onClick={onNavigate}
@@ -173,7 +184,14 @@ function SidebarFooter({
   )
 }
 
-export function AdminShell({ email, appRole, opsInitialUnread, opsInitialItems, children }: AdminShellProps) {
+export function AdminShell({
+  email,
+  appRole,
+  permissions,
+  opsInitialUnread,
+  opsInitialItems,
+  children,
+}: AdminShellProps) {
   const pathname = usePathname()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
@@ -237,7 +255,7 @@ export function AdminShell({ email, appRole, opsInitialUnread, opsInitialItems, 
           )}
           aria-label="Admin sections"
         >
-          <NavLinks pathname={pathname} collapsed={!desktopExpanded} />
+          <NavLinks pathname={pathname} collapsed={!desktopExpanded} permissions={permissions} />
         </nav>
 
         <SidebarFooter collapsed={!desktopExpanded} email={email} appRole={appRole} />
@@ -289,7 +307,9 @@ export function AdminShell({ email, appRole, opsInitialUnread, opsInitialItems, 
           </div>
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
             <ThemeToggle />
-            <AdminOpsAlertBell initialUnread={opsInitialUnread} initialItems={opsInitialItems} />
+            {hasPermission(appRole, 'ops.alerts.read') ? (
+              <AdminOpsAlertBell initialUnread={opsInitialUnread} initialItems={opsInitialItems} />
+            ) : null}
           </div>
         </header>
 
@@ -332,7 +352,11 @@ export function AdminShell({ email, appRole, opsInitialUnread, opsInitialItems, 
               </div>
               <p className="mt-8 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted">Navigate</p>
               <nav className="mt-3 flex flex-1 flex-col gap-0.5 overflow-y-auto" aria-label="Admin sections mobile">
-                <NavLinks pathname={pathname} onNavigate={() => setMobileOpen(false)} />
+                <NavLinks
+                  pathname={pathname}
+                  permissions={permissions}
+                  onNavigate={() => setMobileOpen(false)}
+                />
               </nav>
               <SidebarFooter
                 collapsed={false}

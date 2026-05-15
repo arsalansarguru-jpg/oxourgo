@@ -67,6 +67,9 @@ const bookingSelect = `
   pickup_inspection_completed_at,
   return_inspection_completed_at,
   admin_internal_notes,
+  booking_source,
+  customer_contact_id,
+  whatsapp_conversation_id,
   created_at,
   updated_at,
   vehicles (
@@ -95,6 +98,7 @@ export type AdminBookingsListParams = {
   pageSize?: number
   booking_status?: string
   payment_status?: string
+  booking_source?: string
   search?: string
 }
 
@@ -170,6 +174,9 @@ export async function adminListBookingsPage(params: AdminBookingsListParams = {}
   if (params.payment_status?.trim()) {
     countQ = countQ.eq('payment_status', params.payment_status.trim())
   }
+  if (params.booking_source?.trim()) {
+    countQ = countQ.eq('booking_source', params.booking_source.trim())
+  }
   if (orExpr) {
     countQ = countQ.or(orExpr)
   }
@@ -190,6 +197,9 @@ export async function adminListBookingsPage(params: AdminBookingsListParams = {}
   }
   if (params.payment_status?.trim()) {
     dataQ = dataQ.eq('payment_status', params.payment_status.trim())
+  }
+  if (params.booking_source?.trim()) {
+    dataQ = dataQ.eq('booking_source', params.booking_source.trim())
   }
   if (orExpr) {
     dataQ = dataQ.or(orExpr)

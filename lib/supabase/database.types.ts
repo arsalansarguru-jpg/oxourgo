@@ -193,6 +193,9 @@ export type Database = {
           pickup_inspection_completed_at: string | null
           return_inspection_completed_at: string | null
           outstanding_fines_rupees: number
+          booking_source: string
+          customer_contact_id: string | null
+          whatsapp_conversation_id: string | null
           created_at: string
           updated_at: string
         }
@@ -263,6 +266,9 @@ export type Database = {
           pickup_inspection_completed_at?: string | null
           return_inspection_completed_at?: string | null
           outstanding_fines_rupees?: number
+          booking_source?: string
+          customer_contact_id?: string | null
+          whatsapp_conversation_id?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -333,8 +339,131 @@ export type Database = {
           pickup_inspection_completed_at?: string | null
           return_inspection_completed_at?: string | null
           outstanding_fines_rupees?: number
+          booking_source?: string
+          customer_contact_id?: string | null
+          whatsapp_conversation_id?: string | null
           created_at?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      customer_contacts: {
+        Row: {
+          id: string
+          e164: string
+          user_id: string | null
+          full_name: string | null
+          email: string | null
+          whatsapp_opt_in: boolean
+          preferred_channel: string
+          metadata: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          e164: string
+          user_id?: string | null
+          full_name?: string | null
+          email?: string | null
+          whatsapp_opt_in?: boolean
+          preferred_channel?: string
+          metadata?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          e164?: string
+          user_id?: string | null
+          full_name?: string | null
+          email?: string | null
+          whatsapp_opt_in?: boolean
+          preferred_channel?: string
+          metadata?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      whatsapp_conversations: {
+        Row: {
+          id: string
+          customer_contact_id: string
+          external_wa_id: string | null
+          status: string
+          flow_state: string
+          context: Json
+          active_booking_id: string | null
+          assigned_ops_user_id: string | null
+          last_inbound_at: string | null
+          last_outbound_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          customer_contact_id: string
+          external_wa_id?: string | null
+          status?: string
+          flow_state?: string
+          context?: Json
+          active_booking_id?: string | null
+          assigned_ops_user_id?: string | null
+          last_inbound_at?: string | null
+          last_outbound_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          customer_contact_id?: string
+          external_wa_id?: string | null
+          status?: string
+          flow_state?: string
+          context?: Json
+          active_booking_id?: string | null
+          assigned_ops_user_id?: string | null
+          last_inbound_at?: string | null
+          last_outbound_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      whatsapp_conversation_messages: {
+        Row: {
+          id: string
+          conversation_id: string
+          direction: string
+          message_type: string
+          body: string | null
+          payload: Json
+          provider_message_id: string | null
+          idempotency_key: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          conversation_id: string
+          direction: string
+          message_type?: string
+          body?: string | null
+          payload?: Json
+          provider_message_id?: string | null
+          idempotency_key?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          conversation_id?: string
+          direction?: string
+          message_type?: string
+          body?: string | null
+          payload?: Json
+          provider_message_id?: string | null
+          idempotency_key?: string | null
+          created_at?: string
         }
         Relationships: []
       }

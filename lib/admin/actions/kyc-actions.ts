@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 
 import type { AdminActionResult } from '@/lib/admin/actions/types'
 import { writeAdminAudit } from '@/lib/admin/audit'
-import { requireAppRole } from '@/lib/auth/server'
+import { requirePermissionForAdminAction } from '@/lib/auth/admin-action-auth'
 import { onKycDecision } from '@/lib/notifications/events'
 import { syncProfileKycFromDocuments } from '@/lib/kyc/sync-profile-kyc'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -25,7 +25,9 @@ export type AdminKycSetStatusInput = {
 
 export async function adminSetKycDocumentStatusAction(input: AdminKycSetStatusInput): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminSetKycDocumentStatusAction', 'kyc', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('kyc.review')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     if (input.status === 'rejected' || input.status === 'resubmission_required') {
@@ -103,7 +105,8 @@ export async function adminGetKycSignedUrlAction(
   ttlSeconds?: number,
 ): Promise<{ ok: true; url: string; expiresIn: number } | { ok: false; message: string }> {
   return runInstrumentedServerAction('adminGetKycSignedUrlAction', 'kyc', async () => {
-    await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('kyc.review')
+    if (!guard.ok) return guard
     const admin = createAdminClient()
 
     const { data: doc, error } = await admin.from('kyc_documents').select('storage_path').eq('id', documentId).single()

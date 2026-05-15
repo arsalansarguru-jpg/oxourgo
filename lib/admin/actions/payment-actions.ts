@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 
 import type { AdminActionResult } from '@/lib/admin/actions/types'
 import { writeAdminAudit } from '@/lib/admin/audit'
-import { requireAppRole } from '@/lib/auth/server'
+import { requirePermissionForAdminAction } from '@/lib/auth/admin-action-auth'
 import { onOpsPaymentLedger, onPaymentStatusChanged } from '@/lib/notifications/events'
 import type { Json } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -13,7 +13,9 @@ import { runInstrumentedServerAction } from '@/lib/monitoring/instrument-server-
 
 export async function adminCreateRefundPlaceholderAction(bookingId: string): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminCreateRefundPlaceholderAction', 'payments', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('payments.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const { data: booking, error: bErr } = await admin
@@ -90,7 +92,9 @@ export async function adminMarkBookingPaymentReceivedAction(
   note?: string | null,
 ): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminMarkBookingPaymentReceivedAction', 'payments', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('payments.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
     const ts = new Date().toISOString()
 
@@ -166,7 +170,9 @@ export async function adminMarkBookingPartialPaymentAction(input: {
   note?: string | null
 }): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminMarkBookingPartialPaymentAction', 'payments', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('payments.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
     const ts = new Date().toISOString()
 
@@ -252,7 +258,9 @@ export async function adminMarkBookingPaymentRefundedAction(
   note?: string | null,
 ): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminMarkBookingPaymentRefundedAction', 'payments', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('payments.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
     const ts = new Date().toISOString()
 
@@ -321,7 +329,9 @@ export async function adminMarkBookingPaymentRefundedAction(
 
 export async function adminCreateDepositHoldPlaceholderAction(bookingId: string): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminCreateDepositHoldPlaceholderAction', 'payments', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('payments.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const { data: booking, error: bErr } = await admin

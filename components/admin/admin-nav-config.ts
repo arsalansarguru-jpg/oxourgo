@@ -8,24 +8,34 @@ import {
   Scale,
   Settings,
   ShieldCheck,
+  UserCog,
   Users,
 } from 'lucide-react'
 
-/** Primary admin navigation — order matches luxury SaaS IA. */
-export const ADMIN_NAV = [
-  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-  { href: '/admin/bookings', label: 'Bookings', icon: ClipboardList, exact: false },
-  { href: '/admin/fleet', label: 'Fleet', icon: CarFront, exact: false },
-  { href: '/admin/customers', label: 'Customers', icon: Users, exact: false },
-  { href: '/admin/kyc', label: 'KYC', icon: ShieldCheck, exact: false },
-  { href: '/admin/payments', label: 'Payments', icon: Banknote, exact: false },
-  { href: '/admin/financials', label: 'Deposits', icon: Scale, exact: false },
-  { href: '/admin/violations', label: 'Violations', icon: Gavel, exact: false },
-  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3, exact: false },
-  { href: '/admin/settings', label: 'Settings', icon: Settings, exact: false },
-] as const
+import type { Permission } from '@/lib/auth/permissions'
 
-export type AdminNavItem = (typeof ADMIN_NAV)[number]
+export type AdminNavItem = {
+  href: string
+  label: string
+  icon: typeof LayoutDashboard
+  exact: boolean
+  permission: Permission
+}
+
+/** Primary admin navigation — order matches luxury SaaS IA. */
+export const ADMIN_NAV: readonly AdminNavItem[] = [
+  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true, permission: 'admin.dashboard.read' },
+  { href: '/admin/bookings', label: 'Bookings', icon: ClipboardList, exact: false, permission: 'bookings.read' },
+  { href: '/admin/fleet', label: 'Fleet', icon: CarFront, exact: false, permission: 'fleet.read' },
+  { href: '/admin/customers', label: 'Customers', icon: Users, exact: false, permission: 'customers.read' },
+  { href: '/admin/kyc', label: 'KYC', icon: ShieldCheck, exact: false, permission: 'kyc.read' },
+  { href: '/admin/payments', label: 'Payments', icon: Banknote, exact: false, permission: 'payments.read' },
+  { href: '/admin/financials', label: 'Deposits', icon: Scale, exact: false, permission: 'deposits.read' },
+  { href: '/admin/violations', label: 'Violations', icon: Gavel, exact: false, permission: 'penalties.read' },
+  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3, exact: false, permission: 'analytics.read' },
+  { href: '/admin/users', label: 'Users', icon: UserCog, exact: false, permission: 'admin.users.manage' },
+  { href: '/admin/settings', label: 'Settings', icon: Settings, exact: false, permission: 'settings.read' },
+] as const
 
 const SIDEBAR_COLLAPSE_KEY = 'oxour-admin-sidebar-collapsed'
 
@@ -61,7 +71,9 @@ export function adminTopBarTitle(pathname: string): string {
   if (pathname.startsWith('/admin/financials')) return 'Deposits'
   if (pathname.startsWith('/admin/violations')) return 'Violations'
   if (pathname.startsWith('/admin/analytics')) return 'Analytics'
+  if (pathname.startsWith('/admin/users')) return 'Users'
   if (pathname.startsWith('/admin/settings')) return 'Settings'
   if (pathname.startsWith('/admin/notifications')) return 'Alerts'
+  if (pathname.startsWith('/admin/forbidden')) return 'Access restricted'
   return 'Admin'
 }

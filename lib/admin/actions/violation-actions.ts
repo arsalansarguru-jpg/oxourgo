@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 
 import type { AdminActionResult } from '@/lib/admin/actions/types'
 import { writeAdminAudit } from '@/lib/admin/audit'
-import { requireAppRole } from '@/lib/auth/server'
+import { requirePermissionForAdminAction } from '@/lib/auth/admin-action-auth'
 import {
   VIOLATION_STATUSES,
   VIOLATION_TYPES,
@@ -148,7 +148,9 @@ export async function adminCreateViolationAction(input: {
   notifyCustomer?: boolean
 }): Promise<AdminActionResult & { violationId?: string }> {
   return runInstrumentedServerAction('adminCreateViolationAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('penalties.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const violationType = parseViolationType(input.violationType)
@@ -227,7 +229,9 @@ export async function adminUpdateViolationAction(input: {
   notes?: string | null
 }): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminUpdateViolationAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('penalties.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const { data: existing, error: fetchErr } = await admin
@@ -287,7 +291,9 @@ export async function adminUpdateViolationAction(input: {
 
 export async function adminUploadViolationChallanAction(formData: FormData): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminUploadViolationChallanAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('penalties.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const violationId = String(formData.get('violationId') ?? '').trim()
     const file = formData.get('file')
 
@@ -356,7 +362,9 @@ export async function adminUploadViolationChallanAction(formData: FormData): Pro
 
 export async function adminNotifyViolationCustomerAction(violationId: string): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminNotifyViolationCustomerAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('penalties.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
     const ts = nowIso()
 
@@ -398,7 +406,9 @@ export async function adminNotifyViolationCustomerAction(violationId: string): P
 
 export async function adminDeductViolationFromDepositAction(violationId: string): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminDeductViolationFromDepositAction', 'payments', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('penalties.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
     const ts = nowIso()
 
@@ -470,7 +480,9 @@ export async function adminRecordViolationManualPaymentAction(input: {
   note?: string | null
 }): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminRecordViolationManualPaymentAction', 'payments', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('penalties.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
     const ts = nowIso()
 
@@ -546,7 +558,9 @@ export async function adminMarkViolationDisputedAction(input: {
   note?: string | null
 }): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminMarkViolationDisputedAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('penalties.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
     const ts = nowIso()
 
@@ -599,7 +613,9 @@ export async function adminResolveViolationAction(input: {
   }
 
   return runInstrumentedServerAction('adminResolveViolationAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('penalties.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
     const ts = nowIso()
 
@@ -640,7 +656,9 @@ export async function adminResolveViolationAction(input: {
 
 export async function adminDeleteViolationAction(violationId: string): Promise<AdminActionResult> {
   return runInstrumentedServerAction('adminDeleteViolationAction', 'admin', async () => {
-    const { user } = await requireAppRole('ops_admin')
+    const guard = await requirePermissionForAdminAction('penalties.write')
+    if (!guard.ok) return guard
+    const { user } = guard.session
     const admin = createAdminClient()
 
     const { data: row, error: fetchErr } = await admin

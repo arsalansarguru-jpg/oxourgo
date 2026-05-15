@@ -4,8 +4,9 @@ import type { Metadata } from 'next'
 import { AdminCard } from '@/components/admin/admin-card'
 import { AdminShell } from '@/components/admin/admin-shell'
 import { listOpsAlertsForAdmin } from '@/lib/admin/data/ops-alerts'
+import { getPermissionsForRole } from '@/lib/auth/permissions'
 import { getAuthSessionSummary } from '@/lib/auth/server'
-import { roleAtLeast } from '@/lib/auth/roles'
+import { isStaffRole } from '@/lib/auth/permissions'
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -18,9 +19,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!summary) {
     redirect(`/login?${new URLSearchParams({ redirect: '/admin' }).toString()}`)
   }
-  if (!roleAtLeast(summary.appRole, 'ops_admin')) {
+  if (!isStaffRole(summary.appRole)) {
     redirect('/dashboard?error=forbidden')
   }
+
+  const permissions = [...getPermissionsForRole(summary.appRole)]
 
   const hasServiceRole = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY?.trim())
   if (!hasServiceRole && process.env.NODE_ENV === 'development') {
@@ -29,7 +32,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   let opsInitialUnread = 0
   let opsInitialItems: Awaited<ReturnType<typeof listOpsAlertsForAdmin>> = []
-  if (hasServiceRole) {
+  if (hasServiceRole && permissions.includes('ops.alerts.read')) {
     try {
       const items = await listOpsAlertsForAdmin(summary.user.id, 12)
       opsInitialUnread = items.filter((i) => !i.dismissed).length
@@ -44,6 +47,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     <AdminShell
       email={summary.user.email ?? undefined}
       appRole={summary.appRole}
+      permissions={permissions}
       opsInitialUnread={opsInitialUnread}
       opsInitialItems={opsInitialItems}
     >
