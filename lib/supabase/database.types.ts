@@ -24,6 +24,9 @@ export type Database = {
           featured: boolean
           cover_image_path: string | null
           gallery_paths: string[]
+          deleted_at?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           created_at: string
         }
         Insert: {
@@ -41,6 +44,9 @@ export type Database = {
           featured?: boolean
           cover_image_path?: string | null
           gallery_paths?: string[]
+          deleted_at?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
         }
         Update: {
@@ -58,6 +64,9 @@ export type Database = {
           featured?: boolean
           cover_image_path?: string | null
           gallery_paths?: string[]
+          deleted_at?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
         }
         Relationships: []
@@ -84,6 +93,9 @@ export type Database = {
           /** Public fleet segment: SUV, Sedan, Hatchback, Luxury, Budget */
           catalog_category?: string | null
           fleet_ops_note?: string | null
+          deleted_at?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           created_at: string
         }
         Insert: {
@@ -104,6 +116,9 @@ export type Database = {
           security_deposit?: number
           catalog_category?: string | null
           fleet_ops_note?: string | null
+          deleted_at?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
         }
         Update: {
@@ -124,6 +139,9 @@ export type Database = {
           security_deposit?: number
           catalog_category?: string | null
           fleet_ops_note?: string | null
+          deleted_at?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
         }
         Relationships: []
@@ -274,6 +292,9 @@ export type Database = {
           customer_flags: Json
           restrictions_bypass: boolean
           custom_discount_rupees: number
+          deleted_at?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           created_at: string
           updated_at: string
         }
@@ -579,6 +600,9 @@ export type Database = {
           deducted_at: string | null
           resolved_at: string | null
           created_by: string | null
+          deleted_at: string | null
+          archived_at: string | null
+          archived_by: string | null
           created_at: string
           updated_at: string
         }
@@ -627,6 +651,9 @@ export type Database = {
           deducted_at?: string | null
           resolved_at?: string | null
           created_by?: string | null
+          deleted_at?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -781,6 +808,12 @@ export type Database = {
           byte_size: number | null
           content_type: string | null
           original_filename: string | null
+          deleted_at: string | null
+          archived_at: string | null
+          archived_by: string | null
+          storage_retention_until: string | null
+          storage_pinned: boolean
+          recovery_metadata: Json
           created_at: string
           updated_at: string
         }
@@ -797,6 +830,12 @@ export type Database = {
           byte_size?: number | null
           content_type?: string | null
           original_filename?: string | null
+          deleted_at?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
+          storage_retention_until?: string | null
+          storage_pinned?: boolean
+          recovery_metadata?: Json
           created_at?: string
           updated_at?: string
         }
@@ -813,6 +852,12 @@ export type Database = {
           byte_size?: number | null
           content_type?: string | null
           original_filename?: string | null
+          deleted_at?: string | null
+          archived_at?: string | null
+          archived_by?: string | null
+          storage_retention_until?: string | null
+          storage_pinned?: boolean
+          recovery_metadata?: Json
           created_at?: string
           updated_at?: string
         }
@@ -1048,6 +1093,123 @@ export type Database = {
           direction?: string
           status?: string
           metadata?: Json | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      deleted_entity_snapshots: {
+        Row: {
+          id: string
+          entity_type: string
+          entity_id: string
+          snapshot: Json
+          deleted_at: string
+          deleted_by: string | null
+          restored_at: string | null
+          restored_by: string | null
+          metadata: Json
+        }
+        Insert: {
+          id?: string
+          entity_type: string
+          entity_id: string
+          snapshot: Json
+          deleted_at?: string
+          deleted_by?: string | null
+          restored_at?: string | null
+          restored_by?: string | null
+          metadata?: Json
+        }
+        Update: {
+          id?: string
+          entity_type?: string
+          entity_id?: string
+          snapshot?: Json
+          deleted_at?: string
+          deleted_by?: string | null
+          restored_at?: string | null
+          restored_by?: string | null
+          metadata?: Json
+        }
+        Relationships: []
+      }
+      launch_checklist_completions: {
+        Row: {
+          item_key: string
+          completed: boolean
+          notes: string | null
+          completed_at: string | null
+          completed_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          item_key: string
+          completed?: boolean
+          notes?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          item_key?: string
+          completed?: boolean
+          notes?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      launch_qa_signoffs: {
+        Row: {
+          test_key: string
+          status: string
+          notes: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          test_key: string
+          status?: string
+          notes?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          test_key?: string
+          status?: string
+          notes?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
+      backup_operation_logs: {
+        Row: {
+          id: string
+          operation_type: string
+          status: string
+          summary: string | null
+          metadata: Json
+          performed_by: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          operation_type: string
+          status?: string
+          summary?: string | null
+          metadata?: Json
+          performed_by?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          operation_type?: string
+          status?: string
+          summary?: string | null
+          metadata?: Json
+          performed_by?: string | null
           created_at?: string
         }
         Relationships: []

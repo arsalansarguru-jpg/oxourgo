@@ -48,6 +48,10 @@ export const AUDIT_ACTIONS = {
   fleetCreated: 'fleet.created',
   fleetUpdated: 'fleet.updated',
   fleetDeleted: 'fleet.deleted',
+  fleetArchived: 'fleet.archived',
+  fleetRestored: 'fleet.restored',
+  violationArchived: 'violation.archived',
+  violationRestored: 'violation.restored',
 
   // Admin
   adminRoleChange: 'admin.role_change',

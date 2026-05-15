@@ -147,6 +147,7 @@ async function fetchLiveMetrics(admin: ReturnType<typeof createAdminClient>, tod
     admin
       .from('vehicles')
       .select('id', { count: 'exact', head: true })
+      .is('deleted_at', null)
       .eq('availability_status', 'available')
       .or('available.is.null,available.eq.true'),
   ])
@@ -163,7 +164,7 @@ async function fetchLiveMetrics(admin: ReturnType<typeof createAdminClient>, tod
 
 async function fetchFleetStatus(admin: ReturnType<typeof createAdminClient>, today: string): Promise<CommandCenterFleetStatus> {
   const [vehiclesRes, bookingsRes] = await Promise.all([
-    admin.from('vehicles').select('id, availability_status'),
+    admin.from('vehicles').select('id, availability_status').is('deleted_at', null),
     admin
       .from('bookings')
       .select('vehicle_id')
@@ -299,7 +300,7 @@ async function vehicleLabelMap(
   const map = new Map<string, string>()
   if (vehicleIds.length === 0) return map
 
-  const { data, error } = await admin.from('vehicles').select('id, name, brand').in('id', vehicleIds)
+  const { data, error } = await admin.from('vehicles').select('id, name, brand').is('deleted_at', null).in('id', vehicleIds)
   if (error) {
     logPostgrestError('[commandCenter] vehicleLabelMap', error)
     return map

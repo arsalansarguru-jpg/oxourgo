@@ -106,6 +106,13 @@ export async function registerKycDocumentAction(input: {
         byte_size: input.byteSize ?? null,
         content_type: input.contentType?.trim() || null,
         original_filename: input.originalFilename?.trim() || null,
+        storage_retention_until: new Date(Date.now() + 7 * 365.25 * 24 * 60 * 60 * 1000).toISOString(),
+        storage_pinned: false,
+        recovery_metadata: {
+          storagePath: input.storagePath,
+          uploadedAt: new Date().toISOString(),
+          source: 'customer_upload',
+        },
       })
       .select('*')
       .single()

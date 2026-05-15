@@ -25,10 +25,10 @@ export function FleetVehicleDeletePanel({ vehicleId, label, onDeleted }: Props) 
         'rounded-2xl border border-red-500/25 bg-red-500/[0.06] p-4 theme-light:border-red-600/30 theme-light:bg-red-500/8',
       )}
     >
-      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-red-200 theme-light:text-red-900">Danger zone</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.12em] text-red-200 theme-light:text-red-900">Archive</p>
       <p className="mt-2 text-sm text-muted">
-        Permanently remove <span className="font-medium text-soft">{label}</span> from the catalog. Active bookings may
-        block deletion.
+        Archive <span className="font-medium text-soft">{label}</span> from the live catalog. The record stays in the
+        database and can be restored from Backup &amp; recovery.
       </p>
       {error ? <p className="mt-2 text-xs text-red-300 theme-light:text-red-800">{error}</p> : null}
       <Button
@@ -38,7 +38,7 @@ export function FleetVehicleDeletePanel({ vehicleId, label, onDeleted }: Props) 
         className="mt-4 gap-2"
         disabled={pending}
         onClick={() => {
-          if (!window.confirm(`Delete this vehicle from the catalog? This cannot be undone.`)) return
+          if (!window.confirm(`Archive this vehicle? It will be hidden from fleet lists but can be restored later.`)) return
           setError(null)
           start(async () => {
             const r = await adminDeleteVehicleAction(vehicleId)
@@ -53,7 +53,7 @@ export function FleetVehicleDeletePanel({ vehicleId, label, onDeleted }: Props) 
         }}
       >
         <Trash2 className="h-4 w-4" aria-hidden />
-        {pending ? 'Removing…' : 'Delete vehicle'}
+        {pending ? 'Archiving…' : 'Archive vehicle'}
       </Button>
     </div>
   )

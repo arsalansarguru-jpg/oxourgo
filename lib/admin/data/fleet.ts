@@ -52,6 +52,7 @@ function applyFleetListFilters(
     mode === 'count'
       ? admin.from('vehicles').select('id', { count: 'exact', head: true })
       : admin.from('vehicles').select('*').order('created_at', { ascending: false })
+  q = q.is('deleted_at', null)
 
   const avail = params.availability?.trim() || 'all'
   if (avail === 'bookable') {
@@ -129,7 +130,7 @@ export async function adminGetFleetDashboardMetrics(): Promise<AdminFleetDashboa
   const today = new Date().toISOString().slice(0, 10)
 
   const [{ data: vehicles, error: vErr }, { data: bookings, error: bErr }] = await Promise.all([
-    admin.from('vehicles').select('id, available, featured, price_per_day'),
+    admin.from('vehicles').select('id, available, featured, price_per_day').is('deleted_at', null),
     admin
       .from('bookings')
       .select('vehicle_id')

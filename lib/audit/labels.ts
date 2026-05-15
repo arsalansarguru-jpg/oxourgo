@@ -1,6 +1,7 @@
 import type { LucideIcon } from 'lucide-react'
 import {
   AlertTriangle,
+  Archive,
   Banknote,
   Ban,
   CarFront,
@@ -58,6 +59,10 @@ const ACTION_MAP: Record<string, Omit<AuditPresentation, 'category'> & { categor
   [AUDIT_ACTIONS.fleetUnavailable]: { title: 'Vehicle marked unavailable', icon: CarFront, tone: 'warn', category: 'Fleet' },
   [AUDIT_ACTIONS.fleetMaintenance]: { title: 'Maintenance mode', icon: Wrench, tone: 'warn', category: 'Fleet' },
   [AUDIT_ACTIONS.fleetOverride]: { title: 'Fleet manual override', icon: SlidersHorizontal, tone: 'accent', category: 'Fleet' },
+  [AUDIT_ACTIONS.fleetArchived]: { title: 'Fleet archived', icon: Archive, tone: 'warn', category: 'Fleet' },
+  [AUDIT_ACTIONS.fleetRestored]: { title: 'Fleet restored', icon: RotateCcw, tone: 'success', category: 'Fleet' },
+  [AUDIT_ACTIONS.violationArchived]: { title: 'Violation archived', icon: Archive, tone: 'warn', category: 'Fleet' },
+  [AUDIT_ACTIONS.violationRestored]: { title: 'Violation restored', icon: RotateCcw, tone: 'success', category: 'Fleet' },
   [AUDIT_ACTIONS.adminRoleChange]: { title: 'Role changed', icon: UserCog, tone: 'accent', category: 'Admin' },
   [AUDIT_ACTIONS.adminPricingOverride]: { title: 'Pricing override', icon: SlidersHorizontal, tone: 'warn', category: 'Admin' },
   [AUDIT_ACTIONS.adminManualBooking]: { title: 'Manual booking', icon: ClipboardList, tone: 'accent', category: 'Admin' },

@@ -98,12 +98,22 @@ export async function adminDeleteCarAction(id: string): Promise<AdminActionResul
     const { user } = guard.session
     const admin = createAdminClient()
 
-    const { error } = await admin.from('cars').delete().eq('id', id)
-    if (error) return adminActionDbFailed('adminDeleteCarAction', error)
+    const { data: row, error: fetchErr } = await admin.from('cars').select('*').eq('id', id).maybeSingle()
+    if (fetchErr || !row) return { ok: false, message: 'Vehicle not found.' }
+
+    const { softDeleteRecord } = await import('@/lib/admin/soft-delete')
+    const archived = await softDeleteRecord({
+      table: 'cars',
+      id,
+      actorUserId: user.id,
+      snapshot: row as Record<string, unknown>,
+      entityType: 'car',
+    })
+    if (!archived.ok) return archived
 
     await writeAdminAudit({
       actorUserId: user.id,
-      action: 'fleet.car_delete',
+      action: 'fleet.archived',
       entityType: 'car',
       entityId: id,
     })

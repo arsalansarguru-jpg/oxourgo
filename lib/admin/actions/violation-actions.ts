@@ -672,16 +672,19 @@ export async function adminDeleteViolationAction(violationId: string): Promise<A
       return { ok: false, message: 'Settled violations cannot be deleted.' }
     }
 
-    const { error } = await admin.from('booking_violations').delete().eq('id', violationId)
-    if (error) return adminActionDbFailed('adminDeleteViolationAction', error)
-
-    if (row.challan_storage_path) {
-      await admin.storage.from(CHALLAN_BUCKET).remove([row.challan_storage_path]).catch(() => {})
-    }
+    const { softDeleteRecord } = await import('@/lib/admin/soft-delete')
+    const archived = await softDeleteRecord({
+      table: 'booking_violations',
+      id: violationId,
+      actorUserId: user.id,
+      snapshot: row as Record<string, unknown>,
+      entityType: 'violation',
+    })
+    if (!archived.ok) return archived
 
     await writeAdminAudit({
       actorUserId: user.id,
-      action: 'violation.delete',
+      action: 'violation.archived',
       entityType: 'booking_violation',
       entityId: violationId,
       payload: { booking_id: row.booking_id },
@@ -689,6 +692,7 @@ export async function adminDeleteViolationAction(violationId: string): Promise<A
 
     await syncBookingViolationsToFinancials(admin, row.booking_id)
     revalidateViolationPaths(row.booking_id)
+    revalidatePath('/admin/backup')
     return { ok: true }
   })
 }

@@ -59,6 +59,16 @@ export async function adminSetKycDocumentStatusAction(input: AdminKycSetStatusIn
         reviewed_at: nowIso(),
         reviewed_by: user.id,
         updated_at: nowIso(),
+        ...(input.status === 'approved'
+          ? {
+              storage_pinned: true,
+              recovery_metadata: {
+                pinnedAt: nowIso(),
+                pinnedBy: user.id,
+                reason: 'kyc_approved',
+              },
+            }
+          : {}),
       })
       .eq('id', input.documentId)
 

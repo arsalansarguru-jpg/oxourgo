@@ -12,6 +12,13 @@ export type AdminRouteRule = {
 /** Ordered longest-prefix-first for `resolveAdminRoutePermission`. */
 export const ADMIN_ROUTE_RULES: readonly AdminRouteRule[] = [
   { prefix: '/admin/audit', permission: 'admin.audit.read' },
+  { prefix: '/admin/help/onboarding', permission: 'admin.help.read' },
+  { prefix: '/admin/help', permission: 'admin.help.read' },
+  { prefix: '/admin/training/onboarding', permission: 'admin.training.read' },
+  { prefix: '/admin/training/guides', permission: 'admin.training.read' },
+  { prefix: '/admin/training', permission: 'admin.training.read' },
+  { prefix: '/admin/launch', permission: 'admin.launch.read' },
+  { prefix: '/admin/backup', permission: 'admin.backup.read' },
   { prefix: '/admin/users', permission: 'admin.users.manage' },
   { prefix: '/admin/kyc/review', permission: 'kyc.review' },
   { prefix: '/admin/kyc', permission: 'kyc.read' },
