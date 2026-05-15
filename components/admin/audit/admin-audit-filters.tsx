@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useCallback, useTransition } from 'react'
+import { useCallback, useMemo, useTransition } from 'react'
 import { Filter, X } from 'lucide-react'
 
 import { cn } from '@/lib/utils/cn'
@@ -17,14 +17,17 @@ export function AdminAuditFilters({ actions, actors, entityTypes }: Props) {
   const searchParams = useSearchParams()
   const [pending, startTransition] = useTransition()
 
-  const current = {
-    action: searchParams.get('action') ?? '',
-    actor: searchParams.get('actor') ?? '',
-    entityType: searchParams.get('entityType') ?? '',
-    entityId: searchParams.get('entityId') ?? '',
-    from: searchParams.get('from') ?? '',
-    to: searchParams.get('to') ?? '',
-  }
+  const current = useMemo(
+    () => ({
+      action: searchParams.get('action') ?? '',
+      actor: searchParams.get('actor') ?? '',
+      entityType: searchParams.get('entityType') ?? '',
+      entityId: searchParams.get('entityId') ?? '',
+      from: searchParams.get('from') ?? '',
+      to: searchParams.get('to') ?? '',
+    }),
+    [searchParams],
+  )
 
   const hasFilters = Object.values(current).some(Boolean)
 

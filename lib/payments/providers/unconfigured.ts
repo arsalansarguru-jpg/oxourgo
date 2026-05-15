@@ -32,19 +32,23 @@ export const unconfiguredPaymentGateway: PaymentGateway = {
   id: 'unconfigured',
   configured: false,
 
-  async createPaymentOrder(_input: CreatePaymentOrderInput): Promise<CreatePaymentOrderResult> {
+  async createPaymentOrder(input: CreatePaymentOrderInput): Promise<CreatePaymentOrderResult> {
+    void input
     return notConfigured()
   },
 
-  async verifyPayment(_input: VerifyPaymentInput): Promise<VerifyPaymentResult> {
+  async verifyPayment(input: VerifyPaymentInput): Promise<VerifyPaymentResult> {
+    void input
     return notConfiguredVerify()
   },
 
-  async refundPayment(_input: RefundPaymentInput): Promise<RefundPaymentResult> {
+  async refundPayment(input: RefundPaymentInput): Promise<RefundPaymentResult> {
+    void input
     return notConfiguredRefund()
   },
 
-  async getPaymentStatus(_input: GetPaymentStatusInput): Promise<GetPaymentStatusResult> {
+  async getPaymentStatus(input: GetPaymentStatusInput): Promise<GetPaymentStatusResult> {
+    void input
     return notConfiguredStatus()
   },
 }

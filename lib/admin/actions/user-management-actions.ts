@@ -7,7 +7,7 @@ import type { AdminActionResult } from '@/lib/admin/actions/types'
 import { requirePermissionForAdminAction } from '@/lib/auth/admin-action-auth'
 import { APP_ROLE_APP_METADATA_KEY, ASSIGNABLE_STAFF_ROLES, parseAppAuthRole, type AppAuthRole } from '@/lib/auth/roles'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { adminActionDbFailed, SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
+import { SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
 import { runInstrumentedServerAction } from '@/lib/monitoring/instrument-server-action'
 
 export async function adminAssignUserRoleAction(input: {

@@ -2,8 +2,6 @@ import 'server-only'
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logPostgrestError } from '@/lib/errors/safe-user-message'
-import type { Database } from '@/lib/supabase/database.types'
-
 export type AdminWhatsAppConversationListItem = {
   id: string
   flow_state: string
@@ -30,20 +28,7 @@ export async function adminListWhatsAppConversations(input?: {
   let q = admin
     .from('whatsapp_conversations')
     .select(
-      `
-      id,
-      flow_state,
-      status,
-      updated_at,
-      last_inbound_at,
-      active_booking_id,
-      customer_contacts (
-        id,
-        e164,
-        full_name,
-        user_id
-      )
-    `,
+      'id, flow_state, status, updated_at, last_inbound_at, active_booking_id, customer_contact_id',
     )
     .order('updated_at', { ascending: false })
     .limit(limit)
@@ -62,12 +47,31 @@ export async function adminListWhatsAppConversations(input?: {
     return []
   }
 
-  return (data ?? []).map((row) => {
-    const contactJoin = row.customer_contacts as
-      | Database['public']['Tables']['customer_contacts']['Row']
-      | Database['public']['Tables']['customer_contacts']['Row'][]
-      | null
-    const contact = Array.isArray(contactJoin) ? contactJoin[0] : contactJoin
+  const rows = data ?? []
+  const contactIds = [...new Set(rows.map((row) => row.customer_contact_id).filter(Boolean))]
+
+  const contactsById = new Map<
+    string,
+    { id: string; e164: string; full_name: string | null; user_id: string | null }
+  >()
+
+  if (contactIds.length > 0) {
+    const { data: contacts, error: contactError } = await admin
+      .from('customer_contacts')
+      .select('id, e164, full_name, user_id')
+      .in('id', contactIds)
+
+    if (contactError) {
+      logPostgrestError('[adminListWhatsAppConversations] contacts', contactError)
+    } else {
+      for (const contact of contacts ?? []) {
+        contactsById.set(contact.id, contact)
+      }
+    }
+  }
+
+  return rows.map((row) => {
+    const contact = contactsById.get(row.customer_contact_id)
 
     return {
       id: row.id,
@@ -77,7 +81,7 @@ export async function adminListWhatsAppConversations(input?: {
       last_inbound_at: row.last_inbound_at,
       active_booking_id: row.active_booking_id,
       contact: {
-        id: contact?.id ?? '',
+        id: contact?.id ?? row.customer_contact_id,
         e164: contact?.e164 ?? '',
         full_name: contact?.full_name ?? null,
         user_id: contact?.user_id ?? null,

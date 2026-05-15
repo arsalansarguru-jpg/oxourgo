@@ -26,8 +26,11 @@ export async function getWhatsAppBookingPaymentSummary(
     .eq('id', bookingId)
     .maybeSingle()
 
-  if (error || !data) {
+  if (error) {
     logPostgrestError('[getWhatsAppBookingPaymentSummary]', error)
+    return null
+  }
+  if (!data) {
     return null
   }
 

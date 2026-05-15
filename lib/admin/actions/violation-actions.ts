@@ -6,13 +6,11 @@ import type { AdminActionResult } from '@/lib/admin/actions/types'
 import { writeAdminAudit } from '@/lib/admin/audit'
 import { requirePermissionForAdminAction } from '@/lib/auth/admin-action-auth'
 import {
-  VIOLATION_STATUSES,
   VIOLATION_TYPES,
   sumViolationAmounts,
   type ViolationStatus,
   type ViolationType,
 } from '@/lib/booking/violations'
-import { penaltyAmountsFromBooking } from '@/lib/booking/financial'
 import { adminActionDbFailed, logUnknownError, SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
 import { runInstrumentedServerAction } from '@/lib/monitoring/instrument-server-action'
 import type { Database, Json } from '@/lib/supabase/database.types'
@@ -35,11 +33,6 @@ function parseAmount(n: unknown): number | null {
 function parseViolationType(raw: string): ViolationType | null {
   const t = raw.trim().toLowerCase()
   return (VIOLATION_TYPES as readonly string[]).includes(t) ? (t as ViolationType) : null
-}
-
-function parseViolationStatus(raw: string): ViolationStatus | null {
-  const s = raw.trim().toLowerCase()
-  return (VIOLATION_STATUSES as readonly string[]).includes(s) ? (s as ViolationStatus) : null
 }
 
 function parseDateYmd(raw: string): string | null {
@@ -103,7 +96,6 @@ export async function syncBookingViolationsToFinancials(
 
   if (bErr || !booking) return
 
-  const amounts = penaltyAmountsFromBooking(booking)
   const ts = nowIso()
 
   const { error: upErr } = await admin

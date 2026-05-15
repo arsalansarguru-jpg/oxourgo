@@ -78,8 +78,11 @@ export async function updateWhatsAppConversationState(input: {
     .eq('id', input.conversationId)
     .maybeSingle()
 
-  if (loadErr || !current) {
+  if (loadErr) {
     logPostgrestError('[updateWhatsAppConversationState] load', loadErr)
+    return { ok: false, message: 'Could not load conversation.' }
+  }
+  if (!current) {
     return { ok: false, message: 'Conversation not found.' }
   }
 

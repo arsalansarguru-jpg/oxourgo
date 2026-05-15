@@ -7,7 +7,6 @@ import {
   CarFront,
   CheckCircle2,
   ClipboardList,
-  Crown,
   FileCheck,
   FileX,
   HandCoins,

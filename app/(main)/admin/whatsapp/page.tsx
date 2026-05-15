@@ -1,5 +1,3 @@
-import Link from 'next/link'
-
 import { AdminWhatsAppConversations } from '@/components/admin/whatsapp/admin-whatsapp-conversations'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { Button } from '@/components/ui/Button'
@@ -22,8 +20,8 @@ export default async function AdminWhatsAppPage() {
       />
 
       <div className="flex flex-wrap gap-3">
-        <Button asChild variant="secondary">
-          <Link href="/admin/bookings?source=whatsapp">WhatsApp bookings</Link>
+        <Button to="/admin/bookings?source=whatsapp" variant="secondary">
+          WhatsApp bookings
         </Button>
       </div>
 

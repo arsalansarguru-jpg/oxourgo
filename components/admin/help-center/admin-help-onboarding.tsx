@@ -23,7 +23,7 @@ export function AdminHelpOnboarding({ tracks }: Props) {
         Help center
       </Link>
 
-      {tracks.map((track, ti) => (
+      {tracks.map((track) => (
         <AdminCard key={`${track.role}-${track.title}`}>
           <AdminCardContent className="space-y-5 p-6 sm:p-8">
             <div>

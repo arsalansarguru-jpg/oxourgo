@@ -56,8 +56,11 @@ export async function adminCreateWhatsAppBookingFromConversationAction(input: {
     const admin = createAdminClient()
     const { data: contact, error } = await admin.from('customer_contacts').select('*').eq('id', input.contactId).maybeSingle()
 
-    if (error || !contact) {
-      return adminActionDbFailed('Contact not found.')
+    if (error) {
+      return adminActionDbFailed('adminCreateWhatsAppBookingFromConversationAction', error)
+    }
+    if (!contact) {
+      return { ok: false, message: 'Contact not found.' }
     }
 
     const result = await createWhatsAppBooking({

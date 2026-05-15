@@ -1,7 +1,7 @@
 import 'server-only'
 
 import type { AdminActionResult } from '@/lib/admin/actions/types'
-import { authErrorToUserMessage, isAuthError } from '@/lib/auth/errors'
+import { isAuthError } from '@/lib/auth/errors'
 import { type Permission } from '@/lib/auth/permissions'
 import { requirePermission, type AuthSessionSummary } from '@/lib/auth/server'
 import { SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
