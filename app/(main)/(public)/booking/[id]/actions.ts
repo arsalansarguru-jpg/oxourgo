@@ -13,6 +13,8 @@ import { isProfileKycApprovedForBooking } from '@/lib/kyc/kyc-booking-eligible'
 import { createClient } from '@/lib/supabase/server'
 import { isVehicleAvailableForBooking, parseMoneyIntRupees, type VehicleRow } from '@/lib/fleet/vehicle-mappers'
 import type { Database } from '@/lib/supabase/database.types'
+import { assertOnlineCheckoutAllowed } from '@/lib/payments/checkout-guard'
+import { normalizeBookingPaymentMethod } from '@/lib/payments/methods'
 import { runInstrumentedServerAction } from '@/lib/monitoring/instrument-server-action'
 import { reportBookingCreateFailure } from '@/lib/monitoring/report-booking-failure'
 
@@ -104,8 +106,12 @@ export async function createBookingAction(input: CreateBookingInput): Promise<Cr
         }
       }
 
-      const method = input.paymentMethod === 'pay_online' ? 'pay_online' : 'pay_at_pickup'
-      if (method === 'pay_online') {
+      const method = normalizeBookingPaymentMethod(input.paymentMethod)
+      if (method === 'online_payment') {
+        const gate = assertOnlineCheckoutAllowed()
+        if (!gate.ok) {
+          return { ok: false, code: 'validation', message: gate.message }
+        }
         return {
           ok: false,
           code: 'validation',

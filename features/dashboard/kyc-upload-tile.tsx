@@ -9,10 +9,12 @@ import { registerKycDocumentAction } from '@/app/(main)/dashboard/actions'
 import { captureClientEvent } from '@/lib/analytics/capture-client'
 import { POSTHOG_EVENTS } from '@/lib/analytics/posthog-events'
 import type { KycDocumentRow } from '@/lib/customer/kyc-queries'
-import { SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
 import type { Database } from '@/lib/supabase/database.types'
 import type { KycDocumentTypeId } from '@/lib/kyc/constants'
 import { KYC_ID_ACCEPT, KYC_MAX_FILE_BYTES, KYC_SELFIE_ACCEPT } from '@/lib/kyc/constants'
+import { inferKycContentType, isAllowedKycMime } from '@/lib/kyc/mime'
+import { buildKycObjectPath } from '@/lib/kyc/object-path'
+import { mapUnknownToKycUpload, safeMessageForKycUploadCode } from '@/lib/kyc/upload-errors'
 import { uploadKycObjectWithProgress } from '@/lib/kyc/upload-kyc-browser'
 import { cn } from '@/lib/utils/cn'
 import { Button } from '@/components/ui/Button'
@@ -40,29 +42,24 @@ function validateFile(file: File, acceptSelfie: boolean): string | null {
   if (file.size > KYC_MAX_FILE_BYTES) {
     return `File must be ${Math.round(KYC_MAX_FILE_BYTES / (1024 * 1024))}MB or smaller.`
   }
-  if (acceptSelfie) {
-    if (!file.type.startsWith('image/')) return 'Selfie must be an image (JPEG, PNG, or WebP).'
-    return null
+  const mime = inferKycContentType(file)
+  if (!isAllowedKycMime(mime, acceptSelfie)) {
+    return acceptSelfie
+      ? 'Selfie must be an image (JPEG, PNG, or WebP).'
+      : 'Please upload a PDF or an image (JPEG, PNG, or WebP).'
   }
-  const okImage = file.type.startsWith('image/')
-  const okPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf')
-  if (!okImage && !okPdf) return 'Please upload a PDF or an image (JPEG, PNG, WebP).'
   return null
 }
 
 export function KycUploadTile({
   tile,
   userId,
-  projectUrl,
-  anonKey,
   supabase,
   latest,
   onRegistered,
 }: {
   tile: KycTileConfig
   userId: string
-  projectUrl: string
-  anonKey: string
   supabase: SupabaseClient<Database>
   latest: KycDocumentRow | undefined
   onRegistered: (doc: KycDocumentRow) => void
@@ -111,22 +108,36 @@ export function KycUploadTile({
       replacePreview(file)
       startTransition(async () => {
         const {
-          data: { session },
-        } = await supabase.auth.getSession()
-        if (!session?.access_token) {
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser()
+        if (userError || !user) {
           setLocalError('Your session expired. Sign in again.')
           return
         }
+        if (user.id !== userId) {
+          console.error('[KycUploadTile] auth user id mismatch', { authUserId: user.id, userId })
+          setLocalError('Your session does not match this account. Sign in again.')
+          return
+        }
 
-        const ext =
-          (file.name.split('.').pop() ?? 'bin').replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'bin'
-        const objectPath = `${userId}/${tile.id}-${Date.now()}.${ext}`
+        const objectPath = buildKycObjectPath(userId, tile.id, file)
+        const contentType = inferKycContentType(file)
+
+        if (process.env.NODE_ENV === 'development') {
+          console.info('[KycUploadTile] upload start', {
+            bucket: 'kyc',
+            objectPath,
+            authUserId: user.id,
+            contentType,
+            byteSize: file.size,
+          })
+        }
+
         setProgress(0)
         try {
           await uploadKycObjectWithProgress({
-            projectUrl,
-            anonKey,
-            accessToken: session.access_token,
+            supabase,
             objectPath,
             file,
             onProgress: (r) => setProgress(r),
@@ -136,7 +147,7 @@ export function KycUploadTile({
             documentType: tile.id,
             storagePath: objectPath,
             byteSize: file.size,
-            contentType: file.type || null,
+            contentType,
             originalFilename: sanitizeFilename(file.name),
           })
 
@@ -164,12 +175,17 @@ export function KycUploadTile({
           router.refresh()
         } catch (e) {
           setProgress(null)
-          console.error('[KycUploadTile] upload or register failed', e)
-          setLocalError(SAFE_USER_MESSAGE.save)
+          const mapped = mapUnknownToKycUpload(e)
+          console.error('[KycUploadTile] upload or register failed', {
+            code: mapped.code,
+            message: mapped.message,
+            raw: e,
+          })
+          setLocalError(safeMessageForKycUploadCode(mapped.code))
         }
       })
     },
-    [anonKey, onRegistered, projectUrl, replacePreview, router, supabase, tile.id, tile.selfie, userId],
+    [onRegistered, replacePreview, router, supabase, tile.id, tile.selfie, userId],
   )
 
   const onBrowse = () => inputRef.current?.click()
@@ -337,7 +353,8 @@ export function KycUploadTile({
               startPreview(async () => {
                 const { data, error } = await supabase.storage.from('kyc').createSignedUrl(latest.storage_path, 120)
                 if (error || !data?.signedUrl) {
-                  setLocalError(error?.message ?? 'Could not open a secure preview link.')
+                  console.error('[KycUploadTile] signed URL failed', error?.message, error?.name)
+                  setLocalError('Could not open a secure preview link. Try again in a moment.')
                   return
                 }
                 window.open(data.signedUrl, '_blank', 'noopener,noreferrer')

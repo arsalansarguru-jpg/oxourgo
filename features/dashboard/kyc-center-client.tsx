@@ -31,14 +31,10 @@ export function KycCenterClient({
   userId,
   initialDocs,
   initialProfile,
-  projectUrl,
-  anonKey,
 }: {
   userId: string
   initialDocs: KycDocumentRow[]
   initialProfile: KycCenterProfileSnapshot
-  projectUrl: string | null
-  anonKey: string | null
 }) {
   const supabase = useSupabase()
   const [docs, setDocs] = useState(initialDocs)
@@ -48,10 +44,10 @@ export function KycCenterClient({
   }, [initialDocs])
 
   useEffect(() => {
-    if (!supabase || !projectUrl || !anonKey) {
-      console.error('[KycCenterClient] Secure uploads unavailable: client or public project configuration is incomplete.')
+    if (!supabase) {
+      console.error('[KycCenterClient] Secure uploads unavailable: browser Supabase client is missing.')
     }
-  }, [supabase, projectUrl, anonKey])
+  }, [supabase])
 
   const latestMap = useMemo(() => pickLatestDocPerType(docs as KycDocMinimal[]), [docs])
 
@@ -84,7 +80,7 @@ export function KycCenterClient({
       : 'We could not approve your documents yet. Please review the notes on each tile and upload again.'
   }, [docs, initialProfile.kyc_status])
 
-  if (!supabase || !projectUrl || !anonKey) {
+  if (!supabase) {
     return (
       <DataLoadErrorPanel
         title="Unable to open secure uploads"
@@ -199,8 +195,6 @@ export function KycCenterClient({
             key={tile.id}
             tile={tile}
             userId={userId}
-            projectUrl={projectUrl}
-            anonKey={anonKey}
             supabase={supabase}
             latest={latestForTile(tile.id)}
             onRegistered={(doc) => setDocs((prev) => [doc, ...prev])}

@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation'
 
 import { KycCenterClient } from '@/features/dashboard/kyc-center-client'
 import { getAuthenticatedUser } from '@/lib/auth/server'
-import { getSupabasePublicEnv } from '@/lib/env/supabase-public'
 import { listKycDocuments } from '@/lib/customer/kyc-queries'
 import { createClient } from '@/lib/supabase/server'
 
@@ -22,7 +21,6 @@ export default async function KycPage() {
       .eq('user_id', user.id)
       .maybeSingle(),
   ])
-  const env = getSupabasePublicEnv()
   const initialProfile = {
     full_name: profileRes.data?.full_name ?? null,
     phone: profileRes.data?.phone ?? null,
@@ -32,12 +30,6 @@ export default async function KycPage() {
     kyc_approved_at: profileRes.data?.kyc_approved_at ?? null,
   }
   return (
-    <KycCenterClient
-      userId={user.id}
-      initialDocs={docs}
-      initialProfile={initialProfile}
-      projectUrl={env?.url ?? null}
-      anonKey={env?.anonKey ?? null}
-    />
+    <KycCenterClient userId={user.id} initialDocs={docs} initialProfile={initialProfile} />
   )
 }

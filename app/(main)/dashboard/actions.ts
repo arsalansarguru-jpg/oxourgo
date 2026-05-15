@@ -7,7 +7,9 @@ import { getAuthenticatedUser } from '@/lib/auth/server'
 import { onKycSubmitted } from '@/lib/notifications/events'
 import { syncProfileKycFromDocuments } from '@/lib/kyc/sync-profile-kyc'
 import { createClient } from '@/lib/supabase/server'
-import { adminActionDbFailed, SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
+import { adminActionDbFailed, logUnknownError, SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
+import { isKycObjectPathForUser } from '@/lib/kyc/object-path'
+import { kycActionDbFailed, kycStorageObjectMissingMessage } from '@/lib/kyc/upload-errors'
 import { runInstrumentedServerAction } from '@/lib/monitoring/instrument-server-action'
 
 const docTypes = ['aadhaar', 'license', 'passport', 'selfie', 'pan'] as const
@@ -61,7 +63,11 @@ export async function registerKycDocumentAction(input: {
       return { ok: false, message: 'Invalid document type.' }
     }
 
-    if (!input.storagePath.startsWith(`${user.id}/`)) {
+    if (!isKycObjectPathForUser(input.storagePath, user.id)) {
+      console.error('[registerKycDocumentAction] invalid storage path', {
+        userId: user.id,
+        storagePath: input.storagePath,
+      })
       return { ok: false, message: 'Invalid storage path.' }
     }
 
@@ -70,6 +76,22 @@ export async function registerKycDocumentAction(input: {
     }
 
     const supabase = await createClient()
+
+    const { data: stored, error: storageErr } = await supabase.storage
+      .from('kyc')
+      .createSignedUrl(input.storagePath, 60)
+
+    if (storageErr || !stored?.signedUrl) {
+      console.error('[registerKycDocumentAction] storage object not readable', {
+        userId: user.id,
+        storagePath: input.storagePath,
+        bucket: 'kyc',
+        message: storageErr?.message,
+        statusCode: storageErr?.statusCode,
+      })
+      return { ok: false, message: kycStorageObjectMissingMessage() }
+    }
+
     const { data, error } = await supabase
       .from('kyc_documents')
       .insert({
@@ -88,14 +110,25 @@ export async function registerKycDocumentAction(input: {
       .select('*')
       .single()
 
-    if (error) return adminActionDbFailed('registerKycDocumentAction', error)
+    if (error) {
+      return kycActionDbFailed('registerKycDocumentAction:insert', error)
+    }
 
     const syncRes = await syncProfileKycFromDocuments(supabase, user.id)
     if (!syncRes.ok) {
       if (data?.id) {
-        await supabase.from('kyc_documents').delete().eq('id', data.id)
+        await supabase.from('kyc_documents').delete().eq('id', data.id).then(({ error: delErr }) => {
+          if (delErr) logUnknownError('registerKycDocumentAction:rollback_delete', delErr)
+        })
       }
-      await supabase.storage.from('kyc').remove([input.storagePath]).catch(() => {})
+      await supabase.storage.from('kyc').remove([input.storagePath]).catch((removeErr) => {
+        logUnknownError('registerKycDocumentAction:rollback_storage', removeErr)
+      })
+      console.error('[registerKycDocumentAction] profile sync failed', {
+        userId: user.id,
+        storagePath: input.storagePath,
+        message: syncRes.message,
+      })
       return { ok: false, message: syncRes.message }
     }
 

@@ -4,7 +4,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { buildProfileKycUpdate, type KycDocMinimal } from '@/lib/kyc/compute-kyc-profile-status'
 import type { Database } from '@/lib/supabase/database.types'
-import { adminActionDbFailed } from '@/lib/errors/safe-user-message'
+import { kycActionDbFailed } from '@/lib/kyc/upload-errors'
 
 type Client = SupabaseClient<Database>
 
@@ -24,7 +24,7 @@ export async function syncProfileKycFromDocuments(
     .eq('user_id', userId)
 
   if (docsErr) {
-    return adminActionDbFailed('syncProfileKycFromDocuments:select_docs', docsErr)
+    return kycActionDbFailed('syncProfileKycFromDocuments:select_docs', docsErr)
   }
 
   const { data: profile, error: profErr } = await client
@@ -34,7 +34,7 @@ export async function syncProfileKycFromDocuments(
     .maybeSingle()
 
   if (profErr) {
-    return adminActionDbFailed('syncProfileKycFromDocuments:select_profile', profErr)
+    return kycActionDbFailed('syncProfileKycFromDocuments:select_profile', profErr)
   }
 
   const patch = buildProfileKycUpdate({
@@ -56,7 +56,7 @@ export async function syncProfileKycFromDocuments(
     .eq('user_id', userId)
 
   if (upErr) {
-    return adminActionDbFailed('syncProfileKycFromDocuments:update_profile', upErr)
+    return kycActionDbFailed('syncProfileKycFromDocuments:update_profile', upErr)
   }
 
   return { ok: true }

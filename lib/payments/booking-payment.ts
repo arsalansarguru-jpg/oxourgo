@@ -1,10 +1,8 @@
 import type { BookingWithCar } from '@/lib/supabase/database.types'
+import type { PaymentCheckoutStatus } from '@/lib/payments/types'
 
 export const BOOKING_PAYMENT_STATUSES = ['pending', 'received', 'partial', 'refunded'] as const
 export type BookingPaymentStatus = (typeof BOOKING_PAYMENT_STATUSES)[number]
-
-export const BOOKING_PAYMENT_METHODS = ['pay_at_pickup', 'pay_online'] as const
-export type BookingPaymentMethod = (typeof BOOKING_PAYMENT_METHODS)[number]
 
 export function normalizePaymentStatus(raw: string): string {
   return raw.trim().toLowerCase()
@@ -58,16 +56,26 @@ export function bookingPaymentBreakdown(row: BookingWithCar): BookingPaymentBrea
   }
 }
 
-export function formatPaymentMethodLabel(method: string | null | undefined): string {
-  const m = (method ?? 'pay_at_pickup').trim().toLowerCase()
-  if (m === 'pay_online') return 'Pay online'
-  return 'Pay at pickup'
+export function normalizeCheckoutStatus(raw: string | null | undefined): PaymentCheckoutStatus {
+  const s = (raw ?? 'not_started').trim().toLowerCase()
+  const allowed: PaymentCheckoutStatus[] = [
+    'not_started',
+    'order_created',
+    'authorized',
+    'captured',
+    'failed',
+    'refunded',
+  ]
+  return (allowed as readonly string[]).includes(s) ? (s as PaymentCheckoutStatus) : 'not_started'
 }
 
-export function payAtPickupInstructions(): string[] {
-  return [
-    'Bring a valid driving licence and the card used for any pre-authorisation.',
-    'Rental balance is collected at the hub before handover — UPI, NEFT, or card as arranged by concierge.',
-    'Security deposit is a separate pre-auth at pickup; it is released after return inspection when eligible.',
-  ]
-}
+/** @deprecated Import from `@/lib/payments` or `@/lib/payments/methods` */
+export {
+  formatPaymentMethodLabel,
+  payAtPickupInstructions,
+  onlinePaymentInstructions,
+  isOnlinePaymentMethod,
+  normalizeBookingPaymentMethod,
+  BOOKING_PAYMENT_METHODS,
+} from '@/lib/payments/methods'
+export type { BookingPaymentMethod } from '@/lib/payments/methods'

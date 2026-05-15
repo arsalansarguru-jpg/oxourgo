@@ -5,6 +5,7 @@ import { BookingView } from '@/features/booking/booking-view'
 import { getAuthenticatedUser } from '@/lib/auth/server'
 import { defaultPickupReturnIso } from '@/lib/booking/dates'
 import { getFleetCarById } from '@/lib/fleet/get-fleet-car-by-id'
+import { isOnlineCheckoutAvailable } from '@/lib/payments/server'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,6 +32,7 @@ export default async function BookingPage({ params }: { params: Promise<{ id: st
       defaultReturnIso={defaults.return}
       isLoggedIn={Boolean(user)}
       userEmail={user?.email ?? null}
+      onlineCheckoutAvailable={isOnlineCheckoutAvailable()}
     />
   )
 }

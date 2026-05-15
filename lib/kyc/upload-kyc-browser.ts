@@ -1,60 +1,91 @@
 'use client'
 
+import type { SupabaseClient } from '@supabase/supabase-js'
+
+import type { Database } from '@/lib/supabase/database.types'
+import { inferKycContentType } from '@/lib/kyc/mime'
+import { KycUploadError, mapStorageErrorToKycUpload } from '@/lib/kyc/upload-errors'
+
+const KYC_BUCKET = 'kyc' as const
+
+function devLog(label: string, payload: Record<string, unknown>): void {
+  if (process.env.NODE_ENV !== 'development') return
+  console.info(`[kyc-upload] ${label}`, payload)
+}
+
 /**
- * Uploads to the private `kyc` bucket using the Storage REST API so we can report upload progress.
- * Requires a valid user access token (not the anon key alone).
+ * Uploads to the private `kyc` bucket via the authenticated browser Supabase client.
+ * Refreshes the session first (important on mobile Safari / Chrome).
  */
-export function uploadKycObjectWithProgress(input: {
-  projectUrl: string
-  anonKey: string
-  accessToken: string
+export async function uploadKycObjectWithProgress(input: {
+  supabase: SupabaseClient<Database>
   objectPath: string
   file: File
   onProgress: (ratio: number) => void
 }): Promise<void> {
-  const base = input.projectUrl.replace(/\/+$/, '')
-  const encodedPath = input.objectPath.split('/').map((p) => encodeURIComponent(p)).join('/')
-  const url = `${base}/storage/v1/object/${encodeURIComponent('kyc')}/${encodedPath}`
+  const contentType = inferKycContentType(input.file)
 
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest()
-    xhr.open('POST', url)
-    xhr.setRequestHeader('Authorization', `Bearer ${input.accessToken}`)
-    xhr.setRequestHeader('apikey', input.anonKey)
-    xhr.setRequestHeader('Cache-Control', '3600')
-    xhr.setRequestHeader('x-upsert', 'false')
-    xhr.setRequestHeader('Content-Type', input.file.type || 'application/octet-stream')
+  input.onProgress(0.02)
 
-    xhr.upload.onprogress = (ev) => {
-      if (ev.lengthComputable && ev.total > 0) {
-        input.onProgress(Math.min(1, ev.loaded / ev.total))
-      } else {
-        input.onProgress(0)
-      }
-    }
+  const { data: refreshed, error: refreshError } = await input.supabase.auth.refreshSession()
+  if (refreshError) {
+    console.error('[uploadKycObjectWithProgress] refreshSession failed', refreshError.message)
+    throw new KycUploadError('session_expired', 'Your session expired. Sign in again.')
+  }
 
-    xhr.onload = () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        input.onProgress(1)
-        resolve()
-      } else {
-        let detail: unknown = null
-        try {
-          detail = JSON.parse(xhr.responseText) as { message?: string; error?: string }
-        } catch {
-          detail = xhr.responseText ? xhr.responseText.slice(0, 500) : null
-        }
-        console.error('[uploadKycObjectWithProgress] failed', xhr.status, detail)
-        reject(new Error('UPLOAD_FAILED'))
-      }
-    }
+  const session = refreshed.session
+  const accessToken = session?.access_token
+  const authUserId = session?.user?.id
 
-    xhr.onerror = () => {
-      console.error('[uploadKycObjectWithProgress] network error')
-      reject(new Error('UPLOAD_FAILED'))
-    }
-    xhr.onabort = () => reject(new Error('Upload cancelled.'))
+  if (!accessToken || !authUserId) {
+    console.error('[uploadKycObjectWithProgress] no session after refresh')
+    throw new KycUploadError('session_expired', 'Your session expired. Sign in again.')
+  }
 
-    xhr.send(input.file)
+  const pathPrefix = input.objectPath.split('/')[0]
+  if (pathPrefix !== authUserId) {
+    console.error('[uploadKycObjectWithProgress] path prefix mismatch', {
+      pathPrefix,
+      authUserId,
+    })
+    throw new KycUploadError('forbidden', 'Upload path does not match your account.')
+  }
+
+  devLog('starting', {
+    bucket: KYC_BUCKET,
+    objectPath: input.objectPath,
+    authUserId,
+    contentType,
+    byteSize: input.file.size,
   })
+
+  input.onProgress(0.12)
+
+  const { data, error } = await input.supabase.storage.from(KYC_BUCKET).upload(input.objectPath, input.file, {
+    cacheControl: '3600',
+    upsert: false,
+    contentType,
+  })
+
+  if (error) {
+    console.error('[uploadKycObjectWithProgress] storage.upload failed', {
+      bucket: KYC_BUCKET,
+      objectPath: input.objectPath,
+      authUserId,
+      statusCode: error.statusCode,
+      message: error.message,
+      name: error.name,
+    })
+    throw mapStorageErrorToKycUpload(error)
+  }
+
+  devLog('success', {
+    bucket: KYC_BUCKET,
+    objectPath: input.objectPath,
+    authUserId,
+    path: data?.path,
+    id: data?.id,
+  })
+
+  input.onProgress(1)
 }

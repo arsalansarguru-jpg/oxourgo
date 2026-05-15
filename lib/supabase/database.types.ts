@@ -143,6 +143,10 @@ export type Database = {
           booking_status: string
           payment_method: string
           payment_status: string
+          payment_gateway: string | null
+          payment_gateway_order_id: string | null
+          payment_gateway_payment_id: string | null
+          payment_checkout_status: string
           amount_due: number
           amount_paid: number
           payment_received_at: string | null
@@ -209,6 +213,10 @@ export type Database = {
           booking_status?: string
           payment_method?: string
           payment_status?: string
+          payment_gateway?: string | null
+          payment_gateway_order_id?: string | null
+          payment_gateway_payment_id?: string | null
+          payment_checkout_status?: string
           amount_due?: number
           amount_paid?: number
           payment_received_at?: string | null
@@ -275,6 +283,10 @@ export type Database = {
           booking_status?: string
           payment_method?: string
           payment_status?: string
+          payment_gateway?: string | null
+          payment_gateway_order_id?: string | null
+          payment_gateway_payment_id?: string | null
+          payment_checkout_status?: string
           amount_due?: number
           amount_paid?: number
           payment_received_at?: string | null

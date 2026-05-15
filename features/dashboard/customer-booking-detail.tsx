@@ -31,7 +31,14 @@ import {
   paymentStatusBadgeVariant,
   resolveBookingVehicleVisual,
 } from '@/lib/customer/booking-display'
-import { bookingPaymentBreakdown, formatPaymentMethodLabel, payAtPickupInstructions } from '@/lib/payments/booking-payment'
+import { bookingPaymentBreakdown } from '@/lib/payments/booking-payment'
+import {
+  formatPaymentMethodLabel,
+  isOnlinePaymentMethod,
+  onlinePaymentInstructions,
+  payAtPickupInstructions,
+} from '@/lib/payments/methods'
+import { OnlinePaymentNotice } from '@/components/payments/online-payment-notice'
 import { deriveCustomerBookingUiStatus, type CustomerBookingUiStatus } from '@/lib/customer/derive-booking-ui-status'
 import { getPublicSiteUrl } from '@/lib/env/site-url'
 import { CustomerBookingFinancialSection } from '@/features/dashboard/customer-booking-financial-section'
@@ -251,10 +258,15 @@ export function CustomerBookingDetail({
               <p className="mt-2 text-xs text-muted">Collected so far: {formatInr(payBreakdown.collectedRentalRupees)}</p>
             </div>
           </dl>
-          {row.payment_method === 'pay_online' ? (
-            <p className="mt-6 rounded-xl border border-stroke bg-fill-glass px-3 py-2.5 text-sm text-muted">
-              Online checkout is on the roadmap — concierge will coordinate if your reservation moves off pay-at-pickup.
-            </p>
+          {isOnlinePaymentMethod(row.payment_method) ? (
+            <div className="mt-6 space-y-3">
+              <OnlinePaymentNotice />
+              <ul className="list-disc space-y-2 pl-4 text-sm leading-relaxed text-silver/95">
+                {onlinePaymentInstructions().map((line) => (
+                  <li key={line}>{line}</li>
+                ))}
+              </ul>
+            </div>
           ) : (
             <div className="mt-6 rounded-2xl border border-emerald-400/15 bg-emerald-500/[0.06] p-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-emerald-100/90">Pay at pickup</p>

@@ -5,9 +5,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
-import { AlertTriangle, CalendarRange, Car as CarIcon, CheckCircle2, Loader2, MapPin, Shield, Wallet } from 'lucide-react'
+import { AlertTriangle, CalendarRange, Car as CarIcon, CheckCircle2, Loader2, MapPin, Shield } from 'lucide-react'
 
+import { PaymentMethodSelector } from '@/components/payments/payment-method-selector'
 import { createBookingAction } from '@/app/(main)/(public)/booking/[id]/actions'
+import type { BookingPaymentMethod } from '@/lib/payments/types'
 import { customerBookingFailureCopy } from '@/lib/booking/customer-booking-failure-copy'
 import { SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
 import { BRAND } from '@/constants/brand'
@@ -38,6 +40,7 @@ export type BookingViewProps = {
   defaultReturnIso: string
   isLoggedIn: boolean
   userEmail: string | null
+  onlineCheckoutAvailable: boolean
 }
 
 type AvailState =
@@ -46,22 +49,27 @@ type AvailState =
   | { status: 'ready'; available: boolean; reason?: string }
   | { status: 'error'; message: string }
 
-type BookingPaymentChoice = 'pay_at_pickup' | 'pay_online'
-
-export function BookingView({ car, defaultPickupIso, defaultReturnIso, isLoggedIn, userEmail }: BookingViewProps) {
+export function BookingView({
+  car,
+  defaultPickupIso,
+  defaultReturnIso,
+  isLoggedIn,
+  userEmail,
+  onlineCheckoutAvailable,
+}: BookingViewProps) {
   const router = useRouter()
   const [pickup, setPickup] = useState(defaultPickupIso)
   const [returnAt, setReturnAt] = useState(defaultReturnIso)
   const [pickupHub, setPickupHub] = useState<string>(MUMBAI_HUBS[1])
   const [sameReturnHub, setSameReturnHub] = useState(true)
   const [returnHub, setReturnHub] = useState<string>(MUMBAI_HUBS[1])
-  const [paymentMethod, setPaymentMethod] = useState<BookingPaymentChoice>('pay_at_pickup')
+  const [paymentMethod, setPaymentMethod] = useState<BookingPaymentMethod>('pay_at_pickup')
   const [avail, setAvail] = useState<AvailState>({ status: 'idle' })
   const [formError, setFormError] = useState<string | null>(null)
   const [success, setSuccess] = useState<{
     bookingId: string
     totalRupees: number
-    paymentMethod: BookingPaymentChoice
+    paymentMethod: BookingPaymentMethod
   } | null>(null)
   const [pending, startTransition] = useTransition()
 
@@ -164,8 +172,8 @@ export function BookingView({ car, defaultPickupIso, defaultReturnIso, isLoggedI
       setFormError('Choose times that are available.')
       return
     }
-    if (paymentMethod === 'pay_online') {
-      setFormError('Pay online is coming soon — choose Pay at pickup to continue.')
+    if (paymentMethod === 'online_payment') {
+      setFormError('Online payments coming soon — choose Pay at pickup to continue.')
       return
     }
 
@@ -267,35 +275,12 @@ export function BookingView({ car, defaultPickupIso, defaultReturnIso, isLoggedI
           </motion.div>
 
           <motion.div layout className={cn(panel, cardSurfaceTransition, cardSurfaceHover)}>
-            <div className="flex items-center gap-2 text-soft">
-              <Wallet className="h-5 w-5 text-electric" aria-hidden />
-              <h2 className="text-lg font-semibold tracking-[-0.02em]">Payment method</h2>
-            </div>
-            <p className="mt-1 text-sm text-muted">Operational settlement for this reservation (no live PSP yet).</p>
-            <div className="mt-5 grid gap-3 sm:grid-cols-2">
-              <button
-                type="button"
-                onClick={() => setPaymentMethod('pay_at_pickup')}
-                className={cn(
-                  'rounded-2xl border px-4 py-4 text-left transition-all duration-300',
-                  paymentMethod === 'pay_at_pickup'
-                    ? 'border-electric/50 bg-electric/[0.12] shadow-[0_0_0_1px_rgba(59,130,246,0.35)]'
-                    : 'border-stroke bg-matte/[0.35] hover:border-stroke-strong',
-                )}
-              >
-                <p className="text-sm font-semibold text-soft">Pay at pickup</p>
-                <p className="mt-1 text-xs leading-relaxed text-muted">Settle rental with concierge at the hub before keys.</p>
-              </button>
-              <button
-                type="button"
-                disabled
-                className="cursor-not-allowed rounded-2xl border border-stroke bg-matte/[0.2] px-4 py-4 text-left opacity-60"
-              >
-                <p className="text-sm font-semibold text-soft">Pay online</p>
-                <p className="mt-1 text-xs font-medium uppercase tracking-wide text-muted">Coming soon</p>
-              </button>
-            </div>
-          </motion.div>
+            <PaymentMethodSelector
+              value={paymentMethod}
+              onChange={setPaymentMethod}
+              onlineCheckoutAvailable={onlineCheckoutAvailable}
+            />
+</motion.div>
 
           <motion.div layout className={cn(panel, cardSurfaceTransition, cardSurfaceHover)}>
             <div className="flex items-center gap-2 text-soft">
