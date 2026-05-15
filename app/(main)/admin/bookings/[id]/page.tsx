@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation'
 
 import { AdminBookingPdfPanel } from '@/components/admin/admin-booking-pdf-panel'
 import { AdminBookingOpsPanel } from '@/components/admin/admin-booking-ops-panel'
+import { AdminBookingManualOpsPanel } from '@/components/admin/operations/admin-booking-manual-ops-panel'
 import { AdminBookingViolationsPanel } from '@/components/admin/violations/admin-booking-violations-panel'
 import { AdminBookingPaymentTimeline } from '@/components/admin/admin-booking-payment-timeline'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
@@ -13,6 +14,13 @@ import { adminGetBookingInspectionBundle } from '@/lib/admin/data/booking-inspec
 import { adminGetBookingFinancialSummary } from '@/lib/admin/data/financials'
 import { adminGetBookingViolationsBundle } from '@/lib/admin/data/violations'
 import { adminListPaymentEventsForBooking } from '@/lib/admin/data/payments'
+import {
+  adminListBookingOpsActivity,
+  adminListBookingVehicleAssignments,
+} from '@/lib/admin/data/operations'
+import { adminListVehicles } from '@/lib/admin/data/fleet'
+import { canUseOpsOverride, hasPermission } from '@/lib/auth/permissions'
+import { getAuthSessionSummary } from '@/lib/auth/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatInr } from '@/lib/format'
 import { formatPaymentMethodLabel } from '@/lib/payments/booking-payment'
@@ -40,8 +48,20 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
   }
   if (!booking) notFound()
 
-  const [customerEmail, customerProfile, paymentTimeline, inspection, financialSummary, violationsBundle] =
-    await Promise.all([
+  const session = await getAuthSessionSummary()
+  const role = session?.appRole ?? 'customer'
+
+  const [
+    customerEmail,
+    customerProfile,
+    paymentTimeline,
+    inspection,
+    financialSummary,
+    violationsBundle,
+    vehicles,
+    opsActivity,
+    vehicleAssignments,
+  ] = await Promise.all([
     (async () => {
       try {
         const admin = createAdminClient()
@@ -56,6 +76,9 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
     adminGetBookingInspectionBundle(id, booking.customer_handover_signature_path),
     adminGetBookingFinancialSummary(id),
     adminGetBookingViolationsBundle(id),
+    adminListVehicles(),
+    adminListBookingOpsActivity(id),
+    adminListBookingVehicleAssignments(id),
   ])
 
   const vehJoin = booking.vehicles
@@ -74,6 +97,8 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
         <AdminStatusPill value={booking.booking_status} />
         <AdminStatusPill value={booking.payment_status} />
         <BookingSourceBadge source={booking.booking_source} />
+        {booking.ops_hold_at ? <AdminStatusPill value="on_hold" /> : null}
+        {booking.vip_flag ? <AdminStatusPill value="vip" /> : null}
       </div>
 
       {booking.ops_note ? (
@@ -222,6 +247,17 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
 
         <AdminBookingOpsPanel booking={booking} inspection={inspection} financialSummary={financialSummary} />
       </div>
+
+      {hasPermission(role, 'ops.manual.read') ? (
+        <AdminBookingManualOpsPanel
+          booking={booking}
+          vehicles={vehicles}
+          activity={opsActivity}
+          assignments={vehicleAssignments}
+          canOverride={canUseOpsOverride(role)}
+          canFinance={hasPermission(role, 'payments.write') || hasPermission(role, 'refunds.write')}
+        />
+      ) : null}
 
       <AdminBookingViolationsPanel bookingId={id} bundle={violationsBundle} />
 

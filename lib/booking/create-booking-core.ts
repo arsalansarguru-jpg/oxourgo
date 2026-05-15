@@ -12,6 +12,16 @@ import { normalizeBookingPaymentMethod } from '@/lib/payments/methods'
 import { assertOnlineCheckoutAllowed } from '@/lib/payments/checkout-guard'
 import type { Database } from '@/lib/supabase/database.types'
 
+export type BookingPricingOverride = {
+  pricePerDayRupees?: number
+  subtotalRupees?: number
+  convenienceFeeRupees?: number
+  gstRupees?: number
+  totalRupees?: number
+  depositAmountRupees?: number
+  customDiscountRupees?: number
+}
+
 export type InsertBookingCoreInput = {
   vehicleId: string
   userId: string
@@ -25,6 +35,15 @@ export type InsertBookingCoreInput = {
   whatsappConversationId?: string | null
   /** When false, skips KYC check (ops-only flows with explicit acceptance). */
   requireKyc?: boolean
+  /** Ops manual booking: skip overlap and availability checks when true (audited). */
+  bypassRestrictions?: boolean
+  /** Custom line items; partial overrides fall back to computed quote fields. */
+  pricingOverride?: BookingPricingOverride
+  /** Staff-only note stored on the booking at creation. */
+  adminInternalNotes?: string | null
+  /** When true, booking is created as confirmed (skips pending_payment). */
+  autoConfirm?: boolean
+  vipFlag?: boolean
 }
 
 export type InsertBookingCoreSuccess = {
@@ -96,39 +115,55 @@ export async function insertBookingCore(
     return { ok: false, code: 'validation', message: 'Vehicle not found or no longer listed.' }
   }
 
-  if (!isVehicleAvailableForBooking(vehicleRow as VehicleRow)) {
+  if (!input.bypassRestrictions && !isVehicleAvailableForBooking(vehicleRow as VehicleRow)) {
     return { ok: false, code: 'car_unavailable', message: 'This vehicle is not available to book right now.' }
   }
 
-  const pricePerDay = parseMoneyIntRupees(vehicleRow.price_per_day)
-  if (pricePerDay <= 0) {
+  const catalogPricePerDay = parseMoneyIntRupees(vehicleRow.price_per_day)
+  const pricePerDay =
+    input.pricingOverride?.pricePerDayRupees != null
+      ? Math.max(0, Math.round(input.pricingOverride.pricePerDayRupees))
+      : catalogPricePerDay
+  if (pricePerDay <= 0 && input.pricingOverride?.totalRupees == null) {
     return { ok: false, code: 'validation', message: 'Invalid vehicle pricing.' }
   }
 
-  const quote = computeBookingQuote(pricePerDay, dates.rentalDays)
+  const baseQuote = computeBookingQuote(pricePerDay > 0 ? pricePerDay : catalogPricePerDay, dates.rentalDays)
+  const discount = Math.max(0, Math.round(Number(input.pricingOverride?.customDiscountRupees ?? 0)))
+  const quote = {
+    rentalDays: baseQuote.rentalDays,
+    subtotalRupees: input.pricingOverride?.subtotalRupees ?? baseQuote.subtotalRupees,
+    convenienceFeeRupees: input.pricingOverride?.convenienceFeeRupees ?? baseQuote.convenienceFeeRupees,
+    gstRupees: input.pricingOverride?.gstRupees ?? baseQuote.gstRupees,
+    totalRupees:
+      input.pricingOverride?.totalRupees ??
+      Math.max(0, baseQuote.totalRupees - discount),
+  }
 
-  const { overlap, error: overlapErr } = await hasVehicleBookingOverlap(
-    vehicleRow.id,
-    input.pickupAtIso,
-    input.returnAtIso,
-    null,
-    supabase,
-  )
-  if (overlapErr === 'overlap_rpc_missing') {
-    return {
-      ok: false,
-      code: 'rpc_missing',
-      message: 'Reservations are temporarily unavailable. Please try again shortly.',
+  if (!input.bypassRestrictions) {
+    const { overlap, error: overlapErr } = await hasVehicleBookingOverlap(
+      vehicleRow.id,
+      input.pickupAtIso,
+      input.returnAtIso,
+      null,
+      supabase,
+    )
+    if (overlapErr === 'overlap_rpc_missing') {
+      return {
+        ok: false,
+        code: 'rpc_missing',
+        message: 'Reservations are temporarily unavailable. Please try again shortly.',
+      }
     }
-  }
-  if (overlapErr) {
-    return { ok: false, code: 'database', message: 'Could not verify availability.' }
-  }
-  if (overlap) {
-    return {
-      ok: false,
-      code: 'overlap',
-      message: 'Those dates overlap an existing booking. Choose different times.',
+    if (overlapErr) {
+      return { ok: false, code: 'database', message: 'Could not verify availability.' }
+    }
+    if (overlap) {
+      return {
+        ok: false,
+        code: 'overlap',
+        message: 'Those dates overlap an existing booking. Choose different times.',
+      }
     }
   }
 
@@ -147,6 +182,11 @@ export async function insertBookingCore(
 
   const bookingSource = normalizeBookingSource(input.bookingSource)
 
+  const depositAmount =
+    input.pricingOverride?.depositAmountRupees != null
+      ? Math.max(0, Math.round(input.pricingOverride.depositAmountRupees))
+      : null
+
   const insert: Database['public']['Tables']['bookings']['Insert'] = {
     vehicle_id: vehicleRow.id,
     user_id: input.userId,
@@ -155,19 +195,26 @@ export async function insertBookingCore(
     pickup_location: pickupLocation,
     return_location: returnLocation,
     rental_days: quote.rentalDays,
-    price_per_day_rupees_snapshot: pricePerDay,
+    price_per_day_rupees_snapshot: pricePerDay > 0 ? pricePerDay : catalogPricePerDay,
     subtotal_rupees: quote.subtotalRupees,
     convenience_fee_rupees: quote.convenienceFeeRupees,
     gst_rupees: quote.gstRupees,
     total_rupees: quote.totalRupees,
-    booking_status: 'pending_payment',
-    payment_method: method === 'online_payment' ? 'online_payment' : 'pay_at_pickup',
+    custom_discount_rupees: discount,
+    booking_status: input.autoConfirm ? 'confirmed' : 'pending_payment',
+    payment_method: 'pay_at_pickup',
     payment_status: 'pending',
     amount_due: quote.totalRupees,
     amount_paid: 0,
     booking_source: bookingSource,
     customer_contact_id: input.customerContactId ?? null,
     whatsapp_conversation_id: input.whatsappConversationId ?? null,
+    admin_internal_notes: input.adminInternalNotes?.trim() || null,
+    restrictions_bypass: Boolean(input.bypassRestrictions),
+    vip_flag: Boolean(input.vipFlag),
+    deposit_amount: depositAmount,
+    deposit_held_rupees: depositAmount,
+    approved_at: input.autoConfirm ? new Date().toISOString() : null,
   }
 
   const { data: created, error: insErr } = await supabase.from('bookings').insert(insert).select('id').single()

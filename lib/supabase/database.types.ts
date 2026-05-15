@@ -83,6 +83,7 @@ export type Database = {
           security_deposit: number
           /** Public fleet segment: SUV, Sedan, Hatchback, Luxury, Budget */
           catalog_category?: string | null
+          fleet_ops_note?: string | null
           created_at: string
         }
         Insert: {
@@ -102,6 +103,7 @@ export type Database = {
           registration_number?: string
           security_deposit?: number
           catalog_category?: string | null
+          fleet_ops_note?: string | null
           created_at?: string
         }
         Update: {
@@ -121,6 +123,76 @@ export type Database = {
           registration_number?: string
           security_deposit?: number
           catalog_category?: string | null
+          fleet_ops_note?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      booking_vehicle_assignments: {
+        Row: {
+          id: string
+          booking_id: string
+          from_vehicle_id: string | null
+          to_vehicle_id: string
+          changed_by: string | null
+          reason: string | null
+          recalculate_pricing: boolean
+          previous_total_rupees: number | null
+          new_total_rupees: number | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          booking_id: string
+          from_vehicle_id?: string | null
+          to_vehicle_id: string
+          changed_by?: string | null
+          reason?: string | null
+          recalculate_pricing?: boolean
+          previous_total_rupees?: number | null
+          new_total_rupees?: number | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          booking_id?: string
+          from_vehicle_id?: string | null
+          to_vehicle_id?: string
+          changed_by?: string | null
+          reason?: string | null
+          recalculate_pricing?: boolean
+          previous_total_rupees?: number | null
+          new_total_rupees?: number | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      booking_ops_activity: {
+        Row: {
+          id: string
+          booking_id: string
+          actor_user_id: string | null
+          activity_type: string
+          summary: string
+          payload: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          booking_id: string
+          actor_user_id?: string | null
+          activity_type: string
+          summary: string
+          payload?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          booking_id?: string
+          actor_user_id?: string | null
+          activity_type?: string
+          summary?: string
+          payload?: Json | null
           created_at?: string
         }
         Relationships: []
@@ -196,6 +268,12 @@ export type Database = {
           booking_source: string
           customer_contact_id: string | null
           whatsapp_conversation_id: string | null
+          ops_hold_at: string | null
+          ops_hold_reason: string | null
+          vip_flag: boolean
+          customer_flags: Json
+          restrictions_bypass: boolean
+          custom_discount_rupees: number
           created_at: string
           updated_at: string
         }
@@ -269,6 +347,12 @@ export type Database = {
           booking_source?: string
           customer_contact_id?: string | null
           whatsapp_conversation_id?: string | null
+          ops_hold_at?: string | null
+          ops_hold_reason?: string | null
+          vip_flag?: boolean
+          customer_flags?: Json
+          restrictions_bypass?: boolean
+          custom_discount_rupees?: number
           created_at?: string
           updated_at?: string
         }
@@ -342,6 +426,12 @@ export type Database = {
           booking_source?: string
           customer_contact_id?: string | null
           whatsapp_conversation_id?: string | null
+          ops_hold_at?: string | null
+          ops_hold_reason?: string | null
+          vip_flag?: boolean
+          customer_flags?: Json
+          restrictions_bypass?: boolean
+          custom_discount_rupees?: number
           created_at?: string
           updated_at?: string
         }

@@ -25,7 +25,16 @@ export const VEHICLE_PUBLIC_COLUMNS =
 export function isVehicleShownOnPublicCatalog(row: VehicleRow): boolean {
   if (typeof row.available === 'boolean') return true
   const s = String(row.availability_status ?? '').trim().toLowerCase()
-  if (s === 'unavailable' || s === 'maintenance' || s === 'inactive' || s === 'draft') return false
+  if (
+    s === 'unavailable' ||
+    s === 'maintenance' ||
+    s === 'service' ||
+    s === 'accident_hold' ||
+    s === 'inactive' ||
+    s === 'draft'
+  ) {
+    return false
+  }
   return true
 }
 

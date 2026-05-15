@@ -31,6 +31,8 @@ export const PERMISSIONS = [
   'settings.write',
   'ops.alerts.read',
   'ops.alerts.write',
+  'ops.override',
+  'ops.manual.read',
 ] as const
 
 export type Permission = (typeof PERMISSIONS)[number]
@@ -49,6 +51,7 @@ const READ_ONLY_STAFF: readonly Permission[] = [
   'penalties.read',
   'analytics.read',
   'ops.alerts.read',
+  'ops.manual.read',
 ]
 
 const FLEET_MANAGER: readonly Permission[] = [
@@ -59,6 +62,7 @@ const FLEET_MANAGER: readonly Permission[] = [
   'bookings.inspect',
   'customers.read',
   'ops.alerts.write',
+  'ops.manual.read',
 ]
 
 const FINANCE_MANAGER: readonly Permission[] = [
@@ -75,6 +79,7 @@ const FINANCE_MANAGER: readonly Permission[] = [
   'penalties.write',
   'analytics.read',
   'fleet.read',
+  'ops.manual.read',
 ]
 
 const KYC_REVIEWER: readonly Permission[] = [
@@ -94,6 +99,11 @@ const ROLE_PERMISSIONS: Record<AppAuthRole, ReadonlySet<Permission>> = {
   support_agent: new Set(READ_ONLY_STAFF),
   ops_admin: ALL,
   super_admin: ALL,
+}
+
+/** Roles that may bypass lifecycle guards (force confirm, emergency cancel, hold). */
+export function canUseOpsOverride(role: AppAuthRole): boolean {
+  return hasPermission(role, 'ops.override')
 }
 
 export function getPermissionsForRole(role: AppAuthRole): ReadonlySet<Permission> {
