@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { ChevronDown, LogOut, Menu, MessageCircle, X } from 'lucide-react'
+import { ChevronDown, LayoutDashboard, LogOut, Menu, X } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 import { AnimatePresence, motion } from 'framer-motion'
 import { BRAND } from '@/constants/brand'
@@ -159,16 +159,16 @@ export function Navbar() {
           </nav>
 
           <div className="flex items-center justify-end gap-1.5 justify-self-end sm:gap-2 lg:gap-2.5">
-            <a
-              href={BRAND.whatsapp}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full border border-stroke bg-fill-glass text-muted shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] transition-[border-color,background-color,color] hover:border-stroke-strong hover:bg-fill-glass-strong hover:text-soft md:inline-flex"
-              aria-label="Book on WhatsApp"
-            >
-              <MessageCircle className="h-[18px] w-[18px]" aria-hidden />
-            </a>
-            <ThemeToggle className="hidden md:inline-flex" />
+            {ready && !user ? (
+              <Button
+                variant="outline"
+                size="sm"
+                to="/login"
+                className="hidden h-9 max-w-[5.5rem] shrink-0 px-3 text-[12px] font-semibold tracking-[-0.02em] sm:inline-flex sm:max-w-none sm:px-3.5 sm:text-[13px]"
+              >
+                Login
+              </Button>
+            ) : null}
             {ready && user ? (
               <details
                 ref={accountMenuRef}
@@ -203,6 +203,14 @@ export function Navbar() {
                   )}
                   onClick={(e) => e.stopPropagation()}
                 >
+                  <Link
+                    href="/dashboard"
+                    className="flex w-full items-center gap-2 px-3 py-2.5 text-[13px] font-medium text-muted transition-colors hover:bg-fill-glass-strong hover:text-soft"
+                    onClick={() => accountMenuRef.current?.removeAttribute('open')}
+                  >
+                    <LayoutDashboard className="h-4 w-4 shrink-0" aria-hidden />
+                    Dashboard
+                  </Link>
                   <button
                     type="button"
                     disabled={signingOut}
@@ -217,7 +225,7 @@ export function Navbar() {
             ) : null}
             <WhatsAppInquiryButton
               size="sm"
-              className="hidden h-9 px-4 text-[13px] font-semibold shadow-[0_12px_36px_-16px_rgba(59,130,246,0.55)] hover:translate-y-0 active:translate-y-0 sm:inline-flex"
+              className="hidden h-9 max-w-[min(100%,11rem)] shrink-0 truncate px-3 text-[12px] font-semibold shadow-[0_12px_36px_-16px_rgba(59,130,246,0.55)] hover:translate-y-0 active:translate-y-0 sm:inline-flex sm:max-w-none sm:px-4 sm:text-[13px]"
               label="Book on WhatsApp"
             />
 
@@ -309,17 +317,41 @@ export function Navbar() {
                 </div>
 
                 <div className="mt-5 grid gap-3 border-t border-stroke pt-5">
-                  {ready && user ? (
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      className="min-h-[3.25rem] w-full text-[15px] font-medium hover:translate-y-0 active:translate-y-0"
-                      disabled={signingOut}
-                      onClick={() => void handleSignOut()}
-                    >
-                      <LogOut className="h-[18px] w-[18px]" aria-hidden />
-                      {signingOut ? 'Signing out…' : 'Sign out'}
-                    </Button>
+                  {ready ? (
+                    user ? (
+                      <>
+                        <Button
+                          variant="secondary"
+                          size="lg"
+                          to="/dashboard"
+                          className="min-h-[3.25rem] w-full text-[15px] font-medium hover:translate-y-0 active:translate-y-0"
+                          onClick={() => setOpen(false)}
+                        >
+                          <LayoutDashboard className="h-[18px] w-[18px]" aria-hidden />
+                          Dashboard
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="lg"
+                          className="min-h-[3.25rem] w-full text-[15px] font-medium hover:translate-y-0 active:translate-y-0"
+                          disabled={signingOut}
+                          onClick={() => void handleSignOut()}
+                        >
+                          <LogOut className="h-[18px] w-[18px]" aria-hidden />
+                          {signingOut ? 'Signing out…' : 'Sign out'}
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="lg"
+                        to="/login"
+                        className="min-h-[3.25rem] w-full text-[15px] font-medium hover:translate-y-0 active:translate-y-0"
+                        onClick={() => setOpen(false)}
+                      >
+                        Login
+                      </Button>
+                    )
                   ) : null}
                 </div>
               </div>

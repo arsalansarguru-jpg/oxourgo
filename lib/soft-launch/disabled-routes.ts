@@ -2,14 +2,8 @@
  * Routes disabled during inquiry-only soft launch — redirected to WhatsApp concierge.
  */
 
-const DISABLED_PREFIXES = [
-  '/booking',
-  '/dashboard',
-  '/kyc',
-  '/profile',
-  '/admin',
-  '/login',
-] as const
+/** Concierge-first: block incomplete web checkout and admin shell only — login & member dashboard stay available. */
+const DISABLED_PREFIXES = ['/booking', '/kyc', '/profile', '/admin'] as const
 
 export function isSoftLaunchDisabledRoute(pathname: string): boolean {
   const path = pathname.split('?')[0] ?? pathname

@@ -1,9 +1,12 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { motion, useReducedMotion } from 'framer-motion'
 import { BadgeCheck, Headphones, ShieldCheck, Sparkles } from 'lucide-react'
 import { staggerContainer } from '@/animations/presets'
+import { WhatsAppInquiryButton } from '@/components/marketing/whatsapp-inquiry-button'
+import { useSupabaseAuthUser } from '@/hooks/use-supabase-auth-user'
 import { cn } from '@/lib/utils/cn'
 import { Button } from '@/components/ui/Button'
 import { BookingSearchBar } from '@/components/marketing/booking-search-bar'
@@ -18,6 +21,7 @@ const trustSignals = [
 
 export function HeroSection() {
   const reduceMotion = useReducedMotion()
+  const { user, ready } = useSupabaseAuthUser()
   const t = (duration: number, delay = 0) =>
     reduceMotion ? { duration: 0, delay: 0 } : { duration, delay, ease }
 
@@ -118,16 +122,30 @@ export function HeroSection() {
                 animate: { opacity: 1, y: 0 },
               }}
               transition={t(0.52, 0.2)}
-              className="mt-8 sm:mt-9"
+              className="mt-8 flex min-w-0 flex-col gap-3 sm:mt-9 sm:flex-row sm:flex-wrap sm:items-stretch"
             >
-              <Button
+              <WhatsAppInquiryButton
                 size="lg"
-                to="/fleet"
-                className="w-full shadow-[0_20px_56px_-24px_rgba(59,130,246,0.55)] sm:w-auto sm:min-w-[11.5rem]"
-              >
-                Explore Fleet
-              </Button>
+                className="w-full min-h-[3.25rem] shadow-[0_20px_56px_-24px_rgba(59,130,246,0.55)] sm:w-auto sm:min-w-[12rem]"
+                label="Book on WhatsApp"
+              />
+              {ready ? (
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  to={user ? '/dashboard' : '/login'}
+                  className="w-full min-h-[3.25rem] border-stroke-strong bg-fill-glass-strong sm:w-auto sm:min-w-[10.5rem]"
+                >
+                  {user ? 'Dashboard' : 'Login'}
+                </Button>
+              ) : null}
             </motion.div>
+            <p className="mt-3 max-w-xl text-center text-[12px] leading-relaxed text-muted sm:text-left">
+              <Link href="/fleet" className="font-medium text-electric underline-offset-4 transition-colors hover:underline">
+                Browse full fleet
+              </Link>
+              <span className="text-silver/80"> · Same-day concierge matching</span>
+            </p>
           </motion.div>
 
           <motion.div

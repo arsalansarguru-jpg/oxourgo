@@ -4,6 +4,7 @@ import { Section } from '@/components/ui/Section'
 const links = [
   { href: '/', label: 'Home' },
   { href: '/fleet', label: 'Fleet' },
+  { href: '/login', label: 'Login' },
   { href: '/support', label: 'Support' },
   { href: '/about', label: 'About' },
   { href: '/terms', label: 'Terms & Conditions' },
