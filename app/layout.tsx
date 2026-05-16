@@ -13,8 +13,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: 'cover',
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#f3f5fb' },
-    { color: '#0a0a0c' },
+    { media: '(prefers-color-scheme: dark)', color: '#09090b' },
+    { color: '#fafafa' },
   ],
 }
 
@@ -23,13 +23,13 @@ const siteUrl = getSiteUrl()
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: {
-    default: 'Oxour Go — Luxury Self-Drive Mumbai',
+    default: 'Oxour Go — Self-Drive Car Rental Mumbai',
     template: '%s | Oxour Go',
   },
   description:
-    'Premium self-drive luxury car rentals in Mumbai. Verified vehicles, transparent pricing, and 24x7 support.',
+    'Self-drive car rentals in Mumbai. Verified vehicles, transparent pricing, and concierge support on WhatsApp.',
   applicationName: 'Oxour Go',
-  keywords: ['luxury car rental', 'self drive Mumbai', 'Oxour Go', 'premium fleet', 'car hire'],
+  keywords: ['car rental Mumbai', 'self drive', 'Oxour Go', 'fleet booking', 'car hire'],
   authors: [{ name: 'Oxour Go' }],
   icons: {
     icon: [{ url: '/favicon.svg', type: 'image/svg+xml' }],
@@ -40,16 +40,16 @@ export const metadata: Metadata = {
     locale: 'en_IN',
     url: siteUrl,
     siteName: 'Oxour Go',
-    title: 'Oxour Go — Luxury Self-Drive Mumbai',
+    title: 'Oxour Go — Self-Drive Car Rental Mumbai',
     description:
-      'Premium self-drive luxury car rentals in Mumbai. Verified vehicles, transparent pricing, and 24x7 support.',
-    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Oxour Go — Luxury Self-Drive Mumbai' }],
+      'Self-drive car rentals in Mumbai. Verified vehicles, transparent pricing, and concierge support on WhatsApp.',
+    images: [{ url: '/opengraph-image', width: 1200, height: 630, alt: 'Oxour Go — Self-Drive Car Rental Mumbai' }],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Oxour Go — Luxury Self-Drive Mumbai',
+    title: 'Oxour Go — Self-Drive Car Rental Mumbai',
     description:
-      'Premium self-drive luxury car rentals in Mumbai. Verified vehicles, transparent pricing, and 24x7 support.',
+      'Self-drive car rentals in Mumbai. Verified vehicles, transparent pricing, and concierge support on WhatsApp.',
     images: ['/opengraph-image'],
   },
   robots: {
@@ -60,11 +60,11 @@ export const metadata: Metadata = {
   category: 'travel',
 }
 
-const themeBootstrapScript = `(function(){try{var k='oxour-theme',d=document.documentElement,s=localStorage.getItem(k);function a(t){d.setAttribute('data-theme',t);}if(s==='light'||s==='dark'){a(s);return;}a(window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();`
+const themeBootstrapScript = `(function(){try{var k='oxour-theme',d=document.documentElement,s=localStorage.getItem(k);function a(t){d.setAttribute('data-theme',t);}if(s==='light'||s==='dark'){a(s);return;}a(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();`
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning data-theme="dark">
+    <html lang="en" suppressHydrationWarning data-theme="light">
       <body className="min-w-0 overflow-x-clip font-sans antialiased" suppressHydrationWarning>
         <Script id="oxour-theme-init" strategy="beforeInteractive">
           {themeBootstrapScript}

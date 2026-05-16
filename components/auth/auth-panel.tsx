@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { BRAND } from '@/constants/brand'
 import { buildAuthCallbackUrl } from '@/lib/auth/callback-url'
+import { getCanonicalSiteOrigin } from '@/lib/auth/canonical-origin'
 import { safeNextPath } from '@/lib/auth/safe-next-path'
 import { formatAuthError } from '@/lib/errors/format-auth-error'
 import { normalizePhoneToE164 } from '@/lib/auth/normalize-phone'
@@ -193,7 +194,8 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
 
   const sb = supabase
 
-  const authOrigin = typeof window !== 'undefined' ? window.location.origin : ''
+  const authOrigin =
+    typeof window !== 'undefined' ? getCanonicalSiteOrigin(window.location.origin) : getCanonicalSiteOrigin()
   const nextPath = safeNextPath(redirectTo, '/dashboard')
   const callbackUrl = authOrigin ? buildAuthCallbackUrl(authOrigin, nextPath) : ''
 
@@ -357,8 +359,8 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
       <div className="relative">
         <div className="flex items-start justify-between gap-4">
           <div className="flex min-w-0 items-center gap-3">
-            <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-stroke-strong bg-matte/40 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]">
-              <BrandLogo className="p-[3px]" priority />
+            <div className="relative flex h-12 w-28 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-stroke-strong bg-matte/40 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.08)]">
+              <BrandLogo className="h-10 w-auto max-w-[6.5rem]" priority />
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-electric/90">

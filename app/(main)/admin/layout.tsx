@@ -52,7 +52,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       opsInitialItems={opsInitialItems}
     >
       {!hasServiceRole ? (
-        <AdminCard className="border-amber-400/20 bg-gradient-to-br from-amber-500/[0.07] to-transparent p-6 sm:p-7">
+        <AdminCard className="border-amber-200 bg-amber-50/80 p-6 theme-dark:border-amber-400/20 theme-dark:bg-amber-500/10 sm:p-7">
           <p className="text-sm font-semibold tracking-[-0.02em] text-soft">Admin data connection incomplete</p>
           <p className="mt-2 text-sm leading-relaxed text-muted">
             Some lists and actions may be empty until the deployment is fully configured. If you are an operator, check

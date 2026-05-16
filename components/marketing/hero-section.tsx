@@ -1,6 +1,5 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 import { useSupabaseAuthUser } from '@/hooks/use-supabase-auth-user'
 import { WhatsAppInquiryButton } from '@/components/marketing/whatsapp-inquiry-button'
@@ -12,51 +11,39 @@ export function HeroSection() {
 
   return (
     <section className="border-b border-stroke bg-matte">
-      <div className="container-app py-12 sm:py-16 lg:py-20">
-        <div className="grid min-w-0 gap-10 lg:grid-cols-2 lg:items-center lg:gap-16">
-          <div className="flex min-w-0 flex-col gap-6">
-            <p className="text-xs font-medium uppercase tracking-wider text-muted">Luxury self-drive · Mumbai</p>
-            <h1 className="text-hero-display max-w-xl text-soft">
-              Premium cars. Clear pricing. Concierge on WhatsApp.
-            </h1>
-            <p className="max-w-lg text-base leading-relaxed text-muted">
-              Browse a verified fleet, choose your dates, and reserve with our team — transparent daily rates and
-              24×7 support for business and leisure travel.
-            </p>
-            <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-              <WhatsAppInquiryButton size="lg" label="Book on WhatsApp" />
-              <Button size="lg" variant="secondary" to="/fleet">
-                Browse fleet
+      <div className="container-app py-14 sm:py-16 lg:py-20">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="text-sm font-medium text-muted">Self-drive car rental · Mumbai</p>
+          <h1 className="text-hero-display mt-4 text-soft">
+            Book a car in minutes. Drive with confidence.
+          </h1>
+          <p className="mx-auto mt-4 max-w-xl text-base leading-relaxed text-muted">
+            Browse verified vehicles, see clear daily rates, and reserve through our team on WhatsApp — with support
+            when you need it.
+          </p>
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Button size="lg" to="/fleet">
+              Browse fleet
+            </Button>
+            <WhatsAppInquiryButton size="lg" label="WhatsApp us" />
+            {ready ? (
+              <Button size="lg" variant="ghost" to={user ? '/dashboard' : '/login'}>
+                {user ? 'Dashboard' : 'Sign in'}
               </Button>
-              {ready ? (
-                <Button size="lg" variant="ghost" to={user ? '/dashboard' : '/login'}>
-                  {user ? 'Dashboard' : 'Sign in'}
-                </Button>
-              ) : null}
-            </div>
-            <p className="text-sm text-muted">
-              <Link href="/fleet" className="font-medium text-soft underline-offset-4 hover:underline">
-                View all vehicles
-              </Link>
-            </p>
-          </div>
-
-          <div className="relative aspect-[4/3] overflow-hidden rounded-xl border border-stroke bg-carbon-deep lg:aspect-[5/4]">
-            <Image
-              src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1600&q=80"
-              alt="Luxury vehicle"
-              fill
-              className="object-cover"
-              sizes="(max-width:1024px) 100vw,50vw"
-              priority
-            />
+            ) : null}
           </div>
         </div>
 
-        <div className="mt-12 border-t border-stroke pt-10 lg:mt-14 lg:pt-12">
-          <p className="mb-4 text-xs font-medium uppercase tracking-wider text-muted">Plan your trip</p>
+        <div className="mx-auto mt-12 max-w-4xl">
           <BookingSearchBar />
         </div>
+
+        <p className="mt-6 text-center text-sm text-muted">
+          Need help choosing?{' '}
+          <Link href="/support" className="font-medium text-soft hover:underline">
+            Contact support
+          </Link>
+        </p>
       </div>
     </section>
   )

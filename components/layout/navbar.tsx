@@ -5,12 +5,10 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { ChevronDown, LayoutDashboard, LogOut, Menu, X } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
-import { AnimatePresence, motion } from 'framer-motion'
 import { BRAND } from '@/constants/brand'
 import { useSupabase } from '@/hooks/use-supabase'
 import { useSupabaseAuthUser } from '@/hooks/use-supabase-auth-user'
 import { cn } from '@/lib/utils/cn'
-import { WhatsAppInquiryButton } from '@/components/marketing/whatsapp-inquiry-button'
 import { Button } from '@/components/ui/Button'
 import { BrandLogo } from '@/components/layout/brand-logo'
 import { ThemeToggle } from '@/components/layout/theme-toggle'
@@ -79,15 +77,15 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-stroke bg-matte pt-[var(--safe-top)]">
+      <header className="sticky top-0 z-50 border-b border-stroke bg-carbon pt-[var(--safe-top)]">
         <div className="container-app flex min-h-[var(--public-header-inner-h)] items-center justify-between gap-4">
-          <Link href="/" className="flex min-w-0 items-center gap-3" onClick={() => setOpen(false)}>
-            <BrandLogo priority className="h-8 w-8 shrink-0" />
-            <span className="truncate text-base font-semibold tracking-tight text-soft">{BRAND.name}</span>
+          <Link href="/" className="flex min-w-0 items-center gap-2" onClick={() => setOpen(false)}>
+            <BrandLogo priority className="h-8 w-auto max-w-[7.5rem] shrink-0 sm:max-w-[8.5rem]" />
+            <span className="sr-only">{BRAND.name}</span>
           </Link>
 
           <nav aria-label="Primary" className="hidden md:block">
-            <ul className="flex items-center gap-8">
+            <ul className="flex items-center gap-1">
               {nav.map(({ href, label }) => {
                 const active = pathname === href || pathname.startsWith(`${href}/`)
                 return (
@@ -95,8 +93,8 @@ export function Navbar() {
                     <Link
                       href={href}
                       className={cn(
-                        'text-sm font-medium transition-colors',
-                        active ? 'text-soft' : 'text-muted hover:text-soft',
+                        'rounded-md px-3 py-2 text-sm font-medium transition-colors',
+                        active ? 'text-soft' : 'text-muted hover:bg-fill-glass hover:text-soft',
                       )}
                     >
                       {label}
@@ -107,54 +105,56 @@ export function Navbar() {
             </ul>
           </nav>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-2">
             <ThemeToggle className="hidden sm:inline-flex" />
             {ready && !user ? (
               <Button variant="ghost" size="sm" to="/login" className="hidden sm:inline-flex">
                 Sign in
               </Button>
             ) : null}
+            <Button size="sm" to="/fleet" className="hidden sm:inline-flex">
+              Browse fleet
+            </Button>
             {ready && user ? (
               <details ref={accountMenuRef} className="relative hidden sm:block">
                 <summary
-                  className="flex cursor-pointer list-none items-center gap-2 [&::-webkit-details-marker]:hidden"
+                  className="flex cursor-pointer list-none items-center gap-2 rounded-md px-1 py-1 [&::-webkit-details-marker]:hidden"
                   aria-label="Account"
                 >
                   {avatarUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={avatarUrl} alt="" width={32} height={32} className="h-8 w-8 rounded-full object-cover" referrerPolicy="no-referrer" />
                   ) : (
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-fill-glass text-xs font-semibold text-soft">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-carbon-deep text-xs font-medium text-soft">
                       {initialsFromUser(user)}
                     </span>
                   )}
                   <ChevronDown className="h-4 w-4 text-muted" aria-hidden />
                 </summary>
-                <div className="absolute right-0 top-full z-[80] mt-2 min-w-[11rem] rounded-xl border border-stroke bg-carbon py-1">
+                <div className="absolute right-0 top-full z-[80] mt-1 min-w-[11rem] rounded-lg border border-stroke bg-carbon py-1 shadow-[var(--shadow-card-hover)]">
                   <Link
                     href="/dashboard"
-                    className="flex items-center gap-2 px-4 py-2.5 text-sm text-muted hover:bg-fill-glass hover:text-soft"
+                    className="flex items-center gap-2 px-3 py-2 text-sm text-soft hover:bg-fill-glass"
                     onClick={() => accountMenuRef.current?.removeAttribute('open')}
                   >
-                    <LayoutDashboard className="h-4 w-4" aria-hidden />
+                    <LayoutDashboard className="h-4 w-4 text-muted" aria-hidden />
                     Dashboard
                   </Link>
                   <button
                     type="button"
                     disabled={signingOut}
-                    className="flex w-full items-center gap-2 px-4 py-2.5 text-left text-sm text-muted hover:bg-fill-glass hover:text-soft disabled:opacity-50"
+                    className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-soft hover:bg-fill-glass disabled:opacity-50"
                     onClick={() => void handleSignOut()}
                   >
-                    <LogOut className="h-4 w-4" aria-hidden />
+                    <LogOut className="h-4 w-4 text-muted" aria-hidden />
                     {signingOut ? 'Signing out…' : 'Sign out'}
                   </button>
                 </div>
               </details>
             ) : null}
-            <WhatsAppInquiryButton size="sm" className="hidden md:inline-flex" label="Concierge" />
             <button
               type="button"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-stroke text-soft md:hidden"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-stroke text-soft md:hidden"
               aria-label={open ? 'Close menu' : 'Open menu'}
               aria-expanded={open}
               onClick={() => setOpen((v) => !v)}
@@ -165,66 +165,58 @@ export function Navbar() {
         </div>
       </header>
 
-      <AnimatePresence>
-        {open ? (
-          <>
-            <motion.button
-              type="button"
-              aria-label="Close menu"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[60] bg-matte/80 md:hidden"
-              onClick={() => setOpen(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              className="fixed inset-x-0 top-[var(--public-header-offset)] z-[70] max-h-[calc(100dvh-var(--public-header-offset))] overflow-y-auto border-b border-stroke bg-matte md:hidden"
-            >
-              <div className="container-app space-y-1 py-4">
-                {nav.map(({ href, label }) => {
-                  const active = pathname === href || pathname.startsWith(`${href}/`)
-                  return (
-                    <Link
-                      key={href}
-                      href={href}
-                      className={cn(
-                        'block rounded-lg px-3 py-3.5 text-base font-medium',
-                        active ? 'bg-fill-glass text-soft' : 'text-muted',
-                      )}
-                      onClick={() => setOpen(false)}
-                    >
-                      {label}
-                    </Link>
-                  )
-                })}
-                <div className="border-t border-stroke pt-4">
-                  <ThemeToggle size="comfortable" className="mb-3 w-full justify-center" />
-                  <WhatsAppInquiryButton size="lg" className="w-full" label="WhatsApp concierge" onClick={() => setOpen(false)} />
-                  {ready ? (
-                    user ? (
-                      <div className="mt-3 space-y-2">
-                        <Button variant="secondary" size="lg" to="/dashboard" className="w-full" onClick={() => setOpen(false)}>
-                          Dashboard
-                        </Button>
-                        <Button variant="ghost" size="lg" className="w-full" disabled={signingOut} onClick={() => void handleSignOut()}>
-                          {signingOut ? 'Signing out…' : 'Sign out'}
-                        </Button>
-                      </div>
-                    ) : (
-                      <Button variant="outline" size="lg" to="/login" className="mt-3 w-full" onClick={() => setOpen(false)}>
-                        Sign in
+      {open ? (
+        <div className="fixed inset-0 z-40 md:hidden">
+          <button
+            type="button"
+            aria-label="Close menu"
+            className="absolute inset-0 bg-soft/20"
+            onClick={() => setOpen(false)}
+          />
+          <div className="absolute inset-x-0 top-[var(--public-header-offset)] max-h-[calc(100dvh-var(--public-header-offset))] overflow-y-auto border-b border-stroke bg-carbon shadow-[var(--shadow-card-hover)]">
+            <div className="container-app space-y-1 py-3">
+              {nav.map(({ href, label }) => {
+                const active = pathname === href || pathname.startsWith(`${href}/`)
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={cn(
+                      'block rounded-md px-3 py-3 text-base font-medium',
+                      active ? 'bg-fill-glass text-soft' : 'text-muted',
+                    )}
+                    onClick={() => setOpen(false)}
+                  >
+                    {label}
+                  </Link>
+                )
+              })}
+              <div className="space-y-2 border-t border-stroke pt-4">
+                <ThemeToggle size="comfortable" className="w-full justify-center" />
+                <Button size="lg" to="/fleet" className="w-full" onClick={() => setOpen(false)}>
+                  Browse fleet
+                </Button>
+                {ready ? (
+                  user ? (
+                    <>
+                      <Button variant="secondary" size="lg" to="/dashboard" className="w-full" onClick={() => setOpen(false)}>
+                        Dashboard
                       </Button>
-                    )
-                  ) : null}
-                </div>
+                      <Button variant="ghost" size="lg" className="w-full" disabled={signingOut} onClick={() => void handleSignOut()}>
+                        {signingOut ? 'Signing out…' : 'Sign out'}
+                      </Button>
+                    </>
+                  ) : (
+                    <Button variant="outline" size="lg" to="/login" className="w-full" onClick={() => setOpen(false)}>
+                      Sign in
+                    </Button>
+                  )
+                ) : null}
               </div>
-            </motion.div>
-          </>
-        ) : null}
-      </AnimatePresence>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </>
   )
 }

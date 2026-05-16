@@ -1,99 +1,103 @@
 @import 'tailwindcss';
 
-/** Descendant variant for light theme (paired with `html[data-theme="light"]`). */
+/** Descendant variants for theme-specific overrides in shared components */
 @custom-variant theme-light (&:where(html[data-theme="light"] *));
+@custom-variant theme-dark (&:where(html[data-theme="dark"] *));
 
-/* Premium theme tokens — extend via @theme; light palette overrides on `html[data-theme="light"]` */
-@theme {
-  /* System stack only — avoids `next/font/google` network fetch at build (SSL/proxy issues). */
-  --font-sans:
-    ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue',
-    Arial, sans-serif;
-
-  --color-matte: #0a0a0c;
-  --color-carbon: #141418;
-  --color-carbon-deep: #0f0f12;
-  --color-electric: #3b82f6;
-  --color-soft: #f4f6f9;
-  --color-silver: #aeb4bf;
-  --color-muted: rgba(174, 180, 191, 0.72);
-  --color-emerald: #10b981;
-
-  /** Hairlines & glass fills — swap on `html[data-theme="light"]` for contrast */
-  --color-stroke: rgb(255 255 255 / 0.09);
-  --color-stroke-strong: rgb(255 255 255 / 0.14);
-  --color-fill-glass: rgb(255 255 255 / 0.05);
-  --color-fill-glass-strong: rgb(255 255 255 / 0.085);
-  --color-hero-mist: rgb(255 255 255 / 0.045);
-
-  --radius-sm: 0.5rem;
-  --radius-md: 0.625rem;
-  --radius-lg: 0.875rem;
-  --radius-xl: 1rem;
-  --radius-2xl: 1.25rem;
-  --radius-3xl: 1.5rem;
-
-  /* Unified vertical rhythm — calm, scannable sections */
-  --spacing-section-y: clamp(3.5rem, 6vw, 6rem);
-  --spacing-section-gap: clamp(2rem, 4vw, 3rem);
-  --spacing-edge: clamp(1rem, 3vw, 1.5rem);
-  --spacing-stack: 1.5rem;
-  --spacing-stack-lg: 2.5rem;
-  /* Space reserved for fixed mobile tab bar (thumb + safe area) */
-  --bottom-nav-clearance: calc(4.85rem + max(0.5rem, env(safe-area-inset-bottom, 0px)));
-
-  --container-max: 72rem;
-  --container-wide: min(92rem, calc(100vw - var(--spacing-edge) * 2));
-
-  --shadow-glow: none;
-  --shadow-glow-strong: none;
-  --shadow-card: none;
-  --shadow-card-hover: none;
-  --shadow-card-accent: none;
-
-  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
-  --duration-fast: 200ms;
-  --duration-normal: 320ms;
-  --duration-slow: 480ms;
-
-  --background-image-hero-mesh: none;
-  --background-image-hero-cinematic: none;
-}
-
-html[data-theme='light'] {
-  color-scheme: light;
-  --color-matte: #f3f5fb;
-  --color-carbon: #ffffff;
-  --color-carbon-deep: #e8ecf6;
-  --color-soft: #0c1017;
-  --color-silver: #4b5563;
-  --color-muted: rgb(55 65 81 / 0.82);
-  --color-stroke: rgb(15 23 42 / 0.11);
-  --color-stroke-strong: rgb(15 23 42 / 0.18);
-  --color-fill-glass: rgb(15 23 42 / 0.045);
-  --color-fill-glass-strong: rgb(15 23 42 / 0.09);
-  --color-hero-mist: rgb(59 130 246 / 0.09);
-
-  --shadow-glow: none;
-  --shadow-glow-strong: none;
-  --shadow-card: none;
-  --shadow-card-hover: none;
-  --shadow-card-accent: none;
-  --background-image-hero-mesh: none;
-  --background-image-hero-cinematic: none;
-}
+/* Inter (UI/body) + Satoshi (headings) — runtime CDN, no build-time font fetch */
+@import url('https://fonts.bunny.net/css?family=inter:400,500,600');
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@500,600,700&display=swap');
 
 /**
- * Safe areas + public chrome height — fleet sticky bars and mobile nav offset.
- * Inner navbar heights mirror `Navbar` (`min-h` breakpoints).
+ * Oxour Go — product-grade SaaS design system.
+ * Light-first tokens; dark mode via `html[data-theme="dark"]`.
+ * Legacy names (matte, carbon, soft, …) map to semantic roles for gradual migration.
  */
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Satoshi', var(--font-sans);
+
+  /* Surfaces */
+  --color-matte: #fafafa;
+  --color-carbon: #ffffff;
+  --color-carbon-deep: #f4f4f5;
+
+  /* Text */
+  --color-soft: #18181b;
+  --color-silver: #52525b;
+  --color-muted: #71717a;
+
+  /* Brand */
+  --color-electric: #2563eb;
+  --color-emerald: #059669;
+
+  /* Borders & fills */
+  --color-stroke: rgb(24 24 27 / 0.08);
+  --color-stroke-strong: rgb(24 24 27 / 0.14);
+  --color-fill-glass: rgb(24 24 27 / 0.04);
+  --color-fill-glass-strong: rgb(24 24 27 / 0.07);
+  --color-hero-mist: rgb(37 99 235 / 0.06);
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.625rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.25rem;
+
+  --spacing-section-y: clamp(4rem, 7vw, 6.5rem);
+  --spacing-section-gap: clamp(1.75rem, 3vw, 2.5rem);
+  --spacing-edge: clamp(1rem, 3vw, 1.5rem);
+  --spacing-stack: 1.25rem;
+  --spacing-stack-lg: 2rem;
+  --bottom-nav-clearance: calc(4.25rem + max(0.5rem, env(safe-area-inset-bottom, 0px)));
+
+  --container-max: 72rem;
+  --container-wide: min(80rem, calc(100vw - var(--spacing-edge) * 2));
+
+  --shadow-glow: none;
+  --shadow-glow-strong: none;
+  --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.04);
+  --shadow-card-hover: 0 4px 16px -4px rgb(0 0 0 / 0.08);
+  --shadow-card-accent: 0 4px 16px -4px rgb(37 99 235 / 0.12);
+
+  --ease-premium: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 280ms;
+
+  --background-image-hero-mesh: none;
+  --background-image-hero-cinematic: none;
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --color-matte: #09090b;
+  --color-carbon: #18181b;
+  --color-carbon-deep: #111113;
+  --color-soft: #fafafa;
+  --color-silver: #a1a1aa;
+  --color-muted: #a1a1aa;
+  --color-stroke: rgb(255 255 255 / 0.08);
+  --color-stroke-strong: rgb(255 255 255 / 0.12);
+  --color-fill-glass: rgb(255 255 255 / 0.04);
+  --color-fill-glass-strong: rgb(255 255 255 / 0.07);
+  --color-hero-mist: rgb(59 130 246 / 0.08);
+  --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.24);
+  --shadow-card-hover: 0 4px 16px -4px rgb(0 0 0 / 0.4);
+}
+
+html[data-theme='light'],
+html:not([data-theme]) {
+  color-scheme: light;
+}
+
 :root {
   --safe-top: max(0px, env(safe-area-inset-top, 0px));
   --safe-bottom: max(0px, env(safe-area-inset-bottom, 0px));
   --public-header-inner-h: 3.5rem;
   --public-header-offset: calc(var(--public-header-inner-h) + var(--safe-top));
-  /** Space above the fixed mobile tab bar for floating CTAs (approx. tab bar + inset). */
-  --mobile-fab-clearance: calc(4.35rem + var(--safe-bottom));
+  --mobile-fab-clearance: calc(4.25rem + var(--safe-bottom));
 }
 
 @media (min-width: 1024px) {
@@ -102,62 +106,35 @@ html[data-theme='light'] {
   }
 }
 
-html[data-theme='dark'] {
-  color-scheme: dark;
-}
-
-/**
- * Admin console: forced dark luxury palette + graphite wash so tables/cards stay on-brand
- * even when the global theme toggle is set to light (tokens resolve from this subtree).
- */
-.admin-app-root {
-  color-scheme: dark;
-  --color-matte: #09090b;
-  --color-carbon: #111114;
-  --color-carbon-deep: #0c0c0f;
-  --color-soft: #f4f4f5;
-  --color-silver: #a1a1aa;
-  --color-muted: rgb(161 161 170 / 0.85);
-  --color-stroke: rgb(255 255 255 / 0.08);
-  --color-stroke-strong: rgb(255 255 255 / 0.12);
-  --color-fill-glass: rgb(255 255 255 / 0.04);
-  --color-fill-glass-strong: rgb(255 255 255 / 0.07);
-  --shadow-card: none;
-  --shadow-card-hover: none;
-  --shadow-card-accent: none;
-  background-color: var(--color-matte);
-  background-image: none;
-}
-
 @layer base {
   html {
     @apply scroll-smooth antialiased;
     overflow-x: clip;
   }
+
   body {
-    @apply min-w-0 overflow-x-clip bg-matte font-sans text-soft;
+    @apply min-w-0 overflow-x-clip bg-matte font-sans text-base text-soft;
     text-rendering: optimizeLegibility;
   }
+
   h1,
   h2,
   h3,
   h4 {
+    font-family: var(--font-display);
     text-wrap: balance;
   }
-  ::selection {
-    @apply bg-electric/35 text-soft;
-  }
 
-  html[data-theme='light'] ::selection {
-    @apply bg-electric/25 text-soft;
+  ::selection {
+    @apply bg-electric/20 text-soft;
   }
 
   :where(a[href]):not([class*='ring-offset']):focus-visible {
-    @apply rounded-md outline-none ring-2 ring-electric/80 ring-offset-2 ring-offset-matte;
+    @apply rounded-md outline-none ring-2 ring-electric ring-offset-2 ring-offset-matte;
   }
 
-  html[data-theme='light'] :where(a[href]):not([class*='ring-offset']):focus-visible {
-    @apply ring-offset-white;
+  html[data-theme='dark'] :where(a[href]):not([class*='ring-offset']):focus-visible {
+    @apply ring-offset-matte;
   }
 }
 
@@ -172,9 +149,14 @@ html[data-theme='dark'] {
   }
 }
 
-@utility glass-panel {
+@utility font-display {
+  font-family: var(--font-display);
+}
+
+@utility surface-panel {
   border: 1px solid var(--color-stroke);
   background: var(--color-carbon);
+  box-shadow: var(--shadow-card);
 }
 
 @utility text-balance {
@@ -182,24 +164,26 @@ html[data-theme='dark'] {
 }
 
 @utility admin-table-head {
-  @apply border-b border-white/[0.055] bg-white/[0.028] text-[11px] font-medium uppercase tracking-[0.07em] text-muted;
+  @apply border-b border-stroke bg-carbon-deep text-xs font-medium text-muted;
 }
 
 @utility admin-table-row {
-  @apply border-b border-white/[0.05] transition-colors duration-200 hover:bg-white/[0.035];
+  @apply border-b border-stroke transition-colors duration-150 hover:bg-fill-glass;
 }
 
 @utility text-display {
-  font-size: clamp(1.75rem, 3vw + 0.5rem, 2.5rem);
-  line-height: 1.15;
-  letter-spacing: -0.025em;
+  font-family: var(--font-display);
+  font-size: clamp(1.875rem, 2.5vw + 0.75rem, 2.75rem);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
   font-weight: 600;
 }
 
 @utility text-hero-display {
-  font-size: clamp(1.75rem, 3vw + 0.5rem, 2.5rem);
-  line-height: 1.15;
-  letter-spacing: -0.025em;
+  font-family: var(--font-display);
+  font-size: clamp(1.875rem, 2.5vw + 0.75rem, 2.75rem);
+  line-height: 1.12;
+  letter-spacing: -0.03em;
   font-weight: 600;
 }
 
@@ -207,11 +191,13 @@ html[data-theme='dark'] {
   font-size: 0.875rem;
   line-height: 1.5;
   font-weight: 500;
+  color: var(--color-muted);
 }
 
 @utility text-section-title {
-  font-size: clamp(1.25rem, 1.5vw + 0.75rem, 1.75rem);
-  line-height: 1.25;
+  font-family: var(--font-display);
+  font-size: clamp(1.25rem, 1vw + 0.875rem, 1.5rem);
+  line-height: 1.3;
   letter-spacing: -0.02em;
   font-weight: 600;
 }
@@ -224,17 +210,7 @@ html[data-theme='dark'] {
   padding-inline: var(--spacing-edge);
 }
 
-/** Momentum scrolling inside horizontal overflow regions (tables, galleries). */
 @utility scroll-touch {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
-}
-
-@keyframes shimmer {
-  0% {
-    transform: translateX(-100%);
-  }
-  100% {
-    transform: translateX(100%);
-  }
 }

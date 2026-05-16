@@ -96,7 +96,7 @@ export function BookingSearchBar() {
 
   return (
     <div className="w-full min-w-0">
-      <div className="rounded-xl border border-stroke bg-carbon p-4 sm:p-6">
+      <div className="rounded-lg border border-stroke bg-carbon p-4 shadow-[var(--shadow-card)] sm:p-5">
         <div
           className="grid min-w-0 gap-4 md:grid-cols-2 lg:grid-cols-4 lg:items-end"
           onKeyDown={(e) => {

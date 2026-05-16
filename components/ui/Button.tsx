@@ -5,25 +5,23 @@ import NextLink from 'next/link'
 import { cn } from '@/lib/utils/cn'
 
 const variants = {
-  primary:
-    'bg-electric text-white shadow-none hover:bg-electric/90 active:bg-electric/84',
+  primary: 'bg-electric text-white hover:bg-electric/90 active:bg-electric/85',
   secondary:
-    'border border-stroke-strong bg-carbon/[0.72] text-soft shadow-none hover:border-stroke hover:bg-fill-glass-strong active:bg-fill-glass',
+    'border border-stroke-strong bg-carbon text-soft hover:bg-carbon-deep active:bg-carbon-deep',
   ghost: 'text-soft hover:bg-fill-glass active:bg-fill-glass-strong',
-  outline:
-    'border border-stroke-strong bg-transparent text-soft hover:border-stroke-strong hover:bg-fill-glass',
+  outline: 'border border-stroke-strong bg-transparent text-soft hover:bg-fill-glass',
   danger:
-    'border border-red-500/35 bg-red-500/15 text-red-200 theme-light:text-red-900 theme-light:bg-red-500/12 theme-light:border-red-600/35 hover:bg-red-500/25 theme-light:hover:bg-red-500/20',
+    'border border-red-200 bg-red-50 text-red-700 theme-dark:border-red-500/35 theme-dark:bg-red-500/15 theme-dark:text-red-200 hover:bg-red-100 theme-dark:hover:bg-red-500/25',
 } as const
 
 const sizes = {
-  sm: 'min-h-9 px-3.5 py-2 text-sm rounded-lg',
-  md: 'min-h-11 px-4 py-2.5 text-sm rounded-lg',
-  lg: 'min-h-12 px-5 py-3 text-base rounded-lg',
+  sm: 'min-h-9 px-3.5 py-2 text-sm rounded-md',
+  md: 'min-h-10 px-4 py-2 text-sm rounded-md',
+  lg: 'min-h-11 px-5 py-2.5 text-sm rounded-md',
 } as const
 
 const base =
-  'touch-manipulation inline-flex shrink-0 items-center justify-center gap-2 font-semibold tracking-[-0.02em] transition-[background-color,border-color,color,box-shadow] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/45 focus-visible:ring-offset-2 focus-visible:ring-offset-matte theme-light:focus-visible:ring-offset-white disabled:pointer-events-none disabled:opacity-40'
+  'touch-manipulation inline-flex shrink-0 items-center justify-center gap-2 font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/40 focus-visible:ring-offset-2 focus-visible:ring-offset-matte disabled:pointer-events-none disabled:opacity-40'
 
 export type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'href' | 'onClick'> & {
   variant?: keyof typeof variants

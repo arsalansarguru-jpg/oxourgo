@@ -3,13 +3,14 @@ import { NextResponse } from 'next/server'
 
 import { captureServerPosthogEvent } from '@/lib/analytics/posthog-server'
 import { POSTHOG_EVENTS } from '@/lib/analytics/posthog-events'
+import { getCanonicalSiteOrigin } from '@/lib/auth/canonical-origin'
 import { safeNextPath } from '@/lib/auth/safe-next-path'
 import { readSupabasePublicEnv } from '@/lib/env/supabase-public'
 import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url)
-  const origin = url.origin
+  const origin = getCanonicalSiteOrigin(url.origin)
   const next = safeNextPath(url.searchParams.get('next'), '/dashboard')
 
   const oauthError = url.searchParams.get('error')

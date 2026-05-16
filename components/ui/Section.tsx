@@ -17,7 +17,7 @@ export function Section({
     <section
       className={cn(
         'py-[var(--spacing-section-y)]',
-        variant === 'muted' && 'bg-carbon-deep/50',
+        variant === 'muted' && 'border-y border-stroke bg-carbon-deep',
         className,
       )}
       {...props}
@@ -52,10 +52,10 @@ export function SectionHeading({
         className,
       )}
     >
-      {eyebrow ? <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted">{eyebrow}</p> : null}
+      {eyebrow ? <p className="mb-2 text-sm font-medium text-muted">{eyebrow}</p> : null}
       <h2 className="text-section-title text-soft">{title}</h2>
       {subtitle ? (
-        <p className="mt-3 text-pretty text-sm leading-relaxed text-muted sm:text-base">{subtitle}</p>
+        <p className="mt-2 text-pretty text-sm leading-relaxed text-muted sm:text-base">{subtitle}</p>
       ) : null}
     </header>
   )

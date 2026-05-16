@@ -22,7 +22,6 @@ export type HomeBelowFoldProps = {
   featuredLoadFailed?: boolean
 }
 
-/** Homepage sections below hero — fleet highlight + trust + booking CTA only */
 export function HomeBelowFold({ featuredCars, featuredLoadFailed = false }: HomeBelowFoldProps) {
   const router = useRouter()
 
@@ -31,9 +30,9 @@ export function HomeBelowFold({ featuredCars, featuredLoadFailed = false }: Home
       <Section>
         <SectionHeading
           title="Featured vehicles"
-          subtitle="A selection from our Mumbai fleet — view details or message concierge to reserve."
+          subtitle="Popular picks from our Mumbai fleet."
         />
-        <div className="grid min-w-0 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+        <div className="grid min-w-0 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {featuredLoadFailed ? (
             <div className="col-span-full">
               <DataLoadErrorPanel
@@ -59,12 +58,10 @@ export function HomeBelowFold({ featuredCars, featuredLoadFailed = false }: Home
               />
             </div>
           ) : (
-            featuredCars.map((car) => (
-              <CarCard key={car.id} car={car} />
-            ))
+            featuredCars.map((car) => <CarCard key={car.id} car={car} />)
           )}
         </div>
-        <div className="flex justify-center pt-2">
+        <div className="flex justify-center">
           <Button size="lg" variant="secondary" to="/fleet">
             View all vehicles
           </Button>
@@ -74,16 +71,16 @@ export function HomeBelowFold({ featuredCars, featuredLoadFailed = false }: Home
       <Section variant="muted">
         <SectionHeading
           title="Why Oxour Go"
-          subtitle="Everything you need for a confident self-drive experience."
+          subtitle="A straightforward self-drive experience."
           align="center"
         />
-        <ul className="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <ul className="mx-auto grid max-w-3xl gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {benefits.map(({ icon: Icon, label }) => (
             <li
               key={label}
-              className="flex items-center gap-3 rounded-xl border border-stroke bg-carbon px-4 py-4"
+              className="flex items-center gap-3 rounded-lg border border-stroke bg-carbon px-4 py-3.5 shadow-[var(--shadow-card)]"
             >
-              <Icon className="h-5 w-5 shrink-0 text-silver" aria-hidden />
+              <Icon className="h-4 w-4 shrink-0 text-muted" aria-hidden />
               <span className="text-sm font-medium text-soft">{label}</span>
             </li>
           ))}
@@ -91,14 +88,13 @@ export function HomeBelowFold({ featuredCars, featuredLoadFailed = false }: Home
       </Section>
 
       <Section>
-        <div className="mx-auto flex max-w-2xl flex-col items-center gap-6 text-center">
-          <h2 className="text-section-title text-soft">Ready to reserve?</h2>
+        <div className="mx-auto flex max-w-xl flex-col items-center gap-5 text-center">
+          <h2 className="text-section-title text-soft">Ready to book?</h2>
           <p className="text-base leading-relaxed text-muted">
-            Message our concierge on WhatsApp with your dates and vehicle preference. We confirm availability and
-            pricing before you commit.
+            Message us on WhatsApp with your dates and vehicle preference. We confirm availability before you commit.
           </p>
-          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:justify-center">
-            <WhatsAppInquiryButton size="lg" label="Book on WhatsApp" className="w-full sm:w-auto" />
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+            <WhatsAppInquiryButton size="lg" label="WhatsApp us" className="w-full sm:w-auto" />
             <Button size="lg" variant="secondary" to="/fleet" className="w-full sm:w-auto">
               Browse fleet
             </Button>

@@ -21,11 +21,11 @@ function HomeBelowFoldSkeleton() {
   return (
     <Section className="py-[clamp(2.5rem,8vw,5rem)]" aria-busy="true" aria-label="Loading sections">
       <div className="container-app">
-        <div className="mx-auto h-40 max-w-4xl animate-pulse rounded-3xl bg-fill-glass/80 ring-1 ring-inset ring-stroke/60" />
-        <div className="mx-auto mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          <div className="h-72 animate-pulse rounded-2xl bg-fill-glass/60 ring-1 ring-inset ring-stroke/50" />
-          <div className="h-72 animate-pulse rounded-2xl bg-fill-glass/60 ring-1 ring-inset ring-stroke/50 sm:block" />
-          <div className="hidden h-72 animate-pulse rounded-2xl bg-fill-glass/60 ring-1 ring-inset ring-stroke/50 lg:block" />
+        <div className="mx-auto h-32 max-w-4xl animate-pulse rounded-lg bg-carbon-deep" />
+        <div className="mx-auto mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="h-64 animate-pulse rounded-lg bg-carbon-deep" />
+          <div className="h-64 animate-pulse rounded-lg bg-carbon-deep sm:block" />
+          <div className="hidden h-64 animate-pulse rounded-lg bg-carbon-deep lg:block" />
         </div>
       </div>
     </Section>

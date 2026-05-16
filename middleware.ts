@@ -2,6 +2,7 @@ import { createServerClient } from '@supabase/ssr'
 import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
+import { getCanonicalSiteOrigin, shouldCanonicalizeOrigin } from '@/lib/auth/canonical-origin'
 import { canAccessAdminPath, appRoleFromJwtMetadata } from '@/lib/auth/route-access'
 import { getBusinessWhatsAppUrl } from '@/lib/business-contact'
 import { isStaffRole } from '@/lib/auth/permissions'
@@ -21,6 +22,13 @@ function needsAuthenticatedUser(pathname: string): boolean {
 
 export async function middleware(request: NextRequest) {
   const pathname = request.nextUrl.pathname
+  const requestOrigin = request.nextUrl.origin
+
+  if (shouldCanonicalizeOrigin(requestOrigin)) {
+    const canonical = getCanonicalSiteOrigin(requestOrigin)
+    const target = new URL(`${pathname}${request.nextUrl.search}`, canonical)
+    return NextResponse.redirect(target, 308)
+  }
 
   if (isSoftLaunchDisabledRoute(pathname)) {
     const message = softLaunchInquiryMessageForPath(pathname)
@@ -64,7 +72,8 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    const login = new URL('/login', request.url)
+    const siteOrigin = getCanonicalSiteOrigin(requestOrigin)
+    const login = new URL('/login', siteOrigin)
     login.searchParams.set('redirect', `${request.nextUrl.pathname}${request.nextUrl.search}`)
     const redirectResponse = NextResponse.redirect(login)
     response.cookies.getAll().forEach((c) => {

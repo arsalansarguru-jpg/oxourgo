@@ -23,13 +23,13 @@ type ThemeContextValue = {
 const ThemeContext = createContext<ThemeContextValue | null>(null)
 
 function themeFromDom(): Theme {
-  if (typeof document === 'undefined') return 'dark'
+  if (typeof document === 'undefined') return 'light'
   const v = document.documentElement.getAttribute('data-theme')
-  return v === 'light' ? 'light' : 'dark'
+  return v === 'dark' ? 'dark' : 'light'
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('dark')
+  const [theme, setThemeState] = useState<Theme>('light')
 
   useEffect(() => {
     setThemeState(themeFromDom())

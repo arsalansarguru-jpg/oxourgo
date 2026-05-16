@@ -4,10 +4,12 @@ const contact = getBusinessContact()
 
 export const BRAND = {
   name: 'Oxour Go',
-  tagline: 'Luxury Self-Drive',
-  logoSrc: '/brand/oxour-go-mark.svg',
-  logoAlt:
-    'Oxour Go logo: glowing neon blue OG monogram with OXOUR GO wordmark on a dark background',
+  tagline: 'Self-Drive Car Rental',
+  /** Full lockup (OG monogram + OXOUR GO wordmark). */
+  logoSrc: '/brand/oxour-go-logo.png',
+  /** Compact mark for very small surfaces (favicon-style). */
+  logoMarkSrc: '/brand/oxour-go-mark.svg',
+  logoAlt: 'Oxour Go — OG monogram and OXOUR GO wordmark',
   phoneDisplay: contact.phoneDisplay,
   phoneTel: contact.phoneTel,
   email: contact.supportEmail,
