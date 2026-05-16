@@ -2,14 +2,12 @@
 
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { AlertCircle, BadgeCheck, Headphones, Loader2, Receipt, Search } from 'lucide-react'
-import { motion } from 'framer-motion'
+import { AlertCircle, Loader2, Search } from 'lucide-react'
 
 import { PICKUP_LOCATIONS } from '@/constants/brand'
 import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
 import { Input } from '@/components/ui/Input'
-import { TrustBadge } from '@/components/marketing/trust-badge'
 
 function toYmd(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0')
@@ -97,15 +95,10 @@ export function BookingSearchBar() {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 22 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.48, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
-      className="relative mx-auto w-full min-w-0 max-w-[var(--container-wide)] xl:max-w-5xl"
-    >
-      <div className="glass-panel rounded-[1.25rem] p-4 shadow-[var(--shadow-card)] sm:rounded-3xl sm:p-6 lg:p-7">
+    <div className="w-full min-w-0">
+      <div className="rounded-xl border border-stroke bg-carbon p-4 sm:p-6">
         <div
-          className="grid min-w-0 gap-4 sm:gap-5 md:grid-cols-2 md:gap-5 lg:grid-cols-4 lg:items-end lg:gap-5"
+          className="grid min-w-0 gap-4 md:grid-cols-2 lg:grid-cols-4 lg:items-end"
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               e.preventDefault()
@@ -113,7 +106,7 @@ export function BookingSearchBar() {
             }
           }}
         >
-          <Select label="Pickup Location" value={pickup} onChange={(e) => setPickup(e.target.value)}>
+          <Select label="Pickup location" value={pickup} onChange={(e) => setPickup(e.target.value)}>
             {PICKUP_LOCATIONS.map((loc) => (
               <option key={loc} value={loc}>
                 {loc}
@@ -121,7 +114,7 @@ export function BookingSearchBar() {
             ))}
           </Select>
           <Input
-            label="Pickup Date"
+            label="Pickup date"
             type="date"
             name="pickupDate"
             min={todayYmd}
@@ -133,7 +126,7 @@ export function BookingSearchBar() {
             }}
           />
           <Input
-            label="Dropoff Date"
+            label="Return date"
             type="date"
             name="dropoffDate"
             min={dropoffMin ? addDaysYmd(dropoffMin, 1) : todayYmd}
@@ -150,7 +143,7 @@ export function BookingSearchBar() {
             ) : (
               <>
                 <Search className="h-4 w-4" aria-hidden />
-                Search Cars
+                Search fleet
               </>
             )}
           </Button>
@@ -158,7 +151,7 @@ export function BookingSearchBar() {
         <div className="mt-4">
           <Input
             label="Brand or model (optional)"
-            placeholder="e.g. BMW, Creta, electric"
+            placeholder="e.g. BMW, Creta"
             value={keywords}
             onChange={(e) => setKeywords(e.target.value)}
             onKeyDown={(e) => {
@@ -170,24 +163,13 @@ export function BookingSearchBar() {
           />
         </div>
         {error && (touched.pickup || touched.dropoff) ? (
-          <div className="mt-4 flex items-start gap-2 rounded-xl border border-amber-400/25 bg-amber-500/[0.08] px-3 py-2 text-sm text-amber-50/95">
+          <div className="mt-4 flex items-start gap-2 rounded-lg border border-amber-400/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
             <span>{error}</span>
           </div>
         ) : null}
-        <div className="mt-6 flex flex-wrap items-center justify-center gap-2 sm:justify-start md:gap-2.5">
-          <TrustBadge icon={BadgeCheck} label="Verified Cars" />
-          <TrustBadge icon={Receipt} label="No Hidden Charges" />
-          <TrustBadge icon={Headphones} label="24x7 Support" />
-        </div>
       </div>
-      <div
-        className="pointer-events-none absolute -inset-4 -z-10 rounded-[2rem] opacity-70 blur-3xl"
-        style={{
-          background:
-            'radial-gradient(ellipse at 30% 20%, rgba(59,130,246,0.22), transparent 55%), radial-gradient(ellipse at 80% 0%, rgba(196,201,212,0.12), transparent 45%)',
-        }}
-      />
-    </motion.div>
+    </div>
   )
 }
+

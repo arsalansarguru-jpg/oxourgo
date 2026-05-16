@@ -12,7 +12,7 @@ export function PublicLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-dvh min-w-0 flex-col overflow-x-clip bg-matte pb-[var(--bottom-nav-clearance)] md:pb-0">
       <Navbar />
-      <main id="main" className="min-w-0 flex-1 pb-20 md:pb-24">
+      <main id="main" className="min-w-0 flex-1 pb-[var(--bottom-nav-clearance)] md:pb-0">
         {children}
       </main>
       <Footer />

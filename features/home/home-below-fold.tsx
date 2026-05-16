@@ -1,43 +1,20 @@
 'use client'
 
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { motion } from 'framer-motion'
 import { Bot, CarFront, Clock, IndianRupee, RefreshCw, ShieldCheck } from 'lucide-react'
 import type { Car } from '@/types/car'
-import { destinations } from '@/data/destinations'
-import { testimonials } from '@/data/testimonials'
 import { Section, SectionHeading } from '@/components/ui/Section'
 import { DataLoadErrorPanel } from '@/components/ui/data-load-error'
 import { CarCard } from '@/components/fleet/car-card'
-import { DestinationCard } from '@/components/marketing/destination-card'
-import { FeatureCard } from '@/components/marketing/feature-card'
-import { TestimonialCard } from '@/components/marketing/testimonial-card'
-import { CTASection } from '@/components/marketing/cta-section'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { WhatsAppInquiryButton } from '@/components/marketing/whatsapp-inquiry-button'
 
-const features = [
-  {
-    icon: ShieldCheck,
-    title: 'Verified Cars',
-    description: 'Every vehicle undergoes rigorous quality checks and certification',
-  },
-  {
-    icon: IndianRupee,
-    title: 'Transparent Pricing',
-    description: 'No hidden charges. What you see is what you pay',
-  },
-  {
-    icon: Bot,
-    title: '24x7 AI Support',
-    description: 'Round-the-clock assistance for a seamless experience',
-  },
-  {
-    icon: Clock,
-    title: 'Concierge booking',
-    description: 'Lock dates with our WhatsApp team — fast confirmations and transparent pricing',
-  },
+const benefits = [
+  { icon: ShieldCheck, label: 'Verified vehicles' },
+  { icon: IndianRupee, label: 'Transparent pricing' },
+  { icon: Bot, label: '24×7 support' },
+  { icon: Clock, label: 'WhatsApp concierge' },
 ] as const
 
 export type HomeBelowFoldProps = {
@@ -45,7 +22,7 @@ export type HomeBelowFoldProps = {
   featuredLoadFailed?: boolean
 }
 
-/** Below-the-fold homepage sections — code-split for lighter initial JS on mobile. */
+/** Homepage sections below hero — fleet highlight + trust + booking CTA only */
 export function HomeBelowFold({ featuredCars, featuredLoadFailed = false }: HomeBelowFoldProps) {
   const router = useRouter()
 
@@ -53,12 +30,12 @@ export function HomeBelowFold({ featuredCars, featuredLoadFailed = false }: Home
     <>
       <Section>
         <SectionHeading
-          title="Featured Luxury Fleet"
-          subtitle="Choose from our premium collection of verified luxury cars"
+          title="Featured vehicles"
+          subtitle="A selection from our Mumbai fleet — view details or message concierge to reserve."
         />
-        <div className="mx-auto grid min-w-0 w-full max-w-[var(--container-wide)] gap-6 sm:gap-7 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+        <div className="grid min-w-0 gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
           {featuredLoadFailed ? (
-            <div className="col-span-full min-w-0">
+            <div className="col-span-full">
               <DataLoadErrorPanel
                 title="Unable to load featured fleet"
                 description="Please refresh the page or try again shortly."
@@ -72,92 +49,60 @@ export function HomeBelowFold({ featuredCars, featuredLoadFailed = false }: Home
               />
             </div>
           ) : featuredCars.length === 0 ? (
-            <div className="col-span-full min-w-0">
+            <div className="col-span-full">
               <EmptyState
                 icon={CarFront}
                 title="Featured fleet"
-                description="We are curating the featured fleet for you. Browse the full collection or check back soon."
+                description="Browse the full collection while we update featured vehicles."
                 actionLabel="Browse fleet"
                 to="/fleet"
               />
             </div>
           ) : (
-            featuredCars.map((car, i) => (
-              <motion.div
-                key={car.id}
-                initial={{ opacity: 0, y: 18 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: '-72px 0px' }}
-                transition={{ duration: 0.45, delay: i * 0.07, ease: [0.22, 1, 0.36, 1] }}
-                className="min-w-0"
-              >
-                <CarCard car={car} />
-              </motion.div>
+            featuredCars.map((car) => (
+              <CarCard key={car.id} car={car} />
             ))
           )}
         </div>
-        <div className="flex justify-center px-1">
-          <Button size="lg" variant="secondary" to="/fleet" className="w-full min-[380px]:w-auto">
-            View All Cars
+        <div className="flex justify-center pt-2">
+          <Button size="lg" variant="secondary" to="/fleet">
+            View all vehicles
           </Button>
         </div>
       </Section>
 
-      <Section className="bg-carbon-deep/80">
+      <Section variant="muted">
         <SectionHeading
-          title="Popular Destinations"
-          subtitle="Explore Mumbai's iconic locations in style"
+          title="Why Oxour Go"
+          subtitle="Everything you need for a confident self-drive experience."
+          align="center"
         />
-        <div className="mx-auto grid min-w-0 w-full max-w-[var(--container-wide)] gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4 lg:gap-6">
-          {destinations.map((d) => (
-            <DestinationCard key={d.id} destination={d} />
+        <ul className="mx-auto grid max-w-3xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {benefits.map(({ icon: Icon, label }) => (
+            <li
+              key={label}
+              className="flex items-center gap-3 rounded-xl border border-stroke bg-carbon px-4 py-4"
+            >
+              <Icon className="h-5 w-5 shrink-0 text-silver" aria-hidden />
+              <span className="text-sm font-medium text-soft">{label}</span>
+            </li>
           ))}
-        </div>
+        </ul>
       </Section>
 
       <Section>
-        <SectionHeading
-          title="Why Choose Oxour Go"
-          subtitle="Premium self-drive experience with unmatched service"
-        />
-        <div className="mx-auto grid min-w-0 w-full max-w-[var(--container-wide)] gap-5 md:grid-cols-2 md:gap-6 lg:gap-6">
-          {features.map((f) => (
-            <FeatureCard key={f.title} {...f} />
-          ))}
-        </div>
-      </Section>
-
-      <Section className="bg-carbon-deep/80">
-        <SectionHeading
-          title="What Our Customers Say"
-          subtitle="Trusted by thousands of premium users"
-        />
-        <div className="mx-auto grid min-w-0 w-full max-w-[var(--container-wide)] gap-5 md:grid-cols-3 md:gap-6 lg:gap-6">
-          {testimonials.map((t) => (
-            <TestimonialCard key={t.id} testimonial={t} />
-          ))}
-        </div>
-      </Section>
-
-      <CTASection />
-
-      <Section contained={false} className="pb-8 pt-0">
-        <div className="container-app text-center text-xs text-silver">
-          <p>
-            Curated for{' '}
-            <Link href="/fleet" className="text-electric hover:underline">
-              Mumbai self-drive
-            </Link>
-            . Read our{' '}
-            <Link href="/terms" className="text-electric hover:underline">
-              terms
-            </Link>{' '}
-            and{' '}
-            <Link href="/privacy" className="text-electric hover:underline">
-              privacy
-            </Link>{' '}
-            policies.
+        <div className="mx-auto flex max-w-2xl flex-col items-center gap-6 text-center">
+          <h2 className="text-section-title text-soft">Ready to reserve?</h2>
+          <p className="text-base leading-relaxed text-muted">
+            Message our concierge on WhatsApp with your dates and vehicle preference. We confirm availability and
+            pricing before you commit.
           </p>
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:justify-center">
+            <WhatsAppInquiryButton size="lg" label="Book on WhatsApp" className="w-full sm:w-auto" />
+            <Button size="lg" variant="secondary" to="/fleet" className="w-full sm:w-auto">
+              Browse fleet
+            </Button>
+          </div>
         </div>
       </Section>
     </>

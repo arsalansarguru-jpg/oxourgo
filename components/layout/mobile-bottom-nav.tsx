@@ -12,7 +12,7 @@ const items = [
   { href: '/support', label: 'Support', icon: Headphones, match: (p: string) => p.startsWith('/support') },
   {
     href: BRAND.whatsapp,
-    label: 'WhatsApp',
+    label: 'Chat',
     icon: MessageCircle,
     external: true,
     match: () => false,
@@ -25,37 +25,24 @@ export function MobileBottomNav() {
   return (
     <nav
       aria-label="Mobile primary"
-      className="fixed bottom-0 left-0 right-0 z-40 border-t border-stroke bg-matte/[0.92] pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-md supports-[backdrop-filter]:bg-matte/78 md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-40 border-t border-stroke bg-matte pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1 md:hidden"
     >
-      <div className="mx-auto flex max-w-lg items-stretch justify-around px-2">
+      <div className="mx-auto flex max-w-lg items-stretch justify-around px-1">
         {items.map(({ href, label, icon: Icon, match, ...rest }) => {
           const active = match(pathname)
           const external = 'external' in rest && rest.external
           const className = cn(
-            'touch-manipulation relative flex min-h-[3.25rem] min-w-0 flex-1 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-2 text-[11px] font-semibold tracking-[-0.01em] transition-[color,transform,background-color] duration-200 active:scale-[0.97]',
-            active
-              ? 'text-soft after:absolute after:bottom-1.5 after:left-1/2 after:h-0.5 after:w-6 after:-translate-x-1/2 after:rounded-full after:bg-soft/90'
-              : 'text-muted active:bg-fill-glass',
+            'flex min-h-[3.5rem] min-w-0 flex-1 flex-col items-center justify-center gap-1 px-1 py-2 text-[10px] font-medium',
+            active ? 'text-soft' : 'text-muted',
           )
           const content = (
             <>
-              <Icon
-                className={cn(
-                  'h-6 w-6 shrink-0 opacity-90 sm:h-[1.375rem] sm:w-[1.375rem]',
-                )}
-                aria-hidden
-              />
-              <span className="max-w-full truncate">{label}</span>
+              <Icon className="h-5 w-5 shrink-0" aria-hidden />
+              <span className="truncate">{label}</span>
             </>
           )
           return external ? (
-            <a
-              key={href}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={className}
-            >
+            <a key={href} href={href} target="_blank" rel="noopener noreferrer" className={className}>
               {content}
             </a>
           ) : (

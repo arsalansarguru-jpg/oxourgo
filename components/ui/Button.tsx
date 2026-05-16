@@ -17,9 +17,9 @@ const variants = {
 } as const
 
 const sizes = {
-  sm: 'min-h-11 px-4 py-2 text-[13px] rounded-lg md:min-h-9 md:py-0 md:text-sm',
-  md: 'min-h-12 px-[1.125rem] py-2.5 text-sm rounded-xl md:min-h-[2.875rem] md:px-5 md:py-0',
-  lg: 'min-h-[3.25rem] px-6 py-3 text-base rounded-xl md:min-h-[3.125rem] md:py-0',
+  sm: 'min-h-9 px-3.5 py-2 text-sm rounded-lg',
+  md: 'min-h-11 px-4 py-2.5 text-sm rounded-lg',
+  lg: 'min-h-12 px-5 py-3 text-base rounded-lg',
 } as const
 
 const base =

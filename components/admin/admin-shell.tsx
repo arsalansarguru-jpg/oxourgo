@@ -10,7 +10,6 @@ import {
   ChevronsRight,
   LayoutGrid,
   Menu,
-  Sparkles,
   UserRound,
   X,
 } from 'lucide-react'
@@ -64,22 +63,11 @@ function NavLinks({
             title={collapsed ? label : undefined}
             onClick={onNavigate}
             className={cn(
-              'group relative flex items-center rounded-xl text-[13px] font-medium tracking-[-0.015em] transition-[color,background-color] duration-200',
-              collapsed ? 'justify-center px-0 py-2.5' : 'gap-3 px-3 py-2.5',
-              active
-                ? 'bg-white/[0.06] text-soft'
-                : 'text-muted hover:bg-white/[0.045] hover:text-soft',
+              'flex items-center rounded-lg text-sm font-medium transition-colors duration-200',
+              collapsed ? 'justify-center px-0 py-2.5' : 'gap-3 px-3 py-2',
+              active ? 'bg-fill-glass-strong text-soft' : 'text-muted hover:bg-fill-glass hover:text-soft',
             )}
           >
-            {active ? (
-              <span
-                className={cn(
-                  'absolute bg-soft',
-                  collapsed ? 'left-1/2 top-0 h-0.5 w-5 -translate-x-1/2 rounded-full' : 'left-0 top-1/2 h-6 w-px -translate-y-1/2 rounded-full',
-                )}
-                aria-hidden
-              />
-            ) : null}
             <Icon
               className={cn(
                 'relative shrink-0 transition-colors duration-200',
@@ -106,14 +94,13 @@ function NavLinks({
 function BrandBlock({ expanded }: { expanded: boolean }) {
   return (
     <div className={cn('flex items-center gap-3', !expanded && 'flex-col justify-center gap-2.5')}>
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/[0.09] bg-white/[0.04]">
-        <Sparkles className="h-[18px] w-[18px] text-silver" aria-hidden />
+      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-stroke bg-fill-glass text-xs font-bold text-soft">
+        OG
       </div>
       {expanded ? (
-        <div className="min-w-0 pt-0.5">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">Oxour Go</p>
-          <p className="mt-1 text-[15px] font-semibold tracking-[-0.035em] text-soft">Admin</p>
-          <p className="mt-0.5 text-[11px] font-medium tracking-wide text-muted/90">Luxury mobility</p>
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-soft">Oxour Go</p>
+          <p className="text-xs text-muted">Admin</p>
         </div>
       ) : null}
     </div>
@@ -227,7 +214,7 @@ export function AdminShell({
     <div className="flex min-h-dvh min-w-0">
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-white/[0.06] bg-[#070709]/98 py-8 lg:flex',
+          'fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-stroke bg-carbon py-6 lg:flex',
           'transition-[width,padding] duration-300 ease-out',
           desktopExpanded ? 'w-[17.5rem] pl-6 pr-5' : 'w-[4.75rem] px-2.5',
         )}
@@ -284,11 +271,11 @@ export function AdminShell({
           desktopExpanded ? 'lg:pl-[17.5rem]' : 'lg:pl-[4.75rem]',
         )}
       >
-        <header className="sticky top-0 z-30 flex h-[4.25rem] shrink-0 items-center justify-between gap-4 border-b border-white/[0.06] bg-[#060608]/95 px-4 backdrop-blur-md sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-4 border-b border-stroke bg-matte px-4 sm:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
-              className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-white/[0.08] bg-white/[0.03] text-soft transition-[background-color,border-color] duration-200 hover:border-white/[0.11] hover:bg-white/[0.05] lg:hidden"
+              className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-stroke text-soft lg:hidden"
               aria-expanded={mobileOpen}
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
               onClick={() => setMobileOpen((o) => !o)}
@@ -296,8 +283,7 @@ export function AdminShell({
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
             <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-muted">Operations</p>
-              <h1 className="truncate text-lg font-semibold tracking-[-0.03em] text-soft sm:text-xl">{barTitle}</h1>
+              <h1 className="truncate text-base font-semibold text-soft sm:text-lg">{barTitle}</h1>
             </div>
           </div>
           <div className="flex shrink-0 items-center gap-2 sm:gap-3">
@@ -372,3 +358,4 @@ export function AdminShell({
     </div>
   )
 }
+

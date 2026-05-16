@@ -33,48 +33,31 @@
   --radius-2xl: 1.25rem;
   --radius-3xl: 1.5rem;
 
-  /* Mobile-first: tighter rhythm on phones, opens up on tablet+ */
-  --spacing-section-y: clamp(2.875rem, 9vw, 7.25rem);
-  --spacing-section-gap: clamp(1.75rem, 6vw, 5rem);
-  --spacing-edge: clamp(1.125rem, 4.5vw, 2rem);
+  /* Unified vertical rhythm — calm, scannable sections */
+  --spacing-section-y: clamp(3.5rem, 6vw, 6rem);
+  --spacing-section-gap: clamp(2rem, 4vw, 3rem);
+  --spacing-edge: clamp(1rem, 3vw, 1.5rem);
+  --spacing-stack: 1.5rem;
+  --spacing-stack-lg: 2.5rem;
   /* Space reserved for fixed mobile tab bar (thumb + safe area) */
   --bottom-nav-clearance: calc(4.85rem + max(0.5rem, env(safe-area-inset-bottom, 0px)));
 
   --container-max: 72rem;
   --container-wide: min(92rem, calc(100vw - var(--spacing-edge) * 2));
 
-  --shadow-glow: 0 14px 44px -26px rgba(59, 130, 246, 0.14);
-  --shadow-glow-strong: 0 18px 52px -28px rgba(59, 130, 246, 0.2);
-  --shadow-card:
-    0 1px 0 0 rgba(255, 255, 255, 0.04) inset, 0 16px 44px -28px rgba(0, 0, 0, 0.62);
-  --shadow-card-hover:
-    0 1px 0 0 rgba(255, 255, 255, 0.052) inset, 0 22px 52px -32px rgba(0, 0, 0, 0.68);
-  --shadow-card-accent:
-    0 1px 0 0 rgba(255, 255, 255, 0.04) inset, 0 0 0 1px rgba(59, 130, 246, 0.08),
-    0 18px 48px -32px rgba(0, 0, 0, 0.64);
+  --shadow-glow: none;
+  --shadow-glow-strong: none;
+  --shadow-card: none;
+  --shadow-card-hover: none;
+  --shadow-card-accent: none;
 
   --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
   --duration-fast: 200ms;
   --duration-normal: 320ms;
   --duration-slow: 480ms;
 
-  --background-image-hero-mesh: radial-gradient(
-      ellipse 100% 90% at 15% -5%,
-      rgba(59, 130, 246, 0.08),
-      transparent 58%
-    ),
-    radial-gradient(ellipse 70% 55% at 88% 8%, rgba(255, 255, 255, 0.04), transparent 52%),
-    radial-gradient(ellipse 50% 40% at 50% 100%, rgba(59, 130, 246, 0.028), transparent 55%),
-    linear-gradient(180deg, #0a0a0c 0%, #121218 48%, #0a0a0c 100%);
-
-  /** Hero-only: richer cinematic wash (used in HeroSection) */
-  --background-image-hero-cinematic: radial-gradient(
-      ellipse 85% 70% at 50% 120%,
-      rgba(59, 130, 246, 0.04),
-      transparent 52%
-    ),
-    radial-gradient(ellipse 55% 45% at 0% 35%, rgba(255, 255, 255, 0.032), transparent 58%),
-    linear-gradient(165deg, transparent 0%, rgba(10, 10, 12, 0.5) 100%);
+  --background-image-hero-mesh: none;
+  --background-image-hero-cinematic: none;
 }
 
 html[data-theme='light'] {
@@ -91,32 +74,13 @@ html[data-theme='light'] {
   --color-fill-glass-strong: rgb(15 23 42 / 0.09);
   --color-hero-mist: rgb(59 130 246 / 0.09);
 
-  --shadow-glow: 0 12px 40px -26px rgba(59, 130, 246, 0.1);
-  --shadow-glow-strong: 0 16px 48px -28px rgba(59, 130, 246, 0.14);
-  --shadow-card:
-    0 1px 0 0 rgba(255, 255, 255, 0.85) inset, 0 14px 40px -26px rgba(15, 23, 42, 0.1);
-  --shadow-card-hover:
-    0 1px 0 0 rgba(255, 255, 255, 0.95) inset, 0 20px 48px -30px rgba(15, 23, 42, 0.13);
-  --shadow-card-accent:
-    0 1px 0 0 rgba(255, 255, 255, 0.8) inset, 0 0 0 1px rgba(59, 130, 246, 0.1),
-    0 18px 44px -32px rgba(15, 23, 42, 0.12);
-
-  --background-image-hero-mesh: radial-gradient(
-      ellipse 100% 90% at 15% -5%,
-      rgba(59, 130, 246, 0.06),
-      transparent 58%
-    ),
-    radial-gradient(ellipse 70% 55% at 88% 8%, rgba(15, 23, 42, 0.03), transparent 52%),
-    radial-gradient(ellipse 50% 40% at 50% 100%, rgba(59, 130, 246, 0.03), transparent 55%),
-    linear-gradient(180deg, #f3f5fb 0%, #eef2fa 48%, #f3f5fb 100%);
-
-  --background-image-hero-cinematic: radial-gradient(
-      ellipse 85% 70% at 50% 120%,
-      rgba(59, 130, 246, 0.035),
-      transparent 52%
-    ),
-    radial-gradient(ellipse 55% 45% at 0% 35%, rgba(15, 23, 42, 0.025), transparent 58%),
-    linear-gradient(165deg, transparent 0%, rgba(243, 245, 251, 0.75) 100%);
+  --shadow-glow: none;
+  --shadow-glow-strong: none;
+  --shadow-card: none;
+  --shadow-card-hover: none;
+  --shadow-card-accent: none;
+  --background-image-hero-mesh: none;
+  --background-image-hero-cinematic: none;
 }
 
 /**
@@ -126,22 +90,15 @@ html[data-theme='light'] {
 :root {
   --safe-top: max(0px, env(safe-area-inset-top, 0px));
   --safe-bottom: max(0px, env(safe-area-inset-bottom, 0px));
-  /* Mirrors public `Navbar` — editorial chrome, larger wordmark */
-  --public-header-inner-h: 3.75rem;
+  --public-header-inner-h: 3.5rem;
   --public-header-offset: calc(var(--public-header-inner-h) + var(--safe-top));
   /** Space above the fixed mobile tab bar for floating CTAs (approx. tab bar + inset). */
   --mobile-fab-clearance: calc(4.35rem + var(--safe-bottom));
 }
 
-@media (min-width: 640px) {
-  :root {
-    --public-header-inner-h: 4rem;
-  }
-}
-
 @media (min-width: 1024px) {
   :root {
-    --public-header-inner-h: 4.75rem;
+    --public-header-inner-h: 4rem;
   }
 }
 
@@ -155,32 +112,21 @@ html[data-theme='dark'] {
  */
 .admin-app-root {
   color-scheme: dark;
-  --color-matte: #030304;
-  --color-carbon: #0c0c10;
-  --color-carbon-deep: #070709;
-  --color-soft: #e8ecf1;
-  --color-silver: #9aa3b0;
-  --color-muted: rgb(154 163 176 / 0.78);
-  --color-stroke: rgb(255 255 255 / 0.07);
-  --color-stroke-strong: rgb(255 255 255 / 0.11);
-  --color-fill-glass: rgb(255 255 255 / 0.045);
-  --color-fill-glass-strong: rgb(255 255 255 / 0.078);
-  --color-hero-mist: rgb(255 255 255 / 0.04);
-  --shadow-card:
-    0 1px 0 0 rgb(255 255 255 / 0.035) inset,
-    0 16px 44px -28px rgb(0 0 0 / 0.72);
-  --shadow-card-hover:
-    0 1px 0 0 rgb(255 255 255 / 0.045) inset,
-    0 22px 52px -32px rgb(0 0 0 / 0.78);
-  --shadow-card-accent:
-    0 1px 0 0 rgb(255 255 255 / 0.035) inset,
-    0 0 0 1px rgb(59 130 246 / 0.09),
-    0 18px 48px -32px rgb(0 0 0 / 0.7);
+  --color-matte: #09090b;
+  --color-carbon: #111114;
+  --color-carbon-deep: #0c0c0f;
+  --color-soft: #f4f4f5;
+  --color-silver: #a1a1aa;
+  --color-muted: rgb(161 161 170 / 0.85);
+  --color-stroke: rgb(255 255 255 / 0.08);
+  --color-stroke-strong: rgb(255 255 255 / 0.12);
+  --color-fill-glass: rgb(255 255 255 / 0.04);
+  --color-fill-glass-strong: rgb(255 255 255 / 0.07);
+  --shadow-card: none;
+  --shadow-card-hover: none;
+  --shadow-card-accent: none;
   background-color: var(--color-matte);
-  background-image:
-    radial-gradient(ellipse 120% 90% at 50% -30%, rgb(59 130 246 / 0.06), transparent 58%),
-    radial-gradient(ellipse 55% 45% at 100% 0%, rgb(255 255 255 / 0.028), transparent 50%),
-    linear-gradient(180deg, #040405 0%, #0a0a0f 42%, #060608 100%);
+  background-image: none;
 }
 
 @layer base {
@@ -228,13 +174,7 @@ html[data-theme='dark'] {
 
 @utility glass-panel {
   border: 1px solid var(--color-stroke);
-  background: linear-gradient(
-    165deg,
-    color-mix(in srgb, var(--color-fill-glass-strong) 48%, transparent),
-    color-mix(in srgb, var(--color-fill-glass) 35%, transparent)
-  );
-  backdrop-filter: blur(14px) saturate(120%);
-  box-shadow: 0 1px 0 0 color-mix(in srgb, var(--color-stroke) 55%, transparent) inset;
+  background: var(--color-carbon);
 }
 
 @utility text-balance {
@@ -249,33 +189,30 @@ html[data-theme='dark'] {
   @apply border-b border-white/[0.05] transition-colors duration-200 hover:bg-white/[0.035];
 }
 
-/** Fluid display — hero & cinematic headings */
 @utility text-display {
-  font-size: clamp(2.125rem, 3.8vw + 1rem, 3.35rem);
-  line-height: 1.08;
-  letter-spacing: -0.03em;
-  font-weight: 700;
+  font-size: clamp(1.75rem, 3vw + 0.5rem, 2.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  font-weight: 600;
 }
 
-/** Homepage hero — restrained executive scale */
 @utility text-hero-display {
-  font-size: clamp(1.875rem, 3.4vw + 0.75rem, 3rem);
-  line-height: 1.1;
-  letter-spacing: -0.03em;
+  font-size: clamp(1.75rem, 3vw + 0.5rem, 2.5rem);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
   font-weight: 600;
 }
 
 @utility text-hero-kicker {
-  font-size: clamp(0.8125rem, 0.35vw + 0.78rem, 0.9375rem);
+  font-size: 0.875rem;
   line-height: 1.5;
-  letter-spacing: 0.01em;
   font-weight: 500;
 }
 
 @utility text-section-title {
-  font-size: clamp(1.5rem, 1.65vw + 0.9rem, 2.125rem);
-  line-height: 1.16;
-  letter-spacing: -0.022em;
+  font-size: clamp(1.25rem, 1.5vw + 0.75rem, 1.75rem);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
   font-weight: 600;
 }
 
