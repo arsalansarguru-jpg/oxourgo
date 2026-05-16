@@ -12,7 +12,7 @@ export function Footer() {
         <div className="grid grid-cols-1 gap-10 md:gap-x-8 md:gap-y-10 md:[grid-template-columns:minmax(0,min(100%,20rem))_minmax(0,1fr)] lg:grid-cols-[minmax(0,min(100%,22rem))_repeat(3,minmax(0,1fr))] lg:gap-x-8 lg:gap-y-0 lg:items-start">
           <div className="min-w-0">
             <div className="flex items-center gap-2.5">
-              <span className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-stroke bg-gradient-to-br from-fill-glass-strong to-transparent shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]">
+              <span className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-stroke bg-fill-glass-strong">
                 <BrandLogo className="p-[3px]" />
               </span>
               <span className="text-[0.9375rem] font-bold tracking-[-0.02em] text-soft">{BRAND.name}</span>

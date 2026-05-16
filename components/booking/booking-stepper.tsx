@@ -29,7 +29,7 @@ export function BookingStepper({ steps, current, className }: BookingStepperProp
                 className={cn(
                   'flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-sm font-bold sm:h-8 sm:w-8 sm:text-xs',
                   done && 'border-emerald/40 bg-emerald/15 text-emerald',
-                  active && 'border-electric/50 bg-electric/15 text-electric shadow-glow',
+                  active && 'border-electric/40 bg-electric/10 text-electric',
                   !done && !active && 'border-stroke bg-fill-glass text-muted',
                 )}
                 aria-current={active ? 'step' : undefined}

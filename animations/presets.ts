@@ -43,7 +43,7 @@ export const fadeInHero = {
 /** Unified lift for marketing / dashboard cards */
 export const cardLiftSpring = {
   type: 'spring',
-  stiffness: 430,
-  damping: 34,
-  mass: 0.64,
+  stiffness: 320,
+  damping: 42,
+  mass: 0.72,
 } as const

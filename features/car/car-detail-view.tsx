@@ -101,7 +101,7 @@ export function CarDetailView({
                   className={cn(
                     'relative h-[4.25rem] w-[6.75rem] shrink-0 snap-start overflow-hidden rounded-xl border transition-[border-color,box-shadow,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/50 focus-visible:ring-offset-2 focus-visible:ring-offset-matte sm:h-16 sm:w-24',
                     idx === activeImage
-                      ? 'border-electric/60 ring-2 ring-electric/30'
+                      ? 'border-stroke-strong ring-1 ring-white/10'
                       : 'border-stroke hover:border-stroke-strong hover:-translate-y-0.5',
                   )}
                 >
@@ -118,8 +118,9 @@ export function CarDetailView({
           </div>
 
           <div className="mt-8 min-w-0 space-y-4">
-            <h1 className="text-2xl font-bold tracking-tight text-soft sm:text-3xl md:text-4xl">{car.name}</h1>
-            <p className="max-w-2xl text-silver leading-relaxed">{car.description}</p>
+            <h1 className="text-2xl font-semibold tracking-[-0.025em] text-soft sm:text-3xl md:text-[2rem] md:leading-tight">
+              {car.name}
+            </h1>
             <div className="flex flex-wrap items-center gap-3 text-sm text-silver">
               <ReviewBadge rating={car.rating} count={car.reviews} className="text-sm" />
               <span aria-hidden className="text-silver/50">

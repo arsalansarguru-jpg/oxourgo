@@ -6,12 +6,12 @@ import { cn } from '@/lib/utils/cn'
 
 const variants = {
   primary:
-    'bg-electric text-white shadow-[0_14px_40px_-22px_rgba(59,130,246,0.55)] hover:shadow-glow-strong hover:brightness-[1.07] active:brightness-[0.96]',
+    'bg-electric text-white shadow-none hover:bg-electric/90 active:bg-electric/84',
   secondary:
-    'border border-stroke-strong bg-fill-glass-strong text-soft shadow-[inset_0_1px_0_0_color-mix(in_srgb,var(--color-stroke)_50%,transparent)] hover:border-stroke-strong hover:bg-fill-glass active:bg-fill-glass',
+    'border border-stroke-strong bg-carbon/[0.72] text-soft shadow-none hover:border-stroke hover:bg-fill-glass-strong active:bg-fill-glass',
   ghost: 'text-soft hover:bg-fill-glass active:bg-fill-glass-strong',
   outline:
-    'border border-stroke-strong bg-transparent text-soft hover:border-electric/45 hover:bg-electric/[0.06] hover:text-soft',
+    'border border-stroke-strong bg-transparent text-soft hover:border-stroke-strong hover:bg-fill-glass',
   danger:
     'border border-red-500/35 bg-red-500/15 text-red-200 theme-light:text-red-900 theme-light:bg-red-500/12 theme-light:border-red-600/35 hover:bg-red-500/25 theme-light:hover:bg-red-500/20',
 } as const
@@ -23,7 +23,7 @@ const sizes = {
 } as const
 
 const base =
-  'touch-manipulation inline-flex shrink-0 items-center justify-center gap-2 font-semibold tracking-[-0.02em] transition-[transform,box-shadow,background-color,border-color,color,filter] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric focus-visible:ring-offset-2 focus-visible:ring-offset-matte theme-light:focus-visible:ring-offset-white hover:-translate-y-px active:translate-y-0 disabled:pointer-events-none disabled:opacity-40 active:scale-[0.98] md:active:scale-100'
+  'touch-manipulation inline-flex shrink-0 items-center justify-center gap-2 font-semibold tracking-[-0.02em] transition-[background-color,border-color,color,box-shadow] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/45 focus-visible:ring-offset-2 focus-visible:ring-offset-matte theme-light:focus-visible:ring-offset-white disabled:pointer-events-none disabled:opacity-40'
 
 export type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'href' | 'onClick'> & {
   variant?: keyof typeof variants

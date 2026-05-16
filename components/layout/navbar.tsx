@@ -93,10 +93,10 @@ export function Navbar() {
     <>
       <header
         className={cn(
-          'sticky top-0 z-50 border-b pt-[var(--safe-top)] transition-[background-color,backdrop-filter,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
+          'sticky top-0 z-50 border-b border-stroke/90 pt-[var(--safe-top)] transition-[background-color,backdrop-filter,border-color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
           scrolled
-            ? 'border-stroke bg-matte/[0.78] shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset,0_18px_48px_-28px_rgba(0,0,0,0.75)] backdrop-blur-2xl backdrop-saturate-[1.35] supports-[backdrop-filter]:bg-matte/[0.62]'
-            : 'border-stroke bg-matte/[0.52] shadow-[0_24px_64px_-40px_rgba(0,0,0,0.55)] backdrop-blur-3xl backdrop-saturate-[1.2] supports-[backdrop-filter]:bg-matte/[0.38]',
+            ? 'bg-matte/92 backdrop-blur-md supports-[backdrop-filter]:bg-matte/85'
+            : 'bg-matte/70 backdrop-blur-md supports-[backdrop-filter]:bg-matte/55',
         )}
       >
         <div className="container-app grid min-h-[3.25rem] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 sm:min-h-14 lg:min-h-[3.75rem] lg:gap-4">
@@ -107,15 +107,11 @@ export function Navbar() {
           >
             <div
               className={cn(
-                'relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-[0.625rem] border border-stroke bg-gradient-to-b from-fill-glass-strong to-fill-glass shadow-[inset_0_1px_0_0_rgba(255,255,255,0.12),0_0_0_1px_rgba(0,0,0,0.35)] transition-[transform,box-shadow,border-color] duration-300 sm:h-9 sm:w-9 sm:rounded-[0.6875rem]',
-                'group-hover:-translate-y-px group-hover:border-stroke-strong group-hover:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.14),0_0_0_1px_rgba(59,130,246,0.12),0_12px_40px_-18px_rgba(59,130,246,0.35)]',
+                'relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-[0.625rem] border border-stroke bg-fill-glass-strong transition-[border-color,background-color] duration-200 sm:h-9 sm:w-9 sm:rounded-[0.6875rem]',
+                'group-hover:border-stroke-strong',
               )}
             >
               <BrandLogo priority className="relative z-10 p-[3px]" />
-              <span
-                aria-hidden
-                className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_30%_0%,rgba(59,130,246,0.22),transparent_62%)] opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-              />
             </div>
             <div className="min-w-0 leading-none">
               <p className="truncate text-[0.8125rem] font-semibold tracking-[-0.03em] text-soft sm:text-[0.9375rem]">
@@ -131,7 +127,7 @@ export function Navbar() {
             aria-label="Primary"
             className="hidden items-center justify-center justify-self-center md:flex"
           >
-            <div className="flex items-center rounded-full border border-stroke bg-fill-glass p-1 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] backdrop-blur-md">
+            <div className="flex items-center rounded-full border border-stroke bg-fill-glass p-1">
               {nav.map(({ href, label }) => {
                 const active = pathname === href || pathname.startsWith(`${href}/`)
                 return (
@@ -139,7 +135,7 @@ export function Navbar() {
                     key={href}
                     href={href}
                     className={cn(
-                      'relative rounded-full px-3.5 py-2 text-[13px] font-medium tracking-[-0.01em] transition-[color,background-color,transform] duration-300 lg:px-4',
+                      'relative rounded-full px-3.5 py-2 text-[13px] font-medium tracking-[-0.01em] transition-colors duration-200 lg:px-4',
                       active
                         ? 'text-soft'
                         : 'text-muted hover:bg-fill-glass hover:text-soft',
@@ -148,7 +144,7 @@ export function Navbar() {
                     {active ? (
                       <span
                         aria-hidden
-                        className="absolute inset-0 rounded-full bg-fill-glass-strong shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08)]"
+                        className="absolute inset-0 rounded-full bg-fill-glass-strong"
                       />
                     ) : null}
                     <span className="relative">{label}</span>
@@ -199,7 +195,7 @@ export function Navbar() {
                 </summary>
                 <div
                   className={cn(
-                    'absolute right-0 top-[calc(100%+0.375rem)] z-[80] min-w-[11.5rem] overflow-hidden rounded-xl border border-stroke bg-matte/[0.96] py-1 shadow-[0_16px_48px_-20px_rgba(0,0,0,0.85)] backdrop-blur-xl',
+                    'absolute right-0 top-[calc(100%+0.375rem)] z-[80] min-w-[11.5rem] overflow-hidden rounded-xl border border-stroke bg-matte/[0.98] py-1 shadow-[var(--shadow-card)] backdrop-blur-md',
                   )}
                   onClick={(e) => e.stopPropagation()}
                 >
@@ -225,7 +221,7 @@ export function Navbar() {
             ) : null}
             <WhatsAppInquiryButton
               size="sm"
-              className="hidden h-9 max-w-[min(100%,11rem)] shrink-0 truncate px-3 text-[12px] font-semibold shadow-[0_12px_36px_-16px_rgba(59,130,246,0.55)] hover:translate-y-0 active:translate-y-0 sm:inline-flex sm:max-w-none sm:px-4 sm:text-[13px]"
+              className="hidden h-9 max-w-[min(100%,11rem)] shrink-0 truncate px-3 text-[12px] font-semibold sm:inline-flex sm:max-w-none sm:px-4 sm:text-[13px]"
               label="Book on WhatsApp"
             />
 
@@ -259,7 +255,7 @@ export function Navbar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.28, ease }}
-              className="fixed inset-0 z-[60] bg-matte/55 backdrop-blur-md md:hidden"
+              className="fixed inset-0 z-[60] bg-matte/45 backdrop-blur-sm md:hidden"
               onClick={() => setOpen(false)}
             />
             <motion.div
@@ -272,7 +268,7 @@ export function Navbar() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.38, ease }}
-              className="fixed left-0 right-0 top-[var(--public-header-offset)] z-[70] max-h-[calc(100dvh-var(--public-header-offset))] overflow-y-auto overflow-x-hidden border-b border-stroke bg-matte/[0.92] shadow-[0_24px_80px_-32px_rgba(0,0,0,0.85)] backdrop-blur-2xl backdrop-saturate-[1.25] supports-[backdrop-filter]:bg-matte/[0.78] md:hidden"
+              className="fixed left-0 right-0 top-[var(--public-header-offset)] z-[70] max-h-[calc(100dvh-var(--public-header-offset))] overflow-y-auto overflow-x-hidden border-b border-stroke bg-matte/[0.96] supports-[backdrop-filter]:bg-matte/[0.92] backdrop-blur-md md:hidden"
             >
               <div className="container-app flex flex-col gap-1 py-5">
                 <p className="px-1 pb-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted">
@@ -310,7 +306,7 @@ export function Navbar() {
                 <div className="mt-3">
                   <WhatsAppInquiryButton
                     size="lg"
-                    className="min-h-[3.25rem] w-full text-[15px] font-semibold shadow-[0_16px_48px_-20px_rgba(59,130,246,0.55)] hover:translate-y-0 active:translate-y-0"
+                    className="min-h-[3.25rem] w-full text-[15px] font-semibold"
                     label="Book on WhatsApp"
                     onClick={() => setOpen(false)}
                   />

@@ -6,9 +6,8 @@ import { Section } from '@/components/ui/Section'
 export function CTASection() {
   return (
     <Section className="py-[clamp(3.25rem,7vw,5.5rem)]">
-      <div className="relative overflow-hidden rounded-[1.375rem] border border-stroke bg-gradient-to-br from-electric/18 via-carbon to-matte px-6 py-12 shadow-[0_1px_0_0_rgba(255,255,255,0.06)_inset,var(--shadow-glow)] sm:rounded-3xl sm:px-10 sm:py-14 md:py-16">
-        <div className="pointer-events-none absolute -right-12 -top-12 h-60 w-60 rounded-full bg-electric/28 blur-[80px]" />
-        <div className="pointer-events-none absolute -bottom-20 left-8 h-52 w-52 rounded-full bg-fill-glass-strong blur-[72px]" />
+      <div className="relative overflow-hidden rounded-[1.375rem] border border-stroke bg-carbon px-6 py-12 shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset] sm:rounded-3xl sm:px-10 sm:py-14 md:py-16">
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-fill-glass/30 via-transparent to-transparent" />
         <div className="relative mx-auto max-w-2xl px-2 text-center sm:px-0">
           <h2 className="text-section-title text-balance text-soft">Ready to Experience Luxury?</h2>
           <p className="mt-4 text-pretty text-base leading-[1.65] text-muted md:text-lg">

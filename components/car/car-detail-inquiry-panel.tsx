@@ -38,7 +38,7 @@ export function CarDetailInquiryPanel({ car, tripFrom, tripTo, tripPickup }: Car
       </div>
 
       {(tripPickup || tripFrom || tripTo) && (
-        <div className="rounded-xl border border-electric/18 bg-electric/[0.06] px-4 py-3 text-sm text-muted">
+        <div className="rounded-xl border border-stroke bg-fill-glass px-4 py-3 text-sm text-muted">
           {tripPickup ? (
             <p>
               Hub: <span className="font-semibold text-soft">{tripPickup}</span>

@@ -43,15 +43,15 @@
   --container-max: 72rem;
   --container-wide: min(92rem, calc(100vw - var(--spacing-edge) * 2));
 
-  --shadow-glow: 0 0 56px -12px rgba(59, 130, 246, 0.38);
-  --shadow-glow-strong: 0 0 80px -16px rgba(59, 130, 246, 0.5);
+  --shadow-glow: 0 14px 44px -26px rgba(59, 130, 246, 0.14);
+  --shadow-glow-strong: 0 18px 52px -28px rgba(59, 130, 246, 0.2);
   --shadow-card:
-    0 1px 0 0 rgba(255, 255, 255, 0.045) inset, 0 26px 70px -34px rgba(0, 0, 0, 0.9);
+    0 1px 0 0 rgba(255, 255, 255, 0.04) inset, 0 16px 44px -28px rgba(0, 0, 0, 0.62);
   --shadow-card-hover:
-    0 1px 0 0 rgba(255, 255, 255, 0.06) inset, 0 36px 96px -44px rgba(0, 0, 0, 0.92);
+    0 1px 0 0 rgba(255, 255, 255, 0.052) inset, 0 22px 52px -32px rgba(0, 0, 0, 0.68);
   --shadow-card-accent:
-    0 1px 0 0 rgba(255, 255, 255, 0.05) inset, 0 0 0 1px rgba(59, 130, 246, 0.1),
-    0 28px 80px -40px rgba(0, 0, 0, 0.88);
+    0 1px 0 0 rgba(255, 255, 255, 0.04) inset, 0 0 0 1px rgba(59, 130, 246, 0.08),
+    0 18px 48px -32px rgba(0, 0, 0, 0.64);
 
   --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
   --duration-fast: 200ms;
@@ -60,21 +60,21 @@
 
   --background-image-hero-mesh: radial-gradient(
       ellipse 100% 90% at 15% -5%,
-      rgba(59, 130, 246, 0.2),
+      rgba(59, 130, 246, 0.08),
       transparent 58%
     ),
-    radial-gradient(ellipse 70% 55% at 88% 8%, rgba(255, 255, 255, 0.06), transparent 52%),
-    radial-gradient(ellipse 50% 40% at 50% 100%, rgba(59, 130, 246, 0.06), transparent 55%),
+    radial-gradient(ellipse 70% 55% at 88% 8%, rgba(255, 255, 255, 0.04), transparent 52%),
+    radial-gradient(ellipse 50% 40% at 50% 100%, rgba(59, 130, 246, 0.028), transparent 55%),
     linear-gradient(180deg, #0a0a0c 0%, #121218 48%, #0a0a0c 100%);
 
   /** Hero-only: richer cinematic wash (used in HeroSection) */
   --background-image-hero-cinematic: radial-gradient(
       ellipse 85% 70% at 50% 120%,
-      rgba(59, 130, 246, 0.09),
+      rgba(59, 130, 246, 0.04),
       transparent 52%
     ),
-    radial-gradient(ellipse 55% 45% at 0% 35%, rgba(255, 255, 255, 0.045), transparent 58%),
-    linear-gradient(165deg, transparent 0%, rgba(10, 10, 12, 0.65) 100%);
+    radial-gradient(ellipse 55% 45% at 0% 35%, rgba(255, 255, 255, 0.032), transparent 58%),
+    linear-gradient(165deg, transparent 0%, rgba(10, 10, 12, 0.5) 100%);
 }
 
 html[data-theme='light'] {
@@ -91,32 +91,32 @@ html[data-theme='light'] {
   --color-fill-glass-strong: rgb(15 23 42 / 0.09);
   --color-hero-mist: rgb(59 130 246 / 0.09);
 
-  --shadow-glow: 0 0 48px -14px rgba(59, 130, 246, 0.28);
-  --shadow-glow-strong: 0 0 72px -18px rgba(59, 130, 246, 0.38);
+  --shadow-glow: 0 12px 40px -26px rgba(59, 130, 246, 0.1);
+  --shadow-glow-strong: 0 16px 48px -28px rgba(59, 130, 246, 0.14);
   --shadow-card:
-    0 1px 0 0 rgba(255, 255, 255, 0.85) inset, 0 18px 48px -28px rgba(15, 23, 42, 0.12);
+    0 1px 0 0 rgba(255, 255, 255, 0.85) inset, 0 14px 40px -26px rgba(15, 23, 42, 0.1);
   --shadow-card-hover:
-    0 1px 0 0 rgba(255, 255, 255, 0.95) inset, 0 26px 64px -34px rgba(15, 23, 42, 0.16);
+    0 1px 0 0 rgba(255, 255, 255, 0.95) inset, 0 20px 48px -30px rgba(15, 23, 42, 0.13);
   --shadow-card-accent:
-    0 1px 0 0 rgba(255, 255, 255, 0.8) inset, 0 0 0 1px rgba(59, 130, 246, 0.14),
-    0 22px 56px -36px rgba(15, 23, 42, 0.14);
+    0 1px 0 0 rgba(255, 255, 255, 0.8) inset, 0 0 0 1px rgba(59, 130, 246, 0.1),
+    0 18px 44px -32px rgba(15, 23, 42, 0.12);
 
   --background-image-hero-mesh: radial-gradient(
       ellipse 100% 90% at 15% -5%,
-      rgba(59, 130, 246, 0.14),
+      rgba(59, 130, 246, 0.06),
       transparent 58%
     ),
-    radial-gradient(ellipse 70% 55% at 88% 8%, rgba(15, 23, 42, 0.04), transparent 52%),
-    radial-gradient(ellipse 50% 40% at 50% 100%, rgba(59, 130, 246, 0.05), transparent 55%),
+    radial-gradient(ellipse 70% 55% at 88% 8%, rgba(15, 23, 42, 0.03), transparent 52%),
+    radial-gradient(ellipse 50% 40% at 50% 100%, rgba(59, 130, 246, 0.03), transparent 55%),
     linear-gradient(180deg, #f3f5fb 0%, #eef2fa 48%, #f3f5fb 100%);
 
   --background-image-hero-cinematic: radial-gradient(
       ellipse 85% 70% at 50% 120%,
-      rgba(59, 130, 246, 0.07),
+      rgba(59, 130, 246, 0.035),
       transparent 52%
     ),
-    radial-gradient(ellipse 55% 45% at 0% 35%, rgba(15, 23, 42, 0.03), transparent 58%),
-    linear-gradient(165deg, transparent 0%, rgba(243, 245, 251, 0.85) 100%);
+    radial-gradient(ellipse 55% 45% at 0% 35%, rgba(15, 23, 42, 0.025), transparent 58%),
+    linear-gradient(165deg, transparent 0%, rgba(243, 245, 251, 0.75) 100%);
 }
 
 /**
@@ -166,19 +166,19 @@ html[data-theme='dark'] {
   --color-fill-glass-strong: rgb(255 255 255 / 0.078);
   --color-hero-mist: rgb(255 255 255 / 0.04);
   --shadow-card:
-    0 1px 0 0 rgb(255 255 255 / 0.04) inset,
-    0 28px 72px -38px rgb(0 0 0 / 0.94);
+    0 1px 0 0 rgb(255 255 255 / 0.035) inset,
+    0 16px 44px -28px rgb(0 0 0 / 0.72);
   --shadow-card-hover:
-    0 1px 0 0 rgb(255 255 255 / 0.055) inset,
-    0 40px 96px -44px rgb(0 0 0 / 0.95);
+    0 1px 0 0 rgb(255 255 255 / 0.045) inset,
+    0 22px 52px -32px rgb(0 0 0 / 0.78);
   --shadow-card-accent:
-    0 1px 0 0 rgb(255 255 255 / 0.04) inset,
-    0 0 0 1px rgb(59 130 246 / 0.14),
-    0 28px 80px -42px rgb(0 0 0 / 0.88);
+    0 1px 0 0 rgb(255 255 255 / 0.035) inset,
+    0 0 0 1px rgb(59 130 246 / 0.09),
+    0 18px 48px -32px rgb(0 0 0 / 0.7);
   background-color: var(--color-matte);
   background-image:
-    radial-gradient(ellipse 120% 90% at 50% -30%, rgb(59 130 246 / 0.14), transparent 58%),
-    radial-gradient(ellipse 55% 45% at 100% 0%, rgb(255 255 255 / 0.05), transparent 50%),
+    radial-gradient(ellipse 120% 90% at 50% -30%, rgb(59 130 246 / 0.06), transparent 58%),
+    radial-gradient(ellipse 55% 45% at 100% 0%, rgb(255 255 255 / 0.028), transparent 50%),
     linear-gradient(180deg, #040405 0%, #0a0a0f 42%, #060608 100%);
 }
 
@@ -229,11 +229,11 @@ html[data-theme='dark'] {
   border: 1px solid var(--color-stroke);
   background: linear-gradient(
     165deg,
-    color-mix(in srgb, var(--color-fill-glass-strong) 55%, transparent),
-    color-mix(in srgb, var(--color-fill-glass) 40%, transparent)
+    color-mix(in srgb, var(--color-fill-glass-strong) 48%, transparent),
+    color-mix(in srgb, var(--color-fill-glass) 35%, transparent)
   );
-  backdrop-filter: blur(32px);
-  box-shadow: var(--shadow-card), 0 0 0 1px color-mix(in srgb, var(--color-stroke) 35%, transparent) inset;
+  backdrop-filter: blur(14px) saturate(120%);
+  box-shadow: 0 1px 0 0 color-mix(in srgb, var(--color-stroke) 55%, transparent) inset;
 }
 
 @utility text-balance {
@@ -241,7 +241,7 @@ html[data-theme='dark'] {
 }
 
 @utility admin-table-head {
-  @apply border-b border-white/[0.06] bg-white/[0.035] text-[11px] font-semibold uppercase tracking-[0.12em] text-muted;
+  @apply border-b border-white/[0.055] bg-white/[0.028] text-[11px] font-medium uppercase tracking-[0.07em] text-muted;
 }
 
 @utility admin-table-row {
@@ -250,32 +250,32 @@ html[data-theme='dark'] {
 
 /** Fluid display — hero & cinematic headings */
 @utility text-display {
-  font-size: clamp(2.375rem, 4.5vw + 1rem, 3.875rem);
-  line-height: 1.06;
-  letter-spacing: -0.035em;
-  font-weight: 800;
+  font-size: clamp(2.125rem, 3.8vw + 1rem, 3.35rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  font-weight: 700;
 }
 
-/** Homepage hero — larger scale, tighter cinematic line-height */
+/** Homepage hero — restrained executive scale */
 @utility text-hero-display {
-  font-size: clamp(2.125rem, 5.25vw + 0.85rem, 4.25rem);
-  line-height: 1.03;
-  letter-spacing: -0.04em;
-  font-weight: 800;
+  font-size: clamp(1.875rem, 3.4vw + 0.75rem, 3rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  font-weight: 600;
 }
 
 @utility text-hero-kicker {
   font-size: clamp(0.8125rem, 0.35vw + 0.78rem, 0.9375rem);
-  line-height: 1.45;
+  line-height: 1.5;
   letter-spacing: 0.01em;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 @utility text-section-title {
-  font-size: clamp(1.625rem, 2.2vw + 0.9rem, 2.5rem);
-  line-height: 1.14;
-  letter-spacing: -0.025em;
-  font-weight: 700;
+  font-size: clamp(1.5rem, 1.65vw + 0.9rem, 2.125rem);
+  line-height: 1.16;
+  letter-spacing: -0.022em;
+  font-weight: 600;
 }
 
 @utility container-app {

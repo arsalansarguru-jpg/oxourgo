@@ -38,22 +38,21 @@ export function FleetCarCard({ car, className, tripFrom, tripTo, tripPickup }: F
 
   return (
     <motion.div
-      whileHover={{ y: -6 }}
+      whileHover={{ y: -2 }}
       transition={cardLiftSpring}
       className={cn('h-full', className)}
     >
       <Card
         className={cn(
-          'group/card flex h-full flex-col overflow-hidden transition-[box-shadow,border-color] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]',
+          'group/card flex h-full flex-col overflow-hidden transition-[border-color,box-shadow] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]',
           cardSurfaceHoverAccent,
-          'hover:border-electric/35 hover:shadow-[0_0_0_1px_rgba(59,130,246,0.28),0_22px_56px_-28px_rgba(59,130,246,0.32),var(--shadow-card)]',
         )}
       >
         <div className="relative aspect-[16/10] overflow-hidden bg-carbon-deep">
           <FleetVehicleImg
             src={car.imageUrl}
             alt={car.displayName}
-            className="absolute inset-0 h-full w-full object-cover transition-[transform,filter] duration-[620ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/card:scale-[1.06] group-hover/card:brightness-[1.04]"
+            className="absolute inset-0 h-full w-full object-cover transition-[transform] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/card:scale-[1.02]"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-matte/92 via-matte/[0.12] to-transparent" />
           <div className="absolute left-3 top-3 z-[1] flex flex-wrap gap-2 sm:left-4 sm:top-4">
@@ -65,7 +64,7 @@ export function FleetCarCard({ car, className, tripFrom, tripTo, tripPickup }: F
         <CardContent className="flex flex-1 flex-col gap-5">
           <div>
             <h3 className={cardTitle}>
-              <Link href={detailHref} className="hover:text-electric">
+              <Link href={detailHref} className="transition-colors hover:text-silver">
                 {car.displayName}
               </Link>
             </h3>
@@ -82,15 +81,15 @@ export function FleetCarCard({ car, className, tripFrom, tripTo, tripPickup }: F
 
           <div className="grid grid-cols-3 gap-2">
             <span className={cn(cardMetaChip, 'tabular-nums')}>
-              <Fuel className="h-3.5 w-3.5 shrink-0 text-electric/90" />
+              <Fuel className="h-3.5 w-3.5 shrink-0 text-silver" />
               {car.fuel}
             </span>
             <span className={cn(cardMetaChip, 'tabular-nums')}>
-              <Gauge className="h-3.5 w-3.5 shrink-0 text-electric/90" />
+              <Gauge className="h-3.5 w-3.5 shrink-0 text-silver" />
               {car.transmission}
             </span>
             <span className={cn(cardMetaChip, 'tabular-nums')}>
-              <Users className="h-3.5 w-3.5 shrink-0 text-electric/90" />
+              <Users className="h-3.5 w-3.5 shrink-0 text-silver" />
               {car.seats} seats
             </span>
           </div>

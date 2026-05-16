@@ -22,8 +22,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         ref={ref}
         id={inputId}
         className={cn(
-          'touch-manipulation min-h-12 w-full rounded-xl border border-stroke-strong bg-matte/[0.55] px-4 py-3 text-base tracking-[-0.01em] text-soft shadow-[inset_0_1px_0_0_color-mix(in_srgb,var(--color-stroke)_35%,transparent)] placeholder:text-muted/80 sm:min-h-11 sm:py-2 sm:text-sm',
-          'transition-[border-color,box-shadow,background-color] duration-300 focus-visible:border-electric/55 focus-visible:bg-matte/[0.65] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/22',
+          'touch-manipulation min-h-12 w-full rounded-xl border border-stroke-strong bg-matte/[0.55] px-4 py-3 text-base tracking-[-0.01em] text-soft shadow-[inset_0_1px_0_0_color-mix(in_srgb,var(--color-stroke)_30%,transparent)] placeholder:text-muted/80 sm:min-h-11 sm:py-2 sm:text-sm',
+          'transition-[border-color,box-shadow,background-color] duration-200 focus-visible:border-electric/45 focus-visible:bg-matte/[0.65] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/18',
           error &&
             'border-red-400/50 focus-visible:border-red-400/60 focus-visible:ring-red-400/20',
           className,

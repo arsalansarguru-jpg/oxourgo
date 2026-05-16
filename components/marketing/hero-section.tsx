@@ -29,8 +29,8 @@ export function HeroSection() {
     <section className="relative overflow-hidden">
       <div className="pointer-events-none absolute inset-0 bg-hero-mesh" />
       <div className="pointer-events-none absolute inset-0 bg-hero-cinematic" />
-      <div className="pointer-events-none absolute -right-[22%] top-[-12%] h-[min(520px,62vw)] w-[min(520px,95vw)] rounded-full bg-electric/16 blur-[110px] sm:-right-[14%] sm:top-[-8%] md:right-[-6%]" />
-      <div className="pointer-events-none absolute -left-[28%] top-[38%] h-[min(440px,70vw)] w-[min(440px,90vw)] rounded-full bg-hero-mist blur-[100px] sm:-left-[18%] sm:top-[28%]" />
+      <div className="pointer-events-none absolute -right-[22%] top-[-12%] h-[min(520px,62vw)] w-[min(520px,95vw)] rounded-full bg-electric/[0.07] blur-[100px] sm:-right-[14%] sm:top-[-8%] md:right-[-6%]" />
+      <div className="pointer-events-none absolute -left-[28%] top-[38%] h-[min(440px,70vw)] w-[min(440px,90vw)] rounded-full bg-hero-mist/80 blur-[88px] sm:-left-[18%] sm:top-[28%]" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-matte via-matte/40 to-transparent" />
 
       <div
@@ -51,9 +51,9 @@ export function HeroSection() {
                 animate: { opacity: 1, y: 0 },
               }}
               transition={t(0.48)}
-              className="inline-flex w-fit items-center gap-2 rounded-full border border-stroke bg-fill-glass px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted shadow-[inset_0_1px_0_0_rgba(255,255,255,0.07)] backdrop-blur-md sm:px-3.5 sm:text-[11px]"
+              className="inline-flex w-fit items-center gap-2 rounded-full border border-stroke bg-fill-glass px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.18em] text-muted sm:px-3.5 sm:text-[11px]"
             >
-              <Sparkles className="h-3.5 w-3.5 shrink-0 text-electric" aria-hidden />
+              <Sparkles className="h-3.5 w-3.5 shrink-0 text-silver" aria-hidden />
               Luxury car
             </motion.div>
 
@@ -63,7 +63,7 @@ export function HeroSection() {
                 animate: { opacity: 1, y: 0 },
               }}
               transition={t(0.48, 0.05)}
-              className="text-hero-kicker mt-4 max-w-xl text-electric/90 sm:mt-5"
+              className="text-hero-kicker mt-4 max-w-xl text-soft/90 sm:mt-5"
             >
               Premium Self-Drive Experience
             </motion.p>
@@ -77,11 +77,7 @@ export function HeroSection() {
               className="text-hero-display mt-3 text-soft sm:mt-4"
             >
               Drive Luxury.
-              <span className="mt-1 block sm:mt-2">
-                <span className="bg-gradient-to-br from-soft via-[#e4e9f0] to-silver bg-clip-text text-transparent [-webkit-background-clip:text]">
-                  Live Premium.
-                </span>
-              </span>
+              <span className="mt-1 block text-silver sm:mt-1.5">Live Premium.</span>
             </motion.h1>
 
             <motion.p
@@ -110,7 +106,7 @@ export function HeroSection() {
                   key={label}
                   className="flex items-center gap-2 text-[12px] font-medium tracking-[-0.01em] text-muted sm:text-[13px]"
                 >
-                  <Icon className="h-3.5 w-3.5 shrink-0 text-electric/85" aria-hidden />
+                  <Icon className="h-3.5 w-3.5 shrink-0 text-silver" aria-hidden />
                   <span className="text-soft/90">{label}</span>
                 </li>
               ))}
@@ -126,7 +122,7 @@ export function HeroSection() {
             >
               <WhatsAppInquiryButton
                 size="lg"
-                className="w-full min-h-[3.25rem] shadow-[0_20px_56px_-24px_rgba(59,130,246,0.55)] sm:w-auto sm:min-w-[12rem]"
+                className="w-full min-h-[3.25rem] sm:w-auto sm:min-w-[12rem]"
                 label="Book on WhatsApp"
               />
               {ready ? (
@@ -164,16 +160,16 @@ export function HeroSection() {
                 'lg:translate-y-0 xl:translate-y-1',
               )}
             >
-              <div className="group relative overflow-hidden rounded-[1.125rem] border border-stroke bg-carbon shadow-[var(--shadow-card),0_0_0_1px_rgba(255,255,255,0.02)_inset] sm:rounded-[1.35rem] lg:rounded-3xl">
-                <div className="pointer-events-none absolute -bottom-12 -right-10 z-0 h-[min(200px,42vw)] w-[min(200px,42vw)] rounded-[2rem] border border-electric/18 bg-electric/12 opacity-90 blur-[48px] transition-[opacity,transform] duration-[850ms] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:opacity-[0.98] group-hover:scale-105 sm:h-44 sm:w-44" />
-                <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-br from-matte/75 via-transparent to-electric/[0.06]" />
-                <div className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(180deg,rgba(10,10,12,0.15)_0%,transparent_38%,transparent_62%,rgba(10,10,12,0.88)_100%)]" />
+              <div className="group relative overflow-hidden rounded-[1.125rem] border border-stroke bg-carbon shadow-[0_1px_0_0_rgba(255,255,255,0.04)_inset,var(--shadow-card)] sm:rounded-[1.35rem] lg:rounded-3xl">
+                <div className="pointer-events-none absolute -bottom-12 -right-10 z-0 h-[min(200px,42vw)] w-[min(200px,42vw)] rounded-[2rem] border border-stroke-strong bg-fill-glass opacity-40 blur-[40px] transition-opacity duration-500 group-hover:opacity-55 sm:h-44 sm:w-44" />
+                <div className="pointer-events-none absolute inset-0 z-[1] bg-gradient-to-br from-matte/40 via-transparent to-transparent" />
+                <div className="pointer-events-none absolute inset-0 z-[1] bg-[linear-gradient(180deg,rgba(10,10,12,0.18)_0%,transparent_40%,transparent_60%,rgba(10,10,12,0.82)_100%)]" />
                 <div className="relative z-[2] aspect-[16/11] w-full max-h-[min(52vh,380px)] bg-carbon-deep sm:max-h-none sm:aspect-[16/10] lg:aspect-[5/4] xl:aspect-[4/3]">
                   <Image
                     src="https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1600&q=80"
                     alt="Luxury performance vehicle on a cinematic night drive"
                     fill
-                    className="object-cover object-[center_42%] opacity-[0.93] transition-[transform,opacity,filter] duration-[880ms] ease-[cubic-bezier(0.22,1,0.36,1)] sm:object-center group-hover:scale-[1.028] group-hover:opacity-[0.98] group-hover:brightness-[1.03]"
+                    className="object-cover object-[center_42%] opacity-[0.96] transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] sm:object-center group-hover:scale-[1.015] group-hover:opacity-100"
                     sizes="(max-width:640px) 100vw,(max-width:1024px) 90vw,44vw"
                     priority
                   />
@@ -182,9 +178,9 @@ export function HeroSection() {
                   initial={{ opacity: reduceMotion ? 1 : 0, y: reduceMotion ? 0 : 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={reduceMotion ? { duration: 0 } : { duration: 0.55, delay: 0.35, ease }}
-                  className="absolute bottom-3 left-3 right-3 z-[3] rounded-xl border border-stroke bg-matte/[0.52] px-3.5 py-3 backdrop-blur-2xl backdrop-saturate-150 sm:bottom-4 sm:left-4 sm:right-4 sm:rounded-2xl sm:px-5 sm:py-4 lg:bottom-5 lg:left-5 lg:right-5"
+                  className="absolute bottom-3 left-3 right-3 z-[3] rounded-xl border border-stroke bg-matte/[0.78] px-3.5 py-3 backdrop-blur-md sm:bottom-4 sm:left-4 sm:right-4 sm:rounded-2xl sm:px-5 sm:py-4 lg:bottom-5 lg:left-5 lg:right-5"
                 >
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-electric/90 sm:text-[11px]">
+                  <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-muted sm:text-[11px]">
                     Concierge handoff
                   </p>
                   <p className="mt-1 text-[12.5px] leading-relaxed text-soft/95 sm:mt-1.5 sm:text-sm">

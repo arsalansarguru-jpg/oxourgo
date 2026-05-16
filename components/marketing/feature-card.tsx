@@ -24,7 +24,7 @@ type FeatureCardProps = {
 export function FeatureCard({ icon: Icon, title, description, className }: FeatureCardProps) {
   return (
     <motion.div
-      whileHover={{ y: -4 }}
+      whileHover={{ y: -2 }}
       transition={cardLiftSpring}
       className={cn(
         'group/card',
@@ -35,12 +35,7 @@ export function FeatureCard({ icon: Icon, title, description, className }: Featu
         className,
       )}
     >
-      <div
-        className={cn(
-          cardIconTile,
-          'group-hover/card:-translate-y-px group-hover/card:scale-[1.03]',
-        )}
-      >
+      <div className={cn(cardIconTile)}>
         <Icon className="h-5 w-5" />
       </div>
       <h3 className={cn(cardTitle, 'mt-5')}>{title}</h3>
