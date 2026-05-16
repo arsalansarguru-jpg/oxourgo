@@ -126,7 +126,8 @@ html[data-theme='light'] {
 :root {
   --safe-top: max(0px, env(safe-area-inset-top, 0px));
   --safe-bottom: max(0px, env(safe-area-inset-bottom, 0px));
-  --public-header-inner-h: 3.25rem;
+  /* Mirrors public `Navbar` — editorial chrome, larger wordmark */
+  --public-header-inner-h: 3.75rem;
   --public-header-offset: calc(var(--public-header-inner-h) + var(--safe-top));
   /** Space above the fixed mobile tab bar for floating CTAs (approx. tab bar + inset). */
   --mobile-fab-clearance: calc(4.35rem + var(--safe-bottom));
@@ -134,13 +135,13 @@ html[data-theme='light'] {
 
 @media (min-width: 640px) {
   :root {
-    --public-header-inner-h: 3.5rem;
+    --public-header-inner-h: 4rem;
   }
 }
 
 @media (min-width: 1024px) {
   :root {
-    --public-header-inner-h: 3.75rem;
+    --public-header-inner-h: 4.75rem;
   }
 }
 

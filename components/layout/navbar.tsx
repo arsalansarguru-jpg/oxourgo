@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { ChevronDown, LayoutDashboard, LogOut, Menu, X } from 'lucide-react'
+import { ArrowUpRight, ChevronDown, LayoutDashboard, LogOut, Menu, X } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 import { AnimatePresence, motion } from 'framer-motion'
 import { BRAND } from '@/constants/brand'
@@ -43,6 +43,9 @@ function initialsFromUser(user: User): string {
   return e.slice(0, 2).toUpperCase() || '?'
 }
 
+const conciergeBtn =
+  'h-auto min-h-0 rounded-none border-0 bg-transparent px-0 py-1 text-[11px] font-medium uppercase tracking-[0.22em] text-soft shadow-none transition-opacity duration-200 hover:bg-transparent hover:opacity-55 focus-visible:ring-0 focus-visible:ring-offset-0'
+
 export function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
@@ -56,7 +59,7 @@ export function Navbar() {
   const avatarUrl = user ? avatarUrlFromUser(user) : null
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12)
+    const onScroll = () => setScrolled(window.scrollY > 8)
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
@@ -93,86 +96,75 @@ export function Navbar() {
     <>
       <header
         className={cn(
-          'sticky top-0 z-50 border-b border-stroke/90 pt-[var(--safe-top)] transition-[background-color,backdrop-filter,border-color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)]',
-          scrolled
-            ? 'bg-matte/92 backdrop-blur-md supports-[backdrop-filter]:bg-matte/85'
-            : 'bg-matte/70 backdrop-blur-md supports-[backdrop-filter]:bg-matte/55',
+          'sticky top-0 z-50 border-b pt-[var(--safe-top)] transition-[border-color,background-color] duration-500',
+          scrolled ? 'border-stroke/25 bg-matte/90' : 'border-transparent bg-matte/70',
         )}
       >
-        <div className="container-app grid min-h-[3.25rem] grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 sm:min-h-14 lg:min-h-[3.75rem] lg:gap-4">
+        <div
+          className={cn(
+            'container-app relative flex min-h-[3.75rem] items-center sm:min-h-16 lg:min-h-[4.75rem]',
+            '2xl:max-w-[var(--container-wide)]',
+          )}
+        >
           <Link
             href="/"
-            className="group flex min-w-0 max-w-[min(100%,14rem)] items-center gap-2.5 justify-self-start sm:max-w-none sm:gap-3"
+            className="group flex min-w-0 shrink-0 items-center gap-3 sm:gap-4"
             onClick={() => setOpen(false)}
           >
-            <div
-              className={cn(
-                'relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-[0.625rem] border border-stroke bg-fill-glass-strong transition-[border-color,background-color] duration-200 sm:h-9 sm:w-9 sm:rounded-[0.6875rem]',
-                'group-hover:border-stroke-strong',
-              )}
-            >
-              <BrandLogo priority className="relative z-10 p-[3px]" />
-            </div>
-            <div className="min-w-0 leading-none">
-              <p className="truncate text-[0.8125rem] font-semibold tracking-[-0.03em] text-soft sm:text-[0.9375rem]">
+            <BrandLogo priority className="h-8 w-8 shrink-0 sm:h-9 sm:w-9 md:h-10 md:w-10" />
+            <span className="flex min-w-0 flex-col">
+              <span className="text-[1.125rem] font-medium leading-none tracking-[-0.045em] text-soft sm:text-[1.25rem] lg:text-[1.4rem]">
                 {BRAND.name}
-              </p>
-              <p className="mt-1 hidden truncate text-[10px] font-medium uppercase tracking-[0.18em] text-muted sm:block">
+              </span>
+              <span className="mt-1 hidden text-[10px] font-normal uppercase tracking-[0.32em] text-muted sm:block">
                 {BRAND.tagline}
-              </p>
-            </div>
+              </span>
+            </span>
           </Link>
 
           <nav
             aria-label="Primary"
-            className="hidden items-center justify-center justify-self-center md:flex"
+            className="absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:block"
           >
-            <div className="flex items-center rounded-full border border-stroke bg-fill-glass p-1">
+            <ul className="flex items-center gap-9 lg:gap-11">
               {nav.map(({ href, label }) => {
                 const active = pathname === href || pathname.startsWith(`${href}/`)
                 return (
-                  <Link
-                    key={href}
-                    href={href}
-                    className={cn(
-                      'relative rounded-full px-3.5 py-2 text-[13px] font-medium tracking-[-0.01em] transition-colors duration-200 lg:px-4',
-                      active
-                        ? 'text-soft'
-                        : 'text-muted hover:bg-fill-glass hover:text-soft',
-                    )}
-                  >
-                    {active ? (
-                      <span
-                        aria-hidden
-                        className="absolute inset-0 rounded-full bg-fill-glass-strong"
-                      />
-                    ) : null}
-                    <span className="relative">{label}</span>
-                  </Link>
+                  <li key={href}>
+                    <Link
+                      href={href}
+                      className={cn(
+                        'border-b pb-1 text-[13px] font-medium tracking-[-0.01em] transition-colors duration-200 lg:text-[0.8125rem]',
+                        active
+                          ? 'border-soft text-soft'
+                          : 'border-transparent text-muted hover:border-stroke/50 hover:text-soft',
+                      )}
+                    >
+                      {label}
+                    </Link>
+                  </li>
                 )
               })}
-            </div>
+            </ul>
           </nav>
 
-          <div className="flex items-center justify-end gap-1.5 justify-self-end sm:gap-2 lg:gap-2.5">
+          <div className="ml-auto flex items-center gap-3 sm:gap-4 lg:gap-6">
+            <ThemeToggle className="hidden h-8 w-8 rounded-sm border-0 bg-transparent shadow-none hover:bg-fill-glass sm:inline-flex md:h-9 md:w-9" />
             {ready && !user ? (
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
                 to="/login"
-                className="hidden h-9 max-w-[5.5rem] shrink-0 px-3 text-[12px] font-semibold tracking-[-0.02em] sm:inline-flex sm:max-w-none sm:px-3.5 sm:text-[13px]"
+                className="hidden h-auto min-h-0 rounded-none px-0 py-1 text-[11px] font-medium uppercase tracking-[0.2em] text-muted shadow-none hover:bg-transparent hover:text-soft sm:inline-flex"
               >
-                Login
+                Sign in
               </Button>
             ) : null}
             {ready && user ? (
-              <details
-                ref={accountMenuRef}
-                className="relative hidden sm:block"
-              >
+              <details ref={accountMenuRef} className="relative hidden sm:block">
                 <summary
                   className={cn(
-                    'flex cursor-pointer list-none items-center gap-1.5 rounded-full border border-stroke bg-fill-glass py-1 pl-1 pr-2 text-soft shadow-none transition-[border-color,background-color] hover:border-stroke-strong hover:bg-fill-glass-strong [&::-webkit-details-marker]:hidden',
+                    'flex cursor-pointer list-none items-center gap-2 py-1 text-soft transition-opacity hover:opacity-70 [&::-webkit-details-marker]:hidden',
                   )}
                   aria-label="Account menu"
                 >
@@ -187,33 +179,31 @@ export function Navbar() {
                       referrerPolicy="no-referrer"
                     />
                   ) : (
-                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-electric/20 text-[11px] font-bold text-electric">
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-fill-glass text-[10px] font-semibold uppercase tracking-wider text-soft">
                       {initialsFromUser(user)}
                     </span>
                   )}
-                  <ChevronDown className="h-4 w-4 shrink-0 text-muted" aria-hidden />
+                  <ChevronDown className="h-3.5 w-3.5 shrink-0 text-muted" aria-hidden />
                 </summary>
                 <div
-                  className={cn(
-                    'absolute right-0 top-[calc(100%+0.375rem)] z-[80] min-w-[11.5rem] overflow-hidden rounded-xl border border-stroke bg-matte/[0.98] py-1 shadow-[var(--shadow-card)] backdrop-blur-md',
-                  )}
+                  className="absolute right-0 top-[calc(100%+0.5rem)] z-[80] min-w-[12rem] border-l border-stroke/35 bg-matte py-2 pl-4 pr-2"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <Link
                     href="/dashboard"
-                    className="flex w-full items-center gap-2 px-3 py-2.5 text-[13px] font-medium text-muted transition-colors hover:bg-fill-glass-strong hover:text-soft"
+                    className="flex w-full items-center gap-2 py-2.5 text-[13px] font-medium text-muted transition-colors hover:text-soft"
                     onClick={() => accountMenuRef.current?.removeAttribute('open')}
                   >
-                    <LayoutDashboard className="h-4 w-4 shrink-0" aria-hidden />
+                    <LayoutDashboard className="h-4 w-4 shrink-0 opacity-70" aria-hidden />
                     Dashboard
                   </Link>
                   <button
                     type="button"
                     disabled={signingOut}
-                    className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-[13px] font-medium text-muted transition-colors hover:bg-fill-glass-strong hover:text-soft disabled:opacity-50"
+                    className="flex w-full items-center gap-2 py-2.5 text-left text-[13px] font-medium text-muted transition-colors hover:text-soft disabled:opacity-50"
                     onClick={() => void handleSignOut()}
                   >
-                    <LogOut className="h-4 w-4" aria-hidden />
+                    <LogOut className="h-4 w-4 opacity-70" aria-hidden />
                     {signingOut ? 'Signing out…' : 'Sign out'}
                   </button>
                 </div>
@@ -221,24 +211,28 @@ export function Navbar() {
             ) : null}
             <WhatsAppInquiryButton
               size="sm"
-              className="hidden h-9 max-w-[min(100%,11rem)] shrink-0 truncate px-3 text-[12px] font-semibold sm:inline-flex sm:max-w-none sm:px-4 sm:text-[13px]"
-              label="Book on WhatsApp"
-            />
+              variant="ghost"
+              showIcon={false}
+              className={cn(conciergeBtn, 'hidden sm:inline-flex')}
+              label="WhatsApp concierge"
+            >
+              <span className="flex items-center gap-1">
+                Concierge
+                <ArrowUpRight className="h-3.5 w-3.5 opacity-70" strokeWidth={2} aria-hidden />
+              </span>
+            </WhatsAppInquiryButton>
 
             <button
               type="button"
               className={cn(
-                'touch-manipulation inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-[0.625rem] border text-soft transition-[transform,border-color,background-color,color,box-shadow] duration-300 active:scale-[0.96] md:hidden',
-                open
-                  ? 'border-stroke-strong bg-fill-glass-strong shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]'
-                  : 'border-stroke bg-fill-glass shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] hover:border-stroke-strong hover:bg-fill-glass-strong',
+                'touch-manipulation inline-flex h-11 w-11 shrink-0 items-center justify-center text-soft md:hidden',
               )}
               aria-label={open ? 'Close menu' : 'Open menu'}
               aria-expanded={open}
               aria-controls="mobile-nav"
               onClick={() => setOpen((v) => !v)}
             >
-              {open ? <X className="h-[18px] w-[18px]" strokeWidth={2} /> : <Menu className="h-[18px] w-[18px]" strokeWidth={2} />}
+              {open ? <X className="h-5 w-5" strokeWidth={1.5} /> : <Menu className="h-5 w-5" strokeWidth={1.5} />}
             </button>
           </div>
         </div>
@@ -254,8 +248,8 @@ export function Navbar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.28, ease }}
-              className="fixed inset-0 z-[60] bg-matte/45 backdrop-blur-sm md:hidden"
+              transition={{ duration: 0.2, ease }}
+              className="fixed inset-0 z-[60] bg-matte/80 md:hidden"
               onClick={() => setOpen(false)}
             />
             <motion.div
@@ -264,89 +258,93 @@ export function Navbar() {
               role="dialog"
               aria-modal="true"
               aria-label="Navigation"
-              initial={{ opacity: 0, y: -12 }}
+              initial={{ opacity: 0.97, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.38, ease }}
-              className="fixed left-0 right-0 top-[var(--public-header-offset)] z-[70] max-h-[calc(100dvh-var(--public-header-offset))] overflow-y-auto overflow-x-hidden border-b border-stroke bg-matte/[0.96] supports-[backdrop-filter]:bg-matte/[0.92] backdrop-blur-md md:hidden"
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3, ease }}
+              className="fixed left-0 right-0 top-[var(--public-header-offset)] z-[70] max-h-[calc(100dvh-var(--public-header-offset))] overflow-y-auto bg-matte md:hidden"
             >
-              <div className="container-app flex flex-col gap-1 py-5">
-                <p className="px-1 pb-2 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted">
-                  Menu
-                </p>
-                {nav.map(({ href, label }, i) => {
-                  const active = pathname === href || pathname.startsWith(`${href}/`)
-                  return (
-                    <motion.div
-                      key={href}
-                      initial={{ opacity: 0, x: -8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.32, delay: 0.04 + i * 0.05, ease }}
-                    >
-                      <Link
-                        href={href}
-                        className={cn(
-                          'block min-h-12 rounded-xl px-3 py-4 text-[15px] font-medium leading-snug tracking-[-0.02em] transition-[color,background-color,box-shadow] duration-200',
-                          active
-                            ? 'bg-fill-glass-strong text-soft shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]'
-                            : 'text-muted hover:bg-fill-glass hover:text-soft',
-                        )}
-                        onClick={() => setOpen(false)}
+              <div className="container-app flex flex-col pb-12 pt-8">
+                <nav aria-label="Mobile primary" className="flex flex-col">
+                  {nav.map(({ href, label }, i) => {
+                    const active = pathname === href || pathname.startsWith(`${href}/`)
+                    return (
+                      <motion.div
+                        key={href}
+                        initial={{ opacity: 0.92, x: -4 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.25, delay: i * 0.04, ease }}
                       >
-                        {label}
-                      </Link>
-                    </motion.div>
-                  )
-                })}
+                        <Link
+                          href={href}
+                          className={cn(
+                            'block border-b border-stroke/35 py-5 text-[1.65rem] font-medium leading-none tracking-[-0.035em]',
+                            active ? 'text-soft' : 'text-muted',
+                          )}
+                          onClick={() => setOpen(false)}
+                        >
+                          {label}
+                        </Link>
+                      </motion.div>
+                    )
+                  })}
+                </nav>
 
-                <div className="mt-1">
-                  <ThemeToggle size="comfortable" className="w-full justify-center" />
+                <div className="mt-10 border-b border-stroke/35 pb-10">
+                  <ThemeToggle size="comfortable" className="w-full justify-center rounded-none border-stroke/40 bg-transparent shadow-none" />
                 </div>
 
-                <div className="mt-3">
+                <div className="mt-10 space-y-6">
                   <WhatsAppInquiryButton
                     size="lg"
-                    className="min-h-[3.25rem] w-full text-[15px] font-semibold"
-                    label="Book on WhatsApp"
+                    variant="ghost"
+                    showIcon={false}
+                    className={cn(conciergeBtn, 'w-full justify-start py-3 text-left text-[12px]')}
+                    label="WhatsApp concierge"
                     onClick={() => setOpen(false)}
-                  />
+                  >
+                    <span className="flex w-full items-center justify-between gap-3">
+                      <span className="flex flex-col items-start gap-1">
+                        <span>Reserve with concierge</span>
+                        <span className="text-[11px] font-normal normal-case tracking-normal text-muted">
+                          WhatsApp · same-day response when available
+                        </span>
+                      </span>
+                      <ArrowUpRight className="h-5 w-5 shrink-0 opacity-60" strokeWidth={1.5} />
+                    </span>
+                  </WhatsAppInquiryButton>
                 </div>
 
-                <div className="mt-5 grid gap-3 border-t border-stroke pt-5">
+                <div className="mt-12 flex flex-col gap-4 border-t border-stroke/35 pt-10">
                   {ready ? (
                     user ? (
                       <>
                         <Button
-                          variant="secondary"
+                          variant="ghost"
                           size="lg"
                           to="/dashboard"
-                          className="min-h-[3.25rem] w-full text-[15px] font-medium hover:translate-y-0 active:translate-y-0"
+                          className="h-auto min-h-0 justify-start rounded-none border-0 bg-transparent px-0 py-3 text-left text-[15px] font-medium text-soft shadow-none hover:bg-transparent"
                           onClick={() => setOpen(false)}
                         >
-                          <LayoutDashboard className="h-[18px] w-[18px]" aria-hidden />
                           Dashboard
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="lg"
-                          className="min-h-[3.25rem] w-full text-[15px] font-medium hover:translate-y-0 active:translate-y-0"
+                        <button
+                          type="button"
+                          className="py-3 text-left text-[15px] font-medium text-muted transition-colors hover:text-soft disabled:opacity-50"
                           disabled={signingOut}
                           onClick={() => void handleSignOut()}
                         >
-                          <LogOut className="h-[18px] w-[18px]" aria-hidden />
                           {signingOut ? 'Signing out…' : 'Sign out'}
-                        </Button>
+                        </button>
                       </>
                     ) : (
-                      <Button
-                        variant="outline"
-                        size="lg"
-                        to="/login"
-                        className="min-h-[3.25rem] w-full text-[15px] font-medium hover:translate-y-0 active:translate-y-0"
+                      <Link
+                        href="/login"
+                        className="py-3 text-[15px] font-medium text-soft"
                         onClick={() => setOpen(false)}
                       >
-                        Login
-                      </Button>
+                        Sign in
+                      </Link>
                     )
                   ) : null}
                 </div>

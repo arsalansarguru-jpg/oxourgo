@@ -1,121 +1,124 @@
 import Link from 'next/link'
 import { BRAND } from '@/constants/brand'
-import { BrandLogo } from '@/components/layout/brand-logo'
-
-const linkClass =
-  'text-sm text-muted transition-[color,opacity] duration-300 hover:text-soft hover:opacity-100'
 
 export function Footer() {
   return (
-    <footer className="border-t border-stroke bg-carbon-deep">
-      <div className="container-app py-[clamp(3.25rem,6vw,4.75rem)] 2xl:max-w-[var(--container-wide)]">
-        <div className="grid grid-cols-1 gap-10 md:gap-x-8 md:gap-y-10 md:[grid-template-columns:minmax(0,min(100%,20rem))_minmax(0,1fr)] lg:grid-cols-[minmax(0,min(100%,22rem))_repeat(3,minmax(0,1fr))] lg:gap-x-8 lg:gap-y-0 lg:items-start">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2.5">
-              <span className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-stroke bg-fill-glass-strong">
-                <BrandLogo className="p-[3px]" />
-              </span>
-              <span className="text-[0.9375rem] font-bold tracking-[-0.02em] text-soft">{BRAND.name}</span>
-            </div>
-            <p className="mt-4 max-w-sm text-sm leading-relaxed text-muted">
-              Experience premium self-drive car rentals in Mumbai. Verified cars, transparent pricing,
-              and 24x7 support.
+    <footer className="border-t border-stroke/30 bg-matte">
+      <div className="container-app py-20 sm:py-24 lg:py-28 xl:py-32 2xl:max-w-[var(--container-wide)]">
+        <div className="flex flex-col gap-16 lg:flex-row lg:items-start lg:justify-between lg:gap-12">
+          <div className="max-w-xl lg:max-w-[min(100%,28rem)] xl:max-w-lg">
+            <p className="text-[clamp(2rem,4.5vw,3.5rem)] font-medium leading-[1.05] tracking-[-0.045em] text-soft">
+              {BRAND.name}
             </p>
+            <p className="mt-4 text-[11px] font-medium uppercase tracking-[0.3em] text-muted">{BRAND.tagline}</p>
+            <p className="mt-10 max-w-md text-[15px] font-normal leading-[1.75] text-muted">
+              Premium self-drive in Mumbai — curated cars, transparent tariffs, and a concierge who stays with you
+              from first message to handover.
+            </p>
+            <p className="mt-10 text-[13px] leading-relaxed text-muted">{BRAND.address}</p>
           </div>
 
-          <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-soft/95">Company</p>
-            <ul className="mt-4 flex flex-col gap-2">
-              <li>
-                <Link href="/about" className={linkClass}>
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link href="/fleet" className={linkClass}>
-                  Our Fleet
-                </Link>
-              </li>
-              <li>
-                <Link href="/support" className={linkClass}>
-                  Support
-                </Link>
-              </li>
-              <li>
-                <Link href="/careers" className={linkClass}>
-                  Careers
-                </Link>
-              </li>
-            </ul>
-          </div>
+          <div className="flex min-w-0 flex-1 flex-col gap-14 lg:max-w-md lg:flex-none xl:max-w-lg">
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-muted">Discover</p>
+              <ul className="mt-6 flex flex-col gap-4">
+                <li>
+                  <Link href="/fleet" className="text-[15px] font-normal text-soft transition-opacity hover:opacity-65">
+                    Fleet
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/about" className="text-[15px] font-normal text-soft transition-opacity hover:opacity-65">
+                    About
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/support" className="text-[15px] font-normal text-soft transition-opacity hover:opacity-65">
+                    Support
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/careers" className="text-[15px] font-normal text-soft transition-opacity hover:opacity-65">
+                    Careers
+                  </Link>
+                </li>
+              </ul>
+            </div>
 
-          <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-soft/95">Legal</p>
-            <ul className="mt-4 flex flex-col gap-2">
-              <li>
-                <Link href="/terms" className={linkClass}>
-                  Terms &amp; Conditions
-                </Link>
-              </li>
-              <li>
-                <Link href="/privacy" className={linkClass}>
-                  Privacy Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/refund" className={linkClass}>
-                  Refund Policy
-                </Link>
-              </li>
-              <li>
-                <Link href="/insurance" className={linkClass}>
-                  Insurance
-                </Link>
-              </li>
-            </ul>
-          </div>
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-muted">Legal &amp; policies</p>
+              <ul className="mt-6 flex flex-col gap-3">
+                <li>
+                  <Link href="/terms" className="text-[14px] text-muted transition-colors hover:text-soft">
+                    Terms
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/privacy" className="text-[14px] text-muted transition-colors hover:text-soft">
+                    Privacy
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/refund" className="text-[14px] text-muted transition-colors hover:text-soft">
+                    Refunds
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/insurance" className="text-[14px] text-muted transition-colors hover:text-soft">
+                    Insurance
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/sitemap" className="text-[14px] text-muted transition-colors hover:text-soft">
+                    Sitemap
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/accessibility" className="text-[14px] text-muted transition-colors hover:text-soft">
+                    Accessibility
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/cookies" className="text-[14px] text-muted transition-colors hover:text-soft">
+                    Cookies
+                  </Link>
+                </li>
+              </ul>
+            </div>
 
-          <div className="min-w-0">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-soft/95">Contact</p>
-            <ul className="mt-4 flex flex-col gap-2 text-sm text-muted">
-              <li>{BRAND.address}</li>
-              <li>
-                <a href={`tel:${BRAND.phoneTel}`} className="transition-colors duration-300 hover:text-soft">
-                  {BRAND.phoneDisplay}
-                </a>
-              </li>
-              <li>
-                <a href={`mailto:${BRAND.email}`} className="transition-colors duration-300 hover:text-soft">
-                  {BRAND.email}
-                </a>
-              </li>
-              <li>
-                <a
-                  href={BRAND.whatsapp}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="transition-colors duration-300 hover:text-soft"
-                >
-                  WhatsApp concierge
-                </a>
-              </li>
-            </ul>
+            <div>
+              <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-muted">Contact</p>
+              <div className="mt-6 space-y-4 text-[15px] leading-relaxed">
+                <p>
+                  <a href={`tel:${BRAND.phoneTel}`} className="text-soft transition-opacity hover:opacity-65">
+                    {BRAND.phoneDisplay}
+                  </a>
+                </p>
+                <p>
+                  <a href={`mailto:${BRAND.email}`} className="text-soft transition-opacity hover:opacity-65">
+                    {BRAND.email}
+                  </a>
+                </p>
+                <p>
+                  <a
+                    href={BRAND.whatsapp}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-soft transition-opacity hover:opacity-65"
+                  >
+                    WhatsApp concierge
+                  </a>
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col gap-4 border-t border-stroke pt-9 text-sm text-muted md:flex-row md:items-center md:justify-between">
-          <p>© 2026 Oxour Go. All rights reserved.</p>
-          <div className="flex flex-wrap gap-x-6 gap-y-2">
-            <Link href="/sitemap" className={linkClass}>
-              Sitemap
-            </Link>
-            <Link href="/accessibility" className={linkClass}>
-              Accessibility
-            </Link>
-            <Link href="/cookies" className={linkClass}>
-              Cookie Policy
-            </Link>
-          </div>
+        <div className="mt-20 flex flex-col gap-4 border-t border-stroke/25 pt-10 text-[13px] text-muted sm:flex-row sm:items-center sm:justify-between">
+          <p>© 2026 Oxour Go</p>
+          <p className="max-w-sm text-[13px] leading-relaxed sm:text-right">
+            Built for travellers who prefer discretion over dashboards.
+          </p>
         </div>
       </div>
     </footer>

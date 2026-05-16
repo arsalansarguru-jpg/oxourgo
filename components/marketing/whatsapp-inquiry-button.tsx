@@ -11,6 +11,8 @@ type WhatsAppInquiryButtonProps = Omit<ComponentProps<typeof Button>, 'href' | '
   vehicle?: VehicleInquiryContext
   prefillText?: string
   label?: string
+  /** When false, hides the default WhatsApp glyph (use for typographic / editorial CTAs). */
+  showIcon?: boolean
 }
 
 /** Opens WhatsApp concierge with a contextual prefill (inquiry-only soft launch). */
@@ -18,6 +20,7 @@ export function WhatsAppInquiryButton({
   vehicle,
   prefillText,
   label = 'Book on WhatsApp',
+  showIcon = true,
   className,
   children,
   ...props
@@ -33,11 +36,11 @@ export function WhatsAppInquiryButton({
       href={href}
       target="_blank"
       rel="noopener noreferrer"
-      className={cn('gap-2', className)}
+      className={cn(showIcon && 'gap-2', className)}
       onClick={onClick}
       {...buttonProps}
     >
-      <MessageCircle className="h-4 w-4 shrink-0" aria-hidden />
+      {showIcon ? <MessageCircle className="h-4 w-4 shrink-0" aria-hidden /> : null}
       {children ?? label}
     </Button>
   )
