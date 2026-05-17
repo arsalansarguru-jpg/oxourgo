@@ -13,10 +13,11 @@ import { Button } from '@/components/ui/Button'
 import { BrandLogo } from '@/components/layout/brand-logo'
 import { ThemeToggle } from '@/components/layout/theme-toggle'
 
+import { PUBLIC_EXTRA_NAV, SITE_PRIMARY_NAV } from '@/lib/nav/site-nav'
+
 const nav = [
-  { href: '/fleet', label: 'Fleet' },
-  { href: '/about', label: 'About' },
-  { href: '/support', label: 'Support' },
+  ...SITE_PRIMARY_NAV.map(({ href, label }) => ({ href, label })),
+  ...PUBLIC_EXTRA_NAV,
 ] as const
 
 function avatarUrlFromUser(user: User): string | null {
@@ -87,7 +88,10 @@ export function Navbar() {
           <nav aria-label="Primary" className="hidden md:block">
             <ul className="flex items-center gap-1">
               {nav.map(({ href, label }) => {
-                const active = pathname === href || pathname.startsWith(`${href}/`)
+                const active =
+                  href === '/'
+                    ? pathname === '/'
+                    : pathname === href || pathname.startsWith(`${href}/`)
                 return (
                   <li key={href}>
                     <Link
@@ -176,7 +180,10 @@ export function Navbar() {
           <div className="absolute inset-x-0 top-[var(--public-header-offset)] max-h-[calc(100dvh-var(--public-header-offset))] overflow-y-auto border-b border-stroke bg-carbon shadow-[var(--shadow-card-hover)]">
             <div className="container-app space-y-1 py-3">
               {nav.map(({ href, label }) => {
-                const active = pathname === href || pathname.startsWith(`${href}/`)
+                const active =
+                  href === '/'
+                    ? pathname === '/'
+                    : pathname === href || pathname.startsWith(`${href}/`)
                 return (
                   <Link
                     key={href}

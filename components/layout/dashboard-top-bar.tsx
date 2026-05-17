@@ -8,7 +8,9 @@ import type { User } from '@supabase/supabase-js'
 
 import { DashboardNotificationBell } from '@/features/dashboard/dashboard-notification-bell'
 import { BrandLogo } from '@/components/layout/brand-logo'
+import { SitePrimaryNav } from '@/components/layout/site-primary-nav'
 import { ThemeToggle } from '@/components/layout/theme-toggle'
+import { isDashboardPath } from '@/lib/nav/site-nav'
 import { useSupabase } from '@/hooks/use-supabase'
 import { useSupabaseAuthUser } from '@/hooks/use-supabase-auth-user'
 import type { NotificationRow } from '@/lib/supabase/database.types'
@@ -70,9 +72,17 @@ export function DashboardTopBar({ userId, notificationUnread, notificationPrevie
   return (
     <header className="sticky top-0 z-50 border-b border-stroke bg-carbon pt-[var(--safe-top)]">
       <div className="container-app flex min-h-14 items-center justify-between gap-3 lg:min-h-16">
-        <Link href="/dashboard" className="flex min-w-0 shrink-0 items-center gap-2" aria-label="Oxour Go dashboard home">
-          <BrandLogo priority className="h-8 w-auto max-w-[7rem]" />
-        </Link>
+        <div className="flex min-w-0 items-center gap-4 lg:gap-6">
+          <Link href="/" className="flex min-w-0 shrink-0 items-center gap-2" aria-label="Oxour Go home">
+            <BrandLogo priority className="h-8 w-auto max-w-[7rem]" />
+          </Link>
+          <SitePrimaryNav className="hidden md:block" />
+          {isDashboardPath(pathname) ? (
+            <span className="hidden rounded-md border border-stroke bg-fill-glass px-2 py-1 text-[11px] font-medium text-muted lg:inline">
+              Account
+            </span>
+          ) : null}
+        </div>
 
         <div className="flex min-w-0 items-center justify-end gap-2">
           <DashboardNotificationBell

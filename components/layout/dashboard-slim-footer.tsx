@@ -13,6 +13,18 @@ export function DashboardSlimFooter() {
         <span aria-hidden className="text-silver/50">
           ·
         </span>
+        <Link href="/" className="text-electric hover:underline">
+          Home
+        </Link>
+        <span aria-hidden>·</span>
+        <Link href="/fleet" className="text-electric hover:underline">
+          Fleet
+        </Link>
+        <span aria-hidden>·</span>
+        <Link href="/support" className="text-electric hover:underline">
+          Support
+        </Link>
+        <span aria-hidden>·</span>
         <Link href="/terms" className="text-electric hover:underline">
           Terms
         </Link>

@@ -6,23 +6,25 @@ import {
   Bell,
   CreditCard,
   FileBadge,
-  Home,
+  LayoutDashboard,
   LayoutGrid,
   Settings,
   ShieldCheck,
 } from 'lucide-react'
 
+import { SitePrimaryNav } from '@/components/layout/site-primary-nav'
+import { DASHBOARD_ACCOUNT_NAV } from '@/lib/nav/site-nav'
 import { cn } from '@/lib/utils/cn'
 import { cardPaddingCompact, cardSurfaceBase } from '@/components/ui/card-tokens'
 
-const nav = [
-  { href: '/dashboard', label: 'Overview', icon: Home },
-  { href: '/dashboard/bookings', label: 'My bookings', icon: LayoutGrid },
-  { href: '/dashboard/notifications', label: 'Notifications', icon: Bell },
-  { href: '/dashboard/kyc', label: 'KYC center', icon: ShieldCheck },
-  { href: '/dashboard/payments', label: 'Payments', icon: CreditCard },
-  { href: '/dashboard/settings', label: 'Profile', icon: Settings },
-] as const
+const accountIcons = {
+  '/dashboard': LayoutDashboard,
+  '/dashboard/bookings': LayoutGrid,
+  '/dashboard/notifications': Bell,
+  '/dashboard/kyc': ShieldCheck,
+  '/dashboard/payments': CreditCard,
+  '/dashboard/settings': Settings,
+} as const
 
 export type CustomerDashboardShellProps = {
   displayName: string
@@ -52,8 +54,16 @@ export function CustomerDashboardShell({
             {verificationLabel}
           </p>
         </div>
-        <nav className="mt-4 flex flex-col gap-0.5" aria-label="Customer dashboard">
-          {nav.map(({ href, label, icon: Icon }) => {
+
+        <div className="mt-4 border-t border-stroke pt-4">
+          <p className="mb-2 px-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">Oxour Go</p>
+          <SitePrimaryNav size="compact" />
+        </div>
+
+        <nav className="mt-4 flex flex-col gap-0.5 border-t border-stroke pt-4" aria-label="Account">
+          <p className="mb-2 px-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">Your account</p>
+          {DASHBOARD_ACCOUNT_NAV.map(({ href, label }) => {
+            const Icon = accountIcons[href as keyof typeof accountIcons] ?? LayoutDashboard
             const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
             return (
               <Link

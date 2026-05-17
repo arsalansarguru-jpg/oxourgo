@@ -4,12 +4,22 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Car, Headphones, Home, MessageCircle } from 'lucide-react'
 import { BRAND } from '@/constants/brand'
+import { SITE_PRIMARY_NAV } from '@/lib/nav/site-nav'
 import { cn } from '@/lib/utils/cn'
 
+const siteIcons = {
+  '/': Home,
+  '/fleet': Car,
+  '/support': Headphones,
+} as const
+
 const items = [
-  { href: '/', label: 'Home', icon: Home, match: (p: string) => p === '/' },
-  { href: '/fleet', label: 'Fleet', icon: Car, match: (p: string) => p.startsWith('/fleet') },
-  { href: '/support', label: 'Support', icon: Headphones, match: (p: string) => p.startsWith('/support') },
+  ...SITE_PRIMARY_NAV.map(({ href, label, match }) => ({
+    href,
+    label,
+    icon: siteIcons[href as keyof typeof siteIcons] ?? Home,
+    match,
+  })),
   {
     href: BRAND.whatsapp,
     label: 'Chat',

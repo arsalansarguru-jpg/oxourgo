@@ -7,6 +7,7 @@ import {
   Bell,
   ChevronsLeft,
   ChevronsRight,
+  Home,
   LayoutGrid,
   Menu,
   UserRound,
@@ -131,6 +132,18 @@ function SidebarFooter({
             {expanded ? <span>Alerts</span> : null}
           </Link>
         ) : null}
+        <Link
+          href="/"
+          onClick={onNavigate}
+          className={cn(
+            'flex items-center gap-2 rounded-md px-2.5 py-2 text-xs font-medium text-muted hover:bg-fill-glass hover:text-soft',
+            !expanded && 'justify-center p-2',
+          )}
+          title="Marketing home"
+        >
+          <Home className="h-4 w-4 shrink-0" aria-hidden />
+          {expanded ? <span>Home</span> : null}
+        </Link>
         <Link
           href="/dashboard"
           onClick={onNavigate}
