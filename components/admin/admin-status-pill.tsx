@@ -1,9 +1,9 @@
 import { cn } from '@/lib/utils/cn'
 
 const styles: Record<string, string> = {
-  pending_payment: 'border-amber-400/35 bg-amber-500/10 text-amber-100',
-  confirmed: 'border-emerald-400/35 bg-emerald-500/10 text-emerald',
-  active: 'border-sky-400/40 bg-sky-500/12 text-sky-100',
+  pending_payment: 'border-amber-200 bg-amber-50 text-amber-800 theme-dark:border-amber-400/35 theme-dark:bg-amber-500/10 theme-dark:text-amber-100',
+  confirmed: 'border-emerald-200 bg-emerald-50 text-emerald-800 theme-dark:border-emerald-400/35 theme-dark:bg-emerald-500/10 theme-dark:text-emerald',
+  active: 'border-sky-200 bg-sky-50 text-sky-800 theme-dark:border-sky-400/40 theme-dark:bg-sky-500/12 theme-dark:text-sky-100',
   cancelled: 'border-stroke-strong bg-fill-glass-strong text-muted',
   completed: 'border-sky-400/35 bg-sky-500/10 text-sky-100',
   pending: 'border-amber-400/35 bg-amber-500/10 text-amber-100',
