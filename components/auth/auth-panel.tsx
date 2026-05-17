@@ -20,8 +20,7 @@ import { DataLoadErrorPanel } from '@/components/ui/data-load-error'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { BRAND } from '@/constants/brand'
-import { buildAuthCallbackUrl } from '@/lib/auth/callback-url'
-import { getCanonicalSiteOrigin } from '@/lib/auth/canonical-origin'
+import { getOAuthCallbackUrl } from '@/lib/auth/callback-url'
 import { safeNextPath } from '@/lib/auth/safe-next-path'
 import { formatAuthError } from '@/lib/errors/format-auth-error'
 import { normalizePhoneToE164 } from '@/lib/auth/normalize-phone'
@@ -194,10 +193,11 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
 
   const sb = supabase
 
-  const authOrigin =
-    typeof window !== 'undefined' ? getCanonicalSiteOrigin(window.location.origin) : getCanonicalSiteOrigin()
   const nextPath = safeNextPath(redirectTo, '/dashboard')
-  const callbackUrl = authOrigin ? buildAuthCallbackUrl(authOrigin, nextPath) : ''
+  const callbackUrl =
+    typeof window !== 'undefined'
+      ? getOAuthCallbackUrl(nextPath, window.location.origin)
+      : getOAuthCallbackUrl(nextPath)
 
   const resetFlowMessages = () => {
     setError(null)
@@ -220,6 +220,11 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
         provider: 'google',
         options: {
           redirectTo: callbackUrl,
+          skipBrowserRedirect: false,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'select_account',
+          },
         },
       })
       if (err) {
