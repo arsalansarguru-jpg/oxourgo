@@ -24,3 +24,10 @@ export const DASHBOARD_ACCOUNT_NAV = [
 export function isDashboardPath(pathname: string): boolean {
   return pathname === '/dashboard' || pathname.startsWith('/dashboard/')
 }
+
+/** Groups routes that share the same chrome — used to avoid jarring transitions across layout swaps. */
+export function navigationShellKey(pathname: string): 'public' | 'dashboard' | 'admin' {
+  if (pathname.startsWith('/admin')) return 'admin'
+  if (isDashboardPath(pathname)) return 'dashboard'
+  return 'public'
+}
