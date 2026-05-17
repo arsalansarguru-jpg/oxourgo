@@ -5,8 +5,9 @@ import { CustomerDashboardHome } from '@/features/dashboard/customer-dashboard-h
 import { getAuthenticatedUser } from '@/lib/auth/server'
 import { listBookingsForUser, unwrapListBookingsResult } from '@/lib/customer/bookings-queries'
 import { listKycDocuments } from '@/lib/customer/kyc-queries'
+import { getCustomerProfileSnapshot } from '@/lib/customer/profile-queries'
 import { isProfileKycApprovedForBooking } from '@/lib/kyc/kyc-booking-eligible'
-import { createClient } from '@/lib/supabase/server'
+import { logUnknownError } from '@/lib/errors/safe-user-message'
 
 export const dynamic = 'force-dynamic'
 
@@ -31,26 +32,36 @@ export default async function DashboardPage({
       ? 'That area is restricted to operations staff. You are on your member dashboard.'
       : null
 
-  const supabase = await createClient()
-  const [bookingsResult, kycDocs, profileRes] = await Promise.all([
-    listBookingsForUser(user.id),
-    listKycDocuments(user.id),
-    supabase.from('profiles').select('verification_tier, kyc_status').eq('user_id', user.id).maybeSingle(),
-  ])
+  try {
+    const [bookingsResult, kycDocs, profile] = await Promise.all([
+      listBookingsForUser(user.id),
+      listKycDocuments(user.id),
+      getCustomerProfileSnapshot(user.id),
+    ])
 
-  const profile = profileRes.data
-  const verificationTier = (profile?.verification_tier as string | undefined) ?? 'basic'
-  const kycStatus = (profile?.kyc_status as string | undefined) ?? 'not_started'
-  const bookingCleared = isProfileKycApprovedForBooking(profile)
+    const bookingCleared = isProfileKycApprovedForBooking(profile)
 
-  return (
-    <CustomerDashboardHome
-      bookings={unwrapListBookingsResult(bookingsResult)}
-      kycUploadedCount={kycDocs.length}
-      verificationTier={verificationTier}
-      kycStatus={kycStatus}
-      bookingCleared={bookingCleared}
-      accessNotice={accessNotice}
-    />
-  )
+    return (
+      <CustomerDashboardHome
+        bookings={unwrapListBookingsResult(bookingsResult)}
+        kycUploadedCount={kycDocs.length}
+        verificationTier={profile.verification_tier}
+        kycStatus={profile.kyc_status}
+        bookingCleared={bookingCleared}
+        accessNotice={accessNotice}
+      />
+    )
+  } catch (error) {
+    logUnknownError('[dashboard page]', error)
+    return (
+      <CustomerDashboardHome
+        bookings={[]}
+        kycUploadedCount={0}
+        verificationTier="basic"
+        kycStatus="not_started"
+        bookingCleared={false}
+        accessNotice={accessNotice}
+      />
+    )
+  }
 }

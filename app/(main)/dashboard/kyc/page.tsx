@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { KycCenterClient } from '@/features/dashboard/kyc-center-client'
 import { getAuthenticatedUser } from '@/lib/auth/server'
 import { listKycDocuments } from '@/lib/customer/kyc-queries'
-import { createClient } from '@/lib/supabase/server'
+import { DEFAULT_CUSTOMER_PROFILE, getCustomerProfileSnapshot } from '@/lib/customer/profile-queries'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,22 +12,17 @@ export default async function KycPage() {
   if (!user) {
     redirect(`/login?${new URLSearchParams({ redirect: '/dashboard/kyc' }).toString()}`)
   }
-  const supabase = await createClient()
-  const [docs, profileRes] = await Promise.all([
+  const [docs, profile] = await Promise.all([
     listKycDocuments(user.id),
-    supabase
-      .from('profiles')
-      .select('full_name, phone, avatar_url, kyc_status, kyc_submitted_at, kyc_approved_at')
-      .eq('user_id', user.id)
-      .maybeSingle(),
+    getCustomerProfileSnapshot(user.id),
   ])
   const initialProfile = {
-    full_name: profileRes.data?.full_name ?? null,
-    phone: profileRes.data?.phone ?? null,
-    avatar_url: profileRes.data?.avatar_url ?? null,
-    kyc_status: (profileRes.data?.kyc_status as string | undefined) ?? 'not_started',
-    kyc_submitted_at: profileRes.data?.kyc_submitted_at ?? null,
-    kyc_approved_at: profileRes.data?.kyc_approved_at ?? null,
+    full_name: profile.full_name ?? DEFAULT_CUSTOMER_PROFILE.full_name,
+    phone: profile.phone ?? DEFAULT_CUSTOMER_PROFILE.phone,
+    avatar_url: profile.avatar_url ?? DEFAULT_CUSTOMER_PROFILE.avatar_url,
+    kyc_status: profile.kyc_status,
+    kyc_submitted_at: profile.kyc_submitted_at,
+    kyc_approved_at: profile.kyc_approved_at,
   }
   return (
     <KycCenterClient userId={user.id} initialDocs={docs} initialProfile={initialProfile} />

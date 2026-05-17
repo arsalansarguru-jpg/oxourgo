@@ -5,7 +5,8 @@ import { CustomerDashboardShell } from '@/components/dashboard/customer-dashboar
 import { DashboardLayout as DashboardChrome } from '@/components/layout/DashboardLayout'
 import { getAuthenticatedUser } from '@/lib/auth/server'
 import { countUnreadNotifications, listNotificationsForUser } from '@/lib/customer/notifications-queries'
-import { createClient } from '@/lib/supabase/server'
+import { getCustomerProfileSnapshot } from '@/lib/customer/profile-queries'
+import { logUnknownError } from '@/lib/errors/safe-user-message'
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
@@ -17,36 +18,36 @@ export default async function DashboardRouteLayout({ children }: { children: Rea
     redirect(`/login?${new URLSearchParams({ redirect: '/dashboard' }).toString()}`)
   }
 
-  const supabase = await createClient()
-  const { data: profile } = await supabase.from('profiles').select('*').eq('user_id', user.id).maybeSingle()
+  try {
+    const profile = await getCustomerProfileSnapshot(user.id)
 
-  const displayName =
-    (profile?.full_name as string | undefined)?.trim() ||
-    (typeof user.user_metadata?.full_name === 'string' ? user.user_metadata.full_name : null) ||
-    user.email?.split('@')[0] ||
-    'Member'
+    const displayName =
+      profile.full_name?.trim() ||
+      (typeof user.user_metadata?.full_name === 'string' ? user.user_metadata.full_name : null) ||
+      user.email?.split('@')[0] ||
+      'Member'
 
-  const tier = (profile?.verification_tier as string | undefined) ?? 'basic'
-  const kycLifecycleStatus = (profile?.kyc_status as string | undefined) ?? 'not_started'
-  const verificationLabel =
-    kycLifecycleStatus === 'approved'
-      ? 'Account verified'
-      : kycLifecycleStatus === 'rejected'
-        ? 'KYC needs your attention'
-        : kycLifecycleStatus === 'pending'
-          ? 'Verification in review'
-          : tier === 'verified'
-            ? 'Account verified'
-            : tier === 'basic'
-              ? 'Verification in progress'
-              : 'Complete your profile'
+    const tier = profile.verification_tier
+    const kycLifecycleStatus = profile.kyc_status
+    const verificationLabel =
+      kycLifecycleStatus === 'approved'
+        ? 'Account verified'
+        : kycLifecycleStatus === 'rejected' || kycLifecycleStatus === 'resubmission_required'
+          ? 'KYC needs your attention'
+          : kycLifecycleStatus === 'pending'
+            ? 'Verification in review'
+            : tier === 'verified'
+              ? 'Account verified'
+              : tier === 'basic'
+                ? 'Verification in progress'
+                : 'Complete your profile'
 
-  const [notificationUnread, notificationPreview] = await Promise.all([
-    countUnreadNotifications(user.id).catch(() => 0),
-    listNotificationsForUser(user.id, 8).catch(() => []),
-  ])
+    const [notificationUnread, notificationPreview] = await Promise.all([
+      countUnreadNotifications(user.id).catch(() => 0),
+      listNotificationsForUser(user.id, 8).catch(() => []),
+    ])
 
-  return (
+    return (
     <DashboardChrome
       userId={user.id}
       notificationUnread={notificationUnread}
@@ -61,5 +62,20 @@ export default async function DashboardRouteLayout({ children }: { children: Rea
         {children}
       </CustomerDashboardShell>
     </DashboardChrome>
-  )
+    )
+  } catch (error) {
+    logUnknownError('[dashboard layout]', error)
+    return (
+      <DashboardChrome userId={user.id} notificationUnread={0} notificationPreview={[]}>
+        <CustomerDashboardShell
+          displayName={user.email?.split('@')[0] ?? 'Member'}
+          email={user.email ?? undefined}
+          verificationLabel="Verification in progress"
+          kycLifecycleStatus="not_started"
+        >
+          {children}
+        </CustomerDashboardShell>
+      </DashboardChrome>
+    )
+  }
 }

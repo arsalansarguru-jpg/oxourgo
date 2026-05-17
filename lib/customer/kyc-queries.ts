@@ -1,5 +1,7 @@
 import 'server-only'
 
+import { logPostgrestError } from '@/lib/errors/safe-user-message'
+import { isMissingRelationError } from '@/lib/supabase/postgrest-errors'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/database.types'
 
@@ -13,6 +15,12 @@ export async function listKycDocuments(userId: string): Promise<KycDocumentRow[]
     .eq('user_id', userId)
     .order('created_at', { ascending: false })
 
-  if (error || !data) return []
+  if (error) {
+    if (!isMissingRelationError(error)) {
+      logPostgrestError('[listKycDocuments]', error)
+    }
+    return []
+  }
+  if (!data) return []
   return data as KycDocumentRow[]
 }
