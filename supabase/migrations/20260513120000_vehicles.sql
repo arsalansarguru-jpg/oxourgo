@@ -1,4 +1,4 @@
--- Public catalog: vehicles shown on marketing site and fleet (separate from legacy admin `cars`).
+﻿-- Public catalog: vehicles shown on marketing site and fleet (separate from legacy admin `cars`).
 
 create table if not exists public.vehicles (
   id uuid primary key default gen_random_uuid(),
@@ -19,6 +19,13 @@ create table if not exists public.vehicles (
 );
 
 create index if not exists vehicles_featured_created_idx on public.vehicles (featured desc, created_at desc);
+
+alter table public.vehicles add column if not exists availability_status text;
+
+update public.vehicles
+set availability_status = 'available'
+where availability_status is null;
+
 create index if not exists vehicles_availability_idx on public.vehicles (availability_status);
 
 comment on table public.vehicles is 'Customer-facing fleet rows for homepage and /fleet; image = absolute URL or path in public fleet storage bucket.';

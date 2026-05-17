@@ -27,6 +27,20 @@ export async function syncProfileKycFromDocuments(
     return kycActionDbFailed('syncProfileKycFromDocuments:select_docs', docsErr)
   }
 
+  const { error: ensureProfileErr } = await client.from('profiles').upsert(
+    { user_id: userId, updated_at: nowIso },
+    { onConflict: 'user_id', ignoreDuplicates: true },
+  )
+
+  if (ensureProfileErr) {
+    console.error('[syncProfileKycFromDocuments] ensure profile row failed', {
+      userId,
+      message: ensureProfileErr.message,
+      code: ensureProfileErr.code,
+    })
+    return kycActionDbFailed('syncProfileKycFromDocuments:ensure_profile', ensureProfileErr)
+  }
+
   const { data: profile, error: profErr } = await client
     .from('profiles')
     .select('kyc_submitted_at, kyc_approved_at')

@@ -7,6 +7,7 @@ import { writeAdminAudit } from '@/lib/admin/audit'
 import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from '@/lib/audit/actions'
 import { requirePermissionForAdminAction } from '@/lib/auth/admin-action-auth'
 import { onKycDecision } from '@/lib/notifications/events'
+import { KYC_STORAGE_BUCKET } from '@/lib/kyc/constants'
 import { syncProfileKycFromDocuments } from '@/lib/kyc/sync-profile-kyc'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { adminActionDbFailed, logUnknownError, SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
@@ -137,10 +138,20 @@ export async function adminGetKycSignedUrlAction(
     const raw = ttlSeconds ?? SIGNED_URL_DEFAULT
     const expiresIn = Math.min(SIGNED_URL_MAX, Math.max(SIGNED_URL_MIN, Number.isFinite(raw) ? raw : SIGNED_URL_DEFAULT))
 
-    const { data: signed, error: signErr } = await admin.storage.from('kyc').createSignedUrl(doc.storage_path, expiresIn)
+    const { data: signed, error: signErr } = await admin.storage
+      .from(KYC_STORAGE_BUCKET)
+      .createSignedUrl(doc.storage_path, expiresIn)
 
     if (signErr || !signed?.signedUrl) {
-      if (signErr) logUnknownError('adminGetKycSignedUrlAction:storage', signErr)
+      if (signErr) {
+        console.error('[adminGetKycSignedUrlAction] signed URL failed', {
+          bucket: KYC_STORAGE_BUCKET,
+          storagePath: doc.storage_path,
+          message: signErr.message,
+          statusCode: signErr.statusCode,
+        })
+        logUnknownError('adminGetKycSignedUrlAction:storage', signErr)
+      }
       return { ok: false, message: SAFE_USER_MESSAGE.generic }
     }
 

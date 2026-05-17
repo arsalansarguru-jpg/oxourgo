@@ -11,10 +11,10 @@ import { POSTHOG_EVENTS } from '@/lib/analytics/posthog-events'
 import type { KycDocumentRow } from '@/lib/customer/kyc-queries'
 import type { Database } from '@/lib/supabase/database.types'
 import type { KycDocumentTypeId } from '@/lib/kyc/constants'
-import { KYC_ID_ACCEPT, KYC_MAX_FILE_BYTES, KYC_SELFIE_ACCEPT } from '@/lib/kyc/constants'
+import { KYC_ID_ACCEPT, KYC_MAX_FILE_BYTES, KYC_SELFIE_ACCEPT, KYC_STORAGE_BUCKET } from '@/lib/kyc/constants'
 import { inferKycContentType, isAllowedKycMime } from '@/lib/kyc/mime'
 import { buildKycObjectPath } from '@/lib/kyc/object-path'
-import { mapUnknownToKycUpload, safeMessageForKycUploadCode } from '@/lib/kyc/upload-errors'
+import { mapUnknownToKycUpload } from '@/lib/kyc/upload-errors'
 import { uploadKycObjectWithProgress } from '@/lib/kyc/upload-kyc-browser'
 import { cn } from '@/lib/utils/cn'
 import { Button } from '@/components/ui/Button'
@@ -124,15 +124,13 @@ export function KycUploadTile({
         const objectPath = buildKycObjectPath(userId, tile.id, file)
         const contentType = inferKycContentType(file)
 
-        if (process.env.NODE_ENV === 'development') {
-          console.info('[KycUploadTile] upload start', {
-            bucket: 'kyc',
-            objectPath,
-            authUserId: user.id,
-            contentType,
-            byteSize: file.size,
-          })
-        }
+        console.info('[KycUploadTile] upload start', {
+          bucket: KYC_STORAGE_BUCKET,
+          objectPath,
+          authUserId: user.id,
+          contentType,
+          byteSize: file.size,
+        })
 
         setProgress(0)
         try {
@@ -152,7 +150,17 @@ export function KycUploadTile({
           })
 
           if (!res.ok) {
-            await supabase.storage.from('kyc').remove([objectPath]).catch(() => {})
+            await supabase.storage.from(KYC_STORAGE_BUCKET).remove([objectPath]).catch((removeErr) => {
+              console.error('[KycUploadTile] rollback storage remove failed', {
+                objectPath,
+                message: removeErr instanceof Error ? removeErr.message : String(removeErr),
+              })
+            })
+            console.error('[KycUploadTile] registerKycDocumentAction failed', {
+              documentType: tile.id,
+              objectPath,
+              message: res.message,
+            })
             setLocalError(res.message ?? 'Could not save document metadata.')
             setProgress(null)
             return
@@ -181,7 +189,7 @@ export function KycUploadTile({
             message: mapped.message,
             raw: e,
           })
-          setLocalError(safeMessageForKycUploadCode(mapped.code))
+          setLocalError(mapped.message)
         }
       })
     },
@@ -351,9 +359,16 @@ export function KycUploadTile({
             disabled={busy || previewPending}
             onClick={() => {
               startPreview(async () => {
-                const { data, error } = await supabase.storage.from('kyc').createSignedUrl(latest.storage_path, 120)
+                const { data, error } = await supabase.storage
+                  .from(KYC_STORAGE_BUCKET)
+                  .createSignedUrl(latest.storage_path, 120)
                 if (error || !data?.signedUrl) {
-                  console.error('[KycUploadTile] signed URL failed', error?.message, error?.name)
+                  console.error('[KycUploadTile] signed URL failed', {
+                    bucket: KYC_STORAGE_BUCKET,
+                    storagePath: latest.storage_path,
+                    message: error?.message,
+                    statusCode: error?.statusCode,
+                  })
                   setLocalError('Could not open a secure preview link. Try again in a moment.')
                   return
                 }

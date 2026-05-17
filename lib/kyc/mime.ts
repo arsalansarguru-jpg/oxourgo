@@ -57,6 +57,7 @@ export function extensionForKycUpload(file: File): string {
 }
 
 export function isAllowedKycMime(mime: string, selfie: boolean): boolean {
-  if (selfie) return KYC_SELFIE_MIMES.has(mime) || mime.startsWith('image/')
-  return KYC_ID_MIMES.has(mime) || mime.startsWith('image/')
+  if (!mime || mime === 'application/octet-stream') return false
+  if (selfie) return KYC_SELFIE_MIMES.has(mime)
+  return KYC_ID_MIMES.has(mime)
 }

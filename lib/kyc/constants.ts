@@ -1,3 +1,6 @@
+/** Private Supabase Storage bucket for all customer KYC files. */
+export const KYC_STORAGE_BUCKET = 'kyc' as const
+
 /** KYC document types persisted in `public.kyc_documents.document_type`. */
 export const KYC_DOCUMENT_TYPES = ['aadhaar', 'license', 'passport', 'selfie', 'pan'] as const
 

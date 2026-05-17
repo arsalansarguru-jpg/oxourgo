@@ -5,11 +5,16 @@ import { revalidatePath } from 'next/cache'
 import type { KycDocumentRow } from '@/lib/customer/kyc-queries'
 import { getAuthenticatedUser } from '@/lib/auth/server'
 import { onKycSubmitted } from '@/lib/notifications/events'
+import { KYC_STORAGE_BUCKET } from '@/lib/kyc/constants'
 import { syncProfileKycFromDocuments } from '@/lib/kyc/sync-profile-kyc'
 import { createClient } from '@/lib/supabase/server'
-import { adminActionDbFailed, logUnknownError, SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
+import { adminActionDbFailed, SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
 import { isKycObjectPathForUser } from '@/lib/kyc/object-path'
-import { kycActionDbFailed, kycStorageObjectMissingMessage } from '@/lib/kyc/upload-errors'
+import { verifyKycStorageObject } from '@/lib/kyc/verify-storage-object'
+import {
+  kycActionDbFailed,
+  kycStorageVerifyFailedMessage,
+} from '@/lib/kyc/upload-errors'
 import { runInstrumentedServerAction } from '@/lib/monitoring/instrument-server-action'
 
 const docTypes = ['aadhaar', 'license', 'passport', 'selfie', 'pan'] as const
@@ -75,68 +80,92 @@ export async function registerKycDocumentAction(input: {
       return { ok: false, message: 'Invalid file size.' }
     }
 
+    console.info('[registerKycDocumentAction] register start', {
+      userId: user.id,
+      documentType: input.documentType,
+      storagePath: input.storagePath,
+      bucket: KYC_STORAGE_BUCKET,
+    })
+
     const supabase = await createClient()
 
-    const { data: stored, error: storageErr } = await supabase.storage
-      .from('kyc')
-      .createSignedUrl(input.storagePath, 60)
-
-    if (storageErr || !stored?.signedUrl) {
-      console.error('[registerKycDocumentAction] storage object not readable', {
+    const storageCheck = await verifyKycStorageObject(input.storagePath, supabase)
+    if (!storageCheck.ok) {
+      console.error('[registerKycDocumentAction] storage object not verified', {
         userId: user.id,
         storagePath: input.storagePath,
-        bucket: 'kyc',
-        message: storageErr?.message,
-        statusCode: storageErr?.statusCode,
+        bucket: KYC_STORAGE_BUCKET,
       })
-      return { ok: false, message: kycStorageObjectMissingMessage() }
+      return { ok: false, message: kycStorageVerifyFailedMessage() }
     }
 
-    const { data, error } = await supabase
-      .from('kyc_documents')
-      .insert({
-        user_id: user.id,
-        document_type: input.documentType,
-        storage_path: input.storagePath,
-        status: 'pending',
-        reviewer_note: null,
-        rejection_reason: null,
-        reviewed_at: null,
-        reviewed_by: null,
-        byte_size: input.byteSize ?? null,
-        content_type: input.contentType?.trim() || null,
-        original_filename: input.originalFilename?.trim() || null,
-        storage_retention_until: new Date(Date.now() + 7 * 365.25 * 24 * 60 * 60 * 1000).toISOString(),
-        storage_pinned: false,
-        recovery_metadata: {
-          storagePath: input.storagePath,
-          uploadedAt: new Date().toISOString(),
-          source: 'customer_upload',
-        },
-      })
-      .select('*')
-      .single()
+    const insertRow = {
+      user_id: user.id,
+      document_type: input.documentType,
+      storage_path: input.storagePath,
+      status: 'pending' as const,
+      byte_size: input.byteSize ?? null,
+      content_type: input.contentType?.trim() || null,
+      original_filename: input.originalFilename?.trim() || null,
+    }
+
+    let { data, error } = await supabase.from('kyc_documents').insert(insertRow).select('*').single()
+
+    if (error?.code === 'PGRST116') {
+      const { data: recovered, error: fetchErr } = await supabase
+        .from('kyc_documents')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('storage_path', input.storagePath)
+        .maybeSingle()
+
+      if (recovered && !fetchErr) {
+        data = recovered
+        error = null
+        console.info('[registerKycDocumentAction] recovered existing row after PGRST116', {
+          userId: user.id,
+          documentId: recovered.id,
+        })
+      }
+    }
 
     if (error) {
+      console.error('[registerKycDocumentAction] insert failed', {
+        userId: user.id,
+        documentType: input.documentType,
+        storagePath: input.storagePath,
+        code: error.code,
+        message: error.message,
+        details: error.details,
+      })
       return kycActionDbFailed('registerKycDocumentAction:insert', error)
     }
 
+    if (!data) {
+      console.error('[registerKycDocumentAction] insert returned no row', {
+        userId: user.id,
+        storagePath: input.storagePath,
+      })
+      return { ok: false, message: SAFE_USER_MESSAGE.save }
+    }
+
+    console.info('[registerKycDocumentAction] insert success', {
+      userId: user.id,
+      documentId: data.id,
+      documentType: input.documentType,
+      storagePath: input.storagePath,
+    })
+
     const syncRes = await syncProfileKycFromDocuments(supabase, user.id)
     if (!syncRes.ok) {
-      if (data?.id) {
-        await supabase.from('kyc_documents').delete().eq('id', data.id).then(({ error: delErr }) => {
-          if (delErr) logUnknownError('registerKycDocumentAction:rollback_delete', delErr)
-        })
-      }
-      await supabase.storage.from('kyc').remove([input.storagePath]).catch((removeErr) => {
-        logUnknownError('registerKycDocumentAction:rollback_storage', removeErr)
-      })
-      console.error('[registerKycDocumentAction] profile sync failed', {
+      console.error('[registerKycDocumentAction] profile sync failed (document kept)', {
         userId: user.id,
+        documentId: data.id,
         storagePath: input.storagePath,
         message: syncRes.message,
       })
-      return { ok: false, message: syncRes.message }
+    } else {
+      console.info('[registerKycDocumentAction] profile sync success', { userId: user.id })
     }
 
     revalidatePath('/dashboard/kyc')
@@ -144,9 +173,8 @@ export async function registerKycDocumentAction(input: {
     revalidatePath('/dashboard/bookings')
     revalidatePath('/admin/kyc')
     revalidatePath(`/admin/kyc/review/${user.id}`)
-    if (data) {
-      void onKycSubmitted(user.id, data.id, input.documentType)
-    }
+    void onKycSubmitted(user.id, data.id, input.documentType)
+
     return { ok: true, document: data as KycDocumentRow }
   })
 }
