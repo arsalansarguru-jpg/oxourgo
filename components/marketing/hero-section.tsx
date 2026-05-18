@@ -35,13 +35,13 @@ export function HeroSection() {
           <p className="mt-6 max-w-xl text-base leading-8 text-white/72 sm:text-lg">
             Premium verified cars, transparent daily rates, and concierge support from inquiry to handover.
           </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <Button size="lg" to="/fleet">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Button size="lg" to="/fleet" className="w-full sm:w-auto">
               Explore fleet
             </Button>
-            <WhatsAppInquiryButton size="lg" label="Concierge on WhatsApp" />
+            <WhatsAppInquiryButton size="lg" label="Concierge on WhatsApp" className="w-full sm:w-auto" />
             {ready ? (
-              <Button size="lg" variant="secondary" to={user ? '/dashboard' : '/login'}>
+              <Button size="lg" variant="secondary" to={user ? '/dashboard' : '/login'} className="w-full sm:w-auto">
                 {user ? 'Open dashboard' : 'Member sign in'}
               </Button>
             ) : null}

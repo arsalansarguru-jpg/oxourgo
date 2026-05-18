@@ -191,14 +191,15 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
               className="border-white/[0.08] bg-white/[0.04] shadow-none theme-light:bg-white/80"
             />
           </div>
-          <div className="flex flex-wrap gap-2">
-            <Button type="submit" className="gap-2" disabled={isPending}>
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
+            <Button type="submit" className="w-full gap-2 sm:w-auto" disabled={isPending}>
               {isPending ? <Loader2 className="h-4 w-4 animate-spin" aria-hidden /> : <Search className="h-4 w-4" aria-hidden />}
               Apply
             </Button>
             <Button
               type="button"
               variant="secondary"
+              className="w-full sm:w-auto"
               disabled={isPending}
               onClick={() => {
                 setDraftQ('')
@@ -230,7 +231,7 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
                   key={o.value || 'all'}
                   href={paymentHref(o.value)}
                   className={cn(
-                    'rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors duration-300',
+                    'inline-flex min-h-9 items-center rounded-full border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors duration-300',
                     active
                       ? 'border-electric/45 bg-electric/18 text-electric'
                       : 'border-white/[0.08] bg-white/[0.03] text-muted hover:border-white/[0.12] hover:text-soft theme-light:border-stroke-strong theme-light:bg-white/70',
@@ -252,7 +253,7 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
                   key={o.value || 'all-src'}
                   href={sourceHref(o.value)}
                   className={cn(
-                    'rounded-full border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors duration-300',
+                    'inline-flex min-h-9 items-center rounded-full border px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.1em] transition-colors duration-300',
                     active
                       ? 'border-emerald-400/45 bg-emerald-500/18 text-emerald-300 theme-light:text-emerald-800'
                       : 'border-white/[0.08] bg-white/[0.03] text-muted hover:border-white/[0.12] hover:text-soft theme-light:border-stroke-strong theme-light:bg-white/70',
@@ -263,7 +264,7 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
               )
             })}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
             <label htmlFor="bookings-per-page" className="text-xs font-medium text-muted">
               Per page
             </label>
@@ -285,7 +286,7 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
                 )
               }}
               className={cn(
-                'h-10 min-w-[4.5rem] rounded-xl border border-stroke-strong bg-matte/[0.55] px-3 text-sm font-medium text-soft theme-light:bg-white/80',
+                'h-11 min-h-11 w-full rounded-xl border border-stroke-strong bg-matte/[0.55] px-3 text-base font-medium text-soft theme-light:bg-white/80 sm:h-10 sm:min-h-10 sm:w-auto sm:min-w-[4.5rem] sm:text-sm',
                 'focus:border-electric/55 focus:outline-none focus:ring-2 focus:ring-electric/22',
               )}
             >
@@ -362,7 +363,7 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
           </div>
         ) : showRows ? (
           <>
-            <div className="hidden max-h-[min(72vh,860px)] overflow-auto lg:block">
+            <div className="admin-table-scroll hidden max-h-[min(72vh,860px)] overflow-auto lg:block">
               <table className="w-full min-w-[1180px] text-left text-sm">
                 <thead className="sticky top-0 z-20">
                   <tr
@@ -605,7 +606,7 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
                 const canComplete = b.booking_status === 'active'
 
                 return (
-                  <div key={b.id} className="space-y-4 p-4">
+                  <div key={b.id} className="space-y-4 p-4 sm:p-5">
                     <div className="flex gap-3">
                       <div className="relative h-20 w-28 shrink-0 overflow-hidden rounded-xl border border-white/[0.08]">
                         {thumb ? (

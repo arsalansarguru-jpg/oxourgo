@@ -44,11 +44,12 @@
   --radius-2xl: 1rem;
   --radius-3xl: 1.25rem;
 
-  --spacing-section-y: clamp(4rem, 7vw, 6.5rem);
-  --spacing-section-gap: clamp(1.75rem, 3vw, 2.5rem);
+  --spacing-section-y: clamp(3rem, 6vw, 6.5rem);
+  --spacing-section-gap: clamp(1.25rem, 2.5vw, 2.5rem);
   --spacing-edge: clamp(1rem, 3vw, 1.5rem);
   --spacing-stack: 1.25rem;
   --spacing-stack-lg: 2rem;
+  --touch-min: 2.75rem;
   --bottom-nav-clearance: calc(4.25rem + max(0.5rem, env(safe-area-inset-bottom, 0px)));
 
   --container-max: 72rem;
@@ -96,7 +97,13 @@ html:not([data-theme]) {
   --safe-bottom: max(0px, env(safe-area-inset-bottom, 0px));
   --public-header-inner-h: 3.5rem;
   --public-header-offset: calc(var(--public-header-inner-h) + var(--safe-top));
-  --mobile-fab-clearance: calc(4.25rem + var(--safe-bottom));
+  --mobile-fab-clearance: calc(5rem + var(--safe-bottom));
+}
+
+@media (max-width: 639px) {
+  :root {
+    --public-header-inner-h: 3.75rem;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -183,9 +190,9 @@ html:not([data-theme]) {
 
 @utility text-hero-display {
   font-family: var(--font-display);
-  font-size: clamp(2.75rem, 6vw + 0.75rem, 6.75rem);
-  line-height: 0.95;
-  letter-spacing: 0;
+  font-size: clamp(2.125rem, 5.5vw + 0.5rem, 6.75rem);
+  line-height: 0.98;
+  letter-spacing: -0.02em;
   font-weight: 600;
 }
 
@@ -215,4 +222,10 @@ html:not([data-theme]) {
 @utility scroll-touch {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior: contain;
+}
+
+@utility admin-table-scroll {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+  scrollbar-gutter: stable;
 }

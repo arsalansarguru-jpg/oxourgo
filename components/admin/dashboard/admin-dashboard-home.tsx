@@ -356,7 +356,7 @@ export function AdminDashboardHome() {
                 View all
               </Button>
             </div>
-            <div className="overflow-x-auto scroll-touch">
+            <div className="overflow-x-auto admin-table-scroll scroll-touch">
               <table className="w-full min-w-[640px] text-left text-sm">
                 <thead className="admin-table-head">
                   <tr>

@@ -27,5 +27,5 @@ export function AdminCard({ className, variant = 'default', interactive, ...prop
 }
 
 export function AdminCardContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('p-5 sm:p-6', className)} {...props} />
+  return <div className={cn('p-4 sm:p-5 lg:p-6', className)} {...props} />
 }

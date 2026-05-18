@@ -158,7 +158,7 @@ export function Navbar() {
             ) : null}
             <button
               type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-stroke text-soft md:hidden"
+              className="inline-flex h-11 w-11 touch-manipulation items-center justify-center rounded-full border border-stroke text-soft md:hidden"
               aria-label={open ? 'Close menu' : 'Open menu'}
               aria-expanded={open}
               onClick={() => setOpen((v) => !v)}
@@ -189,7 +189,7 @@ export function Navbar() {
                     key={href}
                     href={href}
                     className={cn(
-                      'block rounded-2xl px-3 py-3 text-base font-semibold',
+                      'flex min-h-11 items-center rounded-2xl px-3 py-3 text-base font-semibold',
                       active ? 'bg-fill-glass text-soft' : 'text-muted',
                     )}
                     onClick={() => setOpen(false)}

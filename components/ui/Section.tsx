@@ -55,7 +55,7 @@ export function SectionHeading({
       {eyebrow ? <p className="mb-2 text-sm font-medium text-muted">{eyebrow}</p> : null}
       <h2 className="text-section-title text-soft">{title}</h2>
       {subtitle ? (
-        <p className="mt-2 text-pretty text-sm leading-relaxed text-muted sm:text-base">{subtitle}</p>
+        <p className="mt-2 text-pretty text-sm leading-relaxed text-muted sm:text-base sm:leading-7">{subtitle}</p>
       ) : null}
     </header>
   )

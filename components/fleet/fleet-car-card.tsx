@@ -55,14 +55,14 @@ export function FleetCarCard({ car, className, tripFrom, tripTo }: FleetCarCardP
         </div>
       </Link>
 
-      <CardContent className="flex flex-1 flex-col gap-4">
-        <div>
+      <CardContent className="flex flex-1 flex-col gap-3 p-4 sm:gap-4 sm:p-5">
+        <div className="min-w-0">
           <h3 className={cardTitle}>
-            <Link href={detailHref} className="hover:text-silver">
+            <Link href={detailHref} className="line-clamp-2 break-words hover:text-silver">
               {car.displayName}
             </Link>
           </h3>
-          <p className="mt-1.5 text-sm text-muted">
+          <p className="mt-1.5 text-xs text-muted sm:text-sm">
             {car.category} · {car.year}
             {car.city?.trim() ? ` · ${car.city.trim()}` : ''}
           </p>
@@ -86,7 +86,7 @@ export function FleetCarCard({ car, className, tripFrom, tripTo }: FleetCarCardP
         <div className="mt-auto flex flex-col gap-3 border-t border-stroke pt-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-muted">From</p>
-            <p className="mt-1 text-2xl font-semibold tabular-nums text-soft">
+            <p className="mt-1 text-xl font-semibold tabular-nums text-soft sm:text-2xl">
               {formatInr(car.pricePerDay)}
               <span className="text-sm font-normal text-muted"> / day</span>
             </p>

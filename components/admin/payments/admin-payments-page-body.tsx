@@ -114,7 +114,7 @@ export function AdminPaymentsPageBody({
             <h2 className="text-lg font-semibold tracking-[-0.02em] text-soft">Booking payment queue</h2>
             <p className="mt-1 text-sm text-muted">Customer, vehicle, balance due, and status — open a row for collection actions.</p>
           </div>
-          <div className="overflow-x-auto scroll-touch">
+          <div className="overflow-x-auto admin-table-scroll scroll-touch">
             <table className="w-full min-w-[960px] text-left text-sm">
               <thead className="admin-table-head">
                 <tr>
@@ -177,7 +177,7 @@ export function AdminPaymentsPageBody({
             <h2 className="text-lg font-semibold tracking-[-0.02em] text-soft">Recent ledger activity</h2>
             <p className="mt-1 text-sm text-muted">Cross-booking payment_events — newest first.</p>
           </div>
-          <div className="overflow-x-auto scroll-touch">
+          <div className="overflow-x-auto admin-table-scroll scroll-touch">
             <table className="w-full min-w-[900px] text-left text-sm">
               <thead className="admin-table-head">
                 <tr>

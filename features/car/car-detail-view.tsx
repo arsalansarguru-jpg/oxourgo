@@ -61,7 +61,7 @@ export function CarDetailView({
   const reviews = useMemo(() => carReviews.filter((r) => r.carId === car.id), [car.id])
 
   return (
-    <Section className="pt-8">
+    <Section className="pb-[calc(var(--mobile-fab-clearance)+1.25rem)] pt-6 sm:pt-8 lg:pb-0">
       <article className="grid min-w-0 gap-10 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
         <div className="min-w-0">
           <div
@@ -135,10 +135,10 @@ export function CarDetailView({
                   {Object.entries(car.specs).map(([k, v]) => (
                     <div
                       key={k}
-                      className="flex justify-between gap-4 border-b border-stroke pb-2 last:border-0"
+                      className="flex flex-col gap-1 border-b border-stroke pb-2 last:border-0 sm:flex-row sm:items-start sm:justify-between sm:gap-4"
                     >
                       <dt className="text-silver">{k}</dt>
-                      <dd className="text-right font-medium text-soft">{v}</dd>
+                      <dd className="font-medium text-soft sm:max-w-[55%] sm:text-right sm:break-words">{v}</dd>
                     </div>
                   ))}
                 </dl>
@@ -284,7 +284,7 @@ export function CarDetailView({
                 tripTo,
               }}
               size="lg"
-              className="shrink-0 touch-manipulation"
+              className="min-h-11 shrink-0 touch-manipulation"
               label="Book on WhatsApp"
             />
           </div>

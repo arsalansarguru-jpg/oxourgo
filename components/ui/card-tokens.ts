@@ -21,7 +21,7 @@ export const cardPadding = 'p-5 sm:p-6'
 export const cardPaddingCompact = 'p-4 sm:p-5'
 export const cardPaddingFeature = cardPadding
 
-export const cardTitle = 'font-display text-base font-semibold tracking-tight text-soft'
+export const cardTitle = 'font-display text-base font-semibold tracking-tight text-soft sm:text-[1.0625rem]'
 export const cardBody = 'text-sm leading-relaxed text-muted'
 export const cardEyebrow = 'text-xs font-medium text-muted'
 

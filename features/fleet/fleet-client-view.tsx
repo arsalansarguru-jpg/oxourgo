@@ -125,30 +125,30 @@ export function FleetClientView({
       />
 
       {(from || to || location.trim() || searchQuery.trim()) && (
-        <div className="mx-auto max-w-3xl rounded-3xl border border-electric/25 bg-carbon/80 px-4 py-3.5 text-center text-sm leading-relaxed text-muted shadow-[var(--shadow-card)]">
+        <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-x-3 gap-y-1.5 rounded-3xl border border-electric/25 bg-carbon/80 px-4 py-3.5 text-center text-sm leading-relaxed text-muted shadow-[var(--shadow-card)]">
           {from ? (
-            <span className="ml-2">
+            <span>
               From: <span className="font-semibold text-soft">{from}</span>
             </span>
           ) : null}
           {to ? (
-            <span className="ml-2">
+            <span>
               To: <span className="font-semibold text-soft">{to}</span>
             </span>
           ) : null}
           {searchQuery.trim() ? (
-            <span className="ml-2 block sm:inline">
+            <span className="basis-full sm:basis-auto">
               Keywords: <span className="font-semibold text-soft">{searchQuery.trim()}</span>
             </span>
           ) : location.trim() ? (
-            <span className="ml-2 block sm:inline">
+            <span className="basis-full sm:basis-auto">
               Search: <span className="font-semibold text-soft">{location.trim()}</span>
             </span>
           ) : null}
         </div>
       )}
 
-      <div className="sticky top-[var(--public-header-offset)] z-40 -mx-[var(--spacing-edge)] min-w-0 rounded-3xl border border-stroke bg-carbon/90 px-[var(--spacing-edge)] py-3 shadow-[0_24px_80px_-50px_rgba(0,0,0,0.75)] backdrop-blur-2xl supports-[backdrop-filter]:bg-carbon/82 md:mx-0 md:py-4 lg:sticky lg:top-[var(--public-header-offset)]">
+      <div className="sticky top-[var(--public-header-offset)] z-40 -mx-[var(--spacing-edge)] mt-6 min-w-0 rounded-3xl border border-stroke bg-carbon/90 px-[var(--spacing-edge)] py-3 shadow-[0_24px_80px_-50px_rgba(0,0,0,0.75)] backdrop-blur-2xl supports-[backdrop-filter]:bg-carbon/82 md:mx-0 md:py-4 lg:sticky lg:top-[var(--public-header-offset)]">
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between lg:gap-6">
                 <div className="min-w-0 flex-1 space-y-2">
@@ -275,7 +275,7 @@ export function FleetClientView({
                   {isSearchDebouncing ? (
                     <FleetGridSkeleton count={PAGE_SIZE} />
                   ) : (
-                    <div className="grid gap-6 sm:gap-7 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+                    <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
                       {slice.map((car) => (
                         <motion.div
                           key={car.id}

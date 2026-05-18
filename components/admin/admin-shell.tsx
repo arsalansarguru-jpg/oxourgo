@@ -63,8 +63,8 @@ function NavLinks({
             title={collapsed ? label : undefined}
             onClick={onNavigate}
             className={cn(
-              'flex items-center rounded-xl text-sm font-medium transition-colors',
-              collapsed ? 'justify-center px-0 py-2.5' : 'gap-2.5 px-2.5 py-2',
+              'flex min-h-11 items-center rounded-xl text-sm font-medium transition-colors',
+              collapsed ? 'justify-center px-0 py-3' : 'gap-2.5 px-2.5 py-2.5',
               active ? 'bg-electric/15 text-soft ring-1 ring-electric/20' : 'text-muted hover:bg-fill-glass hover:text-soft',
             )}
           >
@@ -249,11 +249,11 @@ export function AdminShell({
           desktopExpanded ? 'lg:pl-60' : 'lg:pl-[4.25rem]',
         )}
       >
-        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-4 border-b border-white/[0.08] bg-[#0d0a07]/88 px-4 shadow-[0_18px_60px_-50px_rgba(0,0,0,0.95)] backdrop-blur-xl sm:px-6">
-          <div className="flex min-w-0 items-center gap-3">
+        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-3 border-b border-white/[0.08] bg-[#0d0a07]/88 px-4 shadow-[0_18px_60px_-50px_rgba(0,0,0,0.95)] backdrop-blur-xl sm:gap-4 sm:px-6">
+          <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <button
               type="button"
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-stroke text-soft lg:hidden"
+              className="inline-flex h-11 w-11 shrink-0 touch-manipulation items-center justify-center rounded-xl border border-stroke text-soft lg:hidden"
               aria-expanded={mobileOpen}
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
               onClick={() => setMobileOpen((o) => !o)}
@@ -285,7 +285,7 @@ export function AdminShell({
                 <BrandBlock expanded />
                 <button
                   type="button"
-                  className="rounded-xl p-2 text-muted hover:bg-fill-glass hover:text-soft"
+                  className="inline-flex h-11 w-11 touch-manipulation items-center justify-center rounded-xl text-muted hover:bg-fill-glass hover:text-soft"
                   aria-label="Close menu"
                   onClick={() => setMobileOpen(false)}
                 >
@@ -306,8 +306,8 @@ export function AdminShell({
         ) : null}
 
         <main className="flex-1 overflow-x-hidden bg-[radial-gradient(circle_at_top_left,rgba(201,154,85,0.14),transparent_28rem),linear-gradient(180deg,#080706,#0c0906)]">
-          <div className="mx-auto w-full max-w-[80rem] px-4 py-8 sm:px-6 lg:py-10">
-            <div className="flex min-w-0 flex-col gap-8">{children}</div>
+          <div className="mx-auto w-full max-w-[80rem] px-4 py-6 sm:px-6 sm:py-8 lg:py-10">
+            <div className="flex min-w-0 flex-col gap-6 sm:gap-8">{children}</div>
           </div>
         </main>
       </div>

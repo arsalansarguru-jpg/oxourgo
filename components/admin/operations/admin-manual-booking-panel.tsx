@@ -42,7 +42,7 @@ export function AdminManualBookingPanel({ vehicles, canBypass }: Props) {
         </div>
 
         <form
-          className="grid gap-3 sm:grid-cols-2"
+          className="grid gap-4 sm:grid-cols-2"
           onSubmit={(e) => {
             e.preventDefault()
             setMsg(null)
@@ -110,7 +110,7 @@ export function AdminManualBookingPanel({ vehicles, canBypass }: Props) {
             name="internalNotes"
             rows={2}
             placeholder="Staff-only notes"
-            className="min-h-[72px] w-full rounded-xl border border-stroke-strong bg-matte/[0.55] px-3 py-2 text-sm text-soft sm:col-span-2"
+            className="min-h-[4.5rem] w-full rounded-xl border border-stroke-strong bg-matte/[0.55] px-3 py-2.5 text-base text-soft sm:col-span-2 sm:min-h-[72px] sm:text-sm"
           />
           <Input name="opsNote" label="Customer-visible ops note" className="sm:col-span-2" />
 

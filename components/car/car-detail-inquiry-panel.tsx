@@ -50,9 +50,9 @@ export function CarDetailInquiryPanel({ car, tripFrom, tripTo }: CarDetailInquir
         ) : null}
       </div>
 
-      <WhatsAppInquiryButton vehicle={vehicle} size="lg" className="w-full min-h-[3.25rem] sm:min-h-[3.125rem]" label="Book on WhatsApp" />
+      <WhatsAppInquiryButton vehicle={vehicle} size="lg" className="w-full min-h-12" label="Book on WhatsApp" />
 
-      <Button size="lg" variant="secondary" className="w-full min-h-[3.25rem] gap-2 sm:min-h-[3.125rem]" href={`tel:${BRAND.phoneTel}`}>
+      <Button size="lg" variant="secondary" className="w-full min-h-12 gap-2" href={`tel:${BRAND.phoneTel}`}>
         <Phone className="h-4 w-4 shrink-0" aria-hidden />
         Call {BRAND.phoneDisplay}
       </Button>

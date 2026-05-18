@@ -97,7 +97,7 @@ export function BookingSearchBar() {
           All vehicles are collected from our <span className="font-semibold text-[#2a2118]">{PICKUP_HUB}</span> hub.
         </p>
         <div
-          className="grid min-w-0 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:items-end"
+          className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:items-end"
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               e.preventDefault()
@@ -126,7 +126,7 @@ export function BookingSearchBar() {
             onChange={(e) => setDropoffDate(e.target.value)}
             onBlur={() => setTouched((t) => ({ ...t, dropoff: true }))}
           />
-          <Button type="button" size="lg" className="w-full shrink-0" disabled={isPending} onClick={onSearch}>
+          <Button type="button" size="lg" className="w-full shrink-0 sm:col-span-2 lg:col-span-1" disabled={isPending} onClick={onSearch}>
             {isPending ? (
               <span className="inline-flex items-center gap-2">
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
