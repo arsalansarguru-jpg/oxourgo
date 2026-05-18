@@ -368,17 +368,17 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
               <BrandLogo className="h-10 w-auto max-w-[6.5rem]" priority />
             </div>
             <div className="min-w-0">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-electric/90">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-electric">
                 Secure access
               </p>
-              <p id={headingId} className="mt-1 truncate text-lg font-semibold tracking-[-0.03em] text-soft sm:text-xl">
+              <p id={headingId} className="mt-1 truncate text-xl font-semibold tracking-[-0.03em] text-soft sm:text-2xl">
                 {BRAND.name}
               </p>
             </div>
           </div>
         </div>
 
-        <p className="mt-5 text-sm leading-relaxed text-silver/95 sm:text-[0.9375rem]">
+        <p className="mt-5 text-[0.9375rem] font-medium leading-relaxed text-soft/90 sm:text-base">
           Sign in with the method you prefer. Same vault-grade session, whichever path you choose.
         </p>
 
@@ -530,7 +530,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
                     type="button"
                     disabled={busy}
                     onClick={() => void handleGoogle()}
-                    className="flex min-h-[3.35rem] w-full touch-manipulation items-center justify-center gap-3 px-5 text-[0.9375rem] font-semibold tracking-[-0.02em] text-soft disabled:pointer-events-none disabled:opacity-40"
+                    className="flex min-h-[3.35rem] w-full touch-manipulation items-center justify-center gap-3 px-5 text-base font-semibold tracking-[-0.01em] text-soft disabled:pointer-events-none disabled:opacity-40"
                   >
                     {pending === 'google' ? (
                       <Loader2 className="h-[22px] w-[22px] shrink-0 animate-spin text-soft" aria-hidden />
@@ -550,7 +550,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
                       resetOtp()
                       setStep('otp')
                     }}
-                    className="flex min-h-[3.35rem] w-full touch-manipulation items-center justify-center gap-3 px-5 text-[0.9375rem] font-semibold tracking-[-0.02em] text-soft disabled:pointer-events-none disabled:opacity-40"
+                    className="flex min-h-[3.35rem] w-full touch-manipulation items-center justify-center gap-3 px-5 text-base font-semibold tracking-[-0.01em] text-soft disabled:pointer-events-none disabled:opacity-40"
                   >
                     <Smartphone className="h-[22px] w-[22px] text-electric" aria-hidden />
                     Continue with mobile OTP
@@ -560,7 +560,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
 
               <motion.div variants={item} className="relative py-1">
                 <div className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
-                <p className="relative mx-auto w-max bg-[rgba(10,10,12,0.72)] px-3 text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-muted backdrop-blur-sm">
+                <p className="relative mx-auto w-max bg-[rgba(10,10,12,0.72)] px-3 text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-silver backdrop-blur-sm">
                   Professional email
                 </p>
               </motion.div>
@@ -571,7 +571,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
                   disabled={busy}
                   onClick={() => setShowEmail((v) => !v)}
                   aria-expanded={showEmail}
-                  className="flex min-h-[3rem] w-full touch-manipulation items-center justify-center gap-2 rounded-2xl border border-stroke bg-fill-glass px-4 text-sm font-semibold text-silver transition-[border-color,background-color,color,box-shadow] duration-300 hover:border-stroke-strong hover:bg-fill-glass-strong hover:text-soft disabled:pointer-events-none disabled:opacity-40"
+                  className="flex min-h-[3.35rem] w-full touch-manipulation items-center justify-center gap-3 rounded-2xl border border-stroke-strong bg-fill-glass px-5 text-base font-semibold text-soft transition-[border-color,background-color,color,box-shadow] duration-300 hover:border-stroke-strong hover:bg-fill-glass-strong hover:text-soft disabled:pointer-events-none disabled:opacity-40"
                 >
                   <Mail className="h-[22px] w-[22px] shrink-0 text-electric" strokeWidth={2} aria-hidden />
                   {showEmail ? 'Hide email sign-in' : 'Continue with email'}
@@ -625,18 +625,18 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
                   <div
                     key={label}
                     role="listitem"
-                    className="rounded-xl border border-stroke bg-matte/35 px-3 py-3 text-left shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] backdrop-blur-sm"
+                    className="rounded-xl border border-stroke-strong bg-matte/55 px-3 py-3 text-left shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)] backdrop-blur-sm"
                   >
-                    <Icon className="h-4 w-4 text-electric/90" aria-hidden />
-                    <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-soft/95">{label}</p>
-                    <p className="mt-1 text-[11px] leading-snug text-muted">{sub}</p>
+                    <Icon className="h-4 w-4 text-electric" aria-hidden />
+                    <p className="mt-2 text-[11.5px] font-semibold uppercase tracking-[0.14em] text-soft">{label}</p>
+                    <p className="mt-1 text-xs font-medium leading-snug text-silver">{sub}</p>
                   </div>
                 ))}
               </motion.div>
 
-              <motion.p variants={item} className="text-center text-[11px] leading-relaxed text-muted">
+              <motion.p variants={item} className="text-center text-xs leading-relaxed text-silver">
                 Enterprise fleets can request delegated SSO after verification. Need help?{' '}
-                <a href="/support" className="font-medium text-electric/90 underline-offset-2 hover:underline">
+                <a href="/support" className="font-semibold text-electric underline-offset-2 hover:underline">
                   Concierge
                 </a>
               </motion.p>
