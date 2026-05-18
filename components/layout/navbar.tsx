@@ -78,7 +78,7 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 border-b border-stroke bg-carbon pt-[var(--safe-top)]">
+      <header className="sticky top-0 z-50 border-b border-stroke bg-carbon/88 pt-[var(--safe-top)] shadow-[0_18px_60px_-48px_rgba(0,0,0,0.7)] backdrop-blur-xl">
         <div className="container-app flex min-h-[var(--public-header-inner-h)] items-center justify-between gap-4">
           <Link href="/" className="flex min-w-0 items-center gap-2" onClick={() => setOpen(false)}>
             <BrandLogo priority className="h-8 w-auto max-w-[7.5rem] shrink-0 sm:max-w-[8.5rem]" />
@@ -97,8 +97,8 @@ export function Navbar() {
                     <Link
                       href={href}
                       className={cn(
-                        'rounded-md px-3 py-2 text-sm font-medium transition-colors',
-                        active ? 'text-soft' : 'text-muted hover:bg-fill-glass hover:text-soft',
+                        'rounded-full px-3.5 py-2 text-sm font-semibold transition-colors',
+                        active ? 'bg-fill-glass-strong text-soft' : 'text-muted hover:bg-fill-glass hover:text-soft',
                       )}
                     >
                       {label}
@@ -129,13 +129,13 @@ export function Navbar() {
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={avatarUrl} alt="" width={32} height={32} className="h-8 w-8 rounded-full object-cover" referrerPolicy="no-referrer" />
                   ) : (
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-carbon-deep text-xs font-medium text-soft">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full border border-stroke bg-carbon-deep text-xs font-medium text-soft">
                       {initialsFromUser(user)}
                     </span>
                   )}
                   <ChevronDown className="h-4 w-4 text-muted" aria-hidden />
                 </summary>
-                <div className="absolute right-0 top-full z-[80] mt-1 min-w-[11rem] rounded-lg border border-stroke bg-carbon py-1 shadow-[var(--shadow-card-hover)]">
+                <div className="absolute right-0 top-full z-[80] mt-2 min-w-[11rem] rounded-2xl border border-stroke bg-carbon py-1 shadow-[var(--shadow-card-hover)]">
                   <Link
                     href="/dashboard"
                     className="flex items-center gap-2 px-3 py-2 text-sm text-soft hover:bg-fill-glass"
@@ -158,7 +158,7 @@ export function Navbar() {
             ) : null}
             <button
               type="button"
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md border border-stroke text-soft md:hidden"
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-stroke text-soft md:hidden"
               aria-label={open ? 'Close menu' : 'Open menu'}
               aria-expanded={open}
               onClick={() => setOpen((v) => !v)}
@@ -177,7 +177,7 @@ export function Navbar() {
             className="absolute inset-0 bg-soft/20"
             onClick={() => setOpen(false)}
           />
-          <div className="absolute inset-x-0 top-[var(--public-header-offset)] max-h-[calc(100dvh-var(--public-header-offset))] overflow-y-auto border-b border-stroke bg-carbon shadow-[var(--shadow-card-hover)]">
+          <div className="absolute inset-x-0 top-[var(--public-header-offset)] max-h-[calc(100dvh-var(--public-header-offset))] overflow-y-auto border-b border-stroke bg-carbon/96 shadow-[var(--shadow-card-hover)] backdrop-blur-xl">
             <div className="container-app space-y-1 py-3">
               {nav.map(({ href, label }) => {
                 const active =
@@ -189,7 +189,7 @@ export function Navbar() {
                     key={href}
                     href={href}
                     className={cn(
-                      'block rounded-md px-3 py-3 text-base font-medium',
+                      'block rounded-2xl px-3 py-3 text-base font-semibold',
                       active ? 'bg-fill-glass text-soft' : 'text-muted',
                     )}
                     onClick={() => setOpen(false)}

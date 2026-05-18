@@ -18,34 +18,37 @@ type FleetCarCardProps = {
   className?: string
   tripFrom?: string
   tripTo?: string
-  tripPickup?: string
 }
 
-function buildCarHref(carId: string, trip?: { from?: string; to?: string; pickup?: string }): string {
+function buildCarHref(carId: string, trip?: { from?: string; to?: string }): string {
   const q = new URLSearchParams()
   if (trip?.from?.trim()) q.set('from', trip.from.trim())
   if (trip?.to?.trim()) q.set('to', trip.to.trim())
-  if (trip?.pickup?.trim()) q.set('pickup', trip.pickup.trim())
   const s = q.toString()
   return s ? `/car/${carId}?${s}` : `/car/${carId}`
 }
 
-export function FleetCarCard({ car, className, tripFrom, tripTo, tripPickup }: FleetCarCardProps) {
-  const detailHref = buildCarHref(car.id, { from: tripFrom, to: tripTo, pickup: tripPickup })
+export function FleetCarCard({ car, className, tripFrom, tripTo }: FleetCarCardProps) {
+  const detailHref = buildCarHref(car.id, { from: tripFrom, to: tripTo })
   const available = car.availability === 'Available'
 
   return (
     <Card
       className={cn(
-        'group/card flex h-full flex-col overflow-hidden',
+        'group/card flex h-full flex-col overflow-hidden bg-carbon/92',
         cardSurfaceBase,
         cardSurfaceTransition,
         cardSurfaceHover,
         className,
       )}
     >
-      <Link href={detailHref} className="relative block aspect-[16/10] overflow-hidden bg-carbon-deep">
-        <FleetVehicleImg src={car.imageUrl} alt={car.displayName} className="absolute inset-0 h-full w-full object-cover" />
+      <Link href={detailHref} className="relative block aspect-[16/10] overflow-hidden bg-[#14100b]">
+        <FleetVehicleImg
+          src={car.imageUrl}
+          alt={car.displayName}
+          className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover/card:scale-105"
+        />
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.08),rgba(0,0,0,0.58))]" />
         <div className="absolute left-3 top-3 flex flex-wrap gap-2">
           <Badge variant={available ? 'success' : 'muted'}>{car.availability}</Badge>
           {car.featured ? <Badge variant="electric">Featured</Badge> : null}
@@ -83,7 +86,7 @@ export function FleetCarCard({ car, className, tripFrom, tripTo, tripPickup }: F
         <div className="mt-auto flex flex-col gap-3 border-t border-stroke pt-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-muted">From</p>
-            <p className="mt-1 text-xl font-semibold tabular-nums tracking-tight text-soft">
+            <p className="mt-1 text-2xl font-semibold tabular-nums text-soft">
               {formatInr(car.pricePerDay)}
               <span className="text-sm font-normal text-muted"> / day</span>
             </p>
@@ -94,7 +97,6 @@ export function FleetCarCard({ car, className, tripFrom, tripTo, tripPickup }: F
                 vehicleName: car.displayName,
                 tripFrom,
                 tripTo,
-                pickupHub: tripPickup,
               }}
               size="md"
               className="w-full sm:w-auto"

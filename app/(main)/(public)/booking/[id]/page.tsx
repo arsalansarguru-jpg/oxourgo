@@ -11,7 +11,7 @@ export default async function BookingPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ from?: string; to?: string; pickup?: string }>
+  searchParams: Promise<{ from?: string; to?: string }>
 }) {
   const { id } = await params
   const sp = await searchParams
@@ -21,7 +21,6 @@ export default async function BookingPage({
       vehicleName: car?.name ?? undefined,
       tripFrom: sp.from ?? undefined,
       tripTo: sp.to ?? undefined,
-      pickupHub: sp.pickup ?? undefined,
     }),
   )
 }

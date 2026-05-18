@@ -6,9 +6,9 @@ export type AdminPageHeaderProps = {
 
 export function AdminPageHeader({ eyebrow = 'Admin', title, description }: AdminPageHeaderProps) {
   return (
-    <header className="space-y-3">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-electric/90">{eyebrow}</p>
-      <h1 className="max-w-[20ch] text-balance text-3xl font-semibold tracking-[-0.045em] text-soft sm:text-4xl lg:text-[2.65rem] lg:leading-[1.08]">
+    <header className="rounded-3xl border border-white/[0.08] bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.025))] p-5 shadow-[var(--shadow-card)] sm:p-6">
+      <p className="text-[10px] font-semibold uppercase text-electric/90">{eyebrow}</p>
+      <h1 className="mt-3 max-w-[20ch] text-balance text-3xl font-semibold text-soft sm:text-4xl lg:text-[2.65rem] lg:leading-[1.08]">
         {title}
       </h1>
       {description ? (

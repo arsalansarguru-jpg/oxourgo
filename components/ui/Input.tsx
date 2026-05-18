@@ -22,8 +22,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         ref={ref}
         id={inputId}
         className={cn(
-          'touch-manipulation min-h-10 w-full rounded-md border border-stroke-strong bg-carbon px-3 py-2 text-sm text-soft placeholder:text-muted',
-          'transition-colors duration-150 focus-visible:border-electric focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/20',
+          'touch-manipulation min-h-11 w-full rounded-full border border-stroke-strong bg-carbon/85 px-4 py-2 text-sm text-soft placeholder:text-muted shadow-[inset_0_1px_0_rgb(255_255_255/0.28)]',
+          'transition-[border-color,box-shadow,background-color] duration-200 focus-visible:border-electric focus-visible:bg-carbon focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/20',
           error && 'border-red-400 focus-visible:border-red-400 focus-visible:ring-red-400/20',
           className,
         )}

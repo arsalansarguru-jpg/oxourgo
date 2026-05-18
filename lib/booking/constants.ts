@@ -1,6 +1,5 @@
-export const MUMBAI_HUBS = ['Andheri', 'Bandra', 'Colaba', 'Juhu', 'Powai'] as const
-
-export type MumbaiHub = (typeof MUMBAI_HUBS)[number]
+/** Single operational hub — customers collect and return vehicles here. */
+export const PICKUP_HUB = 'Mira Road' as const
 
 export const MAX_RENTAL_DAYS = 60
 

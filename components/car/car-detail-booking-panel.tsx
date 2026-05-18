@@ -12,10 +12,9 @@ export type CarDetailBookingPanelProps = {
   kycStatus?: string | null
   tripFrom?: string
   tripTo?: string
-  tripPickup?: string
 }
 
 /** Legacy export — renders WhatsApp concierge panel only (no web checkout). */
-export function CarDetailBookingPanel({ car, tripFrom, tripTo, tripPickup }: CarDetailBookingPanelProps) {
-  return <CarDetailInquiryPanel car={car} tripFrom={tripFrom} tripTo={tripTo} tripPickup={tripPickup} />
+export function CarDetailBookingPanel({ car, tripFrom, tripTo }: CarDetailBookingPanelProps) {
+  return <CarDetailInquiryPanel car={car} tripFrom={tripFrom} tripTo={tripTo} />
 }

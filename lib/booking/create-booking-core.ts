@@ -3,6 +3,7 @@ import 'server-only'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 import { computeBookingQuote } from '@/lib/booking/pricing'
+import { PICKUP_HUB } from '@/lib/booking/constants'
 import { validateTripWindow } from '@/lib/booking/dates'
 import { hasVehicleBookingOverlap } from '@/lib/booking/vehicle-overlap'
 import { normalizeBookingSource, type BookingSource } from '@/lib/booking/booking-source'
@@ -74,11 +75,8 @@ export async function insertBookingCore(
   supabase: SupabaseClient<Database>,
   input: InsertBookingCoreInput,
 ): Promise<InsertBookingCoreResult> {
-  const pickupLocation = input.pickupLocation?.trim()
-  const returnLocation = input.returnLocation?.trim()
-  if (!pickupLocation || !returnLocation) {
-    return { ok: false, code: 'validation', message: 'Pickup and return locations are required.' }
-  }
+  const pickupLocation = input.pickupLocation?.trim() || PICKUP_HUB
+  const returnLocation = input.returnLocation?.trim() || PICKUP_HUB
 
   const dates = validateTripWindow(input.pickupAtIso, input.returnAtIso)
   if (!dates.ok) {

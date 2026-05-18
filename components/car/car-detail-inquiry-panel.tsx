@@ -6,22 +6,21 @@ import { WhatsAppInquiryButton } from '@/components/marketing/whatsapp-inquiry-b
 import { Button } from '@/components/ui/Button'
 import { cardEyebrow } from '@/components/ui/card-tokens'
 import { BRAND } from '@/constants/brand'
+import { PICKUP_HUB } from '@/lib/booking/constants'
 import type { Car } from '@/types/car'
 
 export type CarDetailInquiryPanelProps = {
   car: Car
   tripFrom?: string
   tripTo?: string
-  tripPickup?: string
 }
 
 /** Inquiry-only booking panel — online checkout is paused; routes guests to concierge. */
-export function CarDetailInquiryPanel({ car, tripFrom, tripTo, tripPickup }: CarDetailInquiryPanelProps) {
+export function CarDetailInquiryPanel({ car, tripFrom, tripTo }: CarDetailInquiryPanelProps) {
   const vehicle = {
     vehicleName: car.name,
     tripFrom,
     tripTo,
-    pickupHub: tripPickup,
   }
 
   return (
@@ -37,23 +36,19 @@ export function CarDetailInquiryPanel({ car, tripFrom, tripTo, tripPickup }: Car
         </p>
       </div>
 
-      {(tripPickup || tripFrom || tripTo) && (
-        <div className="rounded-xl border border-stroke bg-fill-glass px-4 py-3 text-sm text-muted">
-          {tripPickup ? (
-            <p>
-              Hub: <span className="font-semibold text-soft">{tripPickup}</span>
-            </p>
-          ) : null}
-          {tripFrom && tripTo ? (
-            <p className={tripPickup ? 'mt-1' : undefined}>
-              Dates:{' '}
-              <span className="font-semibold text-soft">
-                {tripFrom} → {tripTo}
-              </span>
-            </p>
-          ) : null}
-        </div>
-      )}
+      <div className="rounded-xl border border-stroke bg-fill-glass px-4 py-3 text-sm text-muted">
+        <p>
+          Pickup: <span className="font-semibold text-soft">{PICKUP_HUB}</span>
+        </p>
+        {tripFrom && tripTo ? (
+          <p className="mt-1">
+            Dates:{' '}
+            <span className="font-semibold text-soft">
+              {tripFrom} → {tripTo}
+            </span>
+          </p>
+        ) : null}
+      </div>
 
       <WhatsAppInquiryButton vehicle={vehicle} size="lg" className="w-full min-h-[3.25rem] sm:min-h-[3.125rem]" label="Book on WhatsApp" />
 

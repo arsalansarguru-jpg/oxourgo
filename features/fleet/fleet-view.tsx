@@ -6,7 +6,6 @@ import { getMetadataSiteUrl } from '@/lib/seo/site-metadata'
 
 type FleetViewProps = {
   cars: FleetCar[]
-  pickup?: string
   from?: string
   to?: string
   location?: string
@@ -14,7 +13,7 @@ type FleetViewProps = {
   searchQuery?: string
 }
 
-export function FleetView({ cars, pickup, from, to, location, searchQuery }: FleetViewProps) {
+export function FleetView({ cars, from, to, location, searchQuery }: FleetViewProps) {
   const jsonLd = buildFleetItemListJsonLd(cars, getMetadataSiteUrl())
 
   return (
@@ -22,7 +21,6 @@ export function FleetView({ cars, pickup, from, to, location, searchQuery }: Fle
       <JsonLdScript id="fleet-catalog-jsonld" data={jsonLd} />
       <FleetClientView
         cars={cars}
-        pickup={pickup}
         from={from}
         to={to}
         location={location}

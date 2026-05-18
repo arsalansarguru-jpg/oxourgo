@@ -1,3 +1,5 @@
+@import url('https://fonts.bunny.net/css?family=inter:400,500,600');
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@500,600,700&display=swap');
 @import 'tailwindcss';
 
 /** Descendant variants for theme-specific overrides in shared components */
@@ -5,9 +7,6 @@
 @custom-variant theme-dark (&:where(html[data-theme="dark"] *));
 
 /* Inter (UI/body) + Satoshi (headings) — runtime CDN, no build-time font fetch */
-@import url('https://fonts.bunny.net/css?family=inter:400,500,600');
-@import url('https://api.fontshare.com/v2/css?f[]=satoshi@500,600,700&display=swap');
-
 /**
  * Oxour Go — product-grade SaaS design system.
  * Light-first tokens; dark mode via `html[data-theme="dark"]`.
@@ -18,25 +17,25 @@
   --font-display: 'Satoshi', var(--font-sans);
 
   /* Surfaces */
-  --color-matte: #fafafa;
-  --color-carbon: #ffffff;
-  --color-carbon-deep: #f4f4f5;
+  --color-matte: #f7f3eb;
+  --color-carbon: #fffaf1;
+  --color-carbon-deep: #eee5d6;
 
   /* Text */
-  --color-soft: #18181b;
-  --color-silver: #52525b;
-  --color-muted: #71717a;
+  --color-soft: #15110b;
+  --color-silver: #5e5548;
+  --color-muted: #7f7362;
 
   /* Brand */
-  --color-electric: #2563eb;
-  --color-emerald: #059669;
+  --color-electric: #b98743;
+  --color-emerald: #0f8b6f;
 
   /* Borders & fills */
-  --color-stroke: rgb(24 24 27 / 0.08);
-  --color-stroke-strong: rgb(24 24 27 / 0.14);
-  --color-fill-glass: rgb(24 24 27 / 0.04);
-  --color-fill-glass-strong: rgb(24 24 27 / 0.07);
-  --color-hero-mist: rgb(37 99 235 / 0.06);
+  --color-stroke: rgb(48 36 22 / 0.12);
+  --color-stroke-strong: rgb(48 36 22 / 0.2);
+  --color-fill-glass: rgb(185 135 67 / 0.08);
+  --color-fill-glass-strong: rgb(185 135 67 / 0.14);
+  --color-hero-mist: rgb(185 135 67 / 0.14);
 
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
@@ -57,9 +56,9 @@
 
   --shadow-glow: none;
   --shadow-glow-strong: none;
-  --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.04);
-  --shadow-card-hover: 0 4px 16px -4px rgb(0 0 0 / 0.08);
-  --shadow-card-accent: 0 4px 16px -4px rgb(37 99 235 / 0.12);
+  --shadow-card: 0 18px 45px -32px rgb(43 31 18 / 0.45);
+  --shadow-card-hover: 0 26px 70px -38px rgb(43 31 18 / 0.55);
+  --shadow-card-accent: 0 26px 64px -34px rgb(185 135 67 / 0.48);
 
   --ease-premium: cubic-bezier(0.4, 0, 0.2, 1);
   --duration-fast: 150ms;
@@ -83,8 +82,8 @@ html[data-theme='dark'] {
   --color-fill-glass: rgb(255 255 255 / 0.04);
   --color-fill-glass-strong: rgb(255 255 255 / 0.07);
   --color-hero-mist: rgb(59 130 246 / 0.08);
-  --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.24);
-  --shadow-card-hover: 0 4px 16px -4px rgb(0 0 0 / 0.4);
+  --shadow-card: 0 22px 60px -38px rgb(0 0 0 / 0.65);
+  --shadow-card-hover: 0 28px 78px -42px rgb(0 0 0 / 0.78);
 }
 
 html[data-theme='light'],
@@ -115,6 +114,9 @@ html:not([data-theme]) {
   body {
     @apply min-w-0 overflow-x-clip bg-matte font-sans text-base text-soft;
     text-rendering: optimizeLegibility;
+    background:
+      radial-gradient(circle at top left, rgb(185 135 67 / 0.14), transparent 32rem),
+      linear-gradient(180deg, var(--color-matte), var(--color-matte));
   }
 
   h1,
@@ -175,15 +177,15 @@ html:not([data-theme]) {
   font-family: var(--font-display);
   font-size: clamp(1.875rem, 2.5vw + 0.75rem, 2.75rem);
   line-height: 1.12;
-  letter-spacing: -0.03em;
+  letter-spacing: 0;
   font-weight: 600;
 }
 
 @utility text-hero-display {
   font-family: var(--font-display);
-  font-size: clamp(1.875rem, 2.5vw + 0.75rem, 2.75rem);
-  line-height: 1.12;
-  letter-spacing: -0.03em;
+  font-size: clamp(2.75rem, 6vw + 0.75rem, 6.75rem);
+  line-height: 0.95;
+  letter-spacing: 0;
   font-weight: 600;
 }
 
@@ -198,7 +200,7 @@ html:not([data-theme]) {
   font-family: var(--font-display);
   font-size: clamp(1.25rem, 1vw + 0.875rem, 1.5rem);
   line-height: 1.3;
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
   font-weight: 600;
 }
 

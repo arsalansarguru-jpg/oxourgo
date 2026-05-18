@@ -2,7 +2,6 @@ import { FleetView } from '@/features/fleet/fleet-view'
 import { getFleetCars } from '@/lib/fleet/get-fleet-cars'
 
 type FleetPageContentProps = {
-  pickup?: string
   from?: string
   to?: string
   location?: string
@@ -11,7 +10,6 @@ type FleetPageContentProps = {
 
 /** Server fetch for `/fleet` — same catalog pipeline as the homepage featured strip. */
 export async function FleetPageContent({
-  pickup,
   from,
   to,
   location,
@@ -22,7 +20,6 @@ export async function FleetPageContent({
   return (
     <FleetView
       cars={cars}
-      pickup={pickup}
       from={from}
       to={to}
       location={location}

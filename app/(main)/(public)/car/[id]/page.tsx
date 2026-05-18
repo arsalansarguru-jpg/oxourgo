@@ -45,7 +45,7 @@ export default async function CarDetailPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ from?: string; to?: string; pickup?: string }>
+  searchParams: Promise<{ from?: string; to?: string }>
 }) {
   const { id } = await params
   const q = await searchParams
@@ -80,7 +80,6 @@ export default async function CarDetailPage({
         kycStatus={kycStatus}
         tripFrom={q.from}
         tripTo={q.to}
-        tripPickup={q.pickup}
       />
     </>
   )

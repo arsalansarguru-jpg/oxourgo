@@ -63,9 +63,9 @@ function NavLinks({
             title={collapsed ? label : undefined}
             onClick={onNavigate}
             className={cn(
-              'flex items-center rounded-md text-sm font-medium transition-colors',
+              'flex items-center rounded-xl text-sm font-medium transition-colors',
               collapsed ? 'justify-center px-0 py-2.5' : 'gap-2.5 px-2.5 py-2',
-              active ? 'bg-fill-glass-strong text-soft' : 'text-muted hover:bg-fill-glass hover:text-soft',
+              active ? 'bg-electric/15 text-soft ring-1 ring-electric/20' : 'text-muted hover:bg-fill-glass hover:text-soft',
             )}
           >
             <Icon className={cn('shrink-0', collapsed ? 'h-5 w-5' : 'h-4 w-4')} aria-hidden />
@@ -112,7 +112,7 @@ function SidebarFooter({
         </>
       ) : (
         <div className="flex justify-center" title={email ?? 'Account'}>
-          <div className="flex h-9 w-9 items-center justify-center rounded-md border border-stroke bg-carbon-deep text-muted">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-stroke bg-carbon-deep text-muted">
             <UserRound className="h-4 w-4" aria-hidden />
           </div>
         </div>
@@ -123,7 +123,7 @@ function SidebarFooter({
             href="/admin/notifications"
             onClick={onNavigate}
             className={cn(
-              'flex items-center gap-2 rounded-md px-2.5 py-2 text-xs font-medium text-muted hover:bg-fill-glass hover:text-soft',
+              'flex items-center gap-2 rounded-xl px-2.5 py-2 text-xs font-medium text-muted hover:bg-fill-glass hover:text-soft',
               !expanded && 'justify-center p-2',
             )}
             title="Alerts"
@@ -136,7 +136,7 @@ function SidebarFooter({
           href="/"
           onClick={onNavigate}
           className={cn(
-            'flex items-center gap-2 rounded-md px-2.5 py-2 text-xs font-medium text-muted hover:bg-fill-glass hover:text-soft',
+            'flex items-center gap-2 rounded-xl px-2.5 py-2 text-xs font-medium text-muted hover:bg-fill-glass hover:text-soft',
             !expanded && 'justify-center p-2',
           )}
           title="Marketing home"
@@ -148,7 +148,7 @@ function SidebarFooter({
           href="/dashboard"
           onClick={onNavigate}
           className={cn(
-            'flex items-center gap-2 rounded-md px-2.5 py-2 text-xs font-medium text-muted hover:bg-fill-glass hover:text-soft',
+            'flex items-center gap-2 rounded-xl px-2.5 py-2 text-xs font-medium text-muted hover:bg-fill-glass hover:text-soft',
             !expanded && 'justify-center p-2',
           )}
           title="Customer app"
@@ -205,10 +205,10 @@ export function AdminShell({
   const desktopExpanded = sidebarHydrated ? !collapsed : true
 
   return (
-    <div className="flex min-h-dvh min-w-0 bg-matte">
+    <div className="flex min-h-dvh min-w-0 bg-[#080706] text-soft [--color-carbon-deep:#17120d] [--color-carbon:#100d09] [--color-fill-glass-strong:rgb(201_154_85/0.16)] [--color-fill-glass:rgb(255_255_255/0.055)] [--color-matte:#080706] [--color-muted:#a99b88] [--color-soft:#f8f2e8] [--color-stroke-strong:rgb(255_255_255/0.16)] [--color-stroke:rgb(255_255_255/0.09)]">
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-stroke bg-carbon py-5 lg:flex',
+          'fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-white/[0.08] bg-[#0d0a07]/92 py-5 shadow-[18px_0_80px_-60px_rgba(0,0,0,0.95)] backdrop-blur-xl lg:flex',
           'transition-[width,padding] duration-200',
           desktopExpanded ? 'w-60 px-4' : 'w-[4.25rem] px-2',
         )}
@@ -226,7 +226,7 @@ export function AdminShell({
           type="button"
           onClick={toggleCollapsed}
           className={cn(
-            'mt-3 flex items-center justify-center gap-2 rounded-md border border-stroke py-2 text-xs font-medium text-muted hover:bg-fill-glass hover:text-soft',
+            'mt-3 flex items-center justify-center gap-2 rounded-xl border border-stroke py-2 text-xs font-medium text-muted hover:bg-fill-glass hover:text-soft',
             desktopExpanded ? 'w-full px-3' : 'h-9 w-full',
           )}
           aria-expanded={desktopExpanded}
@@ -249,11 +249,11 @@ export function AdminShell({
           desktopExpanded ? 'lg:pl-60' : 'lg:pl-[4.25rem]',
         )}
       >
-        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-4 border-b border-stroke bg-carbon px-4 sm:px-6">
+        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-4 border-b border-white/[0.08] bg-[#0d0a07]/88 px-4 shadow-[0_18px_60px_-50px_rgba(0,0,0,0.95)] backdrop-blur-xl sm:px-6">
           <div className="flex min-w-0 items-center gap-3">
             <button
               type="button"
-              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-stroke text-soft lg:hidden"
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-stroke text-soft lg:hidden"
               aria-expanded={mobileOpen}
               aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
               onClick={() => setMobileOpen((o) => !o)}
@@ -278,14 +278,14 @@ export function AdminShell({
               onClick={() => setMobileOpen(false)}
             />
             <aside
-              className="fixed inset-y-0 left-0 z-50 flex w-[min(17rem,88vw)] flex-col border-r border-stroke bg-carbon p-4 lg:hidden"
+              className="fixed inset-y-0 left-0 z-50 flex w-[min(17rem,88vw)] flex-col border-r border-white/[0.08] bg-[#0d0a07] p-4 lg:hidden"
               aria-label="Admin navigation mobile"
             >
               <div className="flex items-center justify-between gap-3">
                 <BrandBlock expanded />
                 <button
                   type="button"
-                  className="rounded-md p-2 text-muted hover:bg-fill-glass hover:text-soft"
+                  className="rounded-xl p-2 text-muted hover:bg-fill-glass hover:text-soft"
                   aria-label="Close menu"
                   onClick={() => setMobileOpen(false)}
                 >
@@ -305,7 +305,7 @@ export function AdminShell({
           </>
         ) : null}
 
-        <main className="flex-1 overflow-x-hidden">
+        <main className="flex-1 overflow-x-hidden bg-[radial-gradient(circle_at_top_left,rgba(201,154,85,0.14),transparent_28rem),linear-gradient(180deg,#080706,#0c0906)]">
           <div className="mx-auto w-full max-w-[80rem] px-4 py-8 sm:px-6 lg:py-10">
             <div className="flex min-w-0 flex-col gap-8">{children}</div>
           </div>

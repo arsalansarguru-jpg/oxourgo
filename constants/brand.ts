@@ -1,6 +1,9 @@
 import { getBusinessContact } from '@/lib/business-contact'
+import { PICKUP_HUB } from '@/lib/booking/constants'
 
 const contact = getBusinessContact()
+
+export { PICKUP_HUB }
 
 export const BRAND = {
   name: 'Oxour Go',
@@ -13,8 +16,6 @@ export const BRAND = {
   phoneDisplay: contact.phoneDisplay,
   phoneTel: contact.phoneTel,
   email: contact.supportEmail,
-  address: 'Mumbai, Maharashtra, India',
+  address: 'Mira Road, Mumbai, Maharashtra, India',
   whatsapp: contact.whatsappUrl,
 } as const
-
-export const PICKUP_LOCATIONS = ['Andheri', 'Bandra', 'Colaba', 'Juhu', 'Powai'] as const

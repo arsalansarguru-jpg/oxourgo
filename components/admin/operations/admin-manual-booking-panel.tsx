@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/Input'
 import { Select } from '@/components/ui/Select'
 import { adminCreateManualBookingAction } from '@/lib/admin/actions/manual-ops-actions'
 import type { AdminVehicleRow } from '@/lib/admin/data/fleet'
+import { PICKUP_HUB } from '@/lib/booking/constants'
 
 type Props = {
   vehicles: AdminVehicleRow[]
@@ -96,8 +97,11 @@ export function AdminManualBookingPanel({ vehicles, canBypass }: Props) {
           </Select>
           <Input name="pickupAt" type="datetime-local" label="Pickup" required />
           <Input name="returnAt" type="datetime-local" label="Return" required />
-          <Input name="pickupLocation" label="Pickup location" required defaultValue="Mumbai" />
-          <Input name="returnLocation" label="Return location" required defaultValue="Mumbai" />
+          <input type="hidden" name="pickupLocation" value={PICKUP_HUB} />
+          <input type="hidden" name="returnLocation" value={PICKUP_HUB} />
+          <p className="text-sm text-muted sm:col-span-2">
+            Pickup and return at <span className="font-semibold text-soft">{PICKUP_HUB}</span>.
+          </p>
           <Input name="pricePerDay" type="number" label="Custom daily rate (₹)" placeholder="Leave blank for catalog" />
           <Input name="totalRupees" type="number" label="Custom total (₹)" placeholder="Overrides quote" />
           <Input name="depositRupees" type="number" label="Custom deposit (₹)" />

@@ -4,9 +4,8 @@ import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertCircle, Loader2, Search } from 'lucide-react'
 
-import { PICKUP_LOCATIONS } from '@/constants/brand'
+import { PICKUP_HUB } from '@/lib/booking/constants'
 import { Button } from '@/components/ui/Button'
-import { Select } from '@/components/ui/Select'
 import { Input } from '@/components/ui/Input'
 
 function toYmd(d: Date): string {
@@ -37,7 +36,6 @@ export function BookingSearchBar() {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const initialDates = useMemo(() => defaultTripDates(), [])
-  const [pickup, setPickup] = useState<string>(PICKUP_LOCATIONS[0])
   const [pickupDate, setPickupDate] = useState(initialDates.pickup)
   const [dropoffDate, setDropoffDate] = useState(initialDates.dropoff)
   const [keywords, setKeywords] = useState('')
@@ -75,10 +73,8 @@ export function BookingSearchBar() {
     }
 
     const q = new URLSearchParams()
-    q.set('pickup', pickup)
     q.set('from', pickupDate)
     q.set('to', dropoffDate)
-    q.set('location', pickup)
     const kw = keywords.trim()
     if (kw) q.set('q', kw)
 
@@ -96,9 +92,12 @@ export function BookingSearchBar() {
 
   return (
     <div className="w-full min-w-0">
-      <div className="rounded-lg border border-stroke bg-carbon p-4 shadow-[var(--shadow-card)] sm:p-5">
+      <div className="rounded-3xl border border-white/14 bg-[#fff8ec]/95 p-4 shadow-[0_30px_80px_-42px_rgba(0,0,0,0.75)] backdrop-blur-xl sm:p-5">
+        <p className="mb-4 text-sm text-[#5c4a32]">
+          All vehicles are collected from our <span className="font-semibold text-[#2a2118]">{PICKUP_HUB}</span> hub.
+        </p>
         <div
-          className="grid min-w-0 gap-4 md:grid-cols-2 lg:grid-cols-4 lg:items-end"
+          className="grid min-w-0 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:items-end"
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
               e.preventDefault()
@@ -106,13 +105,6 @@ export function BookingSearchBar() {
             }
           }}
         >
-          <Select label="Pickup location" value={pickup} onChange={(e) => setPickup(e.target.value)}>
-            {PICKUP_LOCATIONS.map((loc) => (
-              <option key={loc} value={loc}>
-                {loc}
-              </option>
-            ))}
-          </Select>
           <Input
             label="Pickup date"
             type="date"
@@ -151,7 +143,7 @@ export function BookingSearchBar() {
         <div className="mt-4">
           <Input
             label="Brand or model (optional)"
-            placeholder="e.g. BMW, Creta"
+            placeholder="e.g. BMW, Mercedes, Thar"
             value={keywords}
             onChange={(e) => setKeywords(e.target.value)}
             onKeyDown={(e) => {
@@ -163,7 +155,7 @@ export function BookingSearchBar() {
           />
         </div>
         {error && (touched.pickup || touched.dropoff) ? (
-          <div className="mt-4 flex items-start gap-2 rounded-lg border border-amber-400/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
+          <div className="mt-4 flex items-start gap-2 rounded-2xl border border-amber-400/40 bg-amber-100 px-3 py-2 text-sm text-amber-900">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
             <span>{error}</span>
           </div>

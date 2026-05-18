@@ -3,9 +3,9 @@ import type { HTMLAttributes } from 'react'
 import { cn } from '@/lib/utils/cn'
 
 const shell =
-  'rounded-lg border border-stroke bg-carbon shadow-[var(--shadow-card)]'
+  'rounded-2xl border border-white/[0.08] bg-white/[0.045] shadow-[var(--shadow-card)] backdrop-blur'
 
-const interactiveShell = 'hover:border-stroke-strong hover:shadow-[var(--shadow-card-hover)]'
+const interactiveShell = 'hover:border-white/[0.14] hover:bg-white/[0.065] hover:shadow-[var(--shadow-card-hover)]'
 
 export type AdminCardProps = HTMLAttributes<HTMLDivElement> & {
   variant?: 'default' | 'risk'

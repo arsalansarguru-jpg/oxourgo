@@ -3,6 +3,8 @@
  * Override via `NEXT_PUBLIC_*` env vars when needed; production defaults below.
  */
 
+import { PICKUP_HUB } from '@/lib/booking/constants'
+
 /** E.164 digits without `+` — voice + WhatsApp (India). */
 export const BUSINESS_PHONE_E164_DIGITS = '919833133343'
 
@@ -97,11 +99,8 @@ export function buildConciergeBookingPrefill(context?: VehicleInquiryContext): s
     core = DEFAULT_WHATSAPP_PREFILL
   }
 
-  const hub = context?.pickupHub?.trim()
-  if (hub) {
-    return `${core} Preferred hub: ${hub}.`
-  }
-  return core
+  const hub = context?.pickupHub?.trim() || PICKUP_HUB
+  return `${core} Pickup at our ${hub} hub.`
 }
 
 /** Vehicle-aware concierge URL (`wa.me` + encoded prefill). */

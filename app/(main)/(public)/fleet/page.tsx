@@ -10,13 +10,12 @@ export const dynamic = 'force-dynamic'
 export async function generateMetadata({
   searchParams,
 }: {
-  searchParams: Promise<{ pickup?: string; from?: string; to?: string; location?: string; q?: string }>
+  searchParams: Promise<{ from?: string; to?: string; location?: string; q?: string }>
 }): Promise<Metadata> {
   const q = await searchParams
   const bits: string[] = []
   if (q.q?.trim()) bits.push(`"${q.q.trim()}"`)
   if (q.location?.trim()) bits.push(`Near ${q.location.trim()}`)
-  if (q.pickup?.trim()) bits.push(`Hub ${q.pickup.trim()}`)
   if (q.from && q.to) bits.push(`${q.from} → ${q.to}`)
   const title = bits.length ? `Fleet · ${bits.join(' · ')}` : 'Luxury self-drive fleet Mumbai'
   const description =
@@ -34,14 +33,13 @@ export async function generateMetadata({
 export default async function FleetPage({
   searchParams,
 }: {
-  searchParams: Promise<{ pickup?: string; from?: string; to?: string; location?: string; q?: string }>
+  searchParams: Promise<{ from?: string; to?: string; location?: string; q?: string }>
 }) {
   const q = await searchParams
 
   return (
     <Suspense fallback={<FleetLoading />}>
       <FleetPageContent
-        pickup={q.pickup}
         from={q.from}
         to={q.to}
         location={q.location}

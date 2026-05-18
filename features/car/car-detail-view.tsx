@@ -34,17 +34,12 @@ type CarDetailViewProps = {
   kycStatus?: string | null
   tripFrom?: string
   tripTo?: string
-  tripPickup?: string
 }
 
 export function CarDetailView({
   car,
-  isLoggedIn,
-  kycApproved,
-  kycStatus,
   tripFrom,
   tripTo,
-  tripPickup,
 }: CarDetailViewProps) {
   const [activeImage, setActiveImage] = useState(0)
   const [openFaq, setOpenFaq] = useState<string | null>(carDetailFaqs[0]?.id ?? null)
@@ -255,7 +250,7 @@ export function CarDetailView({
               </p>
             </div>
 
-            <CarDetailInquiryPanel car={car} tripFrom={tripFrom} tripTo={tripTo} tripPickup={tripPickup} />
+            <CarDetailInquiryPanel car={car} tripFrom={tripFrom} tripTo={tripTo} />
 
             <Button size="lg" variant="secondary" className="w-full" to="/fleet">
               Back to fleet
@@ -287,7 +282,6 @@ export function CarDetailView({
                 vehicleName: car.name,
                 tripFrom,
                 tripTo,
-                pickupHub: tripPickup,
               }}
               size="lg"
               className="shrink-0 touch-manipulation"

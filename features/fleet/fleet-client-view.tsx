@@ -23,7 +23,6 @@ const PAGE_SIZE = 12
 
 type FleetClientViewProps = {
   cars: FleetCar[]
-  pickup?: string
   from?: string
   to?: string
   /** Pre-fills text search (e.g. from homepage search or destination cards). */
@@ -34,7 +33,6 @@ type FleetClientViewProps = {
 
 export function FleetClientView({
   cars,
-  pickup = '',
   from = '',
   to = '',
   location = '',
@@ -103,11 +101,11 @@ export function FleetClientView({
         has_text: len > 0,
         filter_count: activeFilters.size,
         page: currentPage,
-        has_date_context: Boolean(pickup || from || to),
+        has_date_context: Boolean(from || to),
       })
     }, 360)
     return () => window.clearTimeout(handle)
-  }, [activeFilters, currentPage, debouncedQuery, from, isSearchDebouncing, pickup, to])
+  }, [activeFilters, currentPage, debouncedQuery, from, isSearchDebouncing, to])
 
   const clearAllFilters = () => {
     setActiveFilters(new Set())
@@ -119,20 +117,15 @@ export function FleetClientView({
   const gridLayoutKey = `${debouncedQuery}|${[...activeFilters].sort().join(',')}|${currentPage}`
 
   return (
-    <Section className="pt-6 md:pt-10" data-testid="fleet-page">
+    <Section className="pt-8 md:pt-12" data-testid="fleet-page">
       <SectionHeading
         eyebrow="Fleet"
-        title="Browse the collection"
-        subtitle="Search, filter, and book verified luxury and premium vehicles across Mumbai hubs."
+        title="Curated fleet"
+        subtitle="Search, filter, and reserve verified luxury and premium vehicles — all pickups at our Mira Road hub."
       />
 
-      {(pickup || from || to || location.trim() || searchQuery.trim()) && (
-        <div className="mx-auto max-w-3xl rounded-2xl border border-electric/18 bg-gradient-to-br from-electric/[0.07] to-transparent px-4 py-3.5 text-center text-sm leading-relaxed text-muted">
-          {pickup ? (
-            <span>
-              Hub: <span className="font-semibold text-soft">{pickup}</span>
-            </span>
-          ) : null}
+      {(from || to || location.trim() || searchQuery.trim()) && (
+        <div className="mx-auto max-w-3xl rounded-3xl border border-electric/25 bg-carbon/80 px-4 py-3.5 text-center text-sm leading-relaxed text-muted shadow-[var(--shadow-card)]">
           {from ? (
             <span className="ml-2">
               From: <span className="font-semibold text-soft">{from}</span>
@@ -155,7 +148,7 @@ export function FleetClientView({
         </div>
       )}
 
-      <div className="sticky top-[var(--public-header-offset)] z-40 -mx-[var(--spacing-edge)] min-w-0 rounded-2xl border border-stroke bg-matte/[0.88] px-[var(--spacing-edge)] py-3 shadow-[0_8px_40px_-28px_rgba(0,0,0,0.65)] backdrop-blur-2xl supports-[backdrop-filter]:bg-matte/75 md:mx-0 md:py-4 lg:sticky lg:top-[var(--public-header-offset)]">
+      <div className="sticky top-[var(--public-header-offset)] z-40 -mx-[var(--spacing-edge)] min-w-0 rounded-3xl border border-stroke bg-carbon/90 px-[var(--spacing-edge)] py-3 shadow-[0_24px_80px_-50px_rgba(0,0,0,0.75)] backdrop-blur-2xl supports-[backdrop-filter]:bg-carbon/82 md:mx-0 md:py-4 lg:sticky lg:top-[var(--public-header-offset)]">
             <div className="flex flex-col gap-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between lg:gap-6">
                 <div className="min-w-0 flex-1 space-y-2">
@@ -289,7 +282,7 @@ export function FleetClientView({
                           layout
                           transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                         >
-                          <FleetCarCard car={car} tripFrom={from} tripTo={to} tripPickup={pickup} />
+                          <FleetCarCard car={car} tripFrom={from} tripTo={to} />
                         </motion.div>
                       ))}
                     </div>

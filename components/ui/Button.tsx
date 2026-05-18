@@ -5,9 +5,10 @@ import NextLink from 'next/link'
 import { cn } from '@/lib/utils/cn'
 
 const variants = {
-  primary: 'bg-electric text-white hover:bg-electric/90 active:bg-electric/85',
+  primary:
+    'border border-electric/70 bg-[linear-gradient(135deg,#d8b06d,#b98743)] text-[#161009] shadow-[0_16px_34px_-24px_rgba(185,135,67,0.9)] hover:brightness-105 active:brightness-95',
   secondary:
-    'border border-stroke-strong bg-carbon text-soft hover:bg-carbon-deep active:bg-carbon-deep',
+    'border border-stroke-strong bg-carbon/80 text-soft shadow-[inset_0_1px_0_rgb(255_255_255/0.28)] hover:bg-carbon-deep active:bg-carbon-deep',
   ghost: 'text-soft hover:bg-fill-glass active:bg-fill-glass-strong',
   outline: 'border border-stroke-strong bg-transparent text-soft hover:bg-fill-glass',
   danger:
@@ -15,13 +16,13 @@ const variants = {
 } as const
 
 const sizes = {
-  sm: 'min-h-9 px-3.5 py-2 text-sm rounded-md',
-  md: 'min-h-10 px-4 py-2 text-sm rounded-md',
-  lg: 'min-h-11 px-5 py-2.5 text-sm rounded-md',
+  sm: 'min-h-9 px-3.5 py-2 text-sm rounded-full',
+  md: 'min-h-10 px-4 py-2 text-sm rounded-full',
+  lg: 'min-h-12 px-6 py-3 text-sm rounded-full',
 } as const
 
 const base =
-  'touch-manipulation inline-flex shrink-0 items-center justify-center gap-2 font-medium transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/40 focus-visible:ring-offset-2 focus-visible:ring-offset-matte disabled:pointer-events-none disabled:opacity-40'
+  'touch-manipulation inline-flex shrink-0 items-center justify-center gap-2 font-semibold transition-[transform,filter,background-color,border-color,box-shadow] duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/40 focus-visible:ring-offset-2 focus-visible:ring-offset-matte disabled:pointer-events-none disabled:translate-y-0 disabled:opacity-40'
 
 export type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'href' | 'onClick'> & {
   variant?: keyof typeof variants

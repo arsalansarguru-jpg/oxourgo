@@ -156,14 +156,6 @@ export function CustomerBookingDetail({
   const returnFmt = new Date(row.return_date).toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short' })
   const pickupCondition = parseConditionNotes(row.pickup_condition_notes)
   const returnCondition = parseConditionNotes(row.return_condition_notes)
-  const penaltiesTotal =
-    row.penalty_total ??
-    (row.penalty_damage_rupees ?? 0) +
-      (row.penalty_late_rupees ?? 0) +
-      (row.penalty_extra_km_rupees ?? 0) +
-      (row.penalty_fuel_rupees ?? 0) +
-      (row.penalty_cleaning_rupees ?? 0) +
-      (row.penalty_traffic_rupees ?? 0)
   const siteBase = getPublicSiteUrl().replace(/\/+$/, '')
   const whatsAppPrefilled = buildWhatsAppPrefilledUrl(
     bookingSupportPrefilledMessage({

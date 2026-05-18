@@ -40,8 +40,8 @@ export const supportFaqs: Faq[] = [
   },
   {
     id: 's2',
-    question: 'Do you offer airport pickup?',
+    question: 'Where do I collect the car?',
     answer:
-      'Yes—select airport-adjacent hubs like Andheri or coordinate a handoff window with our concierge team.',
+      'All handovers are at our Mira Road hub. Vehicles must be picked up and returned there — we do not offer delivery or airport pickup.',
   },
 ]
