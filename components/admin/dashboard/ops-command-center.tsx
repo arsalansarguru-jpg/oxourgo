@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import {
   ArrowUpRight,
@@ -99,7 +100,16 @@ export function OpsCommandCenter({ data }: { data: OpsDashboardBundle }) {
   const { visibility, kpis, liveOperations, payments, paymentsSummary, customers, vehicles, pendingActions, loadedAt } =
     data
 
-  const refreshed = new Date(loadedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })
+  // Format the refreshed time on the client only to avoid SSR/CSR hydration mismatch
+  // when the server timezone differs from the user's browser locale.
+  const [refreshed, setRefreshed] = useState<string>('')
+  useEffect(() => {
+    try {
+      setRefreshed(new Date(loadedAt).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }))
+    } catch {
+      setRefreshed('')
+    }
+  }, [loadedAt])
 
   return (
     <div className="space-y-8">
@@ -107,7 +117,7 @@ export function OpsCommandCenter({ data }: { data: OpsDashboardBundle }) {
         <div>
           <h1 className="font-display text-xl font-semibold text-soft sm:text-2xl">Operations dashboard</h1>
           <p className="mt-1 text-sm text-muted">
-            Business command center · Updated {refreshed}
+            Business command center{refreshed ? ` · Updated ${refreshed}` : ''}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">

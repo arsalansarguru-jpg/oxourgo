@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 
 import { AdminCard } from '@/components/admin/admin-card'
+import { AdminNoAccessView } from '@/components/admin/admin-no-access-view'
 import { AdminShell } from '@/components/admin/admin-shell'
 import { listOpsAlertsForAdmin } from '@/lib/admin/data/ops-alerts'
 import { getPermissionsForRole } from '@/lib/auth/permissions'
@@ -19,8 +20,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!summary) {
     redirect(`/login?${new URLSearchParams({ redirect: '/admin' }).toString()}`)
   }
+
+  // Authenticated but not staff: render an admin-themed access-denied view in-place.
+  // Never fall through to the customer dashboard UI for any /admin/* path.
   if (!isStaffRole(summary.appRole)) {
-    redirect('/dashboard?error=forbidden')
+    return <AdminNoAccessView email={summary.user.email ?? undefined} appRole={summary.appRole} />
   }
 
   const permissions = [...getPermissionsForRole(summary.appRole)]

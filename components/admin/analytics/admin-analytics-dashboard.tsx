@@ -227,7 +227,7 @@ export function AdminAnalyticsDashboard({ data }: { data: AdminAnalyticsBundle }
           transition={{ duration: 0.45, ease, delay: 0.08 }}
         >
           <AdminCard className="overflow-hidden">
-            <AdminCardContent className="space-y-4 p-6 sm:p-8">
+            <AdminCardContent className="space-y-4 p-4 sm:p-6 lg:p-8">
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-electric/90">Ledger</p>
@@ -252,7 +252,7 @@ export function AdminAnalyticsDashboard({ data }: { data: AdminAnalyticsBundle }
           transition={{ duration: 0.45, ease, delay: 0.08 }}
         >
           <AdminCard className="overflow-hidden">
-            <AdminCardContent className="space-y-4 p-6 sm:p-8">
+            <AdminCardContent className="space-y-4 p-4 sm:p-6 lg:p-8">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-electric/90">Pipeline</p>
                 <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-soft">Booking trends</h2>
@@ -269,7 +269,7 @@ export function AdminAnalyticsDashboard({ data }: { data: AdminAnalyticsBundle }
           transition={{ duration: 0.45, ease, delay: 0.08 }}
         >
           <AdminCard>
-            <AdminCardContent className="space-y-4 p-6 sm:p-8">
+            <AdminCardContent className="space-y-4 p-4 sm:p-6 lg:p-8">
               <div className="flex flex-wrap items-end justify-between gap-3">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-electric/90">Fleet</p>
@@ -298,7 +298,7 @@ export function AdminAnalyticsDashboard({ data }: { data: AdminAnalyticsBundle }
           transition={{ duration: 0.45, ease, delay: 0.08 }}
         >
           <AdminCard>
-            <AdminCardContent className="space-y-4 p-6 sm:p-8">
+            <AdminCardContent className="space-y-4 p-4 sm:p-6 lg:p-8">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-electric/90">Capacity</p>
                 <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-soft">Fleet availability</h2>
@@ -318,7 +318,7 @@ export function AdminAnalyticsDashboard({ data }: { data: AdminAnalyticsBundle }
           className="xl:col-span-2"
         >
           <AdminCard>
-            <AdminCardContent className="space-y-4 p-6 sm:p-8">
+            <AdminCardContent className="space-y-4 p-4 sm:p-6 lg:p-8">
               <div>
                 <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-electric/90">Growth</p>
                 <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-soft">Customer signups</h2>
@@ -337,33 +337,33 @@ export function AdminAnalyticsDashboard({ data }: { data: AdminAnalyticsBundle }
       <div className="grid gap-6 lg:grid-cols-3">
         <AdminCard className="lg:col-span-3">
           <AdminCardContent className="p-0">
-            <div className="border-b border-white/[0.06] px-6 py-4 sm:px-8">
+            <div className="border-b border-white/[0.06] px-4 py-4 sm:px-6 lg:px-8">
               <h2 className="text-lg font-semibold text-soft">Recent bookings</h2>
               <p className="text-xs text-muted">Latest in the selected window.</p>
             </div>
-            <div className="overflow-x-auto scroll-touch">
+            <div className="overflow-x-auto admin-table-scroll scroll-touch">
               <table className="w-full min-w-[720px] text-left text-sm">
                 <thead className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
                   <tr className="border-b border-white/[0.06]">
-                    <th className="px-6 py-3 sm:px-8">When</th>
+                    <th className="px-4 py-3 sm:px-6 lg:px-8">When</th>
                     <th className="px-4 py-3">Vehicle</th>
                     <th className="px-4 py-3">Trip</th>
                     <th className="px-4 py-3">Total</th>
                     <th className="px-4 py-3">Status</th>
-                    <th className="px-6 py-3 sm:px-8" />
+                    <th className="px-4 py-3 sm:px-6 lg:px-8" />
                   </tr>
                 </thead>
                 <tbody>
                   {tables.recentBookings.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="px-6 py-8 text-center text-muted sm:px-8">
+                      <td colSpan={6} className="px-4 py-8 text-center text-muted sm:px-6 lg:px-8">
                         No bookings in this range.
                       </td>
                     </tr>
                   ) : (
                     tables.recentBookings.map((b) => (
                       <tr key={b.id} className="border-b border-white/[0.04] last:border-0">
-                        <td className="px-6 py-3 text-xs text-muted sm:px-8">
+                        <td className="px-4 py-3 text-xs text-muted sm:px-6 lg:px-8">
                           {new Date(b.created_at).toLocaleString()}
                         </td>
                         <td className="max-w-[200px] truncate px-4 py-3 text-soft">{b.vehicle_label ?? '—'}</td>
@@ -374,7 +374,7 @@ export function AdminAnalyticsDashboard({ data }: { data: AdminAnalyticsBundle }
                         <td className="px-4 py-3">
                           <AdminStatusPill value={b.booking_status} />
                         </td>
-                        <td className="px-6 py-3 text-right sm:px-8">
+                        <td className="px-4 py-3 text-right sm:px-6 lg:px-8">
                           <Link
                             href={`/admin/bookings/${b.id}`}
                             className="text-xs font-medium text-electric hover:underline"
@@ -392,7 +392,7 @@ export function AdminAnalyticsDashboard({ data }: { data: AdminAnalyticsBundle }
         </AdminCard>
 
         <AdminCard className="lg:col-span-1">
-          <AdminCardContent className="space-y-3 p-6 sm:p-8">
+          <AdminCardContent className="space-y-3 p-4 sm:p-6 lg:p-8">
             <h2 className="text-lg font-semibold text-soft">Top customers</h2>
             <p className="text-xs text-muted">Posted revenue in window.</p>
             <ul className="space-y-3">
@@ -422,14 +422,14 @@ export function AdminAnalyticsDashboard({ data }: { data: AdminAnalyticsBundle }
         </AdminCard>
 
         <AdminCard className="lg:col-span-2">
-          <AdminCardContent className="space-y-4 p-6 sm:p-8">
+          <AdminCardContent className="space-y-4 p-4 sm:p-6 lg:p-8">
             <div className="flex flex-wrap items-end justify-between gap-3">
               <div>
                 <h2 className="text-lg font-semibold text-soft">Most rented vehicles</h2>
                 <p className="text-xs text-muted">Posted revenue and trip volume in window.</p>
               </div>
             </div>
-            <div className="overflow-x-auto scroll-touch">
+            <div className="overflow-x-auto admin-table-scroll scroll-touch">
               <table className="w-full min-w-[520px] text-left text-sm">
                 <thead className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">
                   <tr className="border-b border-white/[0.06]">

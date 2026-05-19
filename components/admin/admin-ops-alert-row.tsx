@@ -16,7 +16,7 @@ export function AdminOpsAlertRow({ alert }: { alert: OpsAlertListItem }) {
   if (alert.dismissed) return null
 
   return (
-    <motion.li layout initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+    <motion.li initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
       <AdminCard interactive>
         <AdminCardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-start sm:justify-between sm:p-5">
           <div className="min-w-0 space-y-1">

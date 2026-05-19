@@ -63,10 +63,11 @@ export function readAdminSidebarCollapsed(): boolean {
 }
 
 export function writeAdminSidebarCollapsed(collapsed: boolean): void {
+  if (typeof window === 'undefined') return
   try {
     window.localStorage.setItem(SIDEBAR_COLLAPSE_KEY, collapsed ? '1' : '0')
   } catch {
-    /* ignore */
+    /* ignore — Safari private mode / disabled storage */
   }
 }
 

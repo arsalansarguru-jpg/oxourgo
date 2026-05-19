@@ -31,11 +31,16 @@ export function AdminOpsAlertBell({
   }, [initialItems, initialUnread])
 
   useEffect(() => {
-    const onDoc = (e: MouseEvent) => {
+    if (typeof document === 'undefined') return
+    const onDoc = (e: Event) => {
       if (!rootRef.current?.contains(e.target as Node)) setOpen(false)
     }
     document.addEventListener('mousedown', onDoc)
-    return () => document.removeEventListener('mousedown', onDoc)
+    document.addEventListener('touchstart', onDoc, { passive: true })
+    return () => {
+      document.removeEventListener('mousedown', onDoc)
+      document.removeEventListener('touchstart', onDoc)
+    }
   }, [])
 
   useEffect(() => {
@@ -82,7 +87,7 @@ export function AdminOpsAlertBell({
             transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
             className={cn(
               cardSurfaceBase,
-              'absolute left-0 z-50 mt-2 w-[min(100vw-2rem,22rem)] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0a0a0f]/95 p-0 shadow-[0_28px_90px_-36px_rgba(0,0,0,0.92)] ring-1 ring-inset ring-white/[0.04] backdrop-blur-2xl lg:left-auto lg:right-0',
+              'absolute right-0 z-50 mt-2 w-[min(100vw-2rem,22rem)] max-w-[calc(100vw-1rem)] overflow-hidden rounded-2xl border border-white/[0.08] bg-[#0a0a0f]/95 p-0 shadow-[0_28px_90px_-36px_rgba(0,0,0,0.92)] ring-1 ring-inset ring-white/[0.04] backdrop-blur-2xl',
             )}
           >
             <div className="border-b border-stroke px-4 py-3">

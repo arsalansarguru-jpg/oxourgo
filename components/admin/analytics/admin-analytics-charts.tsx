@@ -1,5 +1,6 @@
 'use client'
 
+import { useId } from 'react'
 import { motion } from 'framer-motion'
 
 import type { AdminAnalyticsSeriesPoint } from '@/lib/admin/data/analytics'
@@ -39,6 +40,14 @@ export function AnalyticsSeriesArea({
   accent?: 'electric' | 'emerald' | 'amber'
   valueFormatter: (n: number) => string
 }) {
+  const uid = useId().replace(/[:]/g, '')
+  const fillElId = `aFillEl-${uid}`
+  const strokeElId = `aStrokeEl-${uid}`
+  const fillEmId = `aFillEm-${uid}`
+  const strokeEmId = `aStrokeEm-${uid}`
+  const fillAmId = `aFillAm-${uid}`
+  const strokeAmId = `aStrokeAm-${uid}`
+
   const values = points.map((p) => p.value)
   const w = 720
   const h = 200
@@ -47,40 +56,50 @@ export function AnalyticsSeriesArea({
   const max = Math.max(...values, 1)
   const stroke =
     accent === 'emerald'
-      ? 'url(#aStrokeEm)'
+      ? `url(#${strokeEmId})`
       : accent === 'amber'
-        ? 'url(#aStrokeAm)'
-        : 'url(#aStrokeEl)'
+        ? `url(#${strokeAmId})`
+        : `url(#${strokeElId})`
   const fill =
-    accent === 'emerald' ? 'url(#aFillEm)' : accent === 'amber' ? 'url(#aFillAm)' : 'url(#aFillEl)'
+    accent === 'emerald'
+      ? `url(#${fillEmId})`
+      : accent === 'amber'
+        ? `url(#${fillAmId})`
+        : `url(#${fillElId})`
 
   const tickStep = Math.max(1, Math.ceil(points.length / 6))
 
   return (
     <div className="relative w-full">
-      <svg viewBox={`0 0 ${w} ${h}`} className="h-[200px] w-full overflow-visible" role="img" aria-label="Series chart">
+      <svg
+        viewBox={`0 0 ${w} ${h}`}
+        preserveAspectRatio="none"
+        className="h-[180px] w-full overflow-visible sm:h-[200px]"
+        role="img"
+        aria-label="Series chart"
+      >
         <defs>
-          <linearGradient id="aFillEl" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id={fillElId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="rgb(59, 130, 246)" stopOpacity="0.38" />
             <stop offset="100%" stopColor="rgb(59, 130, 246)" stopOpacity="0" />
           </linearGradient>
-          <linearGradient id="aStrokeEl" x1="0" y1="0" x2="1" y2="0">
+          <linearGradient id={strokeElId} x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="rgb(147, 197, 253)" />
             <stop offset="100%" stopColor="rgb(59, 130, 246)" />
           </linearGradient>
-          <linearGradient id="aFillEm" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id={fillEmId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="rgb(52, 211, 153)" stopOpacity="0.35" />
             <stop offset="100%" stopColor="rgb(52, 211, 153)" stopOpacity="0" />
           </linearGradient>
-          <linearGradient id="aStrokeEm" x1="0" y1="0" x2="1" y2="0">
+          <linearGradient id={strokeEmId} x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="rgb(167, 243, 208)" />
             <stop offset="100%" stopColor="rgb(16, 185, 129)" />
           </linearGradient>
-          <linearGradient id="aFillAm" x1="0" y1="0" x2="0" y2="1">
+          <linearGradient id={fillAmId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="rgb(251, 191, 36)" stopOpacity="0.32" />
             <stop offset="100%" stopColor="rgb(251, 191, 36)" stopOpacity="0" />
           </linearGradient>
-          <linearGradient id="aStrokeAm" x1="0" y1="0" x2="1" y2="0">
+          <linearGradient id={strokeAmId} x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="rgb(253, 224, 71)" />
             <stop offset="100%" stopColor="rgb(245, 158, 11)" />
           </linearGradient>
@@ -141,7 +160,13 @@ export function AnalyticsDailyBars({ points, color }: { points: AdminAnalyticsSe
   const barW = innerW / Math.max(points.length, 1) - 2
 
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="h-[180px] w-full" role="img" aria-label="Daily volume chart">
+    <svg
+      viewBox={`0 0 ${w} ${h}`}
+      preserveAspectRatio="none"
+      className="h-[160px] w-full sm:h-[180px]"
+      role="img"
+      aria-label="Daily volume chart"
+    >
       {points.map((p, i) => {
         const bh = (p.value / max) * innerH
         const x = pad + (i / Math.max(points.length - 1, 1)) * innerW - barW / 2
@@ -205,7 +230,13 @@ export function AnalyticsAvailabilityLine({ points }: { points: AdminAnalyticsSe
   const avg = points.length ? Math.round(points.reduce((s, p) => s + p.value, 0) / points.length) : 0
   return (
     <div>
-      <svg viewBox={`0 0 ${w} ${h}`} className="h-[160px] w-full" role="img" aria-label="Fleet availability">
+      <svg
+        viewBox={`0 0 ${w} ${h}`}
+        preserveAspectRatio="none"
+        className="h-[140px] w-full sm:h-[160px]"
+        role="img"
+        aria-label="Fleet availability"
+      >
         {[0, 1, 2, 3, 4].map((i) => (
           <line
             key={i}

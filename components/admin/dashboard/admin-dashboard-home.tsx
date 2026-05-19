@@ -84,7 +84,7 @@ function HeroMetric({
 }) {
   return (
     <Link href={href} className="group block outline-none">
-      <AdminCard className="relative h-full overflow-hidden p-6 transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-accent)]">
+      <AdminCard className="relative h-full overflow-hidden p-4 transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-accent)] sm:p-6">
         <div className="pointer-events-none absolute -right-6 -top-6 h-28 w-28 rounded-full bg-electric/12 blur-2xl transition-opacity duration-500 group-hover:opacity-100" />
         <div className="relative flex items-start justify-between gap-3">
           <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -141,7 +141,12 @@ function RevenueTrendChart() {
 
   return (
     <div className="relative">
-      <svg viewBox={`0 0 ${w} ${h}`} className="h-[220px] w-full overflow-visible" aria-hidden>
+      <svg
+        viewBox={`0 0 ${w} ${h}`}
+        preserveAspectRatio="none"
+        className="h-[180px] w-full overflow-visible sm:h-[220px]"
+        aria-hidden
+      >
         <defs>
           <linearGradient id="revFill" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="rgb(59, 130, 246)" stopOpacity="0.35" />
@@ -288,7 +293,7 @@ export function AdminDashboardHome() {
           viewport={{ once: true, amount: 0.12 }}
         >
           <AdminCard>
-            <AdminCardContent className="p-6 sm:p-8">
+            <AdminCardContent className="p-4 sm:p-6 lg:p-8">
               <div className="flex flex-wrap items-end justify-between gap-4">
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-electric/90">Revenue</p>

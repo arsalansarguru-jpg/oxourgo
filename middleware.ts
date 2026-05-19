@@ -85,14 +85,11 @@ export async function middleware(request: NextRequest) {
   if (pathname.startsWith('/admin')) {
     const appRole = appRoleFromJwtMetadata(user.app_metadata as Record<string, unknown> | undefined)
 
+    // Non-staff users stay on /admin/* and get an admin-themed "no access" view
+    // rendered by the admin layout. We intentionally do NOT redirect them to
+    // the customer dashboard so /admin never visually leaks customer chrome.
     if (!isStaffRole(appRole)) {
-      const denied = new URL('/dashboard', request.url)
-      denied.searchParams.set('error', 'forbidden')
-      const redirectResponse = NextResponse.redirect(denied)
-      response.cookies.getAll().forEach((c) => {
-        redirectResponse.cookies.set(c.name, c.value)
-      })
-      return redirectResponse
+      return response
     }
 
     if (pathname !== '/admin/forbidden' && !canAccessAdminPath(appRole, pathname)) {

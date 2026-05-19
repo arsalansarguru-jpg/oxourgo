@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import type { LucideIcon } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -63,7 +64,7 @@ function OpsMetricCard({
       <Link href={href} className="group block outline-none">
         <AdminCard
           className={cn(
-            'relative h-full overflow-hidden p-5 transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-accent)]',
+            'relative h-full overflow-hidden p-4 transition-[transform,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-accent)] sm:p-5',
             tone === 'warn' && 'border-amber-400/20',
             tone === 'critical' && 'border-rose-400/25',
           )}
@@ -205,10 +206,20 @@ export function AdminCommandCenter({ data }: { data: CommandCenterBundle }) {
   const { visibility, live, finance, fleet, queue, auditEntries, actorLookup, upcoming, alerts, loadedAt } =
     data
 
-  const refreshed = new Date(loadedAt).toLocaleTimeString('en-IN', {
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+  // Format on the client only — avoids hydration mismatch from differing server/browser locales.
+  const [refreshed, setRefreshed] = useState<string>('')
+  useEffect(() => {
+    try {
+      setRefreshed(
+        new Date(loadedAt).toLocaleTimeString('en-IN', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      )
+    } catch {
+      setRefreshed('')
+    }
+  }, [loadedAt])
 
   return (
     <motion.div
@@ -231,7 +242,7 @@ export function AdminCommandCenter({ data }: { data: CommandCenterBundle }) {
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-electric/90">Live HQ</p>
             <p className="text-sm text-muted">
-              Operational pulse · refreshed {refreshed}
+              Operational pulse{refreshed ? ` · refreshed ${refreshed}` : ''}
             </p>
           </div>
         </div>
@@ -302,7 +313,7 @@ export function AdminCommandCenter({ data }: { data: CommandCenterBundle }) {
             viewport={{ once: true, amount: 0.1 }}
           >
             <AdminCard className="h-full">
-              <AdminCardContent className="space-y-5 p-6 sm:p-7">
+              <AdminCardContent className="space-y-5 p-4 sm:p-6 lg:p-7">
                 <SectionHeader
                   eyebrow="Finance"
                   title="Financial overview"
@@ -341,7 +352,7 @@ export function AdminCommandCenter({ data }: { data: CommandCenterBundle }) {
         ) : (
           <motion.div className="xl:col-span-5" variants={sectionReveal} initial="hidden" whileInView="visible" viewport={{ once: true }}>
             <AdminCard>
-              <AdminCardContent className="p-6 sm:p-7">
+              <AdminCardContent className="p-4 sm:p-6 lg:p-7">
                 <SectionHeader eyebrow="Finance" title="Restricted" icon={Banknote} />
                 <p className="mt-3 text-sm text-muted">
                   Financial metrics are hidden for your role. Contact an ops admin if you need access.
@@ -361,7 +372,7 @@ export function AdminCommandCenter({ data }: { data: CommandCenterBundle }) {
             viewport={{ once: true, amount: 0.1 }}
           >
             <AdminCard className="h-full">
-              <AdminCardContent className="space-y-5 p-6 sm:p-7">
+              <AdminCardContent className="space-y-5 p-4 sm:p-6 lg:p-7">
                 <SectionHeader eyebrow="Fleet" title="Fleet status" icon={CarFront} href="/admin/fleet" />
                 <div className="space-y-4">
                   <FleetBar label="Available" count={fleet.available} total={fleet.total} tone="emerald" />
@@ -422,7 +433,7 @@ export function AdminCommandCenter({ data }: { data: CommandCenterBundle }) {
         {/* Activity feed */}
         <motion.div variants={sectionReveal} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.12 }}>
           <AdminCard>
-            <AdminCardContent className="space-y-5 p-6 sm:p-7">
+            <AdminCardContent className="space-y-5 p-4 sm:p-6 lg:p-7">
               <SectionHeader
                 eyebrow="Activity"
                 title="Live activity feed"
@@ -446,7 +457,7 @@ export function AdminCommandCenter({ data }: { data: CommandCenterBundle }) {
         <div className="space-y-6">
           <motion.div variants={sectionReveal} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.12 }}>
             <AdminCard>
-              <AdminCardContent className="space-y-4 p-6 sm:p-7">
+              <AdminCardContent className="space-y-4 p-4 sm:p-6 lg:p-7">
                 <SectionHeader eyebrow="Schedule" title="Upcoming actions" icon={CalendarClock} />
                 {upcoming.length === 0 ? (
                   <p className="text-sm text-muted">No pickups, returns, or finance actions scheduled for today.</p>
@@ -485,7 +496,7 @@ export function AdminCommandCenter({ data }: { data: CommandCenterBundle }) {
 
           <motion.div variants={sectionReveal} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.12 }}>
             <AdminCard>
-              <AdminCardContent className="space-y-4 p-6 sm:p-7">
+              <AdminCardContent className="space-y-4 p-4 sm:p-6 lg:p-7">
                 <SectionHeader eyebrow="Risk" title="Alerts & flags" icon={AlertTriangle} />
                 {alerts.length === 0 ? (
                   <p className="flex items-center gap-2 text-sm text-muted">
