@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { AlertCircle, Loader2, Search } from 'lucide-react'
 
@@ -35,14 +35,24 @@ function defaultTripDates(): { pickup: string; dropoff: string } {
 export function BookingSearchBar() {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
-  const initialDates = useMemo(() => defaultTripDates(), [])
-  const [pickupDate, setPickupDate] = useState(initialDates.pickup)
-  const [dropoffDate, setDropoffDate] = useState(initialDates.dropoff)
+  // Dates default to empty on the server so SSR and the first client render match.
+  // The user's local "today" is filled in below in useEffect — otherwise the server's
+  // UTC date and the browser's local date can disagree around midnight and crash
+  // hydration in React 19 / Next 15 production.
+  const [pickupDate, setPickupDate] = useState('')
+  const [dropoffDate, setDropoffDate] = useState('')
+  const [todayYmd, setTodayYmd] = useState('')
   const [keywords, setKeywords] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [touched, setTouched] = useState({ pickup: false, dropoff: false })
 
-  const todayYmd = useMemo(() => toYmd(new Date()), [])
+  useEffect(() => {
+    const { pickup, dropoff } = defaultTripDates()
+    setTodayYmd(toYmd(new Date()))
+    setPickupDate((prev) => prev || pickup)
+    setDropoffDate((prev) => prev || dropoff)
+  }, [])
+
   const dropoffMin = pickupDate || todayYmd
 
   const onSearch = () => {
@@ -58,7 +68,7 @@ export function BookingSearchBar() {
     }
     const p = parseYmd(pickupDate)
     const r = parseYmd(dropoffDate)
-    const t0 = parseYmd(todayYmd)
+    const t0 = parseYmd(todayYmd || toYmd(new Date()))
     if (!p || !r || !t0) {
       setError('Enter valid dates (YYYY-MM-DD).')
       return
