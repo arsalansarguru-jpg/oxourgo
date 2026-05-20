@@ -1,7 +1,9 @@
 import type { Metadata } from 'next'
 
 import { LoginView } from '@/features/auth/login-view'
-import { safeNextPath } from '@/lib/auth/safe-next-path'
+import { resolvePostLoginPath } from '@/lib/auth/post-login-path'
+import { getAuthSessionSummary } from '@/lib/auth/server'
+import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,8 +28,14 @@ export default async function LoginPage({
   searchParams: Promise<{ redirect?: string; error?: string }>
 }) {
   const sp = await searchParams
-  const redirectTo = safeNextPath(sp.redirect, '/dashboard')
   const initialAuthError = decodeAuthError(sp.error)
+
+  const summary = await getAuthSessionSummary()
+  if (summary) {
+    redirect(resolvePostLoginPath(summary.appRole, sp.redirect))
+  }
+
+  const redirectTo = resolvePostLoginPath('customer', sp.redirect)
 
   return <LoginView initialAuthError={initialAuthError} redirectTo={redirectTo} />
 }

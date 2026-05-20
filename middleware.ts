@@ -3,9 +3,11 @@ import type { NextRequest } from 'next/server'
 import { NextResponse } from 'next/server'
 
 import { getCanonicalSiteOrigin, shouldCanonicalizeOrigin } from '@/lib/auth/canonical-origin'
-import { canAccessAdminPath, appRoleFromJwtMetadata } from '@/lib/auth/route-access'
+import { canAccessAdminPath } from '@/lib/auth/route-access'
+import { resolveAppRoleWithClaims } from '@/lib/auth/resolve-session-role'
 import { getBusinessWhatsAppUrl } from '@/lib/business-contact'
 import { isStaffRole } from '@/lib/auth/permissions'
+import { resolvePostLoginPath } from '@/lib/auth/post-login-path'
 import { getSupabasePublicEnv } from '@/lib/env/supabase-public'
 import { isSoftLaunchDisabledRoute, softLaunchInquiryMessageForPath } from '@/lib/soft-launch/disabled-routes'
 import type { Database } from '@/lib/supabase/database.types'
@@ -18,6 +20,20 @@ const CONFIG_UNAVAILABLE_PATH = '/system/unavailable'
 
 function needsAuthenticatedUser(pathname: string): boolean {
   return PROTECTED_PREFIXES.some((p) => pathname.startsWith(p))
+}
+
+function isLoginPath(pathname: string): boolean {
+  return pathname === '/login' || pathname.startsWith('/login/')
+}
+
+function needsRoleRouting(pathname: string): boolean {
+  return needsAuthenticatedUser(pathname) || isLoginPath(pathname)
+}
+
+function copyCookies(source: NextResponse, target: NextResponse): void {
+  source.cookies.getAll().forEach((c) => {
+    target.cookies.set(c.name, c.value)
+  })
 }
 
 export async function middleware(request: NextRequest) {
@@ -38,17 +54,18 @@ export async function middleware(request: NextRequest) {
 
   const response = await updateSession(request)
 
-  if (!needsAuthenticatedUser(pathname)) {
+  if (!needsRoleRouting(pathname)) {
     return response
   }
 
   const pair = getSupabasePublicEnv()
   if (!pair) {
+    if (!needsAuthenticatedUser(pathname)) {
+      return response
+    }
     const maintenance = new URL(CONFIG_UNAVAILABLE_PATH, request.url)
     const redirectResponse = NextResponse.redirect(maintenance)
-    response.cookies.getAll().forEach((c) => {
-      redirectResponse.cookies.set(c.name, c.value)
-    })
+    copyCookies(response, redirectResponse)
     return redirectResponse
   }
 
@@ -73,22 +90,39 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   if (!user) {
+    if (!needsAuthenticatedUser(pathname)) {
+      return response
+    }
     const siteOrigin = getCanonicalSiteOrigin(requestOrigin)
     const login = new URL('/login', siteOrigin)
     login.searchParams.set('redirect', `${request.nextUrl.pathname}${request.nextUrl.search}`)
     const redirectResponse = NextResponse.redirect(login)
-    response.cookies.getAll().forEach((c) => {
-      redirectResponse.cookies.set(c.name, c.value)
-    })
+    copyCookies(response, redirectResponse)
+    return redirectResponse
+  }
+
+  const appRole = await resolveAppRoleWithClaims(supabase, user, `middleware:${pathname}`)
+
+  // Already signed in: send staff to admin console (login page + post-auth default).
+  if (isLoginPath(pathname) && isStaffRole(appRole)) {
+    const destination = resolvePostLoginPath(
+      appRole,
+      request.nextUrl.searchParams.get('redirect'),
+    )
+    const redirectResponse = NextResponse.redirect(new URL(destination, request.url))
+    copyCookies(response, redirectResponse)
+    return redirectResponse
+  }
+
+  // Staff must use the admin console — never the customer dashboard.
+  if (pathname.startsWith('/dashboard') && isStaffRole(appRole)) {
+    const adminHome = new URL('/admin', request.url)
+    const redirectResponse = NextResponse.redirect(adminHome)
+    copyCookies(response, redirectResponse)
     return redirectResponse
   }
 
   if (pathname.startsWith('/admin')) {
-    const appRole = appRoleFromJwtMetadata(
-      user.app_metadata as Record<string, unknown> | undefined,
-      user.user_metadata as Record<string, unknown> | undefined,
-    )
-
     // Non-staff users stay on /admin/* and get an admin-themed "no access" view
     // rendered by the admin layout. We intentionally do NOT redirect them to
     // the customer dashboard so /admin never visually leaks customer chrome.
@@ -100,9 +134,7 @@ export async function middleware(request: NextRequest) {
       const forbidden = new URL('/admin/forbidden', request.url)
       forbidden.searchParams.set('from', pathname)
       const redirectResponse = NextResponse.redirect(forbidden)
-      response.cookies.getAll().forEach((c) => {
-        redirectResponse.cookies.set(c.name, c.value)
-      })
+      copyCookies(response, redirectResponse)
       return redirectResponse
     }
   }

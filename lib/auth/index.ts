@@ -7,7 +7,14 @@ export {
   parseAppAuthRole,
   normalizeAppAuthRole,
   resolveAuthRoleFromMetadata,
+  resolveAuthRoleWithDebug,
+  collectAppRolesFromMetadata,
+  pickHighestAppRole,
+  isAdminPortalRole,
 } from '@/lib/auth/roles'
+export { defaultPostLoginPath, resolvePostLoginPath } from '@/lib/auth/post-login-path'
+export { resolveAppRoleForUser, resolveAppRoleWithClaims } from '@/lib/auth/resolve-session-role'
+export { debugLogRoleResolution, isAuthRoleDebugEnabled } from '@/lib/auth/role-debug'
 export type { AppAuthRole, AssignableStaffRole } from '@/lib/auth/roles'
 export {
   PERMISSIONS,

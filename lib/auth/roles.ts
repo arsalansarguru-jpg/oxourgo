@@ -69,9 +69,48 @@ export const ROLE_LABELS: Record<AppAuthRole, string> = {
   super_admin: 'Operations Admin',
 }
 
+const ROLE_METADATA_KEYS = [APP_ROLE_APP_METADATA_KEY, 'role'] as const
+
+/** Supabase Auth JWT `role` claim — not an Oxour app role. */
+const SUPABASE_AUTH_ROLE_VALUES = new Set(['authenticated', 'anon', 'service_role'])
+
 function readRoleString(meta: Record<string, unknown> | null | undefined, key: string): string | undefined {
   const v = meta?.[key]
   return typeof v === 'string' && v.trim() ? v : undefined
+}
+
+function isSupabaseAuthRoleValue(raw: string): boolean {
+  return SUPABASE_AUTH_ROLE_VALUES.has(raw.trim().toLowerCase())
+}
+
+/** Collect every parseable app role from app + user metadata (mirrors SQL jwt_oxour_app_role). */
+export function collectAppRolesFromMetadata(
+  appMetadata?: Record<string, unknown> | null,
+  userMetadata?: Record<string, unknown> | null,
+): AppAuthRole[] {
+  const parsed: AppAuthRole[] = []
+
+  for (const meta of [appMetadata, userMetadata]) {
+    for (const key of ROLE_METADATA_KEYS) {
+      const raw = readRoleString(meta, key)
+      if (!raw || isSupabaseAuthRoleValue(raw)) continue
+      const role = parseAppAuthRole(raw)
+      if (role) parsed.push(role)
+    }
+  }
+
+  return parsed
+}
+
+/** Highest-privilege role wins when metadata buckets disagree. */
+export function pickHighestAppRole(candidates: readonly AppAuthRole[]): AppAuthRole {
+  if (candidates.length === 0) return 'customer'
+  return candidates.reduce((best, role) => (ROLE_ORDER[role] > ROLE_ORDER[best] ? role : best))
+}
+
+/** True when the normalized role is full admin (`ops_admin` / legacy `admin`). */
+export function isAdminPortalRole(role: AppAuthRole): boolean {
+  return role === 'ops_admin' || role === 'super_admin'
 }
 
 /**
@@ -83,13 +122,27 @@ export function resolveAuthRoleFromMetadata(
   appMetadata?: Record<string, unknown> | null,
   userMetadata?: Record<string, unknown> | null,
 ): AppAuthRole {
-  const raw =
-    readRoleString(appMetadata, APP_ROLE_APP_METADATA_KEY) ??
-    readRoleString(appMetadata, 'role') ??
-    readRoleString(userMetadata, APP_ROLE_APP_METADATA_KEY) ??
-    readRoleString(userMetadata, 'role')
+  return pickHighestAppRole(collectAppRolesFromMetadata(appMetadata, userMetadata))
+}
 
-  return parseAppAuthRole(raw) ?? 'customer'
+export type RoleResolutionDebug = {
+  appMetadata: Record<string, unknown> | null | undefined
+  userMetadata: Record<string, unknown> | null | undefined
+  candidates: AppAuthRole[]
+  resolved: AppAuthRole
+}
+
+export function resolveAuthRoleWithDebug(
+  appMetadata?: Record<string, unknown> | null,
+  userMetadata?: Record<string, unknown> | null,
+): RoleResolutionDebug {
+  const candidates = collectAppRolesFromMetadata(appMetadata, userMetadata)
+  return {
+    appMetadata,
+    userMetadata,
+    candidates,
+    resolved: pickHighestAppRole(candidates),
+  }
 }
 
 export function normalizeAppAuthRole(value: string): AppAuthRole | null {

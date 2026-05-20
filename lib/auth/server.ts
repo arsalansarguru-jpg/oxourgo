@@ -4,7 +4,8 @@ import type { User } from '@supabase/supabase-js'
 
 import { AuthError } from '@/lib/auth/errors'
 import { hasPermission, type Permission } from '@/lib/auth/permissions'
-import { type AppAuthRole, resolveAuthRoleFromMetadata, roleAtLeast } from '@/lib/auth/roles'
+import { resolveAppRoleWithClaims } from '@/lib/auth/resolve-session-role'
+import { type AppAuthRole, roleAtLeast } from '@/lib/auth/roles'
 import { createClient } from '@/lib/supabase/server'
 
 export type AuthSessionSummary = {
@@ -30,13 +31,14 @@ export async function getAuthenticatedUser(): Promise<User | null> {
  * User plus parsed `app_metadata` role for route guards and data scoping.
  */
 export async function getAuthSessionSummary(): Promise<AuthSessionSummary | null> {
-  const user = await getAuthenticatedUser()
-  if (!user) return null
+  const supabase = await createClient()
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser()
+  if (error || !user) return null
 
-  const appRole = resolveAuthRoleFromMetadata(
-    user.app_metadata as Record<string, unknown> | undefined,
-    user.user_metadata as Record<string, unknown> | undefined,
-  )
+  const appRole = await resolveAppRoleWithClaims(supabase, user, 'getAuthSessionSummary')
 
   return { user, appRole }
 }

@@ -3,13 +3,18 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
+import { useAppAuthRole } from '@/hooks/use-app-auth-role'
 import { useSupabaseAuthUser } from '@/hooks/use-supabase-auth-user'
+import { defaultPostLoginPath } from '@/lib/auth/post-login-path'
 import { WhatsAppInquiryButton } from '@/components/marketing/whatsapp-inquiry-button'
 import { BookingSearchBar } from '@/components/marketing/booking-search-bar'
 import { Button } from '@/components/ui/Button'
 
 export function HeroSection() {
   const { user, ready } = useSupabaseAuthUser()
+  const { appRole, isStaff } = useAppAuthRole(user)
+  const memberHref = user ? defaultPostLoginPath(appRole) : '/login'
+  const memberLabel = user ? (isStaff ? 'Admin console' : 'Open dashboard') : 'Member sign in'
 
   return (
     <section className="relative isolate min-h-[calc(100svh-var(--public-header-offset))] overflow-hidden border-b border-stroke bg-[#080706] text-white">
@@ -41,8 +46,8 @@ export function HeroSection() {
             </Button>
             <WhatsAppInquiryButton size="lg" label="Concierge on WhatsApp" className="w-full sm:w-auto" />
             {ready ? (
-              <Button size="lg" variant="secondary" to={user ? '/dashboard' : '/login'} className="w-full sm:w-auto">
-                {user ? 'Open dashboard' : 'Member sign in'}
+              <Button size="lg" variant="secondary" to={memberHref} className="w-full sm:w-auto">
+                {memberLabel}
               </Button>
             ) : null}
           </div>

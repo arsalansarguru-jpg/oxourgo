@@ -4,14 +4,16 @@ import { NextResponse } from 'next/server'
 import { captureServerPosthogEvent } from '@/lib/analytics/posthog-server'
 import { POSTHOG_EVENTS } from '@/lib/analytics/posthog-events'
 import { getAuthCallbackOrigin } from '@/lib/auth/canonical-origin'
-import { safeNextPath } from '@/lib/auth/safe-next-path'
+import { debugLogRoleResolution } from '@/lib/auth/role-debug'
+import { resolvePostLoginPath } from '@/lib/auth/post-login-path'
+import { resolveAuthRoleWithDebug } from '@/lib/auth/roles'
 import { readSupabasePublicEnv } from '@/lib/env/supabase-public'
 import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
   const url = new URL(request.url)
   const origin = getAuthCallbackOrigin(url.origin)
-  const next = safeNextPath(url.searchParams.get('next'), '/dashboard')
+  const requestedNext = url.searchParams.get('next')
 
   const oauthError = url.searchParams.get('error')
   const oauthDesc = url.searchParams.get('error_description')
@@ -40,13 +42,28 @@ export async function GET(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser()
     if (user) {
+      const roleDebug = resolveAuthRoleWithDebug(
+        user.app_metadata as Record<string, unknown> | undefined,
+        user.user_metadata as Record<string, unknown> | undefined,
+      )
+      debugLogRoleResolution('auth/callback', {
+        userId: user.id,
+        email: user.email,
+        app_metadata: user.app_metadata,
+        user_metadata: user.user_metadata,
+        candidates: roleDebug.candidates,
+        resolved: roleDebug.resolved,
+        requestedNext,
+      })
       await captureServerPosthogEvent({
         distinctId: user.id,
         event: POSTHOG_EVENTS.loginCompleted,
-        properties: { method: 'oauth_or_magic_link' },
+        properties: { method: 'oauth_or_magic_link', app_role: roleDebug.resolved },
       })
+      const destination = resolvePostLoginPath(roleDebug.resolved, requestedNext)
+      return NextResponse.redirect(new URL(destination, origin))
     }
   }
 
-  return NextResponse.redirect(new URL(next, origin))
+  return NextResponse.redirect(new URL(resolvePostLoginPath('customer', requestedNext), origin))
 }

@@ -21,7 +21,9 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { BRAND } from '@/constants/brand'
 import { getOAuthCallbackUrl } from '@/lib/auth/callback-url'
-import { safeNextPath } from '@/lib/auth/safe-next-path'
+import { appRoleFromUser } from '@/hooks/use-app-auth-role'
+import { resolvePostLoginPath } from '@/lib/auth/post-login-path'
+import { debugLogRoleResolution } from '@/lib/auth/role-debug'
 import { formatAuthError } from '@/lib/errors/format-auth-error'
 import { normalizePhoneToE164 } from '@/lib/auth/normalize-phone'
 import { cn } from '@/lib/utils/cn'
@@ -193,7 +195,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
 
   const sb = supabase
 
-  const nextPath = safeNextPath(redirectTo, '/dashboard')
+  const nextPath = resolvePostLoginPath('customer', redirectTo)
   const callbackUrl =
     typeof window !== 'undefined'
       ? getOAuthCallbackUrl(nextPath, window.location.origin)
@@ -329,11 +331,23 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
       const {
         data: { session },
       } = await sb.auth.getSession()
-      if (session?.user?.id) {
-        identifyClientUser(session.user.id)
+      const user = session?.user ?? null
+      if (user?.id) {
+        identifyClientUser(user.id)
       }
-      captureClientEvent(POSTHOG_EVENTS.loginCompleted, { method: 'phone_otp' })
-      router.push(nextPath)
+      const appRole = appRoleFromUser(user)
+      const destination = resolvePostLoginPath(appRole, redirectTo)
+      debugLogRoleResolution('auth-panel/otp', {
+        userId: user?.id,
+        email: user?.email,
+        app_metadata: user?.app_metadata,
+        user_metadata: user?.user_metadata,
+        resolved: appRole,
+        redirectTo,
+        destination,
+      })
+      captureClientEvent(POSTHOG_EVENTS.loginCompleted, { method: 'phone_otp', app_role: appRole })
+      router.push(destination)
       router.refresh()
     } catch (e) {
       setError(formatAuthError(e instanceof Error ? e : undefined))
