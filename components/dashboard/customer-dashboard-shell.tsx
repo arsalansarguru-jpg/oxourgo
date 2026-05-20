@@ -10,6 +10,7 @@ import {
   LayoutGrid,
   Settings,
   ShieldCheck,
+  Shield,
 } from 'lucide-react'
 
 import { SitePrimaryNav } from '@/components/layout/site-primary-nav'
@@ -31,6 +32,8 @@ export type CustomerDashboardShellProps = {
   email: string | undefined
   verificationLabel: string
   kycLifecycleStatus?: string
+  /** When set, shows a link to the operations admin console for staff accounts. */
+  adminConsoleHref?: string
   children: React.ReactNode
 }
 
@@ -39,6 +42,7 @@ export function CustomerDashboardShell({
   email,
   verificationLabel,
   kycLifecycleStatus = 'not_started',
+  adminConsoleHref,
   children,
 }: CustomerDashboardShellProps) {
   const pathname = usePathname()
@@ -59,6 +63,24 @@ export function CustomerDashboardShell({
           <p className="mb-2 px-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">Oxour Go</p>
           <SitePrimaryNav size="compact" />
         </div>
+
+        {adminConsoleHref ? (
+          <div className="mt-4 border-t border-stroke pt-4">
+            <p className="mb-2 px-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">Operations</p>
+            <Link
+              href={adminConsoleHref}
+              className={cn(
+                'flex min-h-10 items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium transition-colors',
+                pathname === adminConsoleHref || pathname.startsWith(`${adminConsoleHref}/`)
+                  ? 'bg-fill-glass-strong text-soft'
+                  : 'text-muted hover:bg-fill-glass hover:text-soft',
+              )}
+            >
+              <Shield className="h-4 w-4 shrink-0" aria-hidden />
+              <span className="truncate">Admin console</span>
+            </Link>
+          </div>
+        ) : null}
 
         <nav className="mt-4 flex flex-col gap-0.5 border-t border-stroke pt-4" aria-label="Account">
           <p className="mb-2 px-2.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">Your account</p>

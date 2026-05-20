@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { APP_ROLE_APP_METADATA_KEY, parseAppAuthRole, roleLabel, type AppAuthRole } from '@/lib/auth/roles'
+import { resolveAuthRoleFromMetadata, roleLabel, type AppAuthRole } from '@/lib/auth/roles'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export type StaffUserRow = {
@@ -27,10 +27,10 @@ export async function listStaffUsersForAdmin(limit = 100): Promise<StaffUserRow[
   if (error) throw error
 
   return (data.users ?? []).map((u) => {
-    const raw =
-      u.app_metadata?.[APP_ROLE_APP_METADATA_KEY] ??
-      (typeof u.app_metadata?.role === 'string' ? u.app_metadata.role : undefined)
-    const appRole = parseAppAuthRole(raw) ?? 'customer'
+    const appRole = resolveAuthRoleFromMetadata(
+      u.app_metadata as Record<string, unknown> | undefined,
+      u.user_metadata as Record<string, unknown> | undefined,
+    )
     return {
       id: u.id,
       email: u.email ?? null,

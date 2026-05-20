@@ -18,16 +18,20 @@ function vehicleLabel(row: AdminViolationWithBooking & { vehicleLabel?: string }
 export function AdminViolationsPageBody({
   metrics,
   violations,
+  title = 'Fines & violations',
+  description = 'Traffic challans, tolls, parking, towing, and damage liabilities across all trips — linked to deposits and customer notifications.',
 }: {
   metrics: AdminViolationMetrics
   violations: Array<AdminViolationWithBooking & { vehicleLabel?: string }>
+  title?: string
+  description?: string
 }) {
   return (
     <div className="space-y-10">
       <AdminPageHeader
         eyebrow="Compliance"
-        title="Fines & violations"
-        description="Traffic challans, tolls, parking, towing, and damage liabilities across all trips — linked to deposits and customer notifications."
+        title={title}
+        description={description}
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

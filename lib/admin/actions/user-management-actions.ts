@@ -5,7 +5,13 @@ import { revalidatePath } from 'next/cache'
 import { writeAdminAudit } from '@/lib/admin/audit'
 import type { AdminActionResult } from '@/lib/admin/actions/types'
 import { requirePermissionForAdminAction } from '@/lib/auth/admin-action-auth'
-import { APP_ROLE_APP_METADATA_KEY, ASSIGNABLE_STAFF_ROLES, parseAppAuthRole, type AppAuthRole } from '@/lib/auth/roles'
+import {
+  APP_ROLE_APP_METADATA_KEY,
+  ASSIGNABLE_STAFF_ROLES,
+  parseAppAuthRole,
+  resolveAuthRoleFromMetadata,
+  type AppAuthRole,
+} from '@/lib/auth/roles'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
 import { runInstrumentedServerAction } from '@/lib/monitoring/instrument-server-action'
@@ -36,10 +42,10 @@ export async function adminAssignUserRoleAction(input: {
       return { ok: false, message: 'User not found.' }
     }
 
-    const prior =
-      parseAppAuthRole(target.user.app_metadata?.[APP_ROLE_APP_METADATA_KEY]) ??
-      parseAppAuthRole(target.user.app_metadata?.role) ??
-      'customer'
+    const prior = resolveAuthRoleFromMetadata(
+      target.user.app_metadata as Record<string, unknown> | undefined,
+      target.user.user_metadata as Record<string, unknown> | undefined,
+    )
 
     const { error } = await admin.auth.admin.updateUserById(userId, {
       app_metadata: {

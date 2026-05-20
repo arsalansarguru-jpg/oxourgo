@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { ChevronDown, LayoutDashboard, LogOut, Menu, X } from 'lucide-react'
+import { ChevronDown, LayoutDashboard, LogOut, Menu, Shield, X } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 import { BRAND } from '@/constants/brand'
 import { useSupabase } from '@/hooks/use-supabase'
+import { useAppAuthRole } from '@/hooks/use-app-auth-role'
 import { useSupabaseAuthUser } from '@/hooks/use-supabase-auth-user'
 import { cn } from '@/lib/utils/cn'
 import { Button } from '@/components/ui/Button'
@@ -43,6 +44,7 @@ export function Navbar() {
   const router = useRouter()
   const supabase = useSupabase()
   const { user, ready } = useSupabaseAuthUser()
+  const { isStaff } = useAppAuthRole(user)
   const accountMenuRef = useRef<HTMLDetailsElement>(null)
   const [open, setOpen] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
@@ -136,6 +138,16 @@ export function Navbar() {
                   <ChevronDown className="h-4 w-4 text-muted" aria-hidden />
                 </summary>
                 <div className="absolute right-0 top-full z-[80] mt-2 min-w-[11rem] rounded-2xl border border-stroke bg-carbon py-1 shadow-[var(--shadow-card-hover)]">
+                  {isStaff ? (
+                    <Link
+                      href="/admin"
+                      className="flex items-center gap-2 px-3 py-2 text-sm text-soft hover:bg-fill-glass"
+                      onClick={() => accountMenuRef.current?.removeAttribute('open')}
+                    >
+                      <Shield className="h-4 w-4 text-electric" aria-hidden />
+                      Admin console
+                    </Link>
+                  ) : null}
                   <Link
                     href="/dashboard"
                     className="flex items-center gap-2 px-3 py-2 text-sm text-soft hover:bg-fill-glass"
@@ -206,6 +218,11 @@ export function Navbar() {
                 {ready ? (
                   user ? (
                     <>
+                      {isStaff ? (
+                        <Button variant="secondary" size="lg" to="/admin" className="w-full" onClick={() => setOpen(false)}>
+                          Admin console
+                        </Button>
+                      ) : null}
                       <Button variant="secondary" size="lg" to="/dashboard" className="w-full" onClick={() => setOpen(false)}>
                         Dashboard
                       </Button>

@@ -1,9 +1,10 @@
 /**
  * Routes disabled during inquiry-only soft launch — redirected to WhatsApp concierge.
+ * Admin (`/admin/*`) is intentionally excluded: staff use the in-app console after login.
  */
 
-/** Concierge-first: block incomplete web checkout and admin shell only — login & member dashboard stay available. */
-const DISABLED_PREFIXES = ['/booking', '/kyc', '/profile', '/admin'] as const
+/** Concierge-first: block incomplete web checkout — login, dashboard, and admin stay available. */
+const DISABLED_PREFIXES = ['/booking', '/kyc', '/profile'] as const
 
 export function isSoftLaunchDisabledRoute(pathname: string): boolean {
   const path = pathname.split('?')[0] ?? pathname
@@ -20,9 +21,6 @@ export function softLaunchInquiryMessageForPath(pathname: string): string {
   }
   if (path.startsWith('/dashboard')) {
     return 'Hi Oxour Go, I want to book or manage a reservation — please help on WhatsApp.'
-  }
-  if (path.startsWith('/admin')) {
-    return 'Hi Oxour Go, I want to book a luxury self-drive in Mumbai.'
   }
   if (path.startsWith('/profile')) {
     return 'Hi Oxour Go, I want to book a vehicle and need help updating my profile details.'

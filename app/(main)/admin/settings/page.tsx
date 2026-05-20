@@ -1,24 +1,17 @@
-import { AdminPageHeader } from '@/components/admin/admin-page-header'
-import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
+import { AdminSettingsDashboard } from '@/components/admin/settings/admin-settings-dashboard'
+import { requireAdminPageAccess } from '@/lib/auth/guards'
+import { hasPermission } from '@/lib/auth/permissions'
 
 export const dynamic = 'force-dynamic'
 
-export default function AdminSettingsPage() {
+export default async function AdminSettingsPage() {
+  const summary = await requireAdminPageAccess('/admin/settings')
+
   return (
-    <div className="space-y-8">
-      <AdminPageHeader
-        eyebrow="Workspace"
-        title="Settings"
-        description="Organization preferences, integrations, and operator defaults will be configurable here."
-      />
-      <AdminCard>
-        <AdminCardContent className="py-12 text-center">
-          <p className="text-sm leading-relaxed text-muted">
-            Advanced configuration controls are not exposed yet. Use deployment environment and server logs for
-            infrastructure changes.
-          </p>
-        </AdminCardContent>
-      </AdminCard>
-    </div>
+    <AdminSettingsDashboard
+      email={summary.user.email}
+      appRole={summary.appRole}
+      canWrite={hasPermission(summary.appRole, 'settings.write')}
+    />
   )
 }

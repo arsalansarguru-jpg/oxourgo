@@ -1,5 +1,5 @@
 import { hasPermission, isStaffRole, type Permission } from '@/lib/auth/permissions'
-import { parseAppAuthRole, type AppAuthRole } from '@/lib/auth/roles'
+import { resolveAuthRoleFromMetadata, type AppAuthRole } from '@/lib/auth/roles'
 
 export type AdminRouteRule = {
   /** Longest-prefix wins when matching. */
@@ -31,10 +31,15 @@ export const ADMIN_ROUTE_RULES: readonly AdminRouteRule[] = [
   { prefix: '/admin/payments', permission: 'payments.read' },
   { prefix: '/admin/financials', permission: 'deposits.read' },
   { prefix: '/admin/violations', permission: 'penalties.read' },
+  { prefix: '/admin/tracking', permission: 'tracking.read' },
+  { prefix: '/admin/damage', permission: 'damage.read' },
+  { prefix: '/admin/traffic', permission: 'traffic.read' },
+  { prefix: '/admin/support', permission: 'support.read' },
   { prefix: '/admin/analytics', permission: 'analytics.read' },
   { prefix: '/admin/settings', permission: 'settings.read' },
   { prefix: '/admin/notifications', permission: 'ops.alerts.read' },
   { prefix: '/admin/forbidden', permission: 'admin.access' },
+  { prefix: '/admin/dashboard', permission: 'admin.dashboard.read', readOnly: true },
   { prefix: '/admin', permission: 'admin.dashboard.read', readOnly: true },
 ] as const
 
@@ -54,9 +59,9 @@ export function canAccessAdminPath(role: AppAuthRole, pathname: string): boolean
   return hasPermission(role, permission)
 }
 
-export function appRoleFromJwtMetadata(meta: Record<string, unknown> | undefined): AppAuthRole {
-  const raw =
-    (typeof meta?.oxour_role === 'string' ? meta.oxour_role : undefined) ??
-    (typeof meta?.role === 'string' ? meta.role : undefined)
-  return parseAppAuthRole(raw) ?? 'customer'
+export function appRoleFromJwtMetadata(
+  appMetadata: Record<string, unknown> | undefined,
+  userMetadata?: Record<string, unknown> | undefined,
+): AppAuthRole {
+  return resolveAuthRoleFromMetadata(appMetadata, userMetadata)
 }

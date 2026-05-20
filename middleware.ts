@@ -30,7 +30,8 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(target, 308)
   }
 
-  if (isSoftLaunchDisabledRoute(pathname)) {
+  // Staff admin console must never be sent to WhatsApp (soft-launch blocks booking/kyc only).
+  if (!pathname.startsWith('/admin') && isSoftLaunchDisabledRoute(pathname)) {
     const message = softLaunchInquiryMessageForPath(pathname)
     return NextResponse.redirect(getBusinessWhatsAppUrl(message))
   }
@@ -83,7 +84,10 @@ export async function middleware(request: NextRequest) {
   }
 
   if (pathname.startsWith('/admin')) {
-    const appRole = appRoleFromJwtMetadata(user.app_metadata as Record<string, unknown> | undefined)
+    const appRole = appRoleFromJwtMetadata(
+      user.app_metadata as Record<string, unknown> | undefined,
+      user.user_metadata as Record<string, unknown> | undefined,
+    )
 
     // Non-staff users stay on /admin/* and get an admin-themed "no access" view
     // rendered by the admin layout. We intentionally do NOT redirect them to

@@ -1,22 +1,19 @@
 import {
   Banknote,
   BarChart3,
-  BookOpen,
+  Bell,
   CarFront,
   ClipboardList,
   Gavel,
-  GraduationCap,
+  Headphones,
   LayoutDashboard,
-  MessageCircle,
+  MapPin,
   Scale,
-  ScrollText,
-  HardDrive,
-  Rocket,
   Settings,
   ShieldCheck,
-  SlidersHorizontal,
   UserCog,
   Users,
+  Wrench,
 } from 'lucide-react'
 
 import type { Permission } from '@/lib/auth/permissions'
@@ -29,25 +26,22 @@ export type AdminNavItem = {
   permission: Permission
 }
 
-/** Primary admin navigation — order matches luxury SaaS IA. */
+/** Enterprise admin navigation — 14 operational sections. */
 export const ADMIN_NAV: readonly AdminNavItem[] = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true, permission: 'admin.dashboard.read' },
-  { href: '/admin/bookings', label: 'Bookings', icon: ClipboardList, exact: false, permission: 'bookings.read' },
-  { href: '/admin/operations', label: 'Operations', icon: SlidersHorizontal, exact: false, permission: 'ops.manual.read' },
-  { href: '/admin/whatsapp', label: 'WhatsApp', icon: MessageCircle, exact: false, permission: 'bookings.read' },
   { href: '/admin/fleet', label: 'Fleet', icon: CarFront, exact: false, permission: 'fleet.read' },
-  { href: '/admin/customers', label: 'Customers', icon: Users, exact: false, permission: 'customers.read' },
-  { href: '/admin/kyc', label: 'KYC', icon: ShieldCheck, exact: false, permission: 'kyc.read' },
+  { href: '/admin/bookings', label: 'Bookings', icon: ClipboardList, exact: false, permission: 'bookings.read' },
+  { href: '/admin/kyc', label: 'KYC Verification', icon: ShieldCheck, exact: false, permission: 'kyc.read' },
   { href: '/admin/payments', label: 'Payments', icon: Banknote, exact: false, permission: 'payments.read' },
   { href: '/admin/financials', label: 'Deposits', icon: Scale, exact: false, permission: 'deposits.read' },
-  { href: '/admin/violations', label: 'Violations', icon: Gavel, exact: false, permission: 'penalties.read' },
-  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3, exact: false, permission: 'analytics.read' },
-  { href: '/admin/audit', label: 'Audit log', icon: ScrollText, exact: false, permission: 'admin.audit.read' },
-  { href: '/admin/help', label: 'Help & SOPs', icon: BookOpen, exact: false, permission: 'admin.help.read' },
-  { href: '/admin/training', label: 'Training', icon: GraduationCap, exact: false, permission: 'admin.training.read' },
-  { href: '/admin/backup', label: 'Backup & DR', icon: HardDrive, exact: false, permission: 'admin.backup.read' },
-  { href: '/admin/launch', label: 'Launch', icon: Rocket, exact: false, permission: 'admin.launch.read' },
-  { href: '/admin/users', label: 'Users', icon: UserCog, exact: false, permission: 'admin.users.manage' },
+  { href: '/admin/customers', label: 'Customers', icon: Users, exact: false, permission: 'customers.read' },
+  { href: '/admin/tracking', label: 'Vehicle Tracking', icon: MapPin, exact: false, permission: 'tracking.read' },
+  { href: '/admin/damage', label: 'Damage & Penalties', icon: Wrench, exact: false, permission: 'damage.read' },
+  { href: '/admin/traffic', label: 'Traffic Fines', icon: Gavel, exact: false, permission: 'traffic.read' },
+  { href: '/admin/analytics', label: 'Reports', icon: BarChart3, exact: false, permission: 'analytics.read' },
+  { href: '/admin/notifications', label: 'Notifications', icon: Bell, exact: false, permission: 'ops.alerts.read' },
+  { href: '/admin/support', label: 'Support Tickets', icon: Headphones, exact: false, permission: 'support.read' },
+  { href: '/admin/users', label: 'Staff', icon: UserCog, exact: false, permission: 'admin.users.manage' },
   { href: '/admin/settings', label: 'Settings', icon: Settings, exact: false, permission: 'settings.read' },
 ] as const
 
@@ -83,11 +77,16 @@ export function adminTopBarTitle(pathname: string): string {
   if (pathname.startsWith('/admin/whatsapp')) return 'WhatsApp'
   if (pathname.startsWith('/admin/customers/')) return 'Customer detail'
   if (pathname.startsWith('/admin/customers')) return 'Customers'
-  if (pathname.startsWith('/admin/kyc')) return 'KYC'
+  if (pathname.startsWith('/admin/kyc')) return 'KYC Verification'
   if (pathname.startsWith('/admin/payments')) return 'Payments'
   if (pathname.startsWith('/admin/financials')) return 'Deposits'
+  if (pathname.startsWith('/admin/tracking')) return 'Vehicle Tracking'
+  if (pathname.startsWith('/admin/damage')) return 'Damage & Penalties'
+  if (pathname.startsWith('/admin/traffic')) return 'Traffic Fines'
+  if (pathname.startsWith('/admin/analytics')) return 'Reports & Analytics'
+  if (pathname.startsWith('/admin/notifications')) return 'Notifications'
+  if (pathname.startsWith('/admin/support')) return 'Support Tickets'
   if (pathname.startsWith('/admin/violations')) return 'Violations'
-  if (pathname.startsWith('/admin/analytics')) return 'Analytics'
   if (pathname.startsWith('/admin/audit')) return 'Audit log'
   if (pathname.startsWith('/admin/help/onboarding')) return 'Onboarding'
   if (pathname.startsWith('/admin/help/')) return 'Procedure'
@@ -98,9 +97,8 @@ export function adminTopBarTitle(pathname: string): string {
   if (pathname.startsWith('/admin/training')) return 'Training'
   if (pathname.startsWith('/admin/backup')) return 'Backup & recovery'
   if (pathname.startsWith('/admin/launch')) return 'Launch control'
-  if (pathname.startsWith('/admin/users')) return 'Users'
+  if (pathname.startsWith('/admin/users')) return 'Staff Management'
   if (pathname.startsWith('/admin/settings')) return 'Settings'
-  if (pathname.startsWith('/admin/notifications')) return 'Alerts'
   if (pathname.startsWith('/admin/forbidden')) return 'Access restricted'
   return 'Admin'
 }

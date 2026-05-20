@@ -41,6 +41,8 @@ export const ASSIGNABLE_STAFF_ROLES = [
 export type AssignableStaffRole = (typeof ASSIGNABLE_STAFF_ROLES)[number]
 
 const LEGACY_ROLE_ALIASES: Record<string, AppAuthRole> = {
+  admin: 'ops_admin',
+  administrator: 'ops_admin',
   fleet_host: 'fleet_manager',
   super_admin: 'ops_admin',
 }
@@ -67,10 +69,33 @@ export const ROLE_LABELS: Record<AppAuthRole, string> = {
   super_admin: 'Operations Admin',
 }
 
+function readRoleString(meta: Record<string, unknown> | null | undefined, key: string): string | undefined {
+  const v = meta?.[key]
+  return typeof v === 'string' && v.trim() ? v : undefined
+}
+
+/**
+ * Resolve RBAC role from Supabase Auth metadata (app_metadata preferred, then user_metadata).
+ * Matches middleware and server session parsing so staff grants are not missed when
+ * `oxour_role` was set in the wrong bucket or under a legacy key like `admin`.
+ */
+export function resolveAuthRoleFromMetadata(
+  appMetadata?: Record<string, unknown> | null,
+  userMetadata?: Record<string, unknown> | null,
+): AppAuthRole {
+  const raw =
+    readRoleString(appMetadata, APP_ROLE_APP_METADATA_KEY) ??
+    readRoleString(appMetadata, 'role') ??
+    readRoleString(userMetadata, APP_ROLE_APP_METADATA_KEY) ??
+    readRoleString(userMetadata, 'role')
+
+  return parseAppAuthRole(raw) ?? 'customer'
+}
+
 export function normalizeAppAuthRole(value: string): AppAuthRole | null {
   const trimmed = value.trim()
   if (!trimmed) return null
-  const aliased = LEGACY_ROLE_ALIASES[trimmed] ?? trimmed
+  const aliased = LEGACY_ROLE_ALIASES[trimmed.toLowerCase()] ?? trimmed
   return (APP_AUTH_ROLES as readonly string[]).includes(aliased) ? (aliased as AppAuthRole) : null
 }
 

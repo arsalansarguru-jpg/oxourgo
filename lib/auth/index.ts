@@ -1,4 +1,13 @@
-export { APP_ROLE_APP_METADATA_KEY, APP_AUTH_ROLES, ASSIGNABLE_STAFF_ROLES, roleAtLeast, roleLabel, parseAppAuthRole, normalizeAppAuthRole } from '@/lib/auth/roles'
+export {
+  APP_ROLE_APP_METADATA_KEY,
+  APP_AUTH_ROLES,
+  ASSIGNABLE_STAFF_ROLES,
+  roleAtLeast,
+  roleLabel,
+  parseAppAuthRole,
+  normalizeAppAuthRole,
+  resolveAuthRoleFromMetadata,
+} from '@/lib/auth/roles'
 export type { AppAuthRole, AssignableStaffRole } from '@/lib/auth/roles'
 export {
   PERMISSIONS,

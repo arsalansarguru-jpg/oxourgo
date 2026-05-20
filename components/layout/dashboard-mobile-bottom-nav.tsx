@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Car, Headphones, Home, LayoutDashboard } from 'lucide-react'
+import { Car, Headphones, Home, LayoutDashboard, Shield } from 'lucide-react'
 
 import { isDashboardPath } from '@/lib/nav/site-nav'
 import { cn } from '@/lib/utils/cn'
@@ -20,8 +20,19 @@ const items = [
 ] as const
 
 /** Mobile site + account nav for authenticated dashboard routes. */
-export function DashboardMobileBottomNav() {
+export function DashboardMobileBottomNav({ adminConsoleHref }: { adminConsoleHref?: string }) {
   const pathname = usePathname()
+  const mobileItems = adminConsoleHref
+    ? [
+        ...items,
+        {
+          href: adminConsoleHref,
+          label: 'Admin',
+          icon: Shield,
+          match: (p: string) => p === adminConsoleHref || p.startsWith(`${adminConsoleHref}/`),
+        },
+      ]
+    : items
 
   return (
     <nav
@@ -29,7 +40,7 @@ export function DashboardMobileBottomNav() {
       className="fixed bottom-0 left-0 right-0 z-40 border-t border-stroke bg-matte pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-1 md:hidden"
     >
       <div className="mx-auto flex max-w-lg items-stretch justify-around px-1">
-        {items.map(({ href, label, icon: Icon, match }) => {
+        {mobileItems.map(({ href, label, icon: Icon, match }) => {
           const active = match(pathname)
           return (
             <Link

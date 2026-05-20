@@ -40,6 +40,13 @@ export const PERMISSIONS = [
   'ops.alerts.write',
   'ops.override',
   'ops.manual.read',
+  'tracking.read',
+  'support.read',
+  'support.write',
+  'damage.read',
+  'damage.write',
+  'traffic.read',
+  'traffic.write',
 ] as const
 
 export type Permission = (typeof PERMISSIONS)[number]
@@ -59,6 +66,10 @@ const READ_ONLY_STAFF: readonly Permission[] = [
   'analytics.read',
   'ops.alerts.read',
   'ops.manual.read',
+  'tracking.read',
+  'support.read',
+  'damage.read',
+  'traffic.read',
   'admin.backup.read',
   'admin.help.read',
   'admin.training.read',
@@ -76,6 +87,11 @@ const FLEET_MANAGER: readonly Permission[] = [
   'customers.read',
   'ops.alerts.write',
   'ops.manual.read',
+  'tracking.read',
+  'damage.read',
+  'damage.write',
+  'traffic.read',
+  'traffic.write',
 ]
 
 const FINANCE_MANAGER: readonly Permission[] = [
@@ -92,6 +108,10 @@ const FINANCE_MANAGER: readonly Permission[] = [
   'penalties.write',
   'analytics.read',
   'fleet.read',
+  'tracking.read',
+  'damage.read',
+  'traffic.read',
+  'support.read',
   'ops.manual.read',
   'admin.exports.read',
   'admin.backup.read',
@@ -107,6 +127,8 @@ const KYC_REVIEWER: readonly Permission[] = [
   'kyc.read',
   'kyc.review',
   'customers.read',
+  'support.read',
+  'support.write',
 ]
 
 const ROLE_PERMISSIONS: Record<AppAuthRole, ReadonlySet<Permission>> = {

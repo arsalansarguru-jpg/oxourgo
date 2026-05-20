@@ -3,7 +3,8 @@ import { redirect } from 'next/navigation'
 
 import { CustomerDashboardShell } from '@/components/dashboard/customer-dashboard-shell'
 import { DashboardLayout as DashboardChrome } from '@/components/layout/DashboardLayout'
-import { getAuthenticatedUser } from '@/lib/auth/server'
+import { getAuthSessionSummary } from '@/lib/auth/server'
+import { isStaffRole } from '@/lib/auth/permissions'
 import { countUnreadNotifications, listNotificationsForUser } from '@/lib/customer/notifications-queries'
 import { getCustomerProfileSnapshot } from '@/lib/customer/profile-queries'
 import { logUnknownError } from '@/lib/errors/safe-user-message'
@@ -13,10 +14,12 @@ export const metadata: Metadata = {
 }
 
 export default async function DashboardRouteLayout({ children }: { children: React.ReactNode }) {
-  const user = await getAuthenticatedUser()
-  if (!user) {
+  const summary = await getAuthSessionSummary()
+  if (!summary) {
     redirect(`/login?${new URLSearchParams({ redirect: '/dashboard' }).toString()}`)
   }
+  const { user } = summary
+  const adminConsoleHref = isStaffRole(summary.appRole) ? '/admin' : undefined
 
   try {
     const profile = await getCustomerProfileSnapshot(user.id)
@@ -52,12 +55,15 @@ export default async function DashboardRouteLayout({ children }: { children: Rea
       userId={user.id}
       notificationUnread={notificationUnread}
       notificationPreview={notificationPreview}
+      adminConsoleHref={adminConsoleHref}
+      showConciergeFab={!adminConsoleHref}
     >
       <CustomerDashboardShell
         displayName={displayName}
         email={user.email ?? undefined}
         verificationLabel={verificationLabel}
         kycLifecycleStatus={kycLifecycleStatus}
+        adminConsoleHref={adminConsoleHref}
       >
         {children}
       </CustomerDashboardShell>
@@ -66,12 +72,19 @@ export default async function DashboardRouteLayout({ children }: { children: Rea
   } catch (error) {
     logUnknownError('[dashboard layout]', error)
     return (
-      <DashboardChrome userId={user.id} notificationUnread={0} notificationPreview={[]}>
+      <DashboardChrome
+        userId={user.id}
+        notificationUnread={0}
+        notificationPreview={[]}
+        adminConsoleHref={adminConsoleHref}
+        showConciergeFab={!adminConsoleHref}
+      >
         <CustomerDashboardShell
           displayName={user.email?.split('@')[0] ?? 'Member'}
           email={user.email ?? undefined}
           verificationLabel="Verification in progress"
           kycLifecycleStatus="not_started"
+          adminConsoleHref={adminConsoleHref}
         >
           {children}
         </CustomerDashboardShell>

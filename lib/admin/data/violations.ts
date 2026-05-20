@@ -204,13 +204,30 @@ async function loadBookingsByIds(
   return map
 }
 
-export async function adminListViolations(limit = 120): Promise<AdminViolationWithBooking[]> {
+const TRAFFIC_VIOLATION_TYPES = [
+  'traffic_challan',
+  'speeding_fine',
+  'toll_violation',
+  'parking_penalty',
+  'towing_charge',
+] as const
+
+const DAMAGE_VIOLATION_TYPES = ['damage_liability'] as const
+
+export async function adminListViolations(
+  limit = 120,
+  filter?: 'all' | 'traffic' | 'damage',
+): Promise<AdminViolationWithBooking[]> {
   const admin = createAdminClient()
-  const { data, error } = await admin
-    .from('booking_violations')
-    .select(violationSelect)
-    .order('created_at', { ascending: false })
-    .limit(limit)
+  let q = admin.from('booking_violations').select(violationSelect).order('created_at', { ascending: false }).limit(limit)
+
+  if (filter === 'traffic') {
+    q = q.in('violation_type', [...TRAFFIC_VIOLATION_TYPES])
+  } else if (filter === 'damage') {
+    q = q.in('violation_type', [...DAMAGE_VIOLATION_TYPES])
+  }
+
+  const { data, error } = await q
 
   if (error) {
     logPostgrestError('adminListViolations', error)

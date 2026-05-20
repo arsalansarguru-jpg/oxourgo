@@ -93,6 +93,21 @@ export type Database = {
           /** Public fleet segment: SUV, Sedan, Hatchback, Luxury, Budget */
           catalog_category?: string | null
           fleet_ops_note?: string | null
+          model?: string | null
+          chassis_number?: string | null
+          vehicle_location?: string | null
+          odometer_km?: number | null
+          insurance_expiry?: string | null
+          puc_expiry?: string | null
+          rc_expiry?: string | null
+          rc_storage_path?: string | null
+          insurance_storage_path?: string | null
+          puc_storage_path?: string | null
+          fastag_id?: string | null
+          gps_tracker_id?: string | null
+          gps_status?: string | null
+          fuel_level_pct?: number | null
+          last_gps_ping_at?: string | null
           deleted_at?: string | null
           archived_at?: string | null
           archived_by?: string | null
@@ -116,6 +131,21 @@ export type Database = {
           security_deposit?: number
           catalog_category?: string | null
           fleet_ops_note?: string | null
+          model?: string | null
+          chassis_number?: string | null
+          vehicle_location?: string | null
+          odometer_km?: number | null
+          insurance_expiry?: string | null
+          puc_expiry?: string | null
+          rc_expiry?: string | null
+          rc_storage_path?: string | null
+          insurance_storage_path?: string | null
+          puc_storage_path?: string | null
+          fastag_id?: string | null
+          gps_tracker_id?: string | null
+          gps_status?: string | null
+          fuel_level_pct?: number | null
+          last_gps_ping_at?: string | null
           deleted_at?: string | null
           archived_at?: string | null
           archived_by?: string | null
@@ -139,6 +169,21 @@ export type Database = {
           security_deposit?: number
           catalog_category?: string | null
           fleet_ops_note?: string | null
+          model?: string | null
+          chassis_number?: string | null
+          vehicle_location?: string | null
+          odometer_km?: number | null
+          insurance_expiry?: string | null
+          puc_expiry?: string | null
+          rc_expiry?: string | null
+          rc_storage_path?: string | null
+          insurance_storage_path?: string | null
+          puc_storage_path?: string | null
+          fastag_id?: string | null
+          gps_tracker_id?: string | null
+          gps_status?: string | null
+          fuel_level_pct?: number | null
+          last_gps_ping_at?: string | null
           deleted_at?: string | null
           archived_at?: string | null
           archived_by?: string | null
@@ -1211,6 +1256,213 @@ export type Database = {
           metadata?: Json
           performed_by?: string | null
           created_at?: string
+        }
+        Relationships: []
+      }
+      support_tickets: {
+        Row: {
+          id: string
+          user_id: string | null
+          booking_id: string | null
+          subject: string
+          body: string
+          category: string
+          priority: string
+          status: string
+          assigned_to: string | null
+          resolution_notes: string | null
+          created_at: string
+          updated_at: string
+          resolved_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          booking_id?: string | null
+          subject: string
+          body: string
+          category?: string
+          priority?: string
+          status?: string
+          assigned_to?: string | null
+          resolution_notes?: string | null
+          created_at?: string
+          updated_at?: string
+          resolved_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          booking_id?: string | null
+          subject?: string
+          body?: string
+          category?: string
+          priority?: string
+          status?: string
+          assigned_to?: string | null
+          resolution_notes?: string | null
+          created_at?: string
+          updated_at?: string
+          resolved_at?: string | null
+        }
+        Relationships: []
+      }
+      damage_reports: {
+        Row: {
+          id: string
+          booking_id: string | null
+          vehicle_id: string | null
+          user_id: string | null
+          status: string
+          description: string
+          estimated_cost_rupees: number
+          approved_cost_rupees: number | null
+          customer_liable_rupees: number
+          before_photo_paths: string[]
+          after_photo_paths: string[]
+          repair_notes: string | null
+          reported_at: string
+          resolved_at: string | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          booking_id?: string | null
+          vehicle_id?: string | null
+          user_id?: string | null
+          status?: string
+          description: string
+          estimated_cost_rupees?: number
+          approved_cost_rupees?: number | null
+          customer_liable_rupees?: number
+          before_photo_paths?: string[]
+          after_photo_paths?: string[]
+          repair_notes?: string | null
+          reported_at?: string
+          resolved_at?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          booking_id?: string | null
+          vehicle_id?: string | null
+          user_id?: string | null
+          status?: string
+          description?: string
+          estimated_cost_rupees?: number
+          approved_cost_rupees?: number | null
+          customer_liable_rupees?: number
+          before_photo_paths?: string[]
+          after_photo_paths?: string[]
+          repair_notes?: string | null
+          reported_at?: string
+          resolved_at?: string | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      vehicle_maintenance_logs: {
+        Row: {
+          id: string
+          vehicle_id: string
+          maintenance_type: string
+          status: string
+          title: string
+          description: string | null
+          scheduled_at: string | null
+          completed_at: string | null
+          odometer_km: number | null
+          cost_rupees: number | null
+          created_by: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          vehicle_id: string
+          maintenance_type?: string
+          status?: string
+          title: string
+          description?: string | null
+          scheduled_at?: string | null
+          completed_at?: string | null
+          odometer_km?: number | null
+          cost_rupees?: number | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          vehicle_id?: string
+          maintenance_type?: string
+          status?: string
+          title?: string
+          description?: string | null
+          scheduled_at?: string | null
+          completed_at?: string | null
+          odometer_km?: number | null
+          cost_rupees?: number | null
+          created_by?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      invoices: {
+        Row: {
+          id: string
+          booking_id: string
+          user_id: string
+          invoice_number: string
+          invoice_type: string
+          subtotal_rupees: number
+          gst_rupees: number
+          total_rupees: number
+          status: string
+          issued_at: string | null
+          pdf_storage_path: string | null
+          metadata: Json
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          booking_id: string
+          user_id: string
+          invoice_number: string
+          invoice_type?: string
+          subtotal_rupees?: number
+          gst_rupees?: number
+          total_rupees?: number
+          status?: string
+          issued_at?: string | null
+          pdf_storage_path?: string | null
+          metadata?: Json
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          booking_id?: string
+          user_id?: string
+          invoice_number?: string
+          invoice_type?: string
+          subtotal_rupees?: number
+          gst_rupees?: number
+          total_rupees?: number
+          status?: string
+          issued_at?: string | null
+          pdf_storage_path?: string | null
+          metadata?: Json
+          created_at?: string
+          updated_at?: string
         }
         Relationships: []
       }

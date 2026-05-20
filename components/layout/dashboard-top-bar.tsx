@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { ChevronDown, LayoutDashboard, LogOut, Settings } from 'lucide-react'
+import { ChevronDown, LayoutDashboard, LogOut, Settings, Shield } from 'lucide-react'
 import type { User } from '@supabase/supabase-js'
 
 import { DashboardNotificationBell } from '@/features/dashboard/dashboard-notification-bell'
@@ -40,9 +40,16 @@ export type DashboardTopBarProps = {
   userId: string
   notificationUnread: number
   notificationPreview: NotificationRow[]
+  /** Staff-only link to `/admin` operations console. */
+  adminConsoleHref?: string
 }
 
-export function DashboardTopBar({ userId, notificationUnread, notificationPreview }: DashboardTopBarProps) {
+export function DashboardTopBar({
+  userId,
+  notificationUnread,
+  notificationPreview,
+  adminConsoleHref,
+}: DashboardTopBarProps) {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = useSupabase()
@@ -120,6 +127,16 @@ export function DashboardTopBar({ userId, notificationUnread, notificationPrevie
                 className="absolute right-0 top-[calc(100%+0.25rem)] z-[80] min-w-[11.5rem] rounded-lg border border-stroke bg-carbon py-1 shadow-[var(--shadow-card-hover)]"
                 onClick={(e) => e.stopPropagation()}
               >
+                {adminConsoleHref ? (
+                  <Link
+                    href={adminConsoleHref}
+                    className="flex items-center gap-2 px-3 py-2.5 text-sm text-soft hover:bg-fill-glass"
+                    onClick={() => accountMenuRef.current?.removeAttribute('open')}
+                  >
+                    <Shield className="h-4 w-4 text-electric" aria-hidden />
+                    Admin console
+                  </Link>
+                ) : null}
                 <Link
                   href="/dashboard"
                   className="flex items-center gap-2 px-3 py-2.5 text-sm text-soft hover:bg-fill-glass"

@@ -17,7 +17,13 @@ export async function requireAdminPageAccess(pathname: string) {
     redirect(`/login?${new URLSearchParams({ redirect: pathname }).toString()}`)
   }
   if (!isStaffRole(summary.appRole)) {
-    redirect('/dashboard?error=forbidden')
+    const base = pathname.split('?')[0] ?? pathname
+    // Admin layout renders AdminNoAccessView for non-staff. Redirect only off the hub
+    // to avoid a redirect loop on `/admin` while still blocking deeper admin pages.
+    if (base !== '/admin' && base !== '/admin/') {
+      redirect('/admin')
+    }
+    return summary
   }
   if (!canAccessAdminPath(summary.appRole, pathname)) {
     redirect(`/admin/forbidden?from=${encodeURIComponent(pathname)}`)
