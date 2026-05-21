@@ -7,8 +7,8 @@ import { ChevronDown, LayoutDashboard, LogOut, Menu, Shield, X } from 'lucide-re
 import type { User } from '@supabase/supabase-js'
 import { BRAND } from '@/constants/brand'
 import { useSupabase } from '@/hooks/use-supabase'
-import { useAppAuthRole } from '@/hooks/use-app-auth-role'
-import { useSupabaseAuthUser } from '@/hooks/use-supabase-auth-user'
+import { useResolvedAppRole } from '@/hooks/use-resolved-app-role'
+import { ADMIN_HOME, CUSTOMER_HOME } from '@/lib/auth/routes'
 import { cn } from '@/lib/utils/cn'
 import { Button } from '@/components/ui/Button'
 import { BrandLogo } from '@/components/layout/brand-logo'
@@ -43,8 +43,8 @@ export function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = useSupabase()
-  const { user, ready } = useSupabaseAuthUser()
-  const { isStaff } = useAppAuthRole(user)
+  const { user, ready, isStaff } = useResolvedAppRole()
+  const accountHref = isStaff ? ADMIN_HOME : CUSTOMER_HOME
   const accountMenuRef = useRef<HTMLDetailsElement>(null)
   const [open, setOpen] = useState(false)
   const [signingOut, setSigningOut] = useState(false)
@@ -99,7 +99,7 @@ export function Navbar() {
                     <Link
                       href={href}
                       className={cn(
-                        'rounded-full px-3.5 py-2 text-sm font-semibold transition-colors',
+                        'type-nav rounded-full px-3.5 py-2 transition-colors',
                         active ? 'bg-fill-glass-strong text-soft' : 'text-muted hover:bg-fill-glass hover:text-soft',
                       )}
                     >
@@ -138,23 +138,17 @@ export function Navbar() {
                   <ChevronDown className="h-4 w-4 text-muted" aria-hidden />
                 </summary>
                 <div className="absolute right-0 top-full z-[80] mt-2 min-w-[11rem] rounded-2xl border border-stroke bg-carbon py-1 shadow-[var(--shadow-card-hover)]">
-                  {isStaff ? (
-                    <Link
-                      href="/admin"
-                      className="flex items-center gap-2 px-3 py-2 text-sm text-soft hover:bg-fill-glass"
-                      onClick={() => accountMenuRef.current?.removeAttribute('open')}
-                    >
-                      <Shield className="h-4 w-4 text-electric" aria-hidden />
-                      Admin console
-                    </Link>
-                  ) : null}
                   <Link
-                    href="/dashboard"
+                    href={accountHref}
                     className="flex items-center gap-2 px-3 py-2 text-sm text-soft hover:bg-fill-glass"
                     onClick={() => accountMenuRef.current?.removeAttribute('open')}
                   >
-                    <LayoutDashboard className="h-4 w-4 text-muted" aria-hidden />
-                    Dashboard
+                    {isStaff ? (
+                      <Shield className="h-4 w-4 text-electric" aria-hidden />
+                    ) : (
+                      <LayoutDashboard className="h-4 w-4 text-muted" aria-hidden />
+                    )}
+                    {isStaff ? 'Admin console' : 'Dashboard'}
                   </Link>
                   <button
                     type="button"
@@ -201,7 +195,7 @@ export function Navbar() {
                     key={href}
                     href={href}
                     className={cn(
-                      'flex min-h-11 items-center rounded-2xl px-3 py-3 text-base font-semibold',
+                      'type-nav flex min-h-11 items-center rounded-2xl px-3 py-3 text-base font-medium',
                       active ? 'bg-fill-glass text-soft' : 'text-muted',
                     )}
                     onClick={() => setOpen(false)}
@@ -218,13 +212,8 @@ export function Navbar() {
                 {ready ? (
                   user ? (
                     <>
-                      {isStaff ? (
-                        <Button variant="secondary" size="lg" to="/admin" className="w-full" onClick={() => setOpen(false)}>
-                          Admin console
-                        </Button>
-                      ) : null}
-                      <Button variant="secondary" size="lg" to="/dashboard" className="w-full" onClick={() => setOpen(false)}>
-                        Dashboard
+                      <Button variant="secondary" size="lg" to={accountHref} className="w-full" onClick={() => setOpen(false)}>
+                        {isStaff ? 'Admin console' : 'Dashboard'}
                       </Button>
                       <Button variant="ghost" size="lg" className="w-full" disabled={signingOut} onClick={() => void handleSignOut()}>
                         {signingOut ? 'Signing out…' : 'Sign out'}

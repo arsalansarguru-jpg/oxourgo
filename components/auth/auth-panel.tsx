@@ -21,8 +21,8 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { BRAND } from '@/constants/brand'
 import { getOAuthCallbackUrl } from '@/lib/auth/callback-url'
-import { appRoleFromUser } from '@/hooks/use-app-auth-role'
 import { resolvePostLoginPath } from '@/lib/auth/post-login-path'
+import { resolveClientAuthRole } from '@/lib/auth/resolve-client-role'
 import { debugLogRoleResolution } from '@/lib/auth/role-debug'
 import { formatAuthError } from '@/lib/errors/format-auth-error'
 import { normalizePhoneToE164 } from '@/lib/auth/normalize-phone'
@@ -174,7 +174,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
           aria-hidden
         />
         <div className="relative space-y-4">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-amber-200/90">Sign-in</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan">Sign-in</p>
           <DataLoadErrorPanel
             title="Sign-in is not available"
             description="This environment is not fully configured. Please try again later or contact support if the issue continues."
@@ -328,14 +328,10 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
         setError(formatAuthError(err))
         return
       }
-      const {
-        data: { session },
-      } = await sb.auth.getSession()
-      const user = session?.user ?? null
+      const { user, appRole } = await resolveClientAuthRole(sb)
       if (user?.id) {
         identifyClientUser(user.id)
       }
-      const appRole = appRoleFromUser(user)
       const destination = resolvePostLoginPath(appRole, redirectTo)
       debugLogRoleResolution('auth-panel/otp', {
         userId: user?.id,

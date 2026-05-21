@@ -3,41 +3,55 @@
 import Image from 'next/image'
 import Link from 'next/link'
 
-import { useAppAuthRole } from '@/hooks/use-app-auth-role'
-import { useSupabaseAuthUser } from '@/hooks/use-supabase-auth-user'
+import { useResolvedAppRole } from '@/hooks/use-resolved-app-role'
 import { defaultPostLoginPath } from '@/lib/auth/post-login-path'
+import { marketingHeroSection } from '@/lib/design/ui-system'
 import { WhatsAppInquiryButton } from '@/components/marketing/whatsapp-inquiry-button'
 import { BookingSearchBar } from '@/components/marketing/booking-search-bar'
 import { Button } from '@/components/ui/Button'
 
 export function HeroSection() {
-  const { user, ready } = useSupabaseAuthUser()
-  const { appRole, isStaff } = useAppAuthRole(user)
+  const { user, ready, appRole, isStaff } = useResolvedAppRole()
   const memberHref = user ? defaultPostLoginPath(appRole) : '/login'
   const memberLabel = user ? (isStaff ? 'Admin console' : 'Open dashboard') : 'Member sign in'
 
   return (
-    <section className="relative isolate min-h-[calc(100svh-var(--public-header-offset))] overflow-hidden border-b border-stroke bg-[#080706] text-white">
+    <section className={marketingHeroSection}>
       <Image
         src="/media/luxury-car-hero.png"
         alt=""
         fill
         priority
         sizes="100vw"
-        className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
+        className="absolute inset-0 -z-20 h-full w-full object-cover object-center brightness-[0.72] contrast-[1.08] saturate-[0.85]"
       />
-      <div className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgba(6,5,4,0.96)_0%,rgba(6,5,4,0.8)_36%,rgba(6,5,4,0.32)_72%,rgba(6,5,4,0.58)_100%)]" />
-      <div className="absolute inset-x-0 bottom-0 -z-10 h-56 bg-[linear-gradient(180deg,transparent,#080706)]" />
+      <div
+        className="absolute inset-0 -z-10 bg-[var(--hero-overlay)]"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 bg-[var(--background-image-hero-mesh)] opacity-90"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute -left-24 top-1/4 -z-10 h-80 w-80 rounded-full bg-electric/25 blur-[120px] animate-glow-pulse"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute bottom-0 right-0 -z-10 h-64 w-64 rounded-full bg-cyan/20 blur-[100px]"
+        aria-hidden
+      />
+      <div className="absolute inset-x-0 bottom-0 -z-10 h-56 bg-[var(--background-image-hero-cinematic)]" />
 
       <div className="container-app flex min-h-[calc(100svh-var(--public-header-offset))] flex-col justify-center py-10 sm:py-12 lg:py-16">
         <div className="max-w-3xl">
-          <p className="inline-flex rounded-full border border-white/15 bg-white/10 px-4 py-2 text-xs font-semibold uppercase text-[#e6c17d] backdrop-blur">
+          <p className="text-hero-kicker inline-flex rounded-full border border-electric/35 bg-electric/10 px-4 py-2 backdrop-blur-md">
             Self-drive luxury car rental in Mumbai
           </p>
-          <h1 className="text-hero-display mt-6 max-w-2xl text-white">
+          <h1 className="text-hero-display mt-6 max-w-2xl text-soft">
             Drive the city like it belongs to you.
           </h1>
-          <p className="mt-6 max-w-xl text-base leading-8 text-white/72 sm:text-lg">
+          <p className="mt-6 max-w-xl text-base font-medium leading-8 text-silver sm:text-lg">
             Premium verified cars, transparent daily rates, and concierge support from inquiry to handover.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -57,9 +71,9 @@ export function HeroSection() {
           <BookingSearchBar />
         </div>
 
-        <p className="mt-6 text-sm text-white/62">
+        <p className="mt-6 text-sm font-medium text-silver">
           Need a curated recommendation?{' '}
-          <Link href="/support" className="font-semibold text-[#e6c17d] hover:underline">
+          <Link href="/support" className="font-semibold text-cyan hover:text-electric hover:underline">
             Contact support
           </Link>
         </p>

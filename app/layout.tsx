@@ -5,6 +5,8 @@ import Script from 'next/script'
 import { AppProviders } from '@/components/providers/app-providers'
 import { OrganizationAndLocalBusinessJsonLd } from '@/components/seo/organization-json-ld'
 import { getSiteUrl } from '@/lib/env/site-url'
+import { urbanist } from '@/lib/fonts'
+import { cn } from '@/lib/utils/cn'
 
 import './globals.css'
 
@@ -13,8 +15,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: 'cover',
   themeColor: [
-    { media: '(prefers-color-scheme: dark)', color: '#09090b' },
-    { color: '#fafafa' },
+    { media: '(prefers-color-scheme: dark)', color: '#050816' },
+    { color: '#F5F9FF' },
   ],
 }
 
@@ -60,12 +62,23 @@ export const metadata: Metadata = {
   category: 'travel',
 }
 
-const themeBootstrapScript = `(function(){try{var k='oxour-theme',d=document.documentElement,s=localStorage.getItem(k);function a(t){d.setAttribute('data-theme',t);}if(s==='light'||s==='dark'){a(s);return;}a(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');}catch(e){document.documentElement.setAttribute('data-theme','light');}})();`
+const themeBootstrapScript = `(function(){try{var k='oxour-theme',d=document.documentElement,s=localStorage.getItem(k);function a(t){d.setAttribute('data-theme',t);d.style.colorScheme=t;}if(s==='light'||s==='dark'){a(s);return;}a(window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');}catch(e){document.documentElement.setAttribute('data-theme','dark');document.documentElement.style.colorScheme='dark';}})();`
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning data-theme="light">
-      <body className="min-w-0 overflow-x-clip font-sans antialiased" suppressHydrationWarning>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      data-theme="dark"
+      className={cn(urbanist.variable, 'transition-colors duration-200')}
+    >
+      <body
+        className={cn(
+          urbanist.className,
+          'min-w-0 overflow-x-clip font-sans font-normal antialiased',
+        )}
+        suppressHydrationWarning
+      >
         <Script id="oxour-theme-init" strategy="beforeInteractive">
           {themeBootstrapScript}
         </Script>

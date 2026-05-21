@@ -8,18 +8,17 @@ import { resolveAppRoleWithClaims } from '@/lib/auth/resolve-session-role'
 import { getBusinessWhatsAppUrl } from '@/lib/business-contact'
 import { isStaffRole } from '@/lib/auth/permissions'
 import { resolvePostLoginPath } from '@/lib/auth/post-login-path'
+import { ADMIN_HOME, CUSTOMER_HOME, PROTECTED_ROUTE_PREFIXES } from '@/lib/auth/routes'
 import { getSupabasePublicEnv } from '@/lib/env/supabase-public'
 import { isSoftLaunchDisabledRoute, softLaunchInquiryMessageForPath } from '@/lib/soft-launch/disabled-routes'
 import type { Database } from '@/lib/supabase/database.types'
 import { updateSession } from '@/lib/supabase/middleware'
 
-const PROTECTED_PREFIXES = ['/dashboard', '/admin'] as const
-
 /** Fail-closed destination when public Supabase env is missing (must stay outside protected prefixes). */
 const CONFIG_UNAVAILABLE_PATH = '/system/unavailable'
 
 function needsAuthenticatedUser(pathname: string): boolean {
-  return PROTECTED_PREFIXES.some((p) => pathname.startsWith(p))
+  return PROTECTED_ROUTE_PREFIXES.some((p) => pathname.startsWith(p))
 }
 
 function isLoginPath(pathname: string): boolean {
@@ -44,6 +43,16 @@ export async function middleware(request: NextRequest) {
     const canonical = getCanonicalSiteOrigin(requestOrigin)
     const target = new URL(`${pathname}${request.nextUrl.search}`, canonical)
     return NextResponse.redirect(target, 308)
+  }
+
+  // Legacy member URLs → customer dashboard
+  if (pathname === '/member' || pathname.startsWith('/member/')) {
+    const memberTarget = new URL(
+      pathname === '/member' ? CUSTOMER_HOME : pathname.replace(/^\/member/, CUSTOMER_HOME),
+      request.url,
+    )
+    memberTarget.search = request.nextUrl.search
+    return NextResponse.redirect(memberTarget)
   }
 
   // Staff admin console must never be sent to WhatsApp (soft-launch blocks booking/kyc only).
@@ -103,7 +112,6 @@ export async function middleware(request: NextRequest) {
 
   const appRole = await resolveAppRoleWithClaims(supabase, user, `middleware:${pathname}`)
 
-  // Already signed in: send staff to admin console (login page + post-auth default).
   if (isLoginPath(pathname) && isStaffRole(appRole)) {
     const destination = resolvePostLoginPath(
       appRole,
@@ -115,19 +123,23 @@ export async function middleware(request: NextRequest) {
   }
 
   // Staff must use the admin console — never the customer dashboard.
-  if (pathname.startsWith('/dashboard') && isStaffRole(appRole)) {
-    const adminHome = new URL('/admin', request.url)
+  if (pathname.startsWith(CUSTOMER_HOME) && isStaffRole(appRole)) {
+    const adminHome = new URL(ADMIN_HOME, request.url)
     const redirectResponse = NextResponse.redirect(adminHome)
     copyCookies(response, redirectResponse)
     return redirectResponse
   }
 
   if (pathname.startsWith('/admin')) {
-    // Non-staff users stay on /admin/* and get an admin-themed "no access" view
-    // rendered by the admin layout. We intentionally do NOT redirect them to
-    // the customer dashboard so /admin never visually leaks customer chrome.
     if (!isStaffRole(appRole)) {
       return response
+    }
+
+    if (pathname === '/admin') {
+      const adminDashboard = new URL(ADMIN_HOME, request.url)
+      const redirectResponse = NextResponse.redirect(adminDashboard)
+      copyCookies(response, redirectResponse)
+      return redirectResponse
     }
 
     if (pathname !== '/admin/forbidden' && !canAccessAdminPath(appRole, pathname)) {

@@ -18,7 +18,7 @@ export function ThemeToggle({ className, size = 'default' }: ThemeToggleProps) {
       type="button"
       onClick={toggleTheme}
       className={cn(
-        'touch-manipulation inline-flex items-center justify-center rounded-md border border-stroke bg-carbon text-soft transition-colors hover:bg-fill-glass',
+        'touch-manipulation inline-flex items-center justify-center rounded-xl border border-stroke bg-fill-glass-strong text-soft shadow-[var(--shadow-card)] transition-[border-color,box-shadow,background-color] duration-200 hover:border-electric/35 hover:shadow-[0_0_20px_-10px_var(--glow-electric)]',
         size === 'comfortable' ? 'h-10 gap-2 px-4 text-sm font-medium' : 'h-9 w-9',
         className,
       )}

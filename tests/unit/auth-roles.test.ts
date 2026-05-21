@@ -2,12 +2,14 @@ import { describe, expect, it } from 'vitest'
 
 import { isStaffRole } from '@/lib/auth/permissions'
 import {
+  collectAppRolesFromJwtClaims,
   collectAppRolesFromMetadata,
   isAdminPortalRole,
   parseAppAuthRole,
   pickHighestAppRole,
   resolveAuthRoleFromMetadata,
 } from '@/lib/auth/roles'
+import { resolveAppRoleForUser } from '@/lib/auth/resolve-session-role'
 
 describe('resolveAuthRoleFromMetadata', () => {
   it('maps legacy admin string to ops_admin', () => {
@@ -50,5 +52,36 @@ describe('resolveAuthRoleFromMetadata', () => {
 
   it('reads user_metadata.role when app_metadata is empty', () => {
     expect(resolveAuthRoleFromMetadata({}, { role: 'ops_admin' })).toBe('ops_admin')
+  })
+
+  it('reads top-level JWT oxour_role and legacy admin role', () => {
+    expect(
+      pickHighestAppRole(
+        collectAppRolesFromJwtClaims({
+          role: 'authenticated',
+          oxour_role: 'ops_admin',
+        }),
+      ),
+    ).toBe('ops_admin')
+    expect(
+      pickHighestAppRole(
+        collectAppRolesFromJwtClaims({
+          app_metadata: { role: 'admin' },
+        }),
+      ),
+    ).toBe('ops_admin')
+  })
+
+  it('merges JWT claims with user record for resolveAppRoleForUser', () => {
+    const user = {
+      id: 'u1',
+      app_metadata: {},
+      user_metadata: {},
+    } as import('@supabase/supabase-js').User
+    expect(
+      resolveAppRoleForUser(user, {
+        app_metadata: { oxour_role: 'ops_admin' },
+      }),
+    ).toBe('ops_admin')
   })
 })

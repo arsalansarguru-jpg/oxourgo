@@ -1,14 +1,16 @@
 import type { HTMLAttributes } from 'react'
 
+import { adminKpiGlow } from '@/lib/design/admin-actions'
 import { cn } from '@/lib/utils/cn'
 
 const shell =
-  'rounded-2xl border border-white/[0.08] bg-white/[0.045] shadow-[var(--shadow-card)] backdrop-blur'
+  'rounded-2xl border border-stroke bg-fill-glass-strong shadow-[var(--shadow-card)] backdrop-blur-2xl'
 
-const interactiveShell = 'hover:border-white/[0.14] hover:bg-white/[0.065] hover:shadow-[var(--shadow-card-hover)]'
+const interactiveShell =
+  'transition-[border-color,box-shadow,transform] duration-200 hover:-translate-y-0.5 hover:border-electric/30 hover:shadow-[var(--shadow-card-hover)]'
 
 export type AdminCardProps = HTMLAttributes<HTMLDivElement> & {
-  variant?: 'default' | 'risk'
+  variant?: 'default' | 'risk' | 'critical' | 'glow'
   interactive?: boolean
 }
 
@@ -17,7 +19,10 @@ export function AdminCard({ className, variant = 'default', interactive, ...prop
     <div
       className={cn(
         shell,
-        variant === 'risk' && 'border-red-200 bg-red-50/50 theme-dark:border-red-500/30 theme-dark:bg-red-500/10',
+        variant === 'glow' && adminKpiGlow.default,
+        variant === 'risk' &&
+          'border-amber-400/30 bg-amber-500/10 theme-light:border-amber-400/40 theme-light:bg-amber-50/90',
+        variant === 'critical' && cn(adminKpiGlow.critical, 'border-red-500/50 bg-red-500/10'),
         interactive && interactiveShell,
         className,
       )}

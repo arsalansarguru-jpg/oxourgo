@@ -80,7 +80,7 @@ export function CustomerDashboardHome({
       {accessNotice ? (
         <div
           role="status"
-          className="rounded-xl border border-amber-400/25 bg-amber-500/[0.06] px-4 py-3 text-sm text-soft"
+          className="rounded-xl border border-electric/30 bg-electric/10 px-4 py-3 text-sm font-medium text-soft"
         >
           {accessNotice}
         </div>

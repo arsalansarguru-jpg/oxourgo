@@ -6,6 +6,7 @@ import { DashboardLayout as DashboardChrome } from '@/components/layout/Dashboar
 import { debugLogRoleResolution } from '@/lib/auth/role-debug'
 import { getAuthSessionSummary } from '@/lib/auth/server'
 import { isStaffRole } from '@/lib/auth/permissions'
+import { ADMIN_HOME } from '@/lib/auth/routes'
 import { countUnreadNotifications, listNotificationsForUser } from '@/lib/customer/notifications-queries'
 import { getCustomerProfileSnapshot } from '@/lib/customer/profile-queries'
 import { logUnknownError } from '@/lib/errors/safe-user-message'
@@ -31,7 +32,7 @@ export default async function DashboardRouteLayout({ children }: { children: Rea
   })
 
   if (isStaffRole(summary.appRole)) {
-    redirect('/admin')
+    redirect(ADMIN_HOME)
   }
 
   try {

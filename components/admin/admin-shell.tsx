@@ -65,7 +65,9 @@ function NavLinks({
             className={cn(
               'flex min-h-11 items-center rounded-xl text-sm font-medium transition-colors',
               collapsed ? 'justify-center px-0 py-3' : 'gap-2.5 px-2.5 py-2.5',
-              active ? 'bg-electric/15 text-soft ring-1 ring-electric/20' : 'text-muted hover:bg-fill-glass hover:text-soft',
+              active
+                ? 'bg-electric/20 text-soft ring-1 ring-electric/35 shadow-[0_0_20px_-10px_var(--glow-electric)]'
+                : 'text-muted hover:bg-fill-glass hover:text-soft',
             )}
           >
             <Icon className={cn('shrink-0', collapsed ? 'h-5 w-5' : 'h-4 w-4')} aria-hidden />
@@ -205,10 +207,10 @@ export function AdminShell({
   const desktopExpanded = sidebarHydrated ? !collapsed : true
 
   return (
-    <div className="flex min-h-dvh min-w-0 bg-[#080706] text-soft [--color-carbon-deep:#17120d] [--color-carbon:#100d09] [--color-fill-glass-strong:rgb(201_154_85/0.16)] [--color-fill-glass:rgb(255_255_255/0.055)] [--color-matte:#080706] [--color-muted:#a99b88] [--color-soft:#f8f2e8] [--color-stroke-strong:rgb(255_255_255/0.16)] [--color-stroke:rgb(255_255_255/0.09)]">
+    <div className="flex min-h-dvh min-w-0 bg-matte text-soft">
       <aside
         className={cn(
-          'fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-white/[0.08] bg-[#0d0a07]/92 py-5 shadow-[18px_0_80px_-60px_rgba(0,0,0,0.95)] backdrop-blur-xl lg:flex',
+          'fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-stroke bg-carbon-deep/95 py-5 shadow-[var(--shadow-sidebar)] backdrop-blur-2xl lg:flex',
           'transition-[width,padding] duration-200',
           desktopExpanded ? 'w-60 px-4' : 'w-[4.25rem] px-2',
         )}
@@ -249,7 +251,7 @@ export function AdminShell({
           desktopExpanded ? 'lg:pl-60' : 'lg:pl-[4.25rem]',
         )}
       >
-        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-3 border-b border-white/[0.08] bg-[#0d0a07]/88 px-4 shadow-[0_18px_60px_-50px_rgba(0,0,0,0.95)] backdrop-blur-xl sm:gap-4 sm:px-6">
+        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-3 border-b border-stroke bg-carbon/90 px-4 shadow-[var(--shadow-card)] backdrop-blur-2xl sm:gap-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-2 sm:gap-3">
             <button
               type="button"
@@ -260,7 +262,7 @@ export function AdminShell({
             >
               {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
-            <h1 className="truncate font-display text-base font-semibold text-soft">{barTitle}</h1>
+            <h1 className="type-nav truncate font-display font-semibold text-soft">{barTitle}</h1>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             {hasPermission(appRole, 'ops.alerts.read') ? (
@@ -278,7 +280,7 @@ export function AdminShell({
               onClick={() => setMobileOpen(false)}
             />
             <aside
-              className="fixed inset-y-0 left-0 z-50 flex w-[min(17rem,88vw)] flex-col border-r border-white/[0.08] bg-[#0d0a07] p-4 lg:hidden"
+              className="fixed inset-y-0 left-0 z-50 flex w-[min(17rem,88vw)] flex-col border-r border-stroke bg-carbon-deep p-4 lg:hidden"
               aria-label="Admin navigation mobile"
             >
               <div className="flex items-center justify-between gap-3">
@@ -305,7 +307,7 @@ export function AdminShell({
           </>
         ) : null}
 
-        <main className="flex-1 overflow-x-hidden bg-[radial-gradient(circle_at_top_left,rgba(201,154,85,0.14),transparent_28rem),linear-gradient(180deg,#080706,#0c0906)]">
+        <main className="flex-1 overflow-x-hidden bg-[radial-gradient(circle_at_top_left,rgba(0,102,255,0.16),transparent_28rem),linear-gradient(180deg,var(--color-matte),var(--color-carbon))]">
           <div className="mx-auto w-full max-w-[80rem] px-4 py-6 sm:px-6 sm:py-8 lg:py-10">
             <div className="flex min-w-0 flex-col gap-6 sm:gap-8">{children}</div>
           </div>

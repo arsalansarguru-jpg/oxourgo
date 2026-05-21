@@ -1,41 +1,40 @@
-@import url('https://fonts.bunny.net/css?family=inter:400,500,600');
-@import url('https://api.fontshare.com/v2/css?f[]=satoshi@500,600,700&display=swap');
 @import 'tailwindcss';
 
 /** Descendant variants for theme-specific overrides in shared components */
 @custom-variant theme-light (&:where(html[data-theme="light"] *));
 @custom-variant theme-dark (&:where(html[data-theme="dark"] *));
 
-/* Inter (UI/body) + Satoshi (headings) — runtime CDN, no build-time font fetch */
 /**
- * Oxour Go — product-grade SaaS design system.
- * Light-first tokens; dark mode via `html[data-theme="dark"]`.
- * Legacy names (matte, carbon, soft, …) map to semantic roles for gradual migration.
+ * Oxour Go — BLACK + ELECTRIC BLUE luxury automotive SaaS design system.
+ * Typography: Urbanist via `next/font` (`--font-urbanist` on `<html>`). Modes: `data-theme`.
  */
 @theme {
-  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: 'Satoshi', var(--font-sans);
+  --font-sans: var(--font-urbanist), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+  --font-display: var(--font-urbanist), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
 
-  /* Surfaces */
-  --color-matte: #f7f3eb;
-  --color-carbon: #fffaf1;
-  --color-carbon-deep: #eee5d6;
+  /* Semantic surfaces (mapped per theme below) */
+  --color-matte: #f5f9ff;
+  --color-carbon: #eaf2ff;
+  --color-carbon-deep: #dcebff;
 
   /* Text */
-  --color-soft: #15110b;
-  --color-silver: #5e5548;
-  --color-muted: #7f7362;
+  --color-soft: #111827;
+  --color-silver: #334155;
+  --color-muted: #475569;
 
   /* Brand */
-  --color-electric: #b98743;
-  --color-emerald: #0f8b6f;
+  --color-electric: #0066ff;
+  --color-cyan: #00c2ff;
+  --color-emerald: #10b981;
 
   /* Borders & fills */
-  --color-stroke: rgb(48 36 22 / 0.12);
-  --color-stroke-strong: rgb(48 36 22 / 0.2);
-  --color-fill-glass: rgb(185 135 67 / 0.08);
-  --color-fill-glass-strong: rgb(185 135 67 / 0.14);
-  --color-hero-mist: rgb(185 135 67 / 0.14);
+  --color-stroke: rgb(0 102 255 / 0.12);
+  --color-stroke-strong: rgb(0 102 255 / 0.22);
+  --color-fill-glass: rgb(0 102 255 / 0.06);
+  --color-fill-glass-strong: rgb(0 102 255 / 0.1);
+  --color-hero-mist: rgb(0 102 255 / 0.14);
 
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
@@ -55,41 +54,87 @@
   --container-max: 72rem;
   --container-wide: min(80rem, calc(100vw - var(--spacing-edge) * 2));
 
-  --shadow-glow: none;
-  --shadow-glow-strong: none;
-  --shadow-card: 0 18px 45px -32px rgb(43 31 18 / 0.45);
-  --shadow-card-hover: 0 26px 70px -38px rgb(43 31 18 / 0.55);
-  --shadow-card-accent: 0 26px 64px -34px rgb(185 135 67 / 0.48);
+  --glow-electric: rgb(0 102 255 / 0.42);
+  --glow-cyan: rgb(0 194 255 / 0.35);
+  --shadow-glow: 0 0 48px -12px var(--glow-electric);
+  --shadow-glow-strong: 0 0 64px -8px var(--glow-cyan);
+  --shadow-card: 0 22px 56px -32px rgb(0 31 84 / 0.18);
+  --shadow-card-hover: 0 28px 72px -28px rgb(0 31 84 / 0.28);
+  --shadow-card-accent: 0 24px 64px -24px rgb(0 102 255 / 0.35);
+  --shadow-sidebar: 24px 0 80px -48px rgb(0 8 22 / 0.55);
 
-  --ease-premium: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-premium: cubic-bezier(0.22, 1, 0.36, 1);
   --duration-fast: 150ms;
-  --duration-normal: 200ms;
-  --duration-slow: 280ms;
+  --duration-normal: 220ms;
+  --duration-slow: 360ms;
 
-  --background-image-hero-mesh: none;
-  --background-image-hero-cinematic: none;
+  --hero-overlay: linear-gradient(
+    105deg,
+    rgb(5 8 22 / 0.94) 0%,
+    rgb(5 8 22 / 0.78) 38%,
+    rgb(0 102 255 / 0.18) 72%,
+    rgb(5 8 22 / 0.88) 100%
+  );
+  --background-image-hero-mesh: radial-gradient(circle at 20% 20%, rgb(0 102 255 / 0.22), transparent 42%),
+    radial-gradient(circle at 80% 0%, rgb(0 194 255 / 0.12), transparent 38%);
+  --background-image-hero-cinematic: linear-gradient(180deg, rgb(5 8 22 / 0.2), rgb(5 8 22 / 0.95));
 }
 
-html[data-theme='dark'] {
-  color-scheme: dark;
-  --color-matte: #09090b;
-  --color-carbon: #18181b;
-  --color-carbon-deep: #111113;
-  --color-soft: #fafafa;
-  --color-silver: #a1a1aa;
-  --color-muted: #a1a1aa;
-  --color-stroke: rgb(255 255 255 / 0.08);
-  --color-stroke-strong: rgb(255 255 255 / 0.12);
-  --color-fill-glass: rgb(255 255 255 / 0.04);
-  --color-fill-glass-strong: rgb(255 255 255 / 0.07);
-  --color-hero-mist: rgb(59 130 246 / 0.08);
-  --shadow-card: 0 22px 60px -38px rgb(0 0 0 / 0.65);
-  --shadow-card-hover: 0 28px 78px -42px rgb(0 0 0 / 0.78);
-}
-
+/* ——— Light mode (premium blue-tinted, high contrast) ——— */
 html[data-theme='light'],
 html:not([data-theme]) {
   color-scheme: light;
+  --color-matte: #f5f9ff;
+  --color-carbon: #eaf2ff;
+  --color-carbon-deep: #dcebff;
+  --color-soft: #111827;
+  --color-silver: #334155;
+  --color-muted: #475569;
+  --color-electric: #0066ff;
+  --color-cyan: #00a8e0;
+  --color-stroke: rgb(0 79 204 / 0.14);
+  --color-stroke-strong: rgb(0 79 204 / 0.24);
+  --color-fill-glass: rgb(255 255 255 / 0.72);
+  --color-fill-glass-strong: rgb(255 255 255 / 0.88);
+  --color-hero-mist: rgb(0 102 255 / 0.12);
+  --glow-electric: rgb(0 102 255 / 0.28);
+  --hero-overlay: linear-gradient(
+    105deg,
+    rgb(245 249 255 / 0.92) 0%,
+    rgb(234 242 255 / 0.82) 40%,
+    rgb(0 102 255 / 0.08) 70%,
+    rgb(5 8 22 / 0.55) 100%
+  );
+}
+
+/* ——— Dark mode (cinematic automotive command center) ——— */
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --color-matte: #050816;
+  --color-carbon: #0b1220;
+  --color-carbon-deep: #111827;
+  --color-soft: #ffffff;
+  --color-silver: #cbd5e1;
+  --color-muted: #94a3b8;
+  --color-electric: #0066ff;
+  --color-cyan: #00c2ff;
+  --color-stroke: rgb(0 194 255 / 0.12);
+  --color-stroke-strong: rgb(0 194 255 / 0.2);
+  --color-fill-glass: rgb(255 255 255 / 0.04);
+  --color-fill-glass-strong: rgb(255 255 255 / 0.07);
+  --color-hero-mist: rgb(0 102 255 / 0.2);
+  --glow-electric: rgb(0 102 255 / 0.55);
+  --glow-cyan: rgb(0 194 255 / 0.45);
+  --shadow-card: 0 24px 64px -36px rgb(0 0 0 / 0.72);
+  --shadow-card-hover: 0 32px 80px -32px rgb(0 102 255 / 0.22);
+  --shadow-sidebar: 24px 0 100px -40px rgb(0 0 0 / 0.85);
+  --hero-overlay: linear-gradient(
+    105deg,
+    rgb(5 8 22 / 0.96) 0%,
+    rgb(11 18 32 / 0.85) 36%,
+    rgb(0 102 255 / 0.22) 68%,
+    rgb(5 8 22 / 0.94) 100%
+  );
 }
 
 :root {
@@ -98,6 +143,10 @@ html:not([data-theme]) {
   --public-header-inner-h: 3.5rem;
   --public-header-offset: calc(var(--public-header-inner-h) + var(--safe-top));
   --mobile-fab-clearance: calc(5rem + var(--safe-bottom));
+  --theme-transition: background-color var(--duration-normal) var(--ease-premium),
+    color var(--duration-normal) var(--ease-premium),
+    border-color var(--duration-normal) var(--ease-premium),
+    box-shadow var(--duration-normal) var(--ease-premium);
 }
 
 @media (max-width: 639px) {
@@ -116,34 +165,54 @@ html:not([data-theme]) {
   html {
     @apply scroll-smooth antialiased;
     overflow-x: clip;
+    transition: var(--theme-transition);
   }
 
   body {
-    @apply min-w-0 overflow-x-clip bg-matte font-sans text-base text-soft;
+    @apply min-w-0 overflow-x-clip bg-matte font-sans text-base font-normal leading-normal text-soft;
     text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: var(--theme-transition);
     background:
-      radial-gradient(circle at top left, rgb(185 135 67 / 0.14), transparent 32rem),
+      var(--background-image-hero-mesh),
       linear-gradient(180deg, var(--color-matte), var(--color-matte));
   }
 
   h1,
   h2,
   h3,
-  h4 {
+  h4,
+  h5,
+  h6 {
     font-family: var(--font-display);
+    font-weight: 700;
     text-wrap: balance;
+    color: var(--color-soft);
+  }
+
+  p,
+  label,
+  button,
+  input,
+  textarea,
+  select,
+  table {
+    font-family: var(--font-sans);
   }
 
   ::selection {
-    @apply bg-electric/20 text-soft;
+    @apply bg-electric/25 text-soft;
   }
 
   :where(a[href]):not([class*='ring-offset']):focus-visible {
-    @apply rounded-md outline-none ring-2 ring-electric ring-offset-2 ring-offset-matte;
+    @apply rounded-md outline-none ring-2 ring-electric/50 ring-offset-2 ring-offset-matte;
   }
 
-  html[data-theme='dark'] :where(a[href]):not([class*='ring-offset']):focus-visible {
-    @apply ring-offset-matte;
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-muted);
+    opacity: 1;
   }
 }
 
@@ -158,14 +227,65 @@ html:not([data-theme]) {
   }
 }
 
+@keyframes critical-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgb(239 68 68 / 0.35), 0 0 24px -6px rgb(239 68 68 / 0.4);
+    border-color: rgb(239 68 68 / 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 4px rgb(239 68 68 / 0.12), 0 0 36px -4px rgb(239 68 68 / 0.55);
+    border-color: rgb(239 68 68 / 0.75);
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    opacity: 0.65;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+@utility animate-critical-pulse {
+  animation: critical-pulse 2.4s var(--ease-premium) infinite;
+}
+
+@utility animate-glow-pulse {
+  animation: glow-pulse 3s var(--ease-premium) infinite;
+}
+
 @utility font-display {
   font-family: var(--font-display);
 }
 
 @utility surface-panel {
   border: 1px solid var(--color-stroke);
-  background: var(--color-carbon);
+  background: var(--color-fill-glass-strong);
   box-shadow: var(--shadow-card);
+  backdrop-filter: blur(20px);
+}
+
+@utility glass-panel {
+  border: 1px solid var(--color-stroke-strong);
+  background: var(--color-fill-glass-strong);
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(24px);
+}
+
+@utility glow-electric {
+  box-shadow: var(--shadow-glow);
 }
 
 @utility text-balance {
@@ -173,7 +293,7 @@ html:not([data-theme]) {
 }
 
 @utility admin-table-head {
-  @apply border-b border-stroke bg-carbon-deep text-xs font-medium text-muted;
+  @apply border-b border-stroke bg-carbon-deep text-[11px] font-medium uppercase tracking-[0.12em] text-muted;
 }
 
 @utility admin-table-row {
@@ -184,31 +304,85 @@ html:not([data-theme]) {
   font-family: var(--font-display);
   font-size: clamp(1.875rem, 2.5vw + 0.75rem, 2.75rem);
   line-height: 1.12;
-  letter-spacing: 0;
-  font-weight: 600;
+  letter-spacing: -0.02em;
+  font-weight: 700;
 }
 
 @utility text-hero-display {
   font-family: var(--font-display);
-  font-size: clamp(2.125rem, 5.5vw + 0.5rem, 6.75rem);
-  line-height: 0.98;
-  letter-spacing: -0.02em;
-  font-weight: 600;
+  font-size: clamp(2.125rem, 5.5vw + 0.5rem, 4.25rem);
+  line-height: 1.05;
+  letter-spacing: -0.03em;
+  font-weight: 700;
 }
 
 @utility text-hero-kicker {
-  font-size: 0.875rem;
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
   line-height: 1.5;
   font-weight: 500;
-  color: var(--color-muted);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-cyan);
 }
 
 @utility text-section-title {
   font-family: var(--font-display);
   font-size: clamp(1.25rem, 1vw + 0.875rem, 1.5rem);
   line-height: 1.3;
-  letter-spacing: 0;
+  letter-spacing: -0.015em;
   font-weight: 600;
+}
+
+@utility type-page-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.75rem, 2vw + 0.5rem, 2.25rem);
+  line-height: 1.12;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+@utility type-card-title {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  line-height: 1.35;
+  letter-spacing: -0.02em;
+  font-weight: 600;
+}
+
+@utility type-body {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  font-weight: 400;
+}
+
+@utility type-caption {
+  font-size: 0.75rem;
+  line-height: 1.45;
+  font-weight: 400;
+}
+
+@utility type-label-sm {
+  font-size: 0.625rem;
+  line-height: 1.4;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@utility type-metric {
+  font-family: var(--font-display);
+  font-size: clamp(1.5rem, 1.5vw + 0.5rem, 1.65rem);
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+@utility type-nav {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  font-weight: 500;
 }
 
 @utility container-app {
@@ -228,4 +402,15 @@ html:not([data-theme]) {
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-x: contain;
   scrollbar-gutter: stable;
+}
+
+@utility skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--color-fill-glass) 0%,
+    var(--color-fill-glass-strong) 50%,
+    var(--color-fill-glass) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.8s linear infinite;
 }

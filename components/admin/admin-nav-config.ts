@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 
 import type { Permission } from '@/lib/auth/permissions'
+import { ADMIN_HOME } from '@/lib/auth/routes'
 
 export type AdminNavItem = {
   href: string
@@ -28,7 +29,7 @@ export type AdminNavItem = {
 
 /** Enterprise admin navigation — 14 operational sections. */
 export const ADMIN_NAV: readonly AdminNavItem[] = [
-  { href: '/admin', label: 'Dashboard', icon: LayoutDashboard, exact: true, permission: 'admin.dashboard.read' },
+  { href: ADMIN_HOME, label: 'Dashboard', icon: LayoutDashboard, exact: true, permission: 'admin.dashboard.read' },
   { href: '/admin/fleet', label: 'Fleet', icon: CarFront, exact: false, permission: 'fleet.read' },
   { href: '/admin/bookings', label: 'Bookings', icon: ClipboardList, exact: false, permission: 'bookings.read' },
   { href: '/admin/kyc', label: 'KYC Verification', icon: ShieldCheck, exact: false, permission: 'kyc.read' },
@@ -67,7 +68,7 @@ export function writeAdminSidebarCollapsed(collapsed: boolean): void {
 
 /** Short label for the sticky top bar (derived from the path). */
 export function adminTopBarTitle(pathname: string): string {
-  if (pathname === '/admin' || pathname === '/admin/') return 'Dashboard'
+  if (pathname === '/admin' || pathname === '/admin/' || pathname === ADMIN_HOME) return 'Dashboard'
   if (pathname.startsWith('/admin/fleet/new')) return 'New vehicle'
   if (pathname.startsWith('/admin/fleet/')) return 'Fleet detail'
   if (pathname.startsWith('/admin/fleet')) return 'Fleet'

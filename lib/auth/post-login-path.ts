@@ -1,10 +1,21 @@
 import { isStaffRole } from '@/lib/auth/permissions'
 import type { AppAuthRole } from '@/lib/auth/roles'
+import { ADMIN_HOME, CUSTOMER_HOME } from '@/lib/auth/routes'
 import { safeNextPath } from '@/lib/auth/safe-next-path'
 
+export type PostLoginPath = typeof ADMIN_HOME | typeof CUSTOMER_HOME
+
 /** Default landing page after sign-in by resolved app role. */
-export function defaultPostLoginPath(appRole: AppAuthRole): '/admin' | '/dashboard' {
-  return isStaffRole(appRole) ? '/admin' : '/dashboard'
+export function defaultPostLoginPath(appRole: AppAuthRole): PostLoginPath {
+  return isStaffRole(appRole) ? ADMIN_HOME : CUSTOMER_HOME
+}
+
+function isCustomerDashboardPath(pathOnly: string): boolean {
+  return pathOnly === CUSTOMER_HOME || pathOnly.startsWith(`${CUSTOMER_HOME}/`)
+}
+
+function isAdminConsolePath(pathOnly: string): boolean {
+  return pathOnly === '/admin' || pathOnly.startsWith('/admin/')
 }
 
 /**
@@ -16,15 +27,18 @@ export function resolvePostLoginPath(appRole: AppAuthRole, rawNext?: string | nu
 
   if (isStaffRole(appRole)) {
     const pathOnly = next.split('?')[0] ?? next
-    if (pathOnly === '/dashboard' || pathOnly.startsWith('/dashboard/')) {
-      return '/admin'
+    if (isCustomerDashboardPath(pathOnly)) {
+      return ADMIN_HOME
+    }
+    if (pathOnly === '/admin') {
+      return ADMIN_HOME
     }
     return next
   }
 
   const pathOnly = next.split('?')[0] ?? next
-  if (pathOnly === '/admin' || pathOnly.startsWith('/admin/')) {
-    return '/dashboard'
+  if (isAdminConsolePath(pathOnly)) {
+    return CUSTOMER_HOME
   }
 
   return next

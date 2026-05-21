@@ -8,8 +8,8 @@ import { isStaffRole } from '@/lib/auth/permissions'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AdminHomePage() {
-  const summary = await requireAdminPageAccess('/admin')
+export default async function AdminDashboardPage() {
+  const summary = await requireAdminPageAccess('/admin/dashboard')
   if (!isStaffRole(summary.appRole)) {
     return null
   }

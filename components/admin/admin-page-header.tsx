@@ -1,3 +1,6 @@
+import { typeAdminPageTitle, typeCaption, typeEyebrow } from '@/lib/design/typography'
+import { cn } from '@/lib/utils/cn'
+
 export type AdminPageHeaderProps = {
   eyebrow?: string
   title: string
@@ -6,13 +9,15 @@ export type AdminPageHeaderProps = {
 
 export function AdminPageHeader({ eyebrow = 'Admin', title, description }: AdminPageHeaderProps) {
   return (
-    <header className="rounded-3xl border border-white/[0.08] bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.025))] p-4 shadow-[var(--shadow-card)] sm:p-6">
-      <p className="text-[10px] font-semibold uppercase text-electric/90">{eyebrow}</p>
-      <h1 className="mt-2 max-w-none text-balance text-2xl font-semibold text-soft sm:mt-3 sm:max-w-[24ch] sm:text-4xl lg:text-[2.65rem] lg:leading-[1.08]">
+    <header className="glass-panel rounded-3xl p-4 sm:p-6">
+      <p className={cn(typeEyebrow, 'text-electric/90')}>{eyebrow}</p>
+      <h1 className={cn(typeAdminPageTitle, 'mt-2 max-w-none text-balance sm:mt-3 sm:max-w-[28ch]')}>
         {title}
       </h1>
       {description ? (
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted sm:mt-3 lg:text-[0.9375rem]">{description}</p>
+        <p className={cn(typeCaption, 'mt-2 max-w-2xl text-muted sm:mt-3 sm:text-[0.9375rem]')}>
+          {description}
+        </p>
       ) : null}
     </header>
   )

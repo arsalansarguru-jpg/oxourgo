@@ -83,6 +83,38 @@ function isSupabaseAuthRoleValue(raw: string): boolean {
   return SUPABASE_AUTH_ROLE_VALUES.has(raw.trim().toLowerCase())
 }
 
+/**
+ * Parse roles from a Supabase JWT claims object: nested `app_metadata` / `user_metadata`
+ * plus top-level `oxour_role` / `role` when the access-token hook mirrors them there.
+ */
+export function collectAppRolesFromJwtClaims(
+  claims?: Record<string, unknown> | null,
+): AppAuthRole[] {
+  if (!claims) return []
+
+  const nestedApp =
+    claims.app_metadata && typeof claims.app_metadata === 'object' && !Array.isArray(claims.app_metadata)
+      ? (claims.app_metadata as Record<string, unknown>)
+      : undefined
+  const nestedUser =
+    claims.user_metadata && typeof claims.user_metadata === 'object' && !Array.isArray(claims.user_metadata)
+      ? (claims.user_metadata as Record<string, unknown>)
+      : undefined
+
+  const mergedApp: Record<string, unknown> = { ...(nestedApp ?? {}) }
+  for (const key of ROLE_METADATA_KEYS) {
+    const top = readRoleString(claims, key)
+    if (top && !readRoleString(mergedApp, key)) {
+      mergedApp[key] = top
+    }
+  }
+
+  return collectAppRolesFromMetadata(
+    Object.keys(mergedApp).length > 0 ? mergedApp : nestedApp,
+    nestedUser,
+  )
+}
+
 /** Collect every parseable app role from app + user metadata (mirrors SQL jwt_oxour_app_role). */
 export function collectAppRolesFromMetadata(
   appMetadata?: Record<string, unknown> | null,
@@ -111,6 +143,11 @@ export function pickHighestAppRole(candidates: readonly AppAuthRole[]): AppAuthR
 /** True when the normalized role is full admin (`ops_admin` / legacy `admin`). */
 export function isAdminPortalRole(role: AppAuthRole): boolean {
   return role === 'ops_admin' || role === 'super_admin'
+}
+
+/** Portal / operations admin (`ops_admin`, legacy `super_admin`). */
+export function isAdmin(role: AppAuthRole): boolean {
+  return isAdminPortalRole(role)
 }
 
 /**

@@ -6,7 +6,7 @@ import { POSTHOG_EVENTS } from '@/lib/analytics/posthog-events'
 import { getAuthCallbackOrigin } from '@/lib/auth/canonical-origin'
 import { debugLogRoleResolution } from '@/lib/auth/role-debug'
 import { resolvePostLoginPath } from '@/lib/auth/post-login-path'
-import { resolveAuthRoleWithDebug } from '@/lib/auth/roles'
+import { resolveAppRoleWithClaims } from '@/lib/auth/resolve-session-role'
 import { readSupabasePublicEnv } from '@/lib/env/supabase-public'
 import { createClient } from '@/lib/supabase/server'
 
@@ -42,25 +42,21 @@ export async function GET(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser()
     if (user) {
-      const roleDebug = resolveAuthRoleWithDebug(
-        user.app_metadata as Record<string, unknown> | undefined,
-        user.user_metadata as Record<string, unknown> | undefined,
-      )
+      const appRole = await resolveAppRoleWithClaims(supabase, user, 'auth/callback')
       debugLogRoleResolution('auth/callback', {
         userId: user.id,
         email: user.email,
         app_metadata: user.app_metadata,
         user_metadata: user.user_metadata,
-        candidates: roleDebug.candidates,
-        resolved: roleDebug.resolved,
+        resolved: appRole,
         requestedNext,
       })
       await captureServerPosthogEvent({
         distinctId: user.id,
         event: POSTHOG_EVENTS.loginCompleted,
-        properties: { method: 'oauth_or_magic_link', app_role: roleDebug.resolved },
+        properties: { method: 'oauth_or_magic_link', app_role: appRole },
       })
-      const destination = resolvePostLoginPath(roleDebug.resolved, requestedNext)
+      const destination = resolvePostLoginPath(appRole, requestedNext)
       return NextResponse.redirect(new URL(destination, origin))
     }
   }
