@@ -57,6 +57,7 @@ export default async function AdminBookingsPage({
     totalCount: 0,
     page: 1,
     pageSize: 25,
+    dataError: null,
   }
   let loadError: string | null = null
 
@@ -121,6 +122,7 @@ export default async function AdminBookingsPage({
           pageSize: pageResult.pageSize,
         }}
         loadError={loadError}
+        dataError={pageResult.dataError}
       />
     </div>
   )

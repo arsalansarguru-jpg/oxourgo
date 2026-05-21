@@ -73,7 +73,7 @@ export default async function AdminKycPage({ searchParams }: { searchParams: Pro
           <AdminCardContent className="space-y-2 p-6 text-sm text-muted">
             <p>No customers match this filter right now.</p>
             <p className="text-xs">
-              Tip: new renters appear once they begin KYC (aggregate status moves off “not started”).{' '}
+              Queue is built from uploaded documents (same source as dashboard KYC counts).{' '}
               <Link href="/admin/kyc?tab=all" className="text-electric underline-offset-4 hover:underline">
                 View all activity
               </Link>

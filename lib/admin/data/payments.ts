@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { logAdminQueryResult } from '@/lib/admin/debug-query'
 import type { Database } from '@/lib/supabase/database.types'
 import { adminListBookingsPage, type AdminBookingListItem } from '@/lib/admin/data/bookings'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -29,6 +30,7 @@ export async function adminPaymentOperationsMetrics(): Promise<AdminPaymentOpsMe
     const { data, error } = await admin
       .from('bookings')
       .select('booking_status, payment_status, amount_due, amount_paid, total_rupees')
+      .is('deleted_at', null)
       .range(from, from + pageSize - 1)
 
     if (error) {
@@ -119,10 +121,16 @@ export async function adminBookingPaymentSummary(): Promise<BookingPaymentSummar
 }
 
 export async function adminPaymentsBoardRows(filter: PaymentsBoardFilter): Promise<AdminBookingListItem[]> {
-  const { rows } = await adminListBookingsPage({
+  const { rows, totalCount, dataError } = await adminListBookingsPage({
     page: 1,
-    pageSize: 100,
+    pageSize: 250,
     payment_status: filter === 'all' ? undefined : filter,
+  })
+  logAdminQueryResult('adminPaymentsBoardRows', {
+    rowCount: rows.length,
+    totalCount,
+    error: dataError ? { message: dataError } : null,
+    meta: { filter },
   })
   return rows
 }

@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { enumerateUtcDays, toUtcYmd, type AnalyticsResolvedRange } from '@/lib/admin/analytics-range'
+import { logAdminQueryResult } from '@/lib/admin/debug-query'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logPostgrestError } from '@/lib/errors/safe-user-message'
 import { adminViolationMetrics } from '@/lib/admin/data/violations'
@@ -199,8 +200,10 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
       .select(
         'id, user_id, vehicle_id, created_at, pickup_date, return_date, rental_days, total_rupees, booking_status, payment_status, amount_paid',
       )
+      .gte('created_at', range.startIso)
       .lte('created_at', range.endIso)
-      .order('created_at', { ascending: true })
+      .is('deleted_at', null)
+      .order('created_at', { ascending: false })
       .range(off, off + BOOKING_PAGE - 1)
 
     if (error) {
@@ -217,6 +220,11 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
     }
   }
 
+  logAdminQueryResult('fetchAdminAnalyticsBundle.bookingsInRange', {
+    rowCount: allInRange.length,
+    meta: { truncatedBookings, startIso: range.startIso, endIso: range.endIso },
+  })
+
   /** Trips overlapping the chart window (for fleet availability / utilization). */
   const overlapBookings: BookingLite[] = []
   let truncatedOverlap = false
@@ -228,6 +236,7 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
       )
       .lte('pickup_date', range.endDay)
       .gte('return_date', range.startDay)
+      .is('deleted_at', null)
       .order('pickup_date', { ascending: true })
       .range(off, off + BOOKING_PAGE - 1)
     if (error) {
@@ -256,16 +265,16 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
   }
 
   for (const b of allInRange) {
+    const day = b.created_at.slice(0, 10)
+    if (!daySet.has(day)) continue
     bookingsCreatedInPeriod += 1
     if (bookingSuccessForConversion(b)) conversionSuccess += 1
+    bookingsByDay.set(day, (bookingsByDay.get(day) ?? 0) + 1)
     if (postedRevenueEligible(b)) {
       const amt = postedRevenueAmount(b)
       periodRevenue += amt
-      const day = b.created_at.slice(0, 10)
-      if (daySet.has(day)) revenueByDay.set(day, (revenueByDay.get(day) ?? 0) + amt)
+      revenueByDay.set(day, (revenueByDay.get(day) ?? 0) + amt)
     }
-    const day = b.created_at.slice(0, 10)
-    if (daySet.has(day)) bookingsByDay.set(day, (bookingsByDay.get(day) ?? 0) + 1)
   }
 
   const conversionPct =
@@ -349,9 +358,7 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
     full_name: profileNames.get(uid) ?? null,
   }))
 
-  const recentSource = [...allInRange]
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, 12)
+  const recentSource = allInRange.slice(0, 12)
   const recentBookings: AdminAnalyticsRecentBooking[] = recentSource.map((b) => {
     const v = b.vehicle_id ? vehicleMap.get(b.vehicle_id) : undefined
     const vehicle_label = v ? `${v.brand} ${v.name}`.trim() : null

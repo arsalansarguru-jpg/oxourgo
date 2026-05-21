@@ -110,7 +110,20 @@ export async function listAuditLogsForBooking(bookingId: string, limit = 60): Pr
 export async function listAuditLogsForUser(userId: string, limit = 60): Promise<AuditLogRow[]> {
   const admin = createAdminClient()
 
-  const [byProfile, byMeta] = await Promise.all([
+  const { data: bookingIds, error: bookingIdsErr } = await admin
+    .from('bookings')
+    .select('id')
+    .eq('user_id', userId)
+    .is('deleted_at', null)
+    .limit(200)
+
+  if (bookingIdsErr) logPostgrestError('[listAuditLogsForUser:bookingIds]', bookingIdsErr)
+
+  const ids = (bookingIds ?? []).map((b) => b.id).filter(Boolean)
+  const bookingEntityFilter =
+    ids.length > 0 ? `entity_id.in.(${ids.join(',')})` : 'entity_id.eq.00000000-0000-0000-0000-000000000000'
+
+  const [byProfile, byMeta, byBookingEntity] = await Promise.all([
     admin
       .from('audit_logs')
       .select('id, actor_id, actor_role, entity_type, entity_id, action, old_value, new_value, metadata, created_at')
@@ -124,13 +137,23 @@ export async function listAuditLogsForUser(userId: string, limit = 60): Promise<
       .filter('metadata->>userId', 'eq', userId)
       .order('created_at', { ascending: false })
       .limit(limit),
+    ids.length
+      ? admin
+          .from('audit_logs')
+          .select('id, actor_id, actor_role, entity_type, entity_id, action, old_value, new_value, metadata, created_at')
+          .eq('entity_type', 'booking')
+          .or(bookingEntityFilter)
+          .order('created_at', { ascending: false })
+          .limit(limit)
+      : Promise.resolve({ data: [], error: null }),
   ])
 
   if (byProfile.error) logPostgrestError('[listAuditLogsForUser:profile]', byProfile.error)
   if (byMeta.error) logPostgrestError('[listAuditLogsForUser:meta]', byMeta.error)
+  if (byBookingEntity.error) logPostgrestError('[listAuditLogsForUser:booking]', byBookingEntity.error)
 
   const merged = new Map<string, AuditLogRow>()
-  for (const row of [...(byProfile.data ?? []), ...(byMeta.data ?? [])]) {
+  for (const row of [...(byProfile.data ?? []), ...(byMeta.data ?? []), ...(byBookingEntity.data ?? [])]) {
     merged.set(row.id, mapRow(row))
   }
   return [...merged.values()].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, limit)

@@ -38,11 +38,13 @@ export async function adminListCustomers(): Promise<AdminCustomerRow[]> {
       .from('bookings')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', u.id)
+      .is('deleted_at', null)
 
     const { count: cancelled, error: cancelledErr } = await admin
       .from('bookings')
       .select('id', { count: 'exact', head: true })
       .eq('user_id', u.id)
+      .is('deleted_at', null)
       .eq('booking_status', 'cancelled')
 
     if (totalErr) logPostgrestError('[adminListCustomers] bookings.total', totalErr)
@@ -86,11 +88,13 @@ export async function adminGetCustomer(userId: string): Promise<AdminCustomerRow
     .from('bookings')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
+    .is('deleted_at', null)
 
   const { count: cancelled, error: cancelledErr } = await admin
     .from('bookings')
     .select('id', { count: 'exact', head: true })
     .eq('user_id', userId)
+    .is('deleted_at', null)
     .eq('booking_status', 'cancelled')
 
   if (totalErr) logPostgrestError('[adminGetCustomer] bookings.total', totalErr)

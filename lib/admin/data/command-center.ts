@@ -257,6 +257,7 @@ async function sumRevenueToday(admin: ReturnType<typeof createAdminClient>): Pro
   let sum = 0
   for (const row of data ?? []) {
     const st = (row.status ?? '').trim().toLowerCase()
+    if (st === 'void') continue
     if (st && st !== 'posted' && st !== 'completed' && st !== 'succeeded') continue
     sum += Math.max(0, Math.round(Number(row.amount_rupees ?? 0)))
   }

@@ -1,9 +1,27 @@
 import 'server-only'
 
 import { escapeIlikePattern } from '@/lib/admin/bookings-search'
-import type { BookingWithCar } from '@/lib/supabase/database.types'
+import { logAdminQueryResult } from '@/lib/admin/debug-query'
+import type { BookingWithCar, VehicleSummaryRow } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logPostgrestError } from '@/lib/errors/safe-user-message'
+
+const vehicleEmbedSelect = `
+  vehicles!bookings_vehicle_id_fkey (
+    id,
+    name,
+    brand,
+    price_per_day,
+    image,
+    available,
+    transmission,
+    fuel_type,
+    seats,
+    year,
+    registration_number,
+    security_deposit
+  )
+`
 
 const bookingSelect = `
   id,
@@ -78,21 +96,10 @@ const bookingSelect = `
   whatsapp_conversation_id,
   created_at,
   updated_at,
-  vehicles (
-    id,
-    name,
-    brand,
-    price_per_day,
-    image,
-    available,
-    transmission,
-    fuel_type,
-    seats,
-    year,
-    registration_number,
-    security_deposit
-  )
+  ${vehicleEmbedSelect}
 `
+
+const bookingSelectCore = bookingSelect.replace(vehicleEmbedSelect, '').replace(/,\s*$/, '')
 
 export type AdminBookingListItem = BookingWithCar & {
   customerEmail: string | null
@@ -113,6 +120,8 @@ export type AdminBookingsPageResult = {
   totalCount: number
   page: number
   pageSize: number
+  /** Set when count succeeded but row fetch failed (avoids false empty state). */
+  dataError: string | null
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const
@@ -164,6 +173,66 @@ async function buildBookingSearchOrExpression(
   return orParts.join(',')
 }
 
+async function attachVehiclesToBookings(
+  admin: ReturnType<typeof createAdminClient>,
+  rows: BookingWithCar[],
+): Promise<BookingWithCar[]> {
+  const vehicleIds = [...new Set(rows.map((r) => r.vehicle_id).filter((id): id is string => Boolean(id)))]
+  if (!vehicleIds.length) return rows
+
+  const { data: vehicles, error } = await admin
+    .from('vehicles')
+    .select('id, name, brand, price_per_day, image, available, transmission, fuel_type, seats, year, registration_number, security_deposit')
+    .in('id', vehicleIds)
+    .is('deleted_at', null)
+
+  if (error) {
+    logPostgrestError('[attachVehiclesToBookings]', error)
+    return rows
+  }
+
+  const byId = new Map((vehicles ?? []).map((v) => [v.id, v as VehicleSummaryRow]))
+  return rows.map((r) => ({
+    ...r,
+    vehicles: r.vehicle_id ? (byId.get(r.vehicle_id) ?? null) : null,
+  }))
+}
+
+async function fetchBookingRowsForPage(
+  admin: ReturnType<typeof createAdminClient>,
+  params: AdminBookingsListParams,
+  orExpr: string | null,
+  from: number,
+  to: number,
+): Promise<{ rows: BookingWithCar[]; dataError: string | null }> {
+  const runSelect = async (select: string) => {
+    let q = admin.from('bookings').select(select).is('deleted_at', null).order('created_at', { ascending: false })
+    if (params.booking_status?.trim()) q = q.eq('booking_status', params.booking_status.trim())
+    if (params.payment_status?.trim()) q = q.eq('payment_status', params.payment_status.trim())
+    if (params.booking_source?.trim()) q = q.eq('booking_source', params.booking_source.trim())
+    if (orExpr) q = q.or(orExpr)
+    return q.range(from, to)
+  }
+
+  const { data, error } = await runSelect(bookingSelect)
+  if (!error && data) {
+    return { rows: data as unknown as BookingWithCar[], dataError: null }
+  }
+  if (error) logPostgrestError('[adminListBookingsPage] data+embed', error)
+
+  const { data: coreData, error: coreErr } = await runSelect(bookingSelectCore)
+  if (coreErr || !coreData) {
+    logPostgrestError('[adminListBookingsPage] data core', coreErr)
+    return {
+      rows: [],
+      dataError: coreErr?.message ?? error?.message ?? 'Unable to load booking rows',
+    }
+  }
+
+  const withVehicles = await attachVehiclesToBookings(admin, coreData as unknown as BookingWithCar[])
+  return { rows: withVehicles, dataError: null }
+}
+
 /** Paginated admin list with optional booking/payment filters and text search (locations, vehicles, profiles). */
 export async function adminListBookingsPage(params: AdminBookingsListParams = {}): Promise<AdminBookingsPageResult> {
   const admin = createAdminClient()
@@ -173,63 +242,40 @@ export async function adminListBookingsPage(params: AdminBookingsListParams = {}
   const rawSearch = params.search?.trim()
   const orExpr = rawSearch ? await buildBookingSearchOrExpression(admin, rawSearch) : null
 
-  let countQ = admin.from('bookings').select('id', { count: 'exact', head: true })
-  if (params.booking_status?.trim()) {
-    countQ = countQ.eq('booking_status', params.booking_status.trim())
-  }
-  if (params.payment_status?.trim()) {
-    countQ = countQ.eq('payment_status', params.payment_status.trim())
-  }
-  if (params.booking_source?.trim()) {
-    countQ = countQ.eq('booking_source', params.booking_source.trim())
-  }
-  if (orExpr) {
-    countQ = countQ.or(orExpr)
-  }
+  let countQ = admin.from('bookings').select('id', { count: 'exact', head: true }).is('deleted_at', null)
+  if (params.booking_status?.trim()) countQ = countQ.eq('booking_status', params.booking_status.trim())
+  if (params.payment_status?.trim()) countQ = countQ.eq('payment_status', params.payment_status.trim())
+  if (params.booking_source?.trim()) countQ = countQ.eq('booking_source', params.booking_source.trim())
+  if (orExpr) countQ = countQ.or(orExpr)
   const { count: headCount, error: countErr } = await countQ
   if (countErr) {
     logPostgrestError('[adminListBookingsPage] count', countErr)
   }
   const totalCount = countErr ? 0 : typeof headCount === 'number' ? headCount : 0
+  logAdminQueryResult('adminListBookingsPage.count', { totalCount, error: countErr })
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize))
   if (page > totalPages) {
     page = totalPages
   }
 
-  let dataQ = admin.from('bookings').select(bookingSelect).order('created_at', { ascending: false })
-  if (params.booking_status?.trim()) {
-    dataQ = dataQ.eq('booking_status', params.booking_status.trim())
-  }
-  if (params.payment_status?.trim()) {
-    dataQ = dataQ.eq('payment_status', params.payment_status.trim())
-  }
-  if (params.booking_source?.trim()) {
-    dataQ = dataQ.eq('booking_source', params.booking_source.trim())
-  }
-  if (orExpr) {
-    dataQ = dataQ.or(orExpr)
-  }
-
   const from = (page - 1) * pageSize
   const to = from + pageSize - 1
 
-  const { data, error } = await dataQ.range(from, to)
+  const { rows: base, dataError } = await fetchBookingRowsForPage(admin, params, orExpr, from, to)
+  logAdminQueryResult('adminListBookingsPage.data', {
+    rowCount: base.length,
+    totalCount,
+    error: dataError ? { message: dataError } : null,
+  })
 
-  if (error) {
-    logPostgrestError('[adminListBookingsPage] data', error)
-  }
-  if (error || !data) {
-    return { rows: [], totalCount, page, pageSize }
-  }
-
-  const base = data as unknown as BookingWithCar[]
   const rows = await adminEnrichBookingsForAdminList(base)
   return {
     rows,
     totalCount,
     page,
     pageSize,
+    dataError,
   }
 }
 
@@ -286,11 +332,28 @@ export async function adminEnrichBookingsWithCustomerEmails(rows: BookingWithCar
 
 export async function adminGetBooking(id: string): Promise<BookingWithCar | null> {
   const admin = createAdminClient()
-  const { data, error } = await admin.from('bookings').select(bookingSelect).eq('id', id).maybeSingle()
+  const { data, error } = await admin
+    .from('bookings')
+    .select(bookingSelect)
+    .eq('id', id)
+    .is('deleted_at', null)
+    .maybeSingle()
 
   if (error) {
-    logPostgrestError('[adminGetBooking]', error)
-    return null
+    logPostgrestError('[adminGetBooking] embed', error)
+    const { data: core, error: coreErr } = await admin
+      .from('bookings')
+      .select(bookingSelectCore)
+      .eq('id', id)
+      .is('deleted_at', null)
+      .maybeSingle()
+    if (coreErr) {
+      logPostgrestError('[adminGetBooking] core', coreErr)
+      return null
+    }
+    if (!core) return null
+    const [withVehicle] = await attachVehiclesToBookings(admin, [core as unknown as BookingWithCar])
+    return withVehicle ?? null
   }
   if (!data) return null
   return data as unknown as BookingWithCar
@@ -302,14 +365,33 @@ export async function adminListBookingsForUser(userId: string): Promise<BookingW
     .from('bookings')
     .select(bookingSelect)
     .eq('user_id', userId)
+    .is('deleted_at', null)
     .order('pickup_date', { ascending: false })
     .limit(100)
 
-  if (error) {
-    logPostgrestError('[adminListBookingsForUser]', error)
+  if (!error && data) {
+    logAdminQueryResult('adminListBookingsForUser', { rowCount: data.length, error: null })
+    return data as unknown as BookingWithCar[]
   }
-  if (error || !data) return []
-  return data as unknown as BookingWithCar[]
+  if (error) logPostgrestError('[adminListBookingsForUser] embed', error)
+
+  const { data: coreData, error: coreErr } = await admin
+    .from('bookings')
+    .select(bookingSelectCore)
+    .eq('user_id', userId)
+    .is('deleted_at', null)
+    .order('pickup_date', { ascending: false })
+    .limit(100)
+
+  if (coreErr || !coreData) {
+    logPostgrestError('[adminListBookingsForUser] core', coreErr)
+    logAdminQueryResult('adminListBookingsForUser', { rowCount: 0, error: coreErr ?? error })
+    return []
+  }
+
+  const withVehicles = await attachVehiclesToBookings(admin, coreData as unknown as BookingWithCar[])
+  logAdminQueryResult('adminListBookingsForUser', { rowCount: withVehicles.length, error: null })
+  return withVehicles
 }
 
 export type AdminBookingCustomerProfile = {

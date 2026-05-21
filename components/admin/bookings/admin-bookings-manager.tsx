@@ -69,6 +69,7 @@ export type AdminBookingsManagerProps = {
     pageSize: number
   }
   loadError: string | null
+  dataError?: string | null
 }
 
 function customerDisplayName(row: AdminBookingListItem): string {
@@ -100,7 +101,7 @@ function buildBookingsListHref(
   })}`
 }
 
-export function AdminBookingsManager({ pageResult, listQuery, loadError }: AdminBookingsManagerProps) {
+export function AdminBookingsManager({ pageResult, listQuery, loadError, dataError }: AdminBookingsManagerProps) {
   const router = useRouter()
   const pathname = usePathname()
   const [isPending, startTransition] = useTransition()
@@ -159,7 +160,8 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
     }
   }
 
-  const showEmpty = !loadError && totalCount === 0
+  const dataLoadGap = !loadError && totalCount > 0 && rows.length === 0
+  const showEmpty = !loadError && !dataLoadGap && totalCount === 0
   const showRows = !loadError && rows.length > 0
 
   return (
@@ -344,7 +346,20 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError }: Admin
           </div>
         ) : null}
 
-        {showEmpty ? (
+        {dataLoadGap ? (
+          <div className="flex flex-col items-center justify-center gap-4 px-6 py-20 text-center sm:py-24">
+            <div className="max-w-md space-y-2">
+              <p className="text-lg font-semibold tracking-[-0.02em] text-soft">Could not load reservation rows</p>
+              <p className="text-sm leading-relaxed text-muted">
+                Supabase reports {totalCount} matching booking{totalCount === 1 ? '' : 's'}, but the table query failed.
+                {dataError ? ` ${dataError}` : ' Check server logs or set OXOUR_ADMIN_DATA_DEBUG=1.'}
+              </p>
+            </div>
+            <Button type="button" size="sm" variant="secondary" onClick={() => refresh()}>
+              Retry
+            </Button>
+          </div>
+        ) : showEmpty ? (
           <div className="flex flex-col items-center justify-center gap-4 px-6 py-20 text-center sm:py-24">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-white/[0.08] bg-gradient-to-b from-white/[0.09] to-white/[0.02] shadow-[var(--shadow-card)] backdrop-blur-xl ring-1 ring-inset ring-white/[0.04]">
               <Inbox className="h-7 w-7 text-muted" aria-hidden />
