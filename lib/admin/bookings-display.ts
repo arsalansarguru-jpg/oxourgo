@@ -1,4 +1,5 @@
 import type { AdminBookingListItem } from '@/lib/admin/data/bookings'
+import { fleetCatalogTitle } from '@/lib/admin/fleet-display'
 
 export type BookingVehicleSlice = {
   name: string | null
@@ -21,10 +22,12 @@ export function firstBookingVehicle(row: AdminBookingListItem): BookingVehicleSl
 export function bookingVehicleTitle(row: AdminBookingListItem): string {
   const v = firstBookingVehicle(row)
   if (!v) return 'Vehicle'
-  const name = v.name?.trim()
-  if (name) return name
-  const brand = v.brand?.trim()
-  return brand || 'Vehicle'
+  return fleetCatalogTitle({
+    id: row.vehicle_id ?? 'vehicle',
+    name: v.name,
+    brand: v.brand,
+    registration_number: v.registration_number,
+  })
 }
 
 export function formatShortBookingId(id: string): string {

@@ -137,12 +137,14 @@ export async function adminListKycUserSummaries(filter: AdminKycListFilter): Pro
 
     const profile = profileByUser.get(userId)
     const { data: authUser } = await admin.auth.admin.getUserById(userId)
+    const meta = authUser?.user?.user_metadata as { full_name?: string; name?: string } | undefined
+    const metaName = meta?.full_name?.trim() || meta?.name?.trim() || null
     const docUpdated = latestUpdated.get(userId) ?? profile?.updated_at ?? new Date().toISOString()
 
     out.push({
       user_id: userId,
       user_email: authUser?.user?.email ?? null,
-      full_name: profile?.full_name ?? null,
+      full_name: profile?.full_name?.trim() || metaName || null,
       phone: profile?.phone ?? null,
       kyc_status: lifecycle,
       kyc_submitted_at: profile?.kyc_submitted_at ?? userDocs[0]?.created_at ?? null,

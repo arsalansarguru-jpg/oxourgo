@@ -1,6 +1,6 @@
 /** Temporary admin query logging — set OXOUR_ADMIN_DATA_DEBUG=1 (server only). */
 export function isAdminDataDebugEnabled(): boolean {
-  return process.env.OXOUR_ADMIN_DATA_DEBUG === '1' || process.env.NODE_ENV === 'development'
+  return process.env.OXOUR_ADMIN_DATA_DEBUG === '1'
 }
 
 export function logAdminQueryResult(

@@ -9,6 +9,7 @@ import { listAuditLogs, type AuditLogRow } from '@/lib/admin/data/audit-logs'
 import { adminFinancialMetrics } from '@/lib/admin/data/financials'
 import { adminPaymentOperationsMetrics } from '@/lib/admin/data/payments'
 import { adminViolationMetrics } from '@/lib/admin/data/violations'
+import { countPendingKycCustomers } from '@/lib/admin/kyc-metrics'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logPostgrestError } from '@/lib/errors/safe-user-message'
 
@@ -126,14 +127,14 @@ async function fetchLiveMetrics(admin: ReturnType<typeof createAdminClient>, tod
   const [
     activeTripsRes,
     pendingBookingsRes,
-    pendingKycRes,
+    pendingKycCount,
     pendingPaymentsRes,
     overdueReturnsRes,
     availableVehiclesRes,
   ] = await Promise.all([
-    admin.from('bookings').select('id', { count: 'exact', head: true }).eq('booking_status', 'active'),
-    admin.from('bookings').select('id', { count: 'exact', head: true }).eq('booking_status', 'pending_payment'),
-    admin.from('kyc_documents').select('id', { count: 'exact', head: true }).in('status', ['pending', 'reviewing']),
+    admin.from('bookings').select('id', { count: 'exact', head: true }).eq('booking_status', 'active').is('deleted_at', null),
+    admin.from('bookings').select('id', { count: 'exact', head: true }).eq('booking_status', 'pending_payment').is('deleted_at', null),
+    countPendingKycCustomers(),
     admin
       .from('bookings')
       .select('id', { count: 'exact', head: true })
@@ -155,7 +156,7 @@ async function fetchLiveMetrics(admin: ReturnType<typeof createAdminClient>, tod
   return {
     activeTrips: readCount('activeTrips', activeTripsRes),
     pendingBookings: readCount('pendingBookings', pendingBookingsRes),
-    pendingKyc: readCount('pendingKyc', pendingKycRes),
+    pendingKyc: pendingKycCount,
     pendingPayments: readCount('pendingPayments', pendingPaymentsRes),
     overdueReturns: readCount('overdueReturns', overdueReturnsRes),
     availableVehicles: readCount('availableVehicles', availableVehiclesRes),
@@ -205,13 +206,13 @@ async function fetchFleetStatus(admin: ReturnType<typeof createAdminClient>, tod
 async function fetchQueue(admin: ReturnType<typeof createAdminClient>): Promise<CommandCenterQueue> {
   const [
     bookingsNeedingApprovalRes,
-    kycPendingReviewRes,
+    kycPendingReviewCount,
     paymentsPendingConfirmationRes,
     pickupInspectionRes,
     returnInspectionRes,
   ] = await Promise.all([
-    admin.from('bookings').select('id', { count: 'exact', head: true }).eq('booking_status', 'pending_payment'),
-    admin.from('kyc_documents').select('id', { count: 'exact', head: true }).in('status', ['pending', 'reviewing']),
+    admin.from('bookings').select('id', { count: 'exact', head: true }).eq('booking_status', 'pending_payment').is('deleted_at', null),
+    countPendingKycCustomers(),
     admin
       .from('bookings')
       .select('id', { count: 'exact', head: true })
@@ -234,7 +235,7 @@ async function fetchQueue(admin: ReturnType<typeof createAdminClient>): Promise<
 
   return {
     bookingsNeedingApproval: readCount('bookingsNeedingApproval', bookingsNeedingApprovalRes),
-    kycPendingReview: readCount('kycPendingReview', kycPendingReviewRes),
+    kycPendingReview: kycPendingReviewCount,
     paymentsPendingConfirmation: readCount('paymentsPendingConfirmation', paymentsPendingConfirmationRes),
     vehiclesNeedingInspection: pickupInspection + returnInspection,
   }

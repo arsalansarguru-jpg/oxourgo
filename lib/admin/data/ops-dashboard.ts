@@ -9,6 +9,7 @@ import {
 } from '@/lib/admin/data/command-center'
 import { adminFinancialMetrics } from '@/lib/admin/data/financials'
 import { adminPaymentOperationsMetrics } from '@/lib/admin/data/payments'
+import { countPendingKycCustomers } from '@/lib/admin/kyc-metrics'
 import type { AppAuthRole } from '@/lib/auth/roles'
 import { hasPermission } from '@/lib/auth/permissions'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -186,10 +187,10 @@ async function sumMonthlyRevenue(admin: ReturnType<typeof createAdminClient>): P
 }
 
 async function fetchKpis(admin: ReturnType<typeof createAdminClient>, today: string): Promise<OpsDashboardKpis> {
-  const [totalRes, activeRes, pendingPayRes, availableRes, bookedRes, kycRes, financial, paymentMetrics, monthlyRevenue] =
+  const [totalRes, activeRes, pendingPayRes, availableRes, bookedRes, pendingKycCount, financial, paymentMetrics, monthlyRevenue] =
     await Promise.all([
-      admin.from('bookings').select('id', { count: 'exact', head: true }),
-      admin.from('bookings').select('id', { count: 'exact', head: true }).eq('booking_status', 'active'),
+      admin.from('bookings').select('id', { count: 'exact', head: true }).is('deleted_at', null),
+      admin.from('bookings').select('id', { count: 'exact', head: true }).eq('booking_status', 'active').is('deleted_at', null),
       admin
         .from('bookings')
         .select('id', { count: 'exact', head: true })
@@ -207,7 +208,7 @@ async function fetchKpis(admin: ReturnType<typeof createAdminClient>, today: str
         .not('vehicle_id', 'is', null)
         .lte('pickup_date', today)
         .gte('return_date', today),
-      admin.from('kyc_documents').select('id', { count: 'exact', head: true }).in('status', ['pending', 'reviewing']),
+      countPendingKycCustomers(),
       adminFinancialMetrics(),
       adminPaymentOperationsMetrics(),
       sumMonthlyRevenue(admin),
@@ -225,7 +226,7 @@ async function fetchKpis(admin: ReturnType<typeof createAdminClient>, today: str
     monthlyRevenue,
     carsAvailable: readCount('carsAvailable', availableRes),
     carsBooked: bookedIds.size,
-    pendingKyc: readCount('pendingKyc', kycRes),
+    pendingKyc: pendingKycCount,
     refundsPending: financial.pendingRefundsCount,
     refundsPendingRupees: financial.pendingRefundsRupees,
   }

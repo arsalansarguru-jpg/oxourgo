@@ -5,6 +5,7 @@ import { AdminCard } from '@/components/admin/admin-card'
 import { AdminNoAccessView } from '@/components/admin/admin-no-access-view'
 import { AdminShell } from '@/components/admin/admin-shell'
 import { listOpsAlertsForAdmin } from '@/lib/admin/data/ops-alerts'
+import { probeAdminBookingSchema } from '@/lib/admin/schema-health'
 import { getPermissionsForRole } from '@/lib/auth/permissions'
 import { getAuthSessionSummary } from '@/lib/auth/server'
 import { isStaffRole } from '@/lib/auth/permissions'
@@ -36,6 +37,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   let opsInitialUnread = 0
   let opsInitialItems: Awaited<ReturnType<typeof listOpsAlertsForAdmin>> = []
+  if (hasServiceRole) {
+    try {
+      await probeAdminBookingSchema()
+    } catch {
+      /* non-blocking schema probe */
+    }
+  }
+
   if (hasServiceRole && permissions.includes('ops.alerts.read')) {
     try {
       const items = await listOpsAlertsForAdmin(summary.user.id, 12)

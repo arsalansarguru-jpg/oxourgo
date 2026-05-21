@@ -2,104 +2,14 @@ import 'server-only'
 
 import { escapeIlikePattern } from '@/lib/admin/bookings-search'
 import { logAdminQueryResult } from '@/lib/admin/debug-query'
+import {
+  BOOKING_SELECT_TIERS,
+  normalizeBookingRow,
+  type BookingRowLike,
+} from '@/lib/supabase/booking-select'
 import type { BookingWithCar, VehicleSummaryRow } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logPostgrestError } from '@/lib/errors/safe-user-message'
-
-const vehicleEmbedSelect = `
-  vehicles!bookings_vehicle_id_fkey (
-    id,
-    name,
-    brand,
-    price_per_day,
-    image,
-    available,
-    transmission,
-    fuel_type,
-    seats,
-    year,
-    registration_number,
-    security_deposit
-  )
-`
-
-const bookingSelect = `
-  id,
-  vehicle_id,
-  user_id,
-  pickup_date,
-  return_date,
-  pickup_location,
-  return_location,
-  rental_days,
-  price_per_day_rupees_snapshot,
-  subtotal_rupees,
-  convenience_fee_rupees,
-  gst_rupees,
-  total_rupees,
-  booking_status,
-  payment_method,
-  payment_status,
-  amount_due,
-  amount_paid,
-  payment_received_at,
-  payment_received_by,
-  payment_notes,
-  ops_note,
-  approved_at,
-  handed_over_at,
-  returned_at,
-  completed_at,
-  approved_by,
-  handed_over_by,
-  completed_by,
-  deposit_held_rupees,
-  deposit_refunded_at,
-  deposit_refunded_rupees,
-  deposit_amount,
-  deposit_status,
-  deposit_received_at,
-  refund_amount,
-  refund_processed_at,
-  penalty_total,
-  penalty_fuel_rupees,
-  penalty_cleaning_rupees,
-  penalty_traffic_rupees,
-  penalty_notes,
-  deductions,
-  financial_manual_override,
-  pickup_checklist,
-  return_checklist,
-  pickup_fuel_level,
-  return_fuel_level,
-  pickup_odometer_km,
-  return_odometer_km,
-  pickup_condition_notes,
-  return_condition_notes,
-  penalty_damage_rupees,
-  penalty_late_rupees,
-  penalty_extra_km_rupees,
-  deposit_penalty_total_rupees,
-  customer_handover_signature_path,
-  customer_handover_signed_at,
-  pickup_inspection_completed_at,
-  return_inspection_completed_at,
-  admin_internal_notes,
-  ops_hold_at,
-  ops_hold_reason,
-  vip_flag,
-  customer_flags,
-  restrictions_bypass,
-  custom_discount_rupees,
-  booking_source,
-  customer_contact_id,
-  whatsapp_conversation_id,
-  created_at,
-  updated_at,
-  ${vehicleEmbedSelect}
-`
-
-const bookingSelectCore = bookingSelect.replace(vehicleEmbedSelect, '').replace(/,\s*$/, '')
 
 export type AdminBookingListItem = BookingWithCar & {
   customerEmail: string | null
@@ -120,7 +30,6 @@ export type AdminBookingsPageResult = {
   totalCount: number
   page: number
   pageSize: number
-  /** Set when count succeeded but row fetch failed (avoids false empty state). */
   dataError: string | null
 }
 
@@ -129,6 +38,10 @@ const PAGE_SIZE_OPTIONS = [10, 25, 50, 100] as const
 function clampPageSize(n: number): number {
   if (PAGE_SIZE_OPTIONS.includes(n as (typeof PAGE_SIZE_OPTIONS)[number])) return n
   return 25
+}
+
+function asBookingWithCar(row: BookingRowLike): BookingWithCar {
+  return normalizeBookingRow(row) as unknown as BookingWithCar
 }
 
 async function buildBookingSearchOrExpression(
@@ -198,6 +111,10 @@ async function attachVehiclesToBookings(
   }))
 }
 
+function needsVehicleAttach(select: string): boolean {
+  return !select.includes('vehicles!')
+}
+
 async function fetchBookingRowsForPage(
   admin: ReturnType<typeof createAdminClient>,
   params: AdminBookingsListParams,
@@ -214,23 +131,55 @@ async function fetchBookingRowsForPage(
     return q.range(from, to)
   }
 
-  const { data, error } = await runSelect(bookingSelect)
-  if (!error && data) {
-    return { rows: data as unknown as BookingWithCar[], dataError: null }
-  }
-  if (error) logPostgrestError('[adminListBookingsPage] data+embed', error)
-
-  const { data: coreData, error: coreErr } = await runSelect(bookingSelectCore)
-  if (coreErr || !coreData) {
-    logPostgrestError('[adminListBookingsPage] data core', coreErr)
-    return {
-      rows: [],
-      dataError: coreErr?.message ?? error?.message ?? 'Unable to load booking rows',
+  let lastError: { message?: string } | null = null
+  for (const tier of BOOKING_SELECT_TIERS) {
+    const { data, error } = await runSelect(tier)
+    if (!error && data) {
+      let rows = (data as unknown as BookingRowLike[]).map(asBookingWithCar)
+      if (needsVehicleAttach(tier)) {
+        rows = await attachVehiclesToBookings(admin, rows)
+      }
+      return { rows, dataError: null }
     }
+    lastError = error
+    logPostgrestError(`[adminListBookingsPage] tier failed`, error)
   }
 
-  const withVehicles = await attachVehiclesToBookings(admin, coreData as unknown as BookingWithCar[])
-  return { rows: withVehicles, dataError: null }
+  return {
+    rows: [],
+    dataError: lastError?.message ?? 'Unable to load booking rows — run production_schema_alignment migration',
+  }
+}
+
+async function fetchBookingsByUser(
+  admin: ReturnType<typeof createAdminClient>,
+  userId: string,
+  orderCol: 'pickup_date' | 'created_at',
+  limit: number,
+): Promise<BookingWithCar[]> {
+  let lastError: { message?: string } | null = null
+  for (const tier of BOOKING_SELECT_TIERS) {
+    const { data, error } = await admin
+      .from('bookings')
+      .select(tier)
+      .eq('user_id', userId)
+      .is('deleted_at', null)
+      .order(orderCol, { ascending: false })
+      .limit(limit)
+
+    if (!error && data) {
+      let rows = (data as unknown as BookingRowLike[]).map(asBookingWithCar)
+      if (needsVehicleAttach(tier)) {
+        rows = await attachVehiclesToBookings(admin, rows)
+      }
+      return rows
+    }
+    lastError = error
+    logPostgrestError('[fetchBookingsByUser] tier', error)
+  }
+
+  logAdminQueryResult('adminListBookingsForUser', { rowCount: 0, error: lastError })
+  return []
 }
 
 /** Paginated admin list with optional booking/payment filters and text search (locations, vehicles, profiles). */
@@ -300,10 +249,12 @@ export async function adminEnrichBookingsForAdminList(rows: BookingWithCar[]): P
     ...uniqueIds.map(async (uid) => {
       try {
         const { data, error } = await admin.auth.admin.getUserById(uid)
-        if (error || !data?.user) return { uid, email: null as string | null }
-        return { uid, email: data.user.email ?? null }
+        if (error || !data?.user) return { uid, email: null as string | null, name: null as string | null }
+        const meta = data.user.user_metadata as { full_name?: string; name?: string } | undefined
+        const metaName = meta?.full_name?.trim() || meta?.name?.trim() || null
+        return { uid, email: data.user.email ?? null, name: metaName }
       } catch {
-        return { uid, email: null as string | null }
+        return { uid, email: null, name: null }
       }
     }),
   ])
@@ -314,84 +265,47 @@ export async function adminEnrichBookingsForAdminList(rows: BookingWithCar[]): P
 
   const nameByUserId = new Map((profiles ?? []).map((p) => [p.user_id, p.full_name?.trim() || null]))
   const emailByUserId = new Map<string, string | null>()
+  const metaNameByUserId = new Map<string, string | null>()
   for (const r of emailResults) {
     emailByUserId.set(r.uid, r.email)
+    metaNameByUserId.set(r.uid, r.name)
   }
 
   return rows.map((r) => ({
     ...r,
     customerEmail: emailByUserId.get(r.user_id) ?? null,
-    customerFullName: nameByUserId.get(r.user_id) ?? null,
+    customerFullName: nameByUserId.get(r.user_id) ?? metaNameByUserId.get(r.user_id) ?? null,
   }))
-}
-
-/** @deprecated Use adminEnrichBookingsForAdminList */
-export async function adminEnrichBookingsWithCustomerEmails(rows: BookingWithCar[]): Promise<AdminBookingListItem[]> {
-  return adminEnrichBookingsForAdminList(rows)
 }
 
 export async function adminGetBooking(id: string): Promise<BookingWithCar | null> {
   const admin = createAdminClient()
-  const { data, error } = await admin
-    .from('bookings')
-    .select(bookingSelect)
-    .eq('id', id)
-    .is('deleted_at', null)
-    .maybeSingle()
-
-  if (error) {
-    logPostgrestError('[adminGetBooking] embed', error)
-    const { data: core, error: coreErr } = await admin
+  for (const tier of BOOKING_SELECT_TIERS) {
+    const { data, error } = await admin
       .from('bookings')
-      .select(bookingSelectCore)
+      .select(tier)
       .eq('id', id)
       .is('deleted_at', null)
       .maybeSingle()
-    if (coreErr) {
-      logPostgrestError('[adminGetBooking] core', coreErr)
-      return null
+
+    if (!error && data) {
+      let row = asBookingWithCar(data as unknown as BookingRowLike)
+      if (needsVehicleAttach(tier)) {
+        const [one] = await attachVehiclesToBookings(admin, [row])
+        row = one ?? row
+      }
+      return row
     }
-    if (!core) return null
-    const [withVehicle] = await attachVehiclesToBookings(admin, [core as unknown as BookingWithCar])
-    return withVehicle ?? null
+    if (error) logPostgrestError('[adminGetBooking] tier', error)
   }
-  if (!data) return null
-  return data as unknown as BookingWithCar
+  return null
 }
 
 export async function adminListBookingsForUser(userId: string): Promise<BookingWithCar[]> {
   const admin = createAdminClient()
-  const { data, error } = await admin
-    .from('bookings')
-    .select(bookingSelect)
-    .eq('user_id', userId)
-    .is('deleted_at', null)
-    .order('pickup_date', { ascending: false })
-    .limit(100)
-
-  if (!error && data) {
-    logAdminQueryResult('adminListBookingsForUser', { rowCount: data.length, error: null })
-    return data as unknown as BookingWithCar[]
-  }
-  if (error) logPostgrestError('[adminListBookingsForUser] embed', error)
-
-  const { data: coreData, error: coreErr } = await admin
-    .from('bookings')
-    .select(bookingSelectCore)
-    .eq('user_id', userId)
-    .is('deleted_at', null)
-    .order('pickup_date', { ascending: false })
-    .limit(100)
-
-  if (coreErr || !coreData) {
-    logPostgrestError('[adminListBookingsForUser] core', coreErr)
-    logAdminQueryResult('adminListBookingsForUser', { rowCount: 0, error: coreErr ?? error })
-    return []
-  }
-
-  const withVehicles = await attachVehiclesToBookings(admin, coreData as unknown as BookingWithCar[])
-  logAdminQueryResult('adminListBookingsForUser', { rowCount: withVehicles.length, error: null })
-  return withVehicles
+  const rows = await fetchBookingsByUser(admin, userId, 'pickup_date', 100)
+  logAdminQueryResult('adminListBookingsForUser', { rowCount: rows.length, error: null })
+  return rows
 }
 
 export type AdminBookingCustomerProfile = {

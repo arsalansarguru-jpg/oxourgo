@@ -2,6 +2,7 @@ import 'server-only'
 
 import { enumerateUtcDays, toUtcYmd, type AnalyticsResolvedRange } from '@/lib/admin/analytics-range'
 import { logAdminQueryResult } from '@/lib/admin/debug-query'
+import { countPendingKycCustomers } from '@/lib/admin/kyc-metrics'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logPostgrestError } from '@/lib/errors/safe-user-message'
 import { adminViolationMetrics } from '@/lib/admin/data/violations'
@@ -149,7 +150,7 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
   const [
     vehiclesRes,
     profilesCountRes,
-    pendingKycRes,
+    pendingKycCount,
     activeBookingsRes,
     profilesGrowthRes,
     totalRevenueLifetime,
@@ -158,7 +159,7 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
   ] = await Promise.all([
     admin.from('vehicles').select('id, name, brand, available'),
     admin.from('profiles').select('user_id', { count: 'exact', head: true }),
-    admin.from('kyc_documents').select('id', { count: 'exact', head: true }).in('status', ['pending', 'reviewing']),
+    countPendingKycCustomers(),
     admin
       .from('bookings')
       .select('id', { count: 'exact', head: true })
@@ -179,7 +180,6 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
 
   if (vehiclesRes.error) logPostgrestError('[fetchAdminAnalyticsBundle] vehicles', vehiclesRes.error)
   if (profilesCountRes.error) logPostgrestError('[fetchAdminAnalyticsBundle] profilesCount', profilesCountRes.error)
-  if (pendingKycRes.error) logPostgrestError('[fetchAdminAnalyticsBundle] pendingKycCount', pendingKycRes.error)
   if (activeBookingsRes.error) logPostgrestError('[fetchAdminAnalyticsBundle] activeBookingsCount', activeBookingsRes.error)
   if (profilesGrowthRes.error) logPostgrestError('[fetchAdminAnalyticsBundle] profilesGrowth', profilesGrowthRes.error)
 
@@ -189,7 +189,7 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
   const bookableCount = bookableIds.size
 
   const totalCustomers = typeof profilesCountRes.count === 'number' ? profilesCountRes.count : 0
-  const pendingKyc = typeof pendingKycRes.count === 'number' ? pendingKycRes.count : 0
+  const pendingKyc = pendingKycCount
   const activeBookings = typeof activeBookingsRes.count === 'number' ? activeBookingsRes.count : 0
 
   const allInRange: BookingLite[] = []
