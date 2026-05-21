@@ -10,6 +10,9 @@ import { WhatsAppInquiryButton } from '@/components/marketing/whatsapp-inquiry-b
 import { BookingSearchBar } from '@/components/marketing/booking-search-bar'
 import { Button } from '@/components/ui/Button'
 
+/** Cinematic black + electric blue hero — local asset for fast LCP. */
+const HERO_IMAGE_SRC = '/media/luxury-car-hero-electric.png'
+
 export function HeroSection() {
   const { user, ready, appRole, isStaff } = useResolvedAppRole()
   const memberHref = user ? defaultPostLoginPath(appRole) : '/login'
@@ -18,27 +21,44 @@ export function HeroSection() {
   return (
     <section className={marketingHeroSection}>
       <Image
-        src="/media/luxury-car-hero.png"
-        alt=""
+        src={HERO_IMAGE_SRC}
+        alt="Black luxury sedan on a wet city street at night with electric blue lighting"
         fill
         priority
+        quality={85}
         sizes="100vw"
-        className="absolute inset-0 -z-20 h-full w-full object-cover object-center brightness-[0.72] contrast-[1.08] saturate-[0.85]"
+        className="absolute inset-0 -z-20 h-full w-full object-cover object-[76%_52%] brightness-[0.7] contrast-[1.14] saturate-[0.9] sm:object-[70%_50%] lg:object-[62%_48%]"
+      />
+      <div
+        className="pointer-events-none absolute inset-0 -z-[19] backdrop-blur-[1px] [mask-image:linear-gradient(90deg,black_0%,black_28%,transparent_62%)]"
+        aria-hidden
+      />
+      <div
+        className="absolute inset-0 -z-10 bg-[var(--hero-overlay-left)]"
+        aria-hidden
       />
       <div
         className="absolute inset-0 -z-10 bg-[var(--hero-overlay)]"
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute inset-0 -z-10 bg-[var(--background-image-hero-mesh)] opacity-90"
+        className="absolute inset-0 -z-10 bg-[var(--hero-overlay-vignette)]"
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute -left-24 top-1/4 -z-10 h-80 w-80 rounded-full bg-electric/25 blur-[120px] animate-glow-pulse"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[var(--hero-overlay-blue-glow)]"
         aria-hidden
       />
       <div
-        className="pointer-events-none absolute bottom-0 right-0 -z-10 h-64 w-64 rounded-full bg-cyan/20 blur-[100px]"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[var(--background-image-hero-mesh)] opacity-80"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute -left-24 top-1/4 -z-10 h-80 w-80 rounded-full bg-electric/20 blur-[120px] animate-glow-pulse"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute bottom-0 right-0 -z-10 h-64 w-64 rounded-full bg-cyan/15 blur-[100px]"
         aria-hidden
       />
       <div className="absolute inset-x-0 bottom-0 -z-10 h-56 bg-[var(--background-image-hero-cinematic)]" />
