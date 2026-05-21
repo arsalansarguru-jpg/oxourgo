@@ -9,6 +9,7 @@ import {
 import type { BookingWithCar } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logPostgrestError } from '@/lib/errors/safe-user-message'
+import { fleetCatalogTitle } from '@/lib/admin/fleet-display'
 import { adminViolationMetrics } from '@/lib/admin/data/violations'
 
 const financialBookingSelect = `
@@ -80,7 +81,12 @@ function vehicleLabel(booking: BookingWithCar): string {
   const v = booking.vehicles
   const one = Array.isArray(v) ? v[0] : v
   if (!one) return 'Vehicle'
-  return one.name?.trim() || one.brand?.trim() || 'Vehicle'
+  return fleetCatalogTitle({
+    id: one.id ?? booking.vehicle_id ?? 'vehicle',
+    name: one.name,
+    brand: one.brand,
+    registration_number: (one as { registration_number?: string | null }).registration_number ?? null,
+  })
 }
 
 function vehicleSecurityDeposit(booking: BookingWithCar): number {

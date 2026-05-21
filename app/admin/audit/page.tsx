@@ -6,7 +6,7 @@ import { AdminAuditTimeline } from '@/components/admin/audit/admin-audit-timelin
 import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { buildAuditActorLookup } from '@/lib/admin/data/audit-actors'
-import { listAuditLogs, listDistinctAuditActions } from '@/lib/admin/data/audit-logs'
+import { listAuditLogsPage, listDistinctAuditActions } from '@/lib/admin/data/audit-logs'
 import { listStaffUsersForAdmin } from '@/lib/admin/data/staff-users'
 import { requireAdminPageAccess } from '@/lib/auth/guards'
 
@@ -21,6 +21,7 @@ type SearchParams = {
   entityId?: string
   from?: string
   to?: string
+  page?: string
 }
 
 export default async function AdminAuditPage({
@@ -34,29 +35,40 @@ export default async function AdminAuditPage({
   const fromIso = params.from || undefined
   const toIso = params.to || undefined
 
-  let entries: Awaited<ReturnType<typeof listAuditLogs>> = []
+  const page = Math.max(1, Number.parseInt(params.page ?? '1', 10) || 1)
+
+  let entries: Awaited<ReturnType<typeof listAuditLogsPage>>['rows'] = []
+  let totalCount = 0
   let actions: string[] = []
   let staff: Awaited<ReturnType<typeof listStaffUsersForAdmin>> = []
 
   try {
-    ;[entries, actions, staff] = await Promise.all([
-      listAuditLogs({
+    const [pageResult, actionsList, staffList] = await Promise.all([
+      listAuditLogsPage({
         action: params.action,
         actorId: params.actor,
         entityType: params.entityType,
         entityId: params.entityId,
         from: fromIso,
         to: toIso,
-        limit: 100,
+        limit: 50,
+        page,
       }),
       listDistinctAuditActions(),
       listStaffUsersForAdmin(80),
     ])
+    entries = pageResult.rows
+    totalCount = pageResult.totalCount
+    actions = actionsList
+    staff = staffList
   } catch {
     entries = []
+    totalCount = 0
     actions = []
     staff = []
   }
+
+  const totalPages = Math.max(1, Math.ceil(totalCount / 50))
 
   const actorLookup = await buildAuditActorLookup(entries.map((e) => e.actorId))
 
@@ -81,9 +93,33 @@ export default async function AdminAuditPage({
               <ScrollText className="h-5 w-5 text-muted" />
               <h2 className="text-lg font-semibold text-soft">Global activity feed</h2>
             </div>
-            <span className="text-xs tabular-nums text-muted">{entries.length} events</span>
+            <span className="text-xs tabular-nums text-muted">
+              {totalCount} events · page {page} of {totalPages}
+            </span>
           </div>
           <AdminAuditTimeline entries={entries} actorLookup={actorLookup} />
+          {totalPages > 1 ? (
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/[0.06] pt-4">
+              {page > 1 ? (
+                <a
+                  href={`/admin/audit?${new URLSearchParams({ ...params, page: String(page - 1) } as Record<string, string>).toString()}`}
+                  className="text-xs font-medium text-electric hover:underline"
+                >
+                  ← Previous
+                </a>
+              ) : (
+                <span />
+              )}
+              {page < totalPages ? (
+                <a
+                  href={`/admin/audit?${new URLSearchParams({ ...params, page: String(page + 1) } as Record<string, string>).toString()}`}
+                  className="text-xs font-medium text-electric hover:underline"
+                >
+                  Next →
+                </a>
+              ) : null}
+            </div>
+          ) : null}
         </AdminCardContent>
       </AdminCard>
     </div>

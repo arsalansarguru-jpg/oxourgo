@@ -8,12 +8,17 @@ export type FleetLabelInput = {
   internal_unit_code?: string | null
 }
 
+function joinBrandModel(brand: string, name: string): string {
+  if (name.toLowerCase().startsWith(brand.toLowerCase())) return name
+  return `${brand} ${name}`.trim()
+}
+
 export function fleetCatalogTitle(v: FleetLabelInput): string {
   const reg = v.registration_number?.trim()
   const name = v.name?.trim()
   const brand = v.brand?.trim()
   if (reg) return reg
-  if (name && brand) return `${brand} ${name}`.trim()
+  if (name && brand) return joinBrandModel(brand, name)
   if (name) return name
   if (brand) return brand
   return `Unit ${v.id.slice(0, 8).toUpperCase()}`

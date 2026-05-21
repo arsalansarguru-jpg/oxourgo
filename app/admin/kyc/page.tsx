@@ -44,7 +44,7 @@ export default async function AdminKycPage({ searchParams }: { searchParams: Pro
             <AdminCardContent className="flex flex-col gap-4 p-5 sm:p-6">
               <div className="min-w-0 space-y-1">
                 <p className="truncate text-base font-semibold tracking-tight text-soft">
-                  {row.full_name?.trim() || 'Unnamed customer'}
+                  {row.full_name}
                 </p>
                 <p className="truncate text-sm text-muted">{row.user_email ?? row.user_id}</p>
                 <div className="flex flex-wrap items-center gap-2 pt-1">

@@ -12,7 +12,6 @@ import {
   IndianRupee,
   Percent,
   ShieldCheck,
-  Sparkles,
   TrendingUp,
   Users,
 } from 'lucide-react'
@@ -90,21 +89,13 @@ export function AdminAnalyticsDashboard({ data }: { data: AdminAnalyticsBundle }
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35, ease }}
     >
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-electric/90">Intelligence</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-[-0.04em] text-soft sm:text-4xl">Analytics</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
-            Live revenue, fleet load, and booking momentum from Supabase — scoped to{' '}
-            <span className="font-medium text-soft">{range.label}</span> ({range.startDay} → {range.endDay} UTC).
-          </p>
-        </div>
-        <Sparkles className="hidden h-10 w-10 text-electric/40 lg:block" aria-hidden />
-      </div>
-
       <AnalyticsRangeFilter range={range} />
 
-      {totals.bookingsCreatedInPeriod === 0 && totals.periodRevenue === 0 ? (
+      <p className="text-xs text-muted">
+        Window: <span className="font-medium text-soft">{range.label}</span> ({range.startDay} → {range.endDay} UTC)
+      </p>
+
+      {totals.bookingsCreatedInPeriod === 0 ? (
         <div
           className="flex flex-col gap-3 rounded-2xl border border-white/[0.08] bg-white/[0.03] px-5 py-6 text-sm text-muted shadow-[var(--shadow-card)] backdrop-blur-md sm:flex-row sm:items-center sm:gap-4 theme-light:border-stroke-strong theme-light:bg-white/80"
           role="status"
@@ -116,7 +107,7 @@ export function AdminAnalyticsDashboard({ data }: { data: AdminAnalyticsBundle }
             <p className="font-semibold text-soft">No booking activity in this range</p>
             <p className="text-xs leading-relaxed text-muted">
               Charts and leaderboards need at least one reservation created in the selected window. Widen the date range
-              or return once guests begin booking.
+              or return once customers begin booking.
             </p>
           </div>
         </div>
@@ -153,9 +144,25 @@ export function AdminAnalyticsDashboard({ data }: { data: AdminAnalyticsBundle }
         </motion.div>
         <motion.div variants={section}>
           <MetricGlass
-            label="Period revenue"
+            label="Period collected"
             value={formatInr(totals.periodRevenue)}
-            hint="In selected window"
+            hint="Cash received in selected window (amount_paid)"
+            icon={IndianRupee}
+          />
+        </motion.div>
+        <motion.div variants={section}>
+          <MetricGlass
+            label="Period booked value"
+            value={formatInr(totals.periodBookedValue)}
+            hint="Gross rental on non-cancelled bookings created in window"
+            icon={TrendingUp}
+          />
+        </motion.div>
+        <motion.div variants={section}>
+          <MetricGlass
+            label="Outstanding in window"
+            value={formatInr(totals.periodPendingRupees)}
+            hint="Pending balance on bookings created in range"
             icon={IndianRupee}
           />
         </motion.div>
@@ -232,7 +239,9 @@ export function AdminAnalyticsDashboard({ data }: { data: AdminAnalyticsBundle }
                 <div>
                   <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-electric/90">Ledger</p>
                   <h2 className="mt-1 text-xl font-semibold tracking-[-0.03em] text-soft">Revenue over time</h2>
-                  <p className="mt-1 text-xs text-muted">Posted totals by booking creation day (UTC).</p>
+                  <p className="mt-1 text-xs text-muted">
+                    Collected (solid) and booked contract value (when no collections yet) by creation day (UTC).
+                  </p>
                 </div>
                 <Link
                   href="/admin/payments"
@@ -242,6 +251,16 @@ export function AdminAnalyticsDashboard({ data }: { data: AdminAnalyticsBundle }
                 </Link>
               </div>
               <AnalyticsSeriesArea points={series.revenueByDay} valueFormatter={formatInr} accent="electric" />
+              {totals.periodRevenue === 0 && totals.periodBookedValue > 0 ? (
+                <div className="rounded-xl border border-white/[0.06] bg-white/[0.02] px-3 py-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">Booked value (pipeline)</p>
+                  <AnalyticsSeriesArea
+                    points={series.bookedValueByDay}
+                    valueFormatter={formatInr}
+                    accent="amber"
+                  />
+                </div>
+              ) : null}
             </AdminCardContent>
           </AdminCard>
         </motion.div>
@@ -405,7 +424,7 @@ export function AdminAnalyticsDashboard({ data }: { data: AdminAnalyticsBundle }
                     className="flex items-center justify-between gap-2 rounded-xl border border-white/[0.06] bg-white/[0.03] px-3 py-2.5"
                   >
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-soft">{c.full_name ?? 'Member'}</p>
+                      <p className="truncate text-sm font-medium text-soft">{c.full_name ?? `Customer ${c.user_id.slice(0, 8)}`}</p>
                       <p className="truncate font-mono text-[10px] text-muted">{c.user_id.slice(0, 8)}…</p>
                     </div>
                     <div className="shrink-0 text-right">

@@ -9,7 +9,9 @@ import { AdminBookingPaymentTimeline } from '@/components/admin/admin-booking-pa
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 import { AdminStatusPill } from '@/components/admin/admin-status-pill'
+import { fleetCatalogTitle } from '@/lib/admin/fleet-display'
 import { adminGetBooking, adminGetBookingCustomerProfile } from '@/lib/admin/data/bookings'
+import { resolveCustomerDisplayName } from '@/lib/customer/display-name'
 import { adminGetBookingInspectionBundle } from '@/lib/admin/data/booking-inspection'
 import { adminGetBookingFinancialSummary } from '@/lib/admin/data/financials'
 import { adminGetBookingViolationsBundle } from '@/lib/admin/data/violations'
@@ -87,14 +89,45 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
 
   const vehJoin = booking.vehicles
   const veh = Array.isArray(vehJoin) ? vehJoin[0] : vehJoin
-  const carTitle = veh ? (veh.name?.trim() || `${veh.brand}`.trim()) : 'Vehicle'
+  const carTitle = veh
+    ? fleetCatalogTitle({
+        id: veh.id ?? booking.vehicle_id ?? 'vehicle',
+        name: veh.name,
+        brand: veh.brand,
+        registration_number: (veh as { registration_number?: string | null }).registration_number ?? null,
+      })
+    : 'Vehicle'
+
+  let authMeta: { full_name?: string; name?: string; display_name?: string } | null = null
+  try {
+    const admin = createAdminClient()
+    const { data } = await admin.auth.admin.getUserById(booking.user_id)
+    const raw = data?.user?.user_metadata
+    authMeta =
+      raw && typeof raw === 'object'
+        ? {
+            full_name: typeof raw.full_name === 'string' ? raw.full_name : undefined,
+            name: typeof raw.name === 'string' ? raw.name : undefined,
+            display_name: typeof raw.display_name === 'string' ? raw.display_name : undefined,
+          }
+        : null
+  } catch {
+    authMeta = null
+  }
+  const customerDisplayName = resolveCustomerDisplayName({
+    userId: booking.user_id,
+    fullName: customerProfile?.full_name ?? null,
+    email: customerEmail,
+    phone: customerProfile?.phone ?? null,
+    authMetadata: authMeta,
+  })
 
   return (
     <div className="space-y-8">
       <AdminPageHeader
         eyebrow="Booking"
         title={carTitle}
-        description={`Customer ${customerEmail ?? booking.user_id} · ${new Date(booking.pickup_date).toLocaleString()} → ${new Date(booking.return_date).toLocaleString()}`}
+        description={`${customerDisplayName} · ${new Date(booking.pickup_date).toLocaleString()} → ${new Date(booking.return_date).toLocaleString()}`}
       />
 
       <div className="flex flex-wrap gap-2">
@@ -118,7 +151,7 @@ export default async function AdminBookingDetailPage({ params }: { params: Promi
           <dl className="grid gap-3 text-sm sm:grid-cols-2">
             <div>
               <dt className="text-muted">Display name</dt>
-              <dd className="font-medium text-soft">{customerProfile?.full_name?.trim() || '—'}</dd>
+              <dd className="font-medium text-soft">{customerDisplayName}</dd>
             </div>
             <div>
               <dt className="text-muted">Phone</dt>

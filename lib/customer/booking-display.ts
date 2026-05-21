@@ -1,3 +1,4 @@
+import { fleetCatalogTitle } from '@/lib/admin/fleet-display'
 import type { BookingWithCar, VehicleSummaryRow } from '@/lib/supabase/database.types'
 import { getPublicStorageObjectUrl } from '@/lib/supabase/storage-public-url'
 import { resolveFleetImageUrl } from '@/lib/fleet/mappers'
@@ -21,14 +22,12 @@ function firstVehicle(vehicles: BookingWithCar['vehicles']): VehicleSummaryRow |
 export function formatBookingVehicleTitle(row: BookingWithCar): string {
   const veh = firstVehicle(row.vehicles)
   if (!veh) return 'Vehicle'
-  const brand = (veh.brand ?? '').trim()
-  const name = (veh.name ?? '').trim()
-  if (!name && !brand) return 'Vehicle'
-  if (brand && name) {
-    if (name.toLowerCase().startsWith(brand.toLowerCase())) return name
-    return `${brand} ${name}`.trim()
-  }
-  return name || brand
+  return fleetCatalogTitle({
+    id: veh.id ?? row.vehicle_id ?? 'vehicle',
+    name: veh.name,
+    brand: veh.brand,
+    registration_number: (veh as { registration_number?: string | null }).registration_number ?? null,
+  })
 }
 
 function imageFromVehicleRow(brand: string, image: string | null): string {

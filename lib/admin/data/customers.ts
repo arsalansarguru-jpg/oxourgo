@@ -1,11 +1,13 @@
 import 'server-only'
 
 import type { Database } from '@/lib/supabase/database.types'
+import { resolveCustomerDisplayName } from '@/lib/customer/display-name'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logPostgrestError, logUnknownError } from '@/lib/errors/safe-user-message'
 
 export type AdminCustomerRow = {
   userId: string
+  displayName: string
   email: string | null
   createdAt: string
   lastSignInAt: string | null
@@ -54,12 +56,21 @@ export async function adminListCustomers(): Promise<AdminCustomerRow[]> {
     const c = cancelled ?? 0
     const heuristicRisk = t === 0 ? 0 : Math.min(100, Math.round((c / t) * 100))
 
+    const profile = profileByUser.get(u.id)
+    const meta = u.user_metadata as { full_name?: string; name?: string; display_name?: string } | undefined
     rows.push({
       userId: u.id,
+      displayName: resolveCustomerDisplayName({
+        userId: u.id,
+        fullName: profile?.full_name ?? null,
+        email: u.email ?? null,
+        phone: profile?.phone ?? null,
+        authMetadata: meta ?? null,
+      }),
       email: u.email ?? null,
       createdAt: u.created_at,
       lastSignInAt: u.last_sign_in_at ?? null,
-      profile: profileByUser.get(u.id) ?? null,
+      profile: profile ?? null,
       bookingCount: t,
       cancelledCount: c,
       heuristicRisk,
@@ -104,8 +115,16 @@ export async function adminGetCustomer(userId: string): Promise<AdminCustomerRow
   const c = cancelled ?? 0
   const heuristicRisk = t === 0 ? 0 : Math.min(100, Math.round((c / t) * 100))
 
+  const meta = u.user_metadata as { full_name?: string; name?: string; display_name?: string } | undefined
   return {
     userId: u.id,
+    displayName: resolveCustomerDisplayName({
+      userId: u.id,
+      fullName: profile?.full_name ?? null,
+      email: u.email ?? null,
+      phone: profile?.phone ?? null,
+      authMetadata: meta ?? null,
+    }),
     email: u.email ?? null,
     createdAt: u.created_at,
     lastSignInAt: u.last_sign_in_at ?? null,

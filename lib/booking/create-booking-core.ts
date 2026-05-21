@@ -11,6 +11,8 @@ import { isProfileKycApprovedForBooking } from '@/lib/kyc/kyc-booking-eligible'
 import { isVehicleAvailableForBooking, parseMoneyIntRupees, type VehicleRow } from '@/lib/fleet/vehicle-mappers'
 import { normalizeBookingPaymentMethod } from '@/lib/payments/methods'
 import { assertOnlineCheckoutAllowed } from '@/lib/payments/checkout-guard'
+import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from '@/lib/audit/actions'
+import { writeAuditLog } from '@/lib/audit/write'
 import type { Database } from '@/lib/supabase/database.types'
 
 export type BookingPricingOverride = {
@@ -221,6 +223,20 @@ export async function insertBookingCore(
     console.error('[insertBookingCore:insert]', insErr?.message, insErr?.code)
     return { ok: false, code: 'database', message: 'Could not complete the booking.' }
   }
+
+  void writeAuditLog({
+    actorId: input.userId,
+    entityType: AUDIT_ENTITY_TYPES.booking,
+    entityId: created.id,
+    action: input.autoConfirm ? AUDIT_ACTIONS.bookingManualCreate : AUDIT_ACTIONS.bookingCreated,
+    newValue: {
+      booking_status: insert.booking_status,
+      payment_status: insert.payment_status,
+      total_rupees: quote.totalRupees,
+      vehicle_id: vehicleRow.id,
+    },
+    metadata: { bookingId: created.id, userId: input.userId, booking_source: bookingSource },
+  })
 
   return { ok: true, bookingId: created.id, totalRupees: quote.totalRupees }
 }

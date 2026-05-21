@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { escapeIlikePattern } from '@/lib/admin/bookings-search'
+import { resolveCustomerDisplayName, type CustomerNameInput } from '@/lib/customer/display-name'
 import { logAdminQueryResult } from '@/lib/admin/debug-query'
 import {
   BOOKING_SELECT_TIERS,
@@ -245,16 +246,19 @@ export async function adminEnrichBookingsForAdminList(rows: BookingWithCar[]): P
   const uniqueIds = [...new Set(rows.map((r) => r.user_id))]
 
   const [{ data: profiles, error: profilesErr }, ...emailResults] = await Promise.all([
-    admin.from('profiles').select('user_id, full_name').in('user_id', uniqueIds),
+    admin.from('profiles').select('user_id, full_name, phone').in('user_id', uniqueIds),
     ...uniqueIds.map(async (uid) => {
       try {
         const { data, error } = await admin.auth.admin.getUserById(uid)
-        if (error || !data?.user) return { uid, email: null as string | null, name: null as string | null }
-        const meta = data.user.user_metadata as { full_name?: string; name?: string } | undefined
-        const metaName = meta?.full_name?.trim() || meta?.name?.trim() || null
-        return { uid, email: data.user.email ?? null, name: metaName }
+        if (error || !data?.user) return { uid, email: null as string | null, meta: null as Record<string, string> | null }
+        const meta = data.user.user_metadata as {
+          full_name?: string
+          name?: string
+          display_name?: string
+        } | undefined
+        return { uid, email: data.user.email ?? null, meta: meta ?? null }
       } catch {
-        return { uid, email: null, name: null }
+        return { uid, email: null, meta: null }
       }
     }),
   ])
@@ -263,19 +267,34 @@ export async function adminEnrichBookingsForAdminList(rows: BookingWithCar[]): P
     logPostgrestError('[adminEnrichBookingsForAdminList] profiles', profilesErr)
   }
 
-  const nameByUserId = new Map((profiles ?? []).map((p) => [p.user_id, p.full_name?.trim() || null]))
+  const profileByUserId = new Map(
+    (profiles ?? []).map((p) => [
+      p.user_id,
+      { full_name: p.full_name?.trim() || null, phone: (p as { phone?: string | null }).phone?.trim() || null },
+    ]),
+  )
   const emailByUserId = new Map<string, string | null>()
-  const metaNameByUserId = new Map<string, string | null>()
+  const metaByUserId = new Map<string, CustomerNameInput['authMetadata']>()
   for (const r of emailResults) {
     emailByUserId.set(r.uid, r.email)
-    metaNameByUserId.set(r.uid, r.name)
+    metaByUserId.set(r.uid, r.meta)
   }
 
-  return rows.map((r) => ({
-    ...r,
-    customerEmail: emailByUserId.get(r.user_id) ?? null,
-    customerFullName: nameByUserId.get(r.user_id) ?? metaNameByUserId.get(r.user_id) ?? null,
-  }))
+  return rows.map((r) => {
+    const prof = profileByUserId.get(r.user_id)
+    const email = emailByUserId.get(r.user_id) ?? null
+    return {
+      ...r,
+      customerEmail: email,
+      customerFullName: resolveCustomerDisplayName({
+        userId: r.user_id,
+        fullName: prof?.full_name ?? null,
+        email,
+        phone: prof?.phone ?? null,
+        authMetadata: metaByUserId.get(r.user_id) ?? null,
+      }),
+    }
+  })
 }
 
 export async function adminGetBooking(id: string): Promise<BookingWithCar | null> {

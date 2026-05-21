@@ -2,6 +2,7 @@ import 'server-only'
 
 import { captureServerPosthogEvent } from '@/lib/analytics/posthog-server'
 import { POSTHOG_EVENTS } from '@/lib/analytics/posthog-events'
+import { logPostgrestError } from '@/lib/errors/safe-user-message'
 import type { Json } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -17,9 +18,9 @@ export type WriteAuditLogInput = {
 }
 
 /**
- * Append an immutable row to `audit_logs`. Non-blocking — failures are swallowed.
+ * Append an immutable row to `audit_logs`. Non-blocking for callers — logs failures.
  */
-export async function writeAuditLog(input: WriteAuditLogInput): Promise<void> {
+export async function writeAuditLog(input: WriteAuditLogInput): Promise<boolean> {
   try {
     const admin = createAdminClient()
     const { error } = await admin.from('audit_logs').insert({
@@ -33,7 +34,12 @@ export async function writeAuditLog(input: WriteAuditLogInput): Promise<void> {
       metadata: input.metadata ?? null,
     })
 
-    if (!error && input.actorId) {
+    if (error) {
+      logPostgrestError(`[writeAuditLog] ${input.action}`, error)
+      return false
+    }
+
+    if (input.actorId) {
       void captureServerPosthogEvent({
         distinctId: input.actorId,
         event: POSTHOG_EVENTS.adminAction,
@@ -44,7 +50,9 @@ export async function writeAuditLog(input: WriteAuditLogInput): Promise<void> {
         },
       })
     }
-  } catch {
-    // Non-blocking: audit failures must not break primary operations.
+    return true
+  } catch (err) {
+    console.error(`[writeAuditLog] ${input.action}`, err)
+    return false
   }
 }

@@ -8,6 +8,8 @@ import { debugLogRoleResolution } from '@/lib/auth/role-debug'
 import { resolvePostLoginPath } from '@/lib/auth/post-login-path'
 import { resolveAppRoleWithClaims } from '@/lib/auth/resolve-session-role'
 import { readSupabasePublicEnv } from '@/lib/env/supabase-public'
+import { writeAuditLog } from '@/lib/audit/write'
+import { isStaffRole } from '@/lib/auth/permissions'
 import { createClient } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
@@ -56,6 +58,16 @@ export async function GET(request: NextRequest) {
         event: POSTHOG_EVENTS.loginCompleted,
         properties: { method: 'oauth_or_magic_link', app_role: appRole },
       })
+      if (isStaffRole(appRole)) {
+        void writeAuditLog({
+          actorId: user.id,
+          actorRole: appRole,
+          entityType: 'user',
+          entityId: user.id,
+          action: 'admin.sign_in',
+          metadata: { email: user.email ?? null, method: 'oauth_or_magic_link' },
+        })
+      }
       const destination = resolvePostLoginPath(appRole, requestedNext)
       return NextResponse.redirect(new URL(destination, origin))
     }

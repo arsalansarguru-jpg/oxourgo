@@ -2,6 +2,8 @@ import 'server-only'
 
 import type { PostgrestError } from '@supabase/supabase-js'
 
+import { bookingCollectedRupees, isBookingCancelled } from '@/lib/admin/booking-financials'
+import { resolveCustomerDisplayName } from '@/lib/customer/display-name'
 import { adminEnrichBookingsForAdminList, type AdminBookingListItem } from '@/lib/admin/data/bookings'
 import {
   fetchCommandCenterBundle,
@@ -156,7 +158,7 @@ function formatTripDate(date: string, location?: string | null): string {
 }
 
 function customerDisplay(b: AdminBookingListItem): string {
-  return b.customerFullName?.trim() || b.customerEmail?.trim() || `Guest ${b.user_id.slice(0, 8)}`
+  return b.customerFullName?.trim() || b.customerEmail?.trim() || `Customer ${b.user_id.slice(0, 8).toUpperCase()}`
 }
 
 async function sumMonthlyRevenue(admin: ReturnType<typeof createAdminClient>): Promise<number> {
@@ -174,11 +176,8 @@ async function sumMonthlyRevenue(admin: ReturnType<typeof createAdminClient>): P
       break
     }
     for (const r of data ?? []) {
-      const cancelled = (r.booking_status ?? '').trim().toLowerCase() === 'cancelled'
-      const ps = (r.payment_status ?? '').trim().toLowerCase()
-      if (!cancelled && (ps === 'received' || ps === 'partial')) {
-        sum += Math.max(0, Math.round(Number(r.amount_paid ?? 0)))
-      }
+      if (isBookingCancelled(r.booking_status)) continue
+      sum += bookingCollectedRupees(r)
     }
     if ((data ?? []).length < page) break
     from += page
@@ -321,11 +320,22 @@ async function fetchCustomers(admin: ReturnType<typeof createAdminClient>): Prom
     }
 
     const email = authRes.data?.user?.email ?? null
+    const meta = authRes.data?.user?.user_metadata as {
+      full_name?: string
+      name?: string
+      display_name?: string
+    } | undefined
     const notes = (p as { admin_notes?: string | null }).admin_notes?.trim() || null
 
     rows.push({
       userId: p.user_id,
-      name: p.full_name?.trim() || email || `User ${p.user_id.slice(0, 8)}`,
+      name: resolveCustomerDisplayName({
+        userId: p.user_id,
+        fullName: p.full_name,
+        email,
+        phone: p.phone,
+        authMetadata: meta ?? null,
+      }),
       phone: p.phone,
       email,
       kycStatus: p.kyc_status ?? 'not_started',

@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { logAdminQueryResult } from '@/lib/admin/debug-query'
+import { resolveCustomerDisplayName } from '@/lib/customer/display-name'
 import { KYC_IN_REVIEW_DOCUMENT_STATUSES } from '@/lib/admin/status-enums'
 import {
   computeKycLifecycleFromDocuments,
@@ -137,14 +138,23 @@ export async function adminListKycUserSummaries(filter: AdminKycListFilter): Pro
 
     const profile = profileByUser.get(userId)
     const { data: authUser } = await admin.auth.admin.getUserById(userId)
-    const meta = authUser?.user?.user_metadata as { full_name?: string; name?: string } | undefined
-    const metaName = meta?.full_name?.trim() || meta?.name?.trim() || null
+    const meta = authUser?.user?.user_metadata as {
+      full_name?: string
+      name?: string
+      display_name?: string
+    } | undefined
     const docUpdated = latestUpdated.get(userId) ?? profile?.updated_at ?? new Date().toISOString()
 
     out.push({
       user_id: userId,
       user_email: authUser?.user?.email ?? null,
-      full_name: profile?.full_name?.trim() || metaName || null,
+      full_name: resolveCustomerDisplayName({
+        userId,
+        fullName: profile?.full_name ?? null,
+        email: authUser?.user?.email ?? null,
+        phone: profile?.phone ?? null,
+        authMetadata: meta ?? null,
+      }),
       phone: profile?.phone ?? null,
       kyc_status: lifecycle,
       kyc_submitted_at: profile?.kyc_submitted_at ?? userDocs[0]?.created_at ?? null,
@@ -199,10 +209,21 @@ export async function adminGetKycUserReviewBundle(userId: string): Promise<Admin
   const lifecycle = computeKycLifecycleFromDocuments(docMinimals)
 
   const { data: authUser } = await admin.auth.admin.getUserById(userId)
+  const meta = authUser?.user?.user_metadata as {
+    full_name?: string
+    name?: string
+    display_name?: string
+  } | undefined
   const summary: AdminKycUserSummary = {
     user_id: userId,
     user_email: authUser?.user?.email ?? null,
-    full_name: profile?.full_name ?? null,
+    full_name: resolveCustomerDisplayName({
+      userId,
+      fullName: profile?.full_name ?? null,
+      email: authUser?.user?.email ?? null,
+      phone: profile?.phone ?? null,
+      authMetadata: meta ?? null,
+    }),
     phone: profile?.phone ?? null,
     kyc_status: lifecycle,
     kyc_submitted_at: profile?.kyc_submitted_at ?? docMinimals[0]?.created_at ?? null,

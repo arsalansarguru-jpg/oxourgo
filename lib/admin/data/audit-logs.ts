@@ -25,6 +25,14 @@ export type AuditLogFilters = {
   from?: string
   to?: string
   limit?: number
+  page?: number
+}
+
+export type AuditLogPageResult = {
+  rows: AuditLogRow[]
+  totalCount: number
+  page: number
+  pageSize: number
 }
 
 function mapRow(row: {
@@ -53,29 +61,52 @@ function mapRow(row: {
   }
 }
 
-export async function listAuditLogs(filters: AuditLogFilters = {}): Promise<AuditLogRow[]> {
+export async function listAuditLogsPage(filters: AuditLogFilters = {}): Promise<AuditLogPageResult> {
   const admin = createAdminClient()
-  const limit = Math.min(filters.limit ?? 50, 200)
+  const pageSize = Math.min(filters.limit ?? 50, 200)
+  const page = Math.max(1, filters.page ?? 1)
+  const from = (page - 1) * pageSize
+  const to = from + pageSize - 1
 
-  let query = admin
+  let countQuery = admin.from('audit_logs').select('id', { count: 'exact', head: true })
+  if (filters.action) countQuery = countQuery.eq('action', filters.action)
+  if (filters.actorId) countQuery = countQuery.eq('actor_id', filters.actorId)
+  if (filters.entityType) countQuery = countQuery.eq('entity_type', filters.entityType)
+  if (filters.entityId) countQuery = countQuery.eq('entity_id', filters.entityId)
+  if (filters.from) countQuery = countQuery.gte('created_at', filters.from)
+  if (filters.to) countQuery = countQuery.lte('created_at', filters.to)
+  const { count, error: countErr } = await countQuery
+  if (countErr) logPostgrestError('[listAuditLogsPage] count', countErr)
+
+  let dataQuery = admin
     .from('audit_logs')
     .select('id, actor_id, actor_role, entity_type, entity_id, action, old_value, new_value, metadata, created_at')
     .order('created_at', { ascending: false })
-    .limit(limit)
+    .range(from, to)
+  if (filters.action) dataQuery = dataQuery.eq('action', filters.action)
+  if (filters.actorId) dataQuery = dataQuery.eq('actor_id', filters.actorId)
+  if (filters.entityType) dataQuery = dataQuery.eq('entity_type', filters.entityType)
+  if (filters.entityId) dataQuery = dataQuery.eq('entity_id', filters.entityId)
+  if (filters.from) dataQuery = dataQuery.gte('created_at', filters.from)
+  if (filters.to) dataQuery = dataQuery.lte('created_at', filters.to)
 
-  if (filters.action) query = query.eq('action', filters.action)
-  if (filters.actorId) query = query.eq('actor_id', filters.actorId)
-  if (filters.entityType) query = query.eq('entity_type', filters.entityType)
-  if (filters.entityId) query = query.eq('entity_id', filters.entityId)
-  if (filters.from) query = query.gte('created_at', filters.from)
-  if (filters.to) query = query.lte('created_at', filters.to)
-
-  const { data, error } = await query
+  const { data, error } = await dataQuery
   if (error) {
-    logPostgrestError('[listAuditLogs]', error)
-    return []
+    logPostgrestError('[listAuditLogsPage]', error)
+    return { rows: [], totalCount: 0, page, pageSize }
   }
-  return (data ?? []).map(mapRow)
+
+  return {
+    rows: (data ?? []).map(mapRow),
+    totalCount: typeof count === 'number' ? count : 0,
+    page,
+    pageSize,
+  }
+}
+
+export async function listAuditLogs(filters: AuditLogFilters = {}): Promise<AuditLogRow[]> {
+  const { rows } = await listAuditLogsPage(filters)
+  return rows
 }
 
 export async function listAuditLogsForBooking(bookingId: string, limit = 60): Promise<AuditLogRow[]> {

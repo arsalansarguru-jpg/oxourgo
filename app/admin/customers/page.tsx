@@ -29,6 +29,7 @@ export default async function AdminCustomersPage() {
             <table className="w-full min-w-[800px] text-left text-sm">
               <thead className="admin-table-head">
                 <tr>
+                  <th className="px-4 py-3.5 font-medium">Name</th>
                   <th className="px-4 py-3.5 font-medium">Email</th>
                   <th className="px-4 py-3.5 font-medium">Tier</th>
                   <th className="px-4 py-3.5 font-medium">Risk</th>
@@ -43,7 +44,8 @@ export default async function AdminCustomersPage() {
                   const displayRisk = Math.max(stored, r.heuristicRisk)
                   return (
                     <tr key={r.userId} className="admin-table-row">
-                      <td className="px-4 py-3 text-soft">{r.email ?? r.userId}</td>
+                      <td className="px-4 py-3 font-medium text-soft">{r.displayName}</td>
+                      <td className="px-4 py-3 text-muted">{r.email ?? '—'}</td>
                       <td className="px-4 py-3">
                         <AdminStatusPill value={tier} />
                       </td>

@@ -73,11 +73,7 @@ export type AdminBookingsManagerProps = {
 }
 
 function customerDisplayName(row: AdminBookingListItem): string {
-  const n = row.customerFullName?.trim()
-  if (n) return n
-  const email = row.customerEmail?.trim()
-  if (email) return email.split('@')[0] ?? email
-  return 'Guest'
+  return row.customerFullName?.trim() || '—'
 }
 
 function buildBookingsListHref(

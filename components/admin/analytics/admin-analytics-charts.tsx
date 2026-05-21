@@ -10,8 +10,9 @@ const ease = [0.22, 1, 0.36, 1] as const
 
 function buildAreaPath(values: readonly number[], width: number, height: number, padX: number, padY: number) {
   if (values.length === 0) return { line: '', area: '' }
-  const max = Math.max(...values, 1)
-  const min = Math.min(...values) * 0.85
+  const rawMax = Math.max(...values, 0)
+  const max = rawMax > 0 ? rawMax : 1
+  const min = rawMax > 0 ? Math.min(...values) * 0.85 : 0
   const span = max - min || 1
   const innerW = width - padX * 2
   const innerH = height - padY * 2
@@ -49,11 +50,12 @@ export function AnalyticsSeriesArea({
   const strokeAmId = `aStrokeAm-${uid}`
 
   const values = points.map((p) => p.value)
+  const rawMax = values.length ? Math.max(...values, 0) : 0
   const w = 720
   const h = 200
   const pad = 24
   const { line, area } = buildAreaPath(values, w, h, pad, pad)
-  const max = Math.max(...values, 1)
+  const max = rawMax > 0 ? rawMax : 0
   const stroke =
     accent === 'emerald'
       ? `url(#${strokeEmId})`
@@ -144,14 +146,21 @@ export function AnalyticsSeriesArea({
         )}
       </div>
       <p className="mt-2 text-right text-[11px] font-medium tabular-nums text-muted">
-        Peak <span className="text-soft">{valueFormatter(max)}</span>
+        {rawMax > 0 ? (
+          <>
+            Peak <span className="text-soft">{valueFormatter(max)}</span>
+          </>
+        ) : (
+          <span>No activity in range</span>
+        )}
       </p>
     </div>
   )
 }
 
 export function AnalyticsDailyBars({ points, color }: { points: AdminAnalyticsSeriesPoint[]; color: string }) {
-  const max = Math.max(...points.map((p) => p.value), 1)
+  const rawMax = points.length ? Math.max(...points.map((p) => p.value), 0) : 0
+  const max = rawMax > 0 ? rawMax : 1
   const w = 720
   const h = 180
   const pad = 20
@@ -197,7 +206,11 @@ export function AnalyticsHorizontalBars({
   rows: { label: string; value: number }[]
   valueLabel: (n: number) => string
 }) {
-  const max = Math.max(...rows.map((r) => r.value), 1)
+  const rawMax = rows.length ? Math.max(...rows.map((r) => r.value), 0) : 0
+  const max = rawMax > 0 ? rawMax : 1
+  if (rows.length === 0 || rawMax === 0) {
+    return <p className="text-sm text-muted">No data in this range.</p>
+  }
   return (
     <ul className="space-y-3">
       {rows.map((r, i) => (

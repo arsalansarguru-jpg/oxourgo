@@ -1,5 +1,12 @@
 import 'server-only'
 
+import {
+  bookingCollectedRupees,
+  bookingContractRupees,
+  bookingPendingRupees,
+  isBookingCancelled,
+  normalizePaymentStatusForAnalytics,
+} from '@/lib/admin/booking-financials'
 import { logAdminQueryResult } from '@/lib/admin/debug-query'
 import type { Database } from '@/lib/supabase/database.types'
 import { adminListBookingsPage, type AdminBookingListItem } from '@/lib/admin/data/bookings'
@@ -45,20 +52,20 @@ export async function adminPaymentOperationsMetrics(): Promise<AdminPaymentOpsMe
       amount_paid: number | null
       total_rupees: number | null
     }[]) {
-      const cancelled = r.booking_status.trim().toLowerCase() === 'cancelled'
-      const st = r.payment_status.trim().toLowerCase()
-      const due = Math.max(0, Math.round(Number(r.amount_due ?? 0)))
-      const paid = Math.max(0, Math.round(Number(r.amount_paid ?? 0)))
-      const gross = Math.max(0, Math.round(Number(r.total_rupees ?? 0)))
-      if (!cancelled && (st === 'pending' || st === 'partial')) {
+      if (isBookingCancelled(r.booking_status)) continue
+      const st = normalizePaymentStatusForAnalytics(r.payment_status)
+      const pending = bookingPendingRupees(r)
+      const collected = bookingCollectedRupees(r)
+      const contract = bookingContractRupees(r)
+      if (st === 'pending' || st === 'partial') {
         pendingBookingCount += 1
-        pendingCollectionRupees += due
+        pendingCollectionRupees += pending
       }
-      if (!cancelled && st === 'pending') {
-        grossPendingContractRupees += gross
+      if (st === 'pending') {
+        grossPendingContractRupees += contract
       }
-      if (!cancelled && (st === 'received' || st === 'partial')) {
-        collectedRentalRupees += paid
+      if (collected > 0) {
+        collectedRentalRupees += collected
       }
     }
     if (rows.length < pageSize) break
