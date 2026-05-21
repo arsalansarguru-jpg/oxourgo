@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { Bell } from 'lucide-react'
 
-import { markNotificationReadAction } from '@/app/(main)/dashboard/notifications/actions'
+import { markNotificationReadAction } from '@/app/dashboard/notifications/actions'
 import { useSupabase } from '@/hooks/use-supabase'
 import type { NotificationRow } from '@/lib/supabase/database.types'
 import { cn } from '@/lib/utils/cn'

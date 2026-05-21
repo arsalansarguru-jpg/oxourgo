@@ -2,7 +2,8 @@
 
 import type { User } from '@supabase/supabase-js'
 
-import { isAdmin, isStaffRole, resolveAuthRoleFromMetadata, type AppAuthRole } from '@/lib/auth/roles'
+import { isStaffRole } from '@/lib/auth/permissions'
+import { isAdmin, resolveAuthRoleFromMetadata, type AppAuthRole } from '@/lib/auth/roles'
 import { resolveAppRoleForUser } from '@/lib/auth/resolve-session-role'
 
 /** Sync role from user metadata only (prefer {@link useResolvedAppRole} in UI). */

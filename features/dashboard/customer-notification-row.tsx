@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useTransition } from 'react'
 import { motion } from 'framer-motion'
 
-import { markNotificationReadAction } from '@/app/(main)/dashboard/notifications/actions'
+import { markNotificationReadAction } from '@/app/dashboard/notifications/actions'
 import type { NotificationRow } from '@/lib/supabase/database.types'
 import { cn } from '@/lib/utils/cn'
 import { Button } from '@/components/ui/Button'

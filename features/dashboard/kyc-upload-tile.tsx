@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { Check, Eye, FileUp, Loader2, ShieldCheck } from 'lucide-react'
 
-import { registerKycDocumentAction } from '@/app/(main)/dashboard/actions'
+import { registerKycDocumentAction } from '@/app/dashboard/actions'
 import { captureClientEvent } from '@/lib/analytics/capture-client'
 import { POSTHOG_EVENTS } from '@/lib/analytics/posthog-events'
 import type { KycDocumentRow } from '@/lib/customer/kyc-queries'

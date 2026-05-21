@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
-import { markAllNotificationsReadAction } from '@/app/(main)/dashboard/notifications/actions'
+import { markAllNotificationsReadAction } from '@/app/dashboard/notifications/actions'
 import { CustomerNotificationRow } from '@/features/dashboard/customer-notification-row'
 import { groupNotificationsByDay } from '@/lib/customer/notification-groups'
 import { listNotificationsForUser } from '@/lib/customer/notifications-queries'

@@ -4,7 +4,8 @@ import type { SupabaseClient, User } from '@supabase/supabase-js'
 
 import { decodeAccessTokenPayload } from '@/lib/auth/jwt-payload'
 import { logAuthRoleDebug } from '@/lib/auth/role-debug'
-import { resolveAppRoleForUser, type AppAuthRole } from '@/lib/auth/roles'
+import type { AppAuthRole } from '@/lib/auth/roles'
+import { resolveAppRoleForUser } from '@/lib/auth/resolve-session-role'
 
 export type ResolvedClientAuth = {
   user: User | null

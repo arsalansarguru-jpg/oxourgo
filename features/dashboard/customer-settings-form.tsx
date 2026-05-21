@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { Loader2 } from 'lucide-react'
 
-import { updateCustomerProfileAction } from '@/app/(main)/dashboard/actions'
+import { updateCustomerProfileAction } from '@/app/dashboard/actions'
 import type { Database } from '@/lib/supabase/database.types'
 import type { User } from '@supabase/supabase-js'
 import { Button } from '@/components/ui/Button'
