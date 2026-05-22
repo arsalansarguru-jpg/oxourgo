@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
@@ -11,6 +12,11 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { Bell } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'Notifications',
+  description: 'Booking updates, verification outcomes, and payment milestones for your Oxour Go account.',
+}
 
 export default async function NotificationsCenterPage() {
   const user = await getAuthenticatedUser()

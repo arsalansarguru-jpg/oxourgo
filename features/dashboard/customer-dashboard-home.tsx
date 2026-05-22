@@ -14,6 +14,7 @@ import { cardSurfaceBase, cardSurfaceHover, cardSurfaceTransition } from '@/comp
 import { CustomerBookingCard } from '@/components/dashboard/customer-booking-card'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { KycStatusBadge } from '@/components/kyc/kyc-status-badge'
+import type { KycUiSnapshot } from '@/lib/kyc/kyc-ui-snapshot'
 
 function Stat({ label, value, hint }: { label: string; value: string; hint?: string }) {
   return (
@@ -33,16 +34,12 @@ function isPostedPayment(paymentStatus: string): boolean {
 
 export function CustomerDashboardHome({
   bookings,
-  kycUploadedCount,
-  verificationTier,
-  kycStatus,
+  kycUi,
   bookingCleared,
   accessNotice,
 }: {
   bookings: BookingWithCar[]
-  kycUploadedCount: number
-  verificationTier: string
-  kycStatus: string
+  kycUi: KycUiSnapshot
   bookingCleared: boolean
   /** Shown when middleware redirects a non-admin away from `/admin`. */
   accessNotice?: string | null
@@ -89,7 +86,7 @@ export function CustomerDashboardHome({
         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-electric/90">Command center</p>
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <h1 className="text-3xl font-semibold tracking-[-0.04em] text-soft md:text-[2rem]">Your Oxour journey</h1>
-          <KycStatusBadge status={kycStatus} className="shrink-0" />
+          <KycStatusBadge status={kycUi.badgeStatus} className="shrink-0" />
         </div>
         <p className="max-w-2xl text-sm leading-relaxed text-muted">
           Track trips here — new bookings and payments are coordinated with concierge on WhatsApp for a smoother launch.
@@ -106,8 +103,8 @@ export function CustomerDashboardHome({
         <Stat label="Posted spend" value={formatInr(postedSpend)} hint="Rental amounts recorded as collected" />
         <Stat
           label="Verification"
-          value={isVerified ? 'Cleared' : 'In progress'}
-          hint={`${kycUploadedCount} file(s) · tier ${verificationTier}`}
+          value={kycUi.verificationCardTitle}
+          hint={kycUi.verificationCardHint}
         />
       </div>
 
@@ -126,9 +123,9 @@ export function CustomerDashboardHome({
               {pendingPaymentBookings > 0
                 ? `You have ${pendingPaymentBookings} booking${pendingPaymentBookings === 1 ? '' : 's'} awaiting payment — message us on WhatsApp and we will guide you through settlement.`
                 : !isVerified
-                  ? kycStatus === 'rejected'
+                  ? kycUi.badgeStatus === 'rejected'
                     ? 'A document was not accepted — WhatsApp us with your booking reference and we will help you fix verification.'
-                    : kycStatus === 'pending'
+                    : kycUi.badgeStatus === 'pending'
                       ? 'Your documents are with operations — we will confirm on WhatsApp when verification clears.'
                       : 'Share identity documents via WhatsApp concierge so we can unlock reservations faster.'
                   : 'Planning another drive? Message concierge with your preferred dates and vehicle.'}

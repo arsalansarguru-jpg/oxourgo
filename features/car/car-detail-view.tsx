@@ -94,7 +94,7 @@ export function CarDetailView({
                   type="button"
                   onClick={() => setActiveImage(idx)}
                   className={cn(
-                    'relative h-[4.25rem] w-[6.75rem] shrink-0 snap-start overflow-hidden rounded-xl border transition-[border-color,box-shadow,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/50 focus-visible:ring-offset-2 focus-visible:ring-offset-matte sm:h-16 sm:w-24',
+                    'relative h-[4.25rem] w-[6.75rem] shrink-0 snap-start overflow-hidden rounded-xl border transition-[border-color,box-shadow,transform] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] focus-visible:shadow-none sm:h-16 sm:w-24',
                     idx === activeImage
                       ? 'border-stroke-strong ring-1 ring-white/10'
                       : 'border-stroke hover:border-stroke-strong hover:-translate-y-0.5',
@@ -176,7 +176,9 @@ export function CarDetailView({
                 'bg-matte/[0.35]',
               )}
             >
-              {carDetailFaqs.map((faq) => {
+              {carDetailFaqs
+                .filter((faq) => faq.id !== '2' || car.securityDeposit > 0)
+                .map((faq) => {
                 const open = openFaq === faq.id
                 return (
                   <div key={faq.id} className="px-4">

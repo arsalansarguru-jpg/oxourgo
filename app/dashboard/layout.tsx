@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
 import { CustomerDashboardShell } from '@/components/dashboard/customer-dashboard-shell'
+import { KycStatusProvider } from '@/components/providers/kyc-status-provider'
 import { DashboardLayout as DashboardChrome } from '@/components/layout/DashboardLayout'
 import { debugLogRoleResolution } from '@/lib/auth/role-debug'
 import { getAuthSessionSummary } from '@/lib/auth/server'
@@ -10,6 +11,9 @@ import { ADMIN_HOME } from '@/lib/auth/routes'
 import { countUnreadNotifications, listNotificationsForUser } from '@/lib/customer/notifications-queries'
 import { resolveCustomerDisplayName } from '@/lib/customer/display-name'
 import { getCustomerProfileSnapshot } from '@/lib/customer/profile-queries'
+import { listKycDocuments } from '@/lib/customer/kyc-queries'
+import { buildKycUiSnapshot } from '@/lib/kyc/kyc-ui-snapshot'
+import { isProfileKycApprovedForBooking } from '@/lib/kyc/kyc-booking-eligible'
 import { logUnknownError } from '@/lib/errors/safe-user-message'
 
 export const metadata: Metadata = {
@@ -37,7 +41,10 @@ export default async function DashboardRouteLayout({ children }: { children: Rea
   }
 
   try {
-    const profile = await getCustomerProfileSnapshot(user.id)
+    const [profile, kycDocs] = await Promise.all([
+      getCustomerProfileSnapshot(user.id),
+      listKycDocuments(user.id).catch(() => []),
+    ])
 
     const meta = user.user_metadata as { full_name?: string; name?: string; display_name?: string } | undefined
     const displayName = resolveCustomerDisplayName({
@@ -49,20 +56,11 @@ export default async function DashboardRouteLayout({ children }: { children: Rea
       authMetadata: meta ?? null,
     })
 
-    const tier = profile.verification_tier
-    const kycLifecycleStatus = profile.kyc_status
-    const verificationLabel =
-      kycLifecycleStatus === 'approved'
-        ? 'Account verified'
-        : kycLifecycleStatus === 'rejected' || kycLifecycleStatus === 'resubmission_required'
-          ? 'KYC needs your attention'
-          : kycLifecycleStatus === 'pending'
-            ? 'Verification in review'
-            : tier === 'verified'
-              ? 'Account verified'
-              : tier === 'basic'
-                ? 'Verification in progress'
-                : 'Complete your profile'
+    const kycUi = buildKycUiSnapshot({
+      profileKycStatus: profile.kyc_status,
+      docs: kycDocs,
+      bookingCleared: isProfileKycApprovedForBooking(profile),
+    })
 
     const [notificationUnread, notificationPreview] = await Promise.all([
       countUnreadNotifications(user.id).catch(() => 0),
@@ -75,14 +73,16 @@ export default async function DashboardRouteLayout({ children }: { children: Rea
       notificationUnread={notificationUnread}
       notificationPreview={notificationPreview}
     >
-      <CustomerDashboardShell
-        displayName={displayName}
-        email={user.email ?? undefined}
-        verificationLabel={verificationLabel}
-        kycLifecycleStatus={kycLifecycleStatus}
-      >
-        {children}
-      </CustomerDashboardShell>
+      <KycStatusProvider value={kycUi}>
+        <CustomerDashboardShell
+          displayName={displayName}
+          email={user.email ?? undefined}
+          verificationLabel={kycUi.sidebarLabel}
+          kycLifecycleStatus={kycUi.lifecycleStatus}
+        >
+          {children}
+        </CustomerDashboardShell>
+      </KycStatusProvider>
     </DashboardChrome>
     )
   } catch (error) {

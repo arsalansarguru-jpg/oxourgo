@@ -13,13 +13,25 @@ export type ResolvedClientAuth = {
   appRole: AppAuthRole
 }
 
+export type ResolveClientAuthOptions = {
+  /**
+   * When false (default), reads the cached session only — safe on every route change.
+   * When true, calls `refreshSession()` first (use on mount / TOKEN_REFRESHED only).
+   */
+  refresh?: boolean
+}
+
 /**
- * Refresh session, merge JWT claims + access-token payload, resolve app role (client).
+ * Merge JWT claims + access-token payload, resolve app role (client).
+ * Avoid calling `refreshSession()` on navigation — it can briefly clear the session UI.
  */
 export async function resolveClientAuthRole(
   supabase: SupabaseClient,
+  options: ResolveClientAuthOptions = {},
 ): Promise<ResolvedClientAuth> {
-  await supabase.auth.refreshSession()
+  if (options.refresh) {
+    await supabase.auth.refreshSession()
+  }
 
   const {
     data: { session },
@@ -43,6 +55,7 @@ export async function resolveClientAuthRole(
   const appRole = user ? resolveAppRoleForUser(user, claimsRecord) : ('customer' as AppAuthRole)
 
   logAuthRoleDebug('resolveClientAuthRole', {
+    refresh: Boolean(options.refresh),
     ResolvedRole: appRole,
     Session: {
       userId: user?.id,

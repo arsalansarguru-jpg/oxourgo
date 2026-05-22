@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
 import { KycCenterClient } from '@/features/dashboard/kyc-center-client'
@@ -6,6 +7,11 @@ import { listKycDocuments } from '@/lib/customer/kyc-queries'
 import { DEFAULT_CUSTOMER_PROFILE, getCustomerProfileSnapshot } from '@/lib/customer/profile-queries'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'KYC center',
+  description: 'Upload identity documents for Oxour Go verification.',
+}
 
 export default async function KycPage() {
   const user = await getAuthenticatedUser()

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Card, CardContent } from '@/components/ui/Card'
 import { cardSurfaceHover, cardSurfaceTransition } from '@/components/ui/card-tokens'
+import { initialProfileFullName } from '@/lib/customer/sanitize-profile-name'
 import { cn } from '@/lib/utils/cn'
 
 function validateIndianMobile(raw: string): string | null {
@@ -28,7 +29,9 @@ function validateIndianMobile(raw: string): string | null {
 type Profile = Database['public']['Tables']['profiles']['Row'] | null
 
 export function CustomerSettingsForm({ user, profile }: { user: User; profile: Profile }) {
-  const [fullName, setFullName] = useState(profile?.full_name ?? (user.user_metadata?.full_name as string) ?? '')
+  const [fullName, setFullName] = useState(
+    initialProfileFullName(profile?.full_name, user.user_metadata?.full_name as string | undefined),
+  )
   const [phone, setPhone] = useState(profile?.phone ?? '')
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url ?? '')
   const [message, setMessage] = useState<string | null>(null)

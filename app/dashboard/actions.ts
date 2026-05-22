@@ -4,8 +4,10 @@ import { revalidatePath } from 'next/cache'
 
 import type { KycDocumentRow } from '@/lib/customer/kyc-queries'
 import { getAuthenticatedUser } from '@/lib/auth/server'
+import { isRolePlaceholderName } from '@/lib/customer/sanitize-profile-name'
 import { onKycSubmitted } from '@/lib/notifications/events'
 import { KYC_STORAGE_BUCKET } from '@/lib/kyc/constants'
+import { pickLatestDocPerType, type KycDocMinimal } from '@/lib/kyc/compute-kyc-profile-status'
 import { syncProfileKycFromDocuments } from '@/lib/kyc/sync-profile-kyc'
 import { createClient } from '@/lib/supabase/server'
 import { adminActionDbFailed, SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
@@ -26,7 +28,8 @@ export async function updateCustomerProfileAction(formData: FormData): Promise<{
       return { ok: false, message: SAFE_USER_MESSAGE.unauthorized }
     }
 
-    const fullName = String(formData.get('fullName') ?? '').trim()
+    const rawName = String(formData.get('fullName') ?? '').trim()
+    const fullName = isRolePlaceholderName(rawName) ? '' : rawName
     const phone = String(formData.get('phone') ?? '').trim()
     const avatarUrl = String(formData.get('avatarUrl') ?? '').trim()
 
@@ -176,5 +179,56 @@ export async function registerKycDocumentAction(input: {
     void onKycSubmitted(user.id, data.id, input.documentType)
 
     return { ok: true, document: data as KycDocumentRow }
+  })
+}
+
+function kycReadyForReview(latest: ReturnType<typeof pickLatestDocPerType>): boolean {
+  const license = latest.get('license')
+  const selfie = latest.get('selfie')
+  const idOk = Boolean(latest.get('aadhaar') || latest.get('pan'))
+  return Boolean(license && selfie && idOk)
+}
+
+/** Marks KYC as submitted for ops review once required document slots are filled. */
+export async function submitKycForReviewAction(): Promise<{ ok: boolean; message?: string }> {
+  return runInstrumentedServerAction('submitKycForReviewAction', 'kyc', async () => {
+    const user = await getAuthenticatedUser()
+    if (!user) return { ok: false, message: SAFE_USER_MESSAGE.unauthorized }
+
+    const supabase = await createClient()
+    const { data: docs, error } = await supabase
+      .from('kyc_documents')
+      .select('id, document_type, status, created_at')
+      .eq('user_id', user.id)
+
+    if (error) return kycActionDbFailed('submitKycForReviewAction:select_docs', error)
+
+    const latest = pickLatestDocPerType((docs ?? []) as KycDocMinimal[])
+    if (!kycReadyForReview(latest)) {
+      return {
+        ok: false,
+        message: 'Upload your driving license, Aadhaar or PAN, and a selfie before submitting for review.',
+      }
+    }
+
+    const syncRes = await syncProfileKycFromDocuments(supabase, user.id)
+    if (!syncRes.ok) return syncRes
+
+    const nowIso = new Date().toISOString()
+    const { error: upErr } = await supabase
+      .from('profiles')
+      .update({ kyc_submitted_at: nowIso, updated_at: nowIso })
+      .eq('user_id', user.id)
+      .is('kyc_submitted_at', null)
+
+    if (upErr) return kycActionDbFailed('submitKycForReviewAction:update_profile', upErr)
+
+    const notifyDocId = (docs ?? []).find((d) => d.document_type === 'license')?.id ?? (docs ?? [])[0]?.id ?? user.id
+    revalidatePath('/dashboard/kyc')
+    revalidatePath('/dashboard')
+    revalidatePath('/dashboard/bookings')
+    void onKycSubmitted(user.id, notifyDocId, 'kyc_package')
+
+    return { ok: true }
   })
 }

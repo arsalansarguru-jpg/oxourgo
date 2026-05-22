@@ -203,7 +203,7 @@ export function FleetClientView({
               </div>
 
               <div className="hidden border-t border-stroke/80 pt-4 md:block">
-                <FilterPills active={activeFilters} onToggle={toggle} layout="stacked" cars={cars} />
+                <FilterPills active={activeFilters} onToggle={toggle} layout="stacked" cars={filtered} />
               </div>
             </div>
           </div>
@@ -222,7 +222,7 @@ export function FleetClientView({
               </div>
             }
           >
-            <FilterPills active={activeFilters} onToggle={toggle} layout="stacked" cars={cars} />
+            <FilterPills active={activeFilters} onToggle={toggle} layout="stacked" cars={filtered} />
           </FleetFilterDrawer>
 
           {cars.length > 0 ? (

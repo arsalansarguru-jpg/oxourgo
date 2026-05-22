@@ -26,18 +26,21 @@ export function useResolvedAppRole(): ResolvedAppRoleState {
   const [appRole, setAppRole] = useState<AppAuthRole>('customer')
   const [ready, setReady] = useState(false)
 
-  const refresh = useCallback(async () => {
-    if (!supabase) {
-      setUser(null)
-      setAppRole('customer')
+  const refresh = useCallback(
+    async (opts?: { refresh?: boolean }) => {
+      if (!supabase) {
+        setUser(null)
+        setAppRole('customer')
+        setReady(true)
+        return
+      }
+      const resolved = await resolveClientAuthRole(supabase, { refresh: opts?.refresh })
+      setUser(resolved.user)
+      setAppRole(resolved.appRole)
       setReady(true)
-      return
-    }
-    const resolved = await resolveClientAuthRole(supabase)
-    setUser(resolved.user)
-    setAppRole(resolved.appRole)
-    setReady(true)
-  }, [supabase])
+    },
+    [supabase],
+  )
 
   useEffect(() => {
     if (!supabase) {
@@ -48,7 +51,7 @@ export function useResolvedAppRole(): ResolvedAppRoleState {
     }
 
     let cancelled = false
-    void refresh().then(() => {
+    void refresh({ refresh: true }).then(() => {
       if (!cancelled) setReady(true)
     })
 
@@ -61,12 +64,23 @@ export function useResolvedAppRole(): ResolvedAppRoleState {
         setReady(true)
         return
       }
-      void refresh()
+      const shouldRefresh =
+        event === 'SIGNED_IN' ||
+        event === 'TOKEN_REFRESHED' ||
+        event === 'INITIAL_SESSION' ||
+        event === 'USER_UPDATED'
+      void refresh({ refresh: shouldRefresh })
     })
+
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void refresh()
+    }
+    document.addEventListener('visibilitychange', onVisible)
 
     return () => {
       cancelled = true
       subscription.unsubscribe()
+      document.removeEventListener('visibilitychange', onVisible)
     }
   }, [supabase, refresh])
 

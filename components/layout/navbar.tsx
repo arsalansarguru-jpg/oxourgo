@@ -43,7 +43,7 @@ export function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
   const supabase = useSupabase()
-  const { user, ready, isStaff } = useResolvedAppRole()
+  const { user, ready, isStaff, refresh } = useResolvedAppRole()
   const accountHref = isStaff ? ADMIN_HOME : CUSTOMER_HOME
   const accountMenuRef = useRef<HTMLDetailsElement>(null)
   const [open, setOpen] = useState(false)
@@ -63,7 +63,8 @@ export function Navbar() {
   useEffect(() => {
     setOpen(false)
     accountMenuRef.current?.removeAttribute('open')
-  }, [pathname])
+    void refresh()
+  }, [pathname, refresh])
 
   async function handleSignOut() {
     if (!supabase || signingOut) return
@@ -82,7 +83,11 @@ export function Navbar() {
     <>
       <header className="sticky top-0 z-50 border-b border-stroke bg-carbon/88 pt-[var(--safe-top)] shadow-[0_18px_60px_-48px_rgba(0,0,0,0.7)] backdrop-blur-xl">
         <div className="container-app flex min-h-[var(--public-header-inner-h)] items-center justify-between gap-4">
-          <Link href="/" className="flex min-w-0 items-center gap-2" onClick={() => setOpen(false)}>
+          <Link
+            href="/"
+            className="flex min-w-0 items-center gap-2 rounded-md focus-visible:shadow-none"
+            onClick={() => setOpen(false)}
+          >
             <BrandLogo priority className="h-8 w-auto max-w-[7.5rem] shrink-0 sm:max-w-[8.5rem]" />
             <span className="sr-only">{BRAND.name}</span>
           </Link>
@@ -124,7 +129,7 @@ export function Navbar() {
             {ready && user ? (
               <details ref={accountMenuRef} className="relative hidden sm:block">
                 <summary
-                  className="flex cursor-pointer list-none items-center gap-2 rounded-md px-1 py-1 [&::-webkit-details-marker]:hidden"
+                  className="flex cursor-pointer list-none items-center gap-2 rounded-md px-1 py-1 focus-visible:shadow-none [&::-webkit-details-marker]:hidden"
                   aria-label="Account"
                 >
                   {avatarUrl ? (

@@ -2,7 +2,7 @@ import type { Database } from '@/lib/supabase/database.types'
 import type { Car, CarCategory, CarStatus, FuelType, Transmission } from '@/types/car'
 import type { FleetCar, FleetCarAvailabilityLabel, FleetCarCategory, FleetCarFuel } from '@/lib/fleet/types'
 import { getPublicStorageObjectUrl } from '@/lib/supabase/storage-public-url'
-import { resolveFleetImageUrl } from '@/lib/fleet/mappers'
+import { VEHICLE_IMAGE_FALLBACK } from '@/constants/vehicle-media'
 
 export type VehicleRow = Database['public']['Tables']['vehicles']['Row']
 
@@ -20,12 +20,12 @@ export function parseMoneyIntRupees(value: unknown, fallback = 0): number {
   return Math.round(n)
 }
 
-function resolveVehicleImageUrl(image: string | null, brand: string): string {
+function resolveVehicleImageUrl(image: string | null): string {
   const raw = image?.trim()
-  if (!raw) return resolveFleetImageUrl(brand)
+  if (!raw) return VEHICLE_IMAGE_FALLBACK
   if (/^https?:\/\//i.test(raw)) return raw
   const url = getPublicStorageObjectUrl('fleet', raw)
-  return url ?? resolveFleetImageUrl(brand)
+  return url ?? VEHICLE_IMAGE_FALLBACK
 }
 
 export function modelFromListingName(brand: string, name: string): string {
@@ -161,7 +161,7 @@ function toCarStatus(row: VehicleRow): CarStatus {
 
 export function mapVehicleRowToFleetCar(row: VehicleRow): FleetCar {
   const price = parseMoneyIntRupees(row.price_per_day)
-  const imageUrl = resolveVehicleImageUrl(row.image, row.brand)
+  const imageUrl = resolveVehicleImageUrl(row.image)
   const listingName = String(row.name ?? '').trim()
   const displayName = listingName || `${row.brand} ${modelFromListingName(row.brand, listingName)}`.trim()
   const year =
@@ -188,7 +188,7 @@ export function mapVehicleRowToFleetCar(row: VehicleRow): FleetCar {
 
 export function mapVehicleRowToCar(row: VehicleRow): Car {
   const price = parseMoneyIntRupees(row.price_per_day)
-  const imageUrl = resolveVehicleImageUrl(row.image, row.brand)
+  const imageUrl = resolveVehicleImageUrl(row.image)
   const listingName = String(row.name ?? '').trim()
   const name = listingName || `${row.brand} ${modelFromListingName(row.brand, listingName)}`.trim()
   const gallery = [imageUrl, imageUrl, imageUrl]

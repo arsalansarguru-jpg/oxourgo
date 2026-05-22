@@ -38,7 +38,7 @@ export function LoginHeroPanel({ className }: LoginHeroPanelProps) {
       />
 
       <div
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_90%_70%_at_50%_100%,rgba(10,10,12,0.92),transparent_58%),radial-gradient(ellipse_60%_50%_at_80%_20%,rgba(59,130,246,0.12),transparent_55%),linear-gradient(165deg,rgba(10,10,12,0.15)_0%,rgba(10,10,12,0.55)_45%,rgba(10,10,12,0.92)_100%)]"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(5,8,22,0.88)_0%,rgba(5,8,22,0.55)_42%,rgba(5,8,22,0.2)_68%,transparent_88%),radial-gradient(ellipse_90%_70%_at_50%_100%,rgba(10,10,12,0.92),transparent_58%),radial-gradient(ellipse_60%_50%_at_80%_20%,rgba(59,130,246,0.12),transparent_55%),linear-gradient(165deg,rgba(10,10,12,0.15)_0%,rgba(10,10,12,0.55)_45%,rgba(10,10,12,0.92)_100%)]"
         aria-hidden
       />
       <div

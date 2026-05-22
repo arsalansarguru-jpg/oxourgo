@@ -50,7 +50,7 @@ function PillRow({
             aria-pressed={isOn}
             onClick={() => onToggle(id)}
             className={cn(
-              'touch-manipulation inline-flex min-h-11 min-w-[2.75rem] items-center justify-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-semibold tracking-[-0.01em] transition-[border-color,background-color,color,transform,box-shadow] duration-300 active:scale-[0.97]',
+              'touch-manipulation inline-flex min-h-11 min-w-[2.75rem] items-center justify-center gap-1.5 rounded-full border px-3.5 py-2 text-xs font-semibold tracking-[-0.01em] transition-[border-color,background-color,color,transform,box-shadow] duration-300 focus-visible:shadow-none active:scale-[0.97]',
               isOn
                 ? 'border-electric bg-electric text-white shadow-[0_0_0_1px_rgba(59,130,246,0.45),0_12px_36px_-18px_rgba(59,130,246,0.55)] hover:brightness-[1.06]'
                 : 'border-stroke bg-fill-glass text-muted shadow-[inset_0_1px_0_0_rgba(255,255,255,0.04)] hover:border-stroke-strong hover:bg-fill-glass-strong hover:text-soft',

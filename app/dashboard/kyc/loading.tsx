@@ -1,21 +1,16 @@
-import { cn } from '@/lib/utils/cn'
-import { cardSurfaceBase } from '@/components/ui/card-tokens'
+import { Skeleton } from '@/components/ui/skeleton'
 
-export default function KycCenterLoading() {
+export default function KycLoading() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" aria-busy="true" aria-live="polite">
       <div className="space-y-3">
-        <div className="h-3 w-28 animate-pulse rounded-full bg-fill-glass-strong" />
-        <div className="h-9 w-48 max-w-full animate-pulse rounded-lg bg-fill-glass-strong" />
-        <div className="h-4 w-full max-w-2xl animate-pulse rounded bg-fill-glass-strong" />
-        <div className="h-4 w-full max-w-xl animate-pulse rounded bg-fill-glass-strong" />
+        <Skeleton className="h-3 w-28 rounded-full" />
+        <Skeleton className="h-9 w-full max-w-md rounded-xl" />
+        <p className="text-sm font-medium text-electric/90">Loading KYC center…</p>
       </div>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-        {Array.from({ length: 5 }).map((_, i) => (
-          <div
-            key={i}
-            className={cn(cardSurfaceBase, 'h-64 animate-pulse rounded-2xl border border-stroke bg-fill-glass-strong/80')}
-          />
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Skeleton key={i} className="h-44 w-full rounded-2xl" />
         ))}
       </div>
     </div>

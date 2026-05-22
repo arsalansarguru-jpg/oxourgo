@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { Check, Circle, FileUp, UserRound } from 'lucide-react'
 
@@ -16,6 +16,7 @@ import { KYC_TILES, KycUploadTile } from '@/features/dashboard/kyc-upload-tile'
 import { cn } from '@/lib/utils/cn'
 import { Badge } from '@/components/ui/Badge'
 import { cardSurfaceBase } from '@/components/ui/card-tokens'
+import { submitKycForReviewAction } from '@/app/dashboard/actions'
 import { Button } from '@/components/ui/Button'
 
 export type KycCenterProfileSnapshot = {
@@ -38,6 +39,8 @@ export function KycCenterClient({
 }) {
   const supabase = useSupabase()
   const [docs, setDocs] = useState(initialDocs)
+  const [submitMessage, setSubmitMessage] = useState<string | null>(null)
+  const [submitPending, startSubmit] = useTransition()
 
   useEffect(() => {
     setDocs(initialDocs)
@@ -90,6 +93,16 @@ export function KycCenterClient({
   }
 
   const latestForTile = (t: KycDocumentTypeId) => latestMap.get(t) as KycDocumentRow | undefined
+
+  const readyForReview =
+    Boolean(latestMap.get('license')) &&
+    Boolean(latestMap.get('selfie')) &&
+    Boolean(latestMap.get('aadhaar') || latestMap.get('pan'))
+
+  const canSubmit =
+    readyForReview &&
+    initialProfile.kyc_status !== 'approved' &&
+    initialProfile.kyc_status !== 'pending'
 
   const submissionBadgeVariant = (status: string) => {
     if (status === 'approved') return 'success' as const
@@ -188,6 +201,33 @@ export function KycCenterClient({
           </div>
         </div>
       </div>
+
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm text-muted">
+          {readyForReview
+            ? 'All required documents are uploaded. Submit when you are ready for our team to review.'
+            : 'Upload license, government ID (Aadhaar or PAN), and selfie to enable submission.'}
+        </p>
+        <Button
+          type="button"
+          size="lg"
+          disabled={!canSubmit || submitPending}
+          onClick={() => {
+            setSubmitMessage(null)
+            startSubmit(async () => {
+              const res = await submitKycForReviewAction()
+              setSubmitMessage(res.ok ? 'Submitted for review — we will notify you when verified.' : res.message ?? 'Could not submit.')
+            })
+          }}
+        >
+          {submitPending ? 'Submitting…' : 'Submit for review'}
+        </Button>
+      </div>
+      {submitMessage ? (
+        <p className="text-sm font-medium text-soft" role="status">
+          {submitMessage}
+        </p>
+      ) : null}
 
       <div className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {KYC_TILES.map((tile) => (

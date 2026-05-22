@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { dedupePublicVehicleRows } from '@/lib/fleet/dedupe-vehicle-rows'
 import { fetchPublicVehicleRows, isVehicleShownOnPublicCatalog } from '@/lib/fleet/public-vehicle-catalog'
 import type { VehicleRow } from '@/lib/fleet/vehicle-mappers'
 
@@ -23,5 +24,5 @@ export function sortPublicCatalogRows(rows: VehicleRow[]): VehicleRow[] {
 export async function loadListablePublicVehicleRows(): Promise<VehicleRow[]> {
   const { rows } = await fetchPublicVehicleRows()
   const listable = rows.filter((r) => isVehicleShownOnPublicCatalog(r))
-  return sortPublicCatalogRows(listable)
+  return sortPublicCatalogRows(dedupePublicVehicleRows(listable))
 }

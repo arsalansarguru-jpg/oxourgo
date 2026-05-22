@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
 import { CustomerPaymentsView } from '@/features/dashboard/customer-payments-view'
@@ -6,6 +7,11 @@ import { listBookingsForUser, unwrapListBookingsResult } from '@/lib/customer/bo
 import { listPaymentEvents } from '@/lib/customer/payment-queries'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata: Metadata = {
+  title: 'Payments',
+  description: 'Payment history and rental charges for your Oxour Go bookings.',
+}
 
 export default async function PaymentsPage() {
   const user = await getAuthenticatedUser()

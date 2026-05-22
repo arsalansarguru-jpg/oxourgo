@@ -233,6 +233,22 @@ html[data-theme='dark'] {
     transition: var(--theme-transition);
     /* Solid matte only — hero mesh is scoped to marketing hero sections (not viewport-fixed orbs). */
     background-color: var(--color-matte);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /*
+   * Focus indicators: thin outline only (no ring-offset box-shadow).
+   * Large teal rings on rounded-full controls were reported as a "ghost cursor" overlay.
+   */
+  :where(button, a, summary, input, textarea, select, [role='button']):focus:not(:focus-visible) {
+    outline: none;
+    box-shadow: none;
+  }
+
+  :where(button, a, summary, input, textarea, select, [role='button']):focus-visible {
+    outline: 2px solid rgb(0 102 255 / 0.55);
+    outline-offset: 2px;
+    box-shadow: none;
   }
 
   h1,
@@ -261,9 +277,6 @@ html[data-theme='dark'] {
     @apply bg-electric/25 text-soft;
   }
 
-  :where(a[href]):not([class*='ring-offset']):focus-visible {
-    @apply rounded-md outline-none ring-2 ring-electric/50 ring-offset-2 ring-offset-matte;
-  }
 
   input::placeholder,
   textarea::placeholder {

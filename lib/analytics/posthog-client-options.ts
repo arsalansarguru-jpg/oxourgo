@@ -11,12 +11,13 @@ export function buildPosthogClientOptions(): Partial<PostHogConfig> {
     autocapture: false,
     capture_pageview: false,
     capture_pageleave: true,
-    disable_session_recording: false,
+    disable_session_recording: process.env.NEXT_PUBLIC_POSTHOG_DISABLE_REPLAY === '1',
     session_recording: {
       maskAllInputs: true,
       maskTextSelector: '[data-private],[data-ph-mask]',
       blockSelector: '[data-ph-block]',
     },
+    disable_surveys: true,
     loaded: (ph) => {
       ph.register({ analytics_environment: getAnalyticsEnvironment() })
     },

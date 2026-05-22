@@ -22,33 +22,13 @@ export type FleetCarRow = {
   gallery_paths?: string[] | null
 }
 
-const brandImageMap: Record<string, string> = {
-  bmw: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=1600&q=80',
-  audi: 'https://images.unsplash.com/photo-1606664515524-ed2f786a0bd6?auto=format&fit=crop&w=1600&q=80',
-  mercedes: 'https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=1600&q=80',
-  porsche: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=80',
-  range: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=1600&q=80',
-  land: 'https://images.unsplash.com/photo-1519641471654-76ce0107ad1b?auto=format&fit=crop&w=1600&q=80',
-  toyota: 'https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?auto=format&fit=crop&w=1600&q=80',
-  honda: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=1600&q=80',
-  maruti: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=1600&q=80',
-  hyundai: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=80',
-  kia: 'https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1600&q=80',
-}
-
-export function resolveFleetImageUrl(brand: string): string {
-  const key = brand.trim().toLowerCase()
-  if (brandImageMap[key]) return brandImageMap[key]!
-  return VEHICLE_IMAGE_FALLBACK
-}
-
 function resolveRowPrimaryImage(row: FleetCarRow): string {
   const path = row.cover_image_path?.trim()
   if (path) {
     const url = getPublicStorageObjectUrl('fleet', path)
     if (url) return url
   }
-  return resolveFleetImageUrl(row.brand)
+  return VEHICLE_IMAGE_FALLBACK
 }
 
 function resolveRowGallery(row: FleetCarRow, primary: string): string[] {

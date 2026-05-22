@@ -37,7 +37,7 @@ const sizes = {
 } as const
 
 const base =
-  'touch-manipulation inline-flex shrink-0 items-center justify-center gap-2 text-sm font-medium tracking-wide transition-[transform,filter,background-color,border-color,box-shadow] duration-200 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/45 focus-visible:ring-offset-2 focus-visible:ring-offset-matte disabled:pointer-events-none disabled:translate-y-0 disabled:opacity-45'
+  'touch-manipulation inline-flex shrink-0 items-center justify-center gap-2 text-sm font-medium tracking-wide transition-[transform,filter,background-color,border-color,box-shadow] duration-200 hover:-translate-y-0.5 focus-visible:shadow-none disabled:pointer-events-none disabled:translate-y-0 disabled:opacity-45'
 
 export type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'href' | 'onClick'> & {
   variant?: keyof typeof variants

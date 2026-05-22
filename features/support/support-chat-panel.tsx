@@ -31,7 +31,7 @@ export function SupportChatPanel({ greetingName, initialMessages, signedIn }: Su
     const text = chat.trim()
     if (!text || pending) return
     if (!signedIn) {
-      setError('Sign in to save messages with our operations desk.')
+      router.push(`/login?${new URLSearchParams({ redirect: '/support' }).toString()}`)
       return
     }
 
@@ -102,11 +102,14 @@ export function SupportChatPanel({ greetingName, initialMessages, signedIn }: Su
         />
         <Button
           type="button"
-          className="w-full shrink-0 sm:w-40"
-          disabled={pending || !chat.trim() || !signedIn}
+          variant={signedIn ? 'primary' : 'secondary'}
+          className={cn('w-full shrink-0 sm:w-40', !signedIn && 'cursor-not-allowed opacity-50')}
+          disabled={pending || !chat.trim()}
           onClick={handleSend}
         >
-          {pending ? (
+          {!signedIn ? (
+            'Sign in to send'
+          ) : pending ? (
             <span className="inline-flex items-center gap-2">
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
               Sending…

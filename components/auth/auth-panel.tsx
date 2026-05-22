@@ -144,6 +144,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
   const [sentPhone, setSentPhone] = useState<string | null>(null)
 
   const [error, setError] = useState<string | null>(null)
+  const [fieldError, setFieldError] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
   const [pending, setPending] = useState<Pending>(null)
 
@@ -203,6 +204,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
 
   const resetFlowMessages = () => {
     setError(null)
+    setFieldError(null)
     setInfo(null)
   }
 
@@ -249,12 +251,12 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
     resetFlowMessages()
     const trimmed = email.trim()
     if (!trimmed || !trimmed.includes('@')) {
-      setError('Enter a valid email address.')
+      setFieldError('Enter a valid email address.')
       return
     }
     if (!callbackUrl) {
       console.error('[auth-panel] missing origin for callback URL')
-      setError('Could not start sign-in from this page. Open the app in your browser and try again.')
+      setFieldError('Could not start sign-in from this page. Open the app in your browser and try again.')
       return
     }
     setPending('email')
@@ -268,12 +270,12 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
         },
       })
       if (err) {
-        setError(formatAuthError(err))
+        setFieldError(formatAuthError(err))
         return
       }
       setInfo('Check your inbox for a secure sign-in link. It may take a minute to arrive.')
     } catch (e) {
-      setError(formatAuthError(e instanceof Error ? e : undefined))
+      setFieldError(formatAuthError(e instanceof Error ? e : undefined))
     } finally {
       setPending(null)
     }
@@ -283,7 +285,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
     resetFlowMessages()
     const e164 = normalizePhoneToE164(phone)
     if (!e164) {
-      setError('Use a valid Indian mobile (+91) or enter a full international number with +.')
+      setFieldError('Use a valid Indian mobile (+91) or enter a full international number with +.')
       return
     }
     setPending('otp-send')
@@ -297,14 +299,14 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
         },
       })
       if (err) {
-        setError(formatAuthError(err))
+        setFieldError(formatAuthError(err))
         return
       }
       setSentPhone(e164)
       setOtpPhase('verify')
       setInfo('Code sent. Enter the 6-digit OTP from your SMS.')
     } catch (e) {
-      setError(formatAuthError(e instanceof Error ? e : undefined))
+      setFieldError(formatAuthError(e instanceof Error ? e : undefined))
     } finally {
       setPending(null)
     }
@@ -314,7 +316,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
     resetFlowMessages()
     const token = otp.replace(/\D/g, '')
     if (!sentPhone || token.length < 6) {
-      setError('Enter the 6-digit code from your SMS.')
+      setFieldError('Enter the 6-digit code from your SMS.')
       return
     }
     setPending('otp-verify')
@@ -325,7 +327,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
         type: 'sms',
       })
       if (err) {
-        setError(formatAuthError(err))
+        setFieldError(formatAuthError(err))
         return
       }
       const { user, appRole } = await resolveClientAuthRole(sb)
@@ -346,7 +348,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
       router.push(destination)
       router.refresh()
     } catch (e) {
-      setError(formatAuthError(e instanceof Error ? e : undefined))
+      setFieldError(formatAuthError(e instanceof Error ? e : undefined))
     } finally {
       setPending(null)
     }
@@ -392,7 +394,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
           Sign in with the method you prefer. Same vault-grade session, whichever path you choose.
         </p>
 
-        {error ? (
+        {error && step === 'methods' ? (
           <div
             role="alert"
             className="mt-5 rounded-xl border border-red-400/25 bg-red-500/[0.08] px-4 py-3 text-sm leading-relaxed text-red-100/95"
@@ -444,6 +446,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
                     placeholder="+91 98XXX XXXXX"
                     value={phone}
                     disabled={busy}
+                    error={otpPhase === 'phone' ? fieldError ?? undefined : undefined}
                     onChange={(e) => setPhone(e.target.value)}
                     className="min-h-[3.25rem] text-[1.0625rem] tracking-wide"
                   />
@@ -481,6 +484,7 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
                     maxLength={6}
                     value={otp}
                     disabled={busy}
+                    error={otpPhase === 'verify' ? fieldError ?? undefined : undefined}
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
                     className="min-h-[3.25rem] text-center text-[1.25rem] font-medium tracking-[0.35em] text-soft"
                   />
@@ -602,9 +606,10 @@ export function AuthPanel({ initialAuthError, redirectTo }: AuthPanelProps) {
                           label="Work or personal email"
                           type="email"
                           autoComplete="email"
-                          placeholder="you@studio.com"
+                          placeholder="you@example.com"
                           value={email}
                           disabled={busy}
+                          error={showEmail ? fieldError ?? undefined : undefined}
                           onChange={(e) => setEmail(e.target.value)}
                           className="min-h-[3.25rem] text-[1.0625rem]"
                         />

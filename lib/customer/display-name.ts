@@ -2,6 +2,8 @@
  * Canonical customer display name resolution for admin + dashboard surfaces.
  */
 
+import { isRolePlaceholderName } from '@/lib/customer/sanitize-profile-name'
+
 export type CustomerNameInput = {
   userId: string
   fullName?: string | null
@@ -29,13 +31,13 @@ function fromEmailLocal(email: string): string | null {
 /** Best-effort display name — never returns generic placeholders like "Client" or "Guest". */
 export function resolveCustomerDisplayName(input: CustomerNameInput): string {
   const full = input.fullName?.trim()
-  if (full) return full
+  if (full && !isRolePlaceholderName(full)) return full
 
   const display = input.displayName?.trim()
-  if (display) return display
+  if (display && !isRolePlaceholderName(display)) return display
 
   const meta = fromMetadata(input.authMetadata)
-  if (meta) return meta
+  if (meta && !isRolePlaceholderName(meta)) return meta
 
   const email = input.email?.trim()
   if (email) {

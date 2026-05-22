@@ -1,7 +1,7 @@
 import { fleetCatalogTitle } from '@/lib/admin/fleet-display'
 import type { BookingWithCar, VehicleSummaryRow } from '@/lib/supabase/database.types'
 import { getPublicStorageObjectUrl } from '@/lib/supabase/storage-public-url'
-import { resolveFleetImageUrl } from '@/lib/fleet/mappers'
+import { VEHICLE_IMAGE_FALLBACK } from '@/constants/vehicle-media'
 
 /** Customer-facing booking lifecycle labels (maps from DB `booking_status`). */
 export type CustomerBookingStatusBadge = 'pending' | 'scheduled' | 'on_trip' | 'cancelled' | 'completed'
@@ -30,11 +30,11 @@ export function formatBookingVehicleTitle(row: BookingWithCar): string {
   })
 }
 
-function imageFromVehicleRow(brand: string, image: string | null): string {
+function imageFromVehicleRow(image: string | null): string {
   const raw = image?.trim()
-  if (!raw) return resolveFleetImageUrl(brand)
+  if (!raw) return VEHICLE_IMAGE_FALLBACK
   if (/^https?:\/\//i.test(raw)) return raw
-  return getPublicStorageObjectUrl('fleet', raw) ?? resolveFleetImageUrl(brand)
+  return getPublicStorageObjectUrl('fleet', raw) ?? VEHICLE_IMAGE_FALLBACK
 }
 
 /** Resolves hero image plus name/brand for the `vehicles` join on a booking row. */
@@ -43,13 +43,13 @@ export function resolveBookingVehicleVisual(row: BookingWithCar): BookingVehicle
   if (veh) {
     const title = formatBookingVehicleTitle(row)
     return {
-      imageUrl: imageFromVehicleRow(veh.brand, veh.image),
+      imageUrl: imageFromVehicleRow(veh.image),
       name: title,
       brand: veh.brand,
     }
   }
   return {
-    imageUrl: resolveFleetImageUrl(''),
+    imageUrl: VEHICLE_IMAGE_FALLBACK,
     name: 'Vehicle',
     brand: '',
   }

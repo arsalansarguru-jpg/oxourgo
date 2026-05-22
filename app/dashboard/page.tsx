@@ -9,6 +9,7 @@ import { listBookingsForUser, unwrapListBookingsResult } from '@/lib/customer/bo
 import { listKycDocuments } from '@/lib/customer/kyc-queries'
 import { getCustomerProfileSnapshot } from '@/lib/customer/profile-queries'
 import { isProfileKycApprovedForBooking } from '@/lib/kyc/kyc-booking-eligible'
+import { buildKycUiSnapshot } from '@/lib/kyc/kyc-ui-snapshot'
 import { logUnknownError } from '@/lib/errors/safe-user-message'
 
 export const dynamic = 'force-dynamic'
@@ -46,13 +47,16 @@ export default async function DashboardPage({
     ])
 
     const bookingCleared = isProfileKycApprovedForBooking(profile)
+    const kycUi = buildKycUiSnapshot({
+      profileKycStatus: profile.kyc_status,
+      docs: kycDocs,
+      bookingCleared,
+    })
 
     return (
       <CustomerDashboardHome
         bookings={unwrapListBookingsResult(bookingsResult)}
-        kycUploadedCount={kycDocs.length}
-        verificationTier={profile.verification_tier}
-        kycStatus={profile.kyc_status}
+        kycUi={kycUi}
         bookingCleared={bookingCleared}
         accessNotice={accessNotice}
       />
@@ -62,9 +66,7 @@ export default async function DashboardPage({
     return (
       <CustomerDashboardHome
         bookings={[]}
-        kycUploadedCount={0}
-        verificationTier="basic"
-        kycStatus="not_started"
+        kycUi={buildKycUiSnapshot({ profileKycStatus: 'not_started', docs: [] })}
         bookingCleared={false}
         accessNotice={accessNotice}
       />
