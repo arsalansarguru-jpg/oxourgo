@@ -231,9 +231,8 @@ html[data-theme='dark'] {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     transition: var(--theme-transition);
-    background:
-      var(--background-image-hero-mesh),
-      linear-gradient(180deg, var(--color-matte), var(--color-matte));
+    /* Solid matte only — hero mesh is scoped to marketing hero sections (not viewport-fixed orbs). */
+    background-color: var(--color-matte);
   }
 
   h1,
@@ -448,6 +447,10 @@ html[data-theme='dark'] {
   width: 100%;
   max-width: min(var(--container-max), calc(100vw - var(--spacing-edge) * 2));
   padding-inline: var(--spacing-edge);
+}
+
+@utility bg-hero-mesh {
+  background-image: var(--background-image-hero-mesh);
 }
 
 @utility scroll-touch {

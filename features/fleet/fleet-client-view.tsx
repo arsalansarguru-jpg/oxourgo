@@ -227,7 +227,6 @@ export function FleetClientView({
 
           {cars.length > 0 ? (
             <motion.p
-              layout
               className="text-sm text-muted"
               initial={false}
               animate={{ opacity: 1 }}
@@ -265,7 +264,6 @@ export function FleetClientView({
               <AnimatePresence mode="wait">
                 <motion.div
                   key={gridLayoutKey}
-                  layout
                   initial={{ opacity: 0.88, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0.8, y: -4 }}
@@ -279,7 +277,6 @@ export function FleetClientView({
                       {slice.map((car) => (
                         <motion.div
                           key={car.id}
-                          layout
                           transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                         >
                           <FleetCarCard car={car} tripFrom={from} tripTo={to} />
@@ -292,7 +289,6 @@ export function FleetClientView({
 
               {totalPages > 1 && !isSearchDebouncing ? (
                 <motion.div
-                  layout
                   className="mt-10 flex flex-wrap items-center justify-center gap-3 sm:gap-4"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
