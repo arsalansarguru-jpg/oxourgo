@@ -51,7 +51,7 @@ export async function deliverWhatsAppReply(
     idempotencyKey: input.idempotencyKey ?? null,
     payload: {
       sent,
-      providerConfigured: sendResult.code !== 'not_configured',
+      providerConfigured: !('code' in sendResult) || sendResult.code !== 'not_configured',
       ...(input.payload ?? {}),
     },
   })

@@ -554,6 +554,11 @@ export type Database = {
           assigned_ops_user_id: string | null
           last_inbound_at: string | null
           last_outbound_at: string | null
+          escalated_at: string | null
+          escalation_reason: string | null
+          ai_enabled: boolean
+          last_ai_turn_at: string | null
+          last_ai_model: string | null
           created_at: string
           updated_at: string
         }
@@ -568,6 +573,11 @@ export type Database = {
           assigned_ops_user_id?: string | null
           last_inbound_at?: string | null
           last_outbound_at?: string | null
+          escalated_at?: string | null
+          escalation_reason?: string | null
+          ai_enabled?: boolean
+          last_ai_turn_at?: string | null
+          last_ai_model?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -582,6 +592,11 @@ export type Database = {
           assigned_ops_user_id?: string | null
           last_inbound_at?: string | null
           last_outbound_at?: string | null
+          escalated_at?: string | null
+          escalation_reason?: string | null
+          ai_enabled?: boolean
+          last_ai_turn_at?: string | null
+          last_ai_model?: string | null
           created_at?: string
           updated_at?: string
         }

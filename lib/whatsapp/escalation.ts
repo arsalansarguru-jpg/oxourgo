@@ -18,16 +18,14 @@ export async function escalateWhatsAppConversation(
   const admin = createAdminClient()
   const now = new Date().toISOString()
 
-  const { error } = await admin
-    .from('whatsapp_conversations')
-    .update({
-      status: 'paused',
-      escalated_at: now,
-      escalation_reason: input.reason.slice(0, 500),
-      ai_enabled: false,
-      updated_at: now,
-    })
-    .eq('id', input.conversationId)
+  const patch = {
+    status: 'paused',
+    escalated_at: now,
+    escalation_reason: input.reason.slice(0, 500),
+    ai_enabled: false,
+    updated_at: now,
+  }
+  const { error } = await admin.from('whatsapp_conversations').update(patch).eq('id', input.conversationId)
 
   if (error) {
     logPostgrestError('[escalateWhatsAppConversation]', error)

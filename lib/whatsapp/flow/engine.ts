@@ -298,7 +298,7 @@ export async function runWhatsAppFlowEngine(input: FlowEngineInput): Promise<Flo
   }
 
   return {
-    nextFlowState: state === 'inquiry' ? 'collecting_dates' : state,
+    nextFlowState: state,
     contextPatch: ctx,
     facts: {},
   }

@@ -1,4 +1,6 @@
 -- Operational hardening: profile normalization, support messaging, deposit backfill, fleet uniqueness.
+-- NOTE: payment_status is often payment_status_enum — never use trim(payment_status).
+-- If profiles/support already applied, run: supabase/scripts/operational_hardening_resume.sql
 
 -- ---------------------------------------------------------------------------
 -- profiles: display_name + OAuth metadata backfill
@@ -145,6 +147,109 @@ create policy "support_messages_staff" on public.support_messages
   with check (public.is_ops_staff ());
 
 -- ---------------------------------------------------------------------------
+-- bookings: ensure columns required by app + audit trigger (prior migrations may be missing)
+-- ---------------------------------------------------------------------------
+alter table public.bookings add column if not exists amount_paid bigint;
+alter table public.bookings add column if not exists amount_due bigint;
+alter table public.bookings add column if not exists deposit_held_rupees bigint;
+alter table public.bookings add column if not exists deposit_amount integer;
+alter table public.bookings add column if not exists deleted_at timestamptz;
+
+-- payment_status is text or enum — never trim(); only backfill nulls.
+update public.bookings
+set payment_status = 'pending'
+where payment_status is null;
+
+update public.bookings
+set
+  amount_paid = coalesce(amount_paid, 0),
+  amount_due = coalesce(amount_due, coalesce(total_rupees, 0))
+where amount_paid is null
+   or amount_due is null;
+
+-- Audit trigger must not reference columns that are not on the row type — refresh after alters.
+create or replace function public.audit_log_booking_change ()
+  returns trigger
+  language plpgsql
+  security definer
+  set search_path = public
+as $$
+declare
+  v_action text;
+  v_old jsonb;
+  v_new jsonb;
+  v_track_keys text[] := array[
+    'booking_status',
+    'payment_status',
+    'total_rupees',
+    'amount_paid',
+    'amount_due',
+    'deposit_amount',
+    'deposit_held_rupees',
+    'deleted_at'
+  ];
+begin
+  if tg_op = 'INSERT' then
+    v_action := 'booking.created';
+    v_new := (
+      select coalesce(jsonb_object_agg(key, value), '{}'::jsonb)
+      from jsonb_each(to_jsonb(new))
+      where key = any (v_track_keys)
+    );
+    insert into public.audit_logs (actor_id, actor_role, entity_type, entity_id, action, new_value, metadata)
+    values (
+      new.user_id,
+      'system',
+      'booking',
+      new.id::text,
+      v_action,
+      v_new,
+      jsonb_build_object('bookingId', new.id, 'userId', new.user_id, 'source', 'db_trigger')
+    );
+    return new;
+  end if;
+
+  if tg_op = 'UPDATE' then
+    v_old := (
+      select coalesce(jsonb_object_agg(key, value), '{}'::jsonb)
+      from jsonb_each(to_jsonb(old))
+      where key = any (v_track_keys)
+    );
+    v_new := (
+      select coalesce(jsonb_object_agg(key, value), '{}'::jsonb)
+      from jsonb_each(to_jsonb(new))
+      where key = any (v_track_keys)
+    );
+
+    if (v_new->>'deleted_at') is not null and (v_old->>'deleted_at') is null then
+      v_action := 'booking.soft_deleted';
+    elsif (v_old->>'booking_status') is distinct from (v_new->>'booking_status') then
+      v_action := 'booking.status_changed';
+    elsif (v_old->>'payment_status') is distinct from (v_new->>'payment_status') then
+      v_action := 'booking.payment_status_changed';
+    else
+      v_action := 'booking.updated';
+    end if;
+
+    insert into public.audit_logs (actor_id, actor_role, entity_type, entity_id, action, old_value, new_value, metadata)
+    values (
+      coalesce(auth.uid(), new.user_id),
+      'system',
+      'booking',
+      new.id::text,
+      v_action,
+      v_old,
+      v_new,
+      jsonb_build_object('bookingId', new.id, 'userId', new.user_id, 'source', 'db_trigger')
+    );
+    return new;
+  end if;
+
+  return coalesce(new, old);
+end;
+$$;
+
+-- ---------------------------------------------------------------------------
 -- bookings: backfill missing deposit_amount from vehicle catalog
 -- ---------------------------------------------------------------------------
 update public.bookings b
@@ -174,6 +279,14 @@ where b.deleted_at is null
   and coalesce(b.deposit_amount, 0) = 0
   and coalesce(b.deposit_held_rupees, 0) = 0
   and b.vehicle_id is not null;
+
+-- ---------------------------------------------------------------------------
+-- vehicles: telemetry + soft-delete columns for tracking UI
+-- ---------------------------------------------------------------------------
+alter table public.vehicles add column if not exists vehicle_location text;
+alter table public.vehicles add column if not exists gps_status text default 'unknown';
+alter table public.vehicles add column if not exists fuel_level_pct smallint;
+alter table public.vehicles add column if not exists deleted_at timestamptz;
 
 -- ---------------------------------------------------------------------------
 -- vehicles: prevent duplicate registration numbers (non-empty)
