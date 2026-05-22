@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { toUtcYmd, utcDayEndIso, utcDayStartIso, type AnalyticsResolvedRange } from '@/lib/admin/analytics-range'
+import { analyticsRange7dIst, toIstYmd } from '@/lib/admin/analytics-range'
 import { fetchCommandCenterBundle, type CommandCenterBundle } from '@/lib/admin/data/command-center'
 import { fetchAdminAnalyticsBundle, type AdminAnalyticsBundle } from '@/lib/admin/data/analytics'
 import type { AppAuthRole } from '@/lib/auth/roles'
@@ -30,23 +30,8 @@ export type DashboardOverviewBundle = {
   topVehicles: AdminAnalyticsBundle['tables']['topVehicles']
 }
 
-function analyticsRange7d(): AnalyticsResolvedRange {
-  const now = new Date()
-  const endDay = toUtcYmd(now)
-  const t = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 6, 12, 0, 0, 0))
-  const startDay = toUtcYmd(t)
-  return {
-    preset: '7d',
-    label: 'Last 7 days',
-    startIso: utcDayStartIso(startDay),
-    endIso: utcDayEndIso(endDay),
-    startDay,
-    endDay,
-  }
-}
-
-function utcTodayYmd(): string {
-  return new Date().toISOString().slice(0, 10)
+function istTodayYmd(): string {
+  return toIstYmd()
 }
 
 async function fetchExtendedKpis(
@@ -96,7 +81,7 @@ async function fetchExtendedKpis(
 export async function fetchDashboardOverviewBundle(role: AppAuthRole): Promise<DashboardOverviewBundle> {
   const commandCenter = await fetchCommandCenterBundle(role)
   const admin = createAdminClient()
-  const today = utcTodayYmd()
+  const today = istTodayYmd()
 
   let kpis = await fetchExtendedKpis(admin, today, commandCenter)
 
@@ -104,7 +89,7 @@ export async function fetchDashboardOverviewBundle(role: AppAuthRole): Promise<D
   let analytics: AdminAnalyticsBundle | null = null
 
   if (canAnalytics) {
-    analytics = await fetchAdminAnalyticsBundle(analyticsRange7d())
+    analytics = await fetchAdminAnalyticsBundle(analyticsRange7dIst())
     kpis = { ...kpis, revenueMonthRupees: analytics.totals.monthlyRevenue }
   }
 

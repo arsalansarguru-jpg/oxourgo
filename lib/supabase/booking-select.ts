@@ -1,3 +1,5 @@
+import { safeRupees } from '@/lib/money/safe'
+
 /**
  * Single source of truth for PostgREST booking selects.
  * Tiered fallbacks allow admin lists to load when production schema lags migrations.
@@ -129,10 +131,10 @@ export function normalizeBookingRow<T extends BookingRowLike>(row: T): T & {
   amount_due: number
   amount_paid: number
 } {
-  const total = Math.max(0, Number(row.total_rupees ?? 0))
-  const paid = Math.max(0, Number(row.amount_paid ?? 0))
+  const total = safeRupees(row.total_rupees)
+  const paid = safeRupees(row.amount_paid)
   const due =
-    row.amount_due != null ? Math.max(0, Number(row.amount_due)) : Math.max(0, total - paid)
+    row.amount_due != null ? safeRupees(row.amount_due) : Math.max(0, total - paid)
 
   return {
     ...row,

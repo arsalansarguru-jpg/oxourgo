@@ -69,6 +69,10 @@ export const AUDIT_ACTIONS = {
   // WhatsApp ops
   whatsappLink: 'whatsapp.contact_linked',
   whatsappBooking: 'whatsapp.booking_created',
+  whatsappInbound: 'whatsapp.message_inbound',
+  whatsappOutbound: 'whatsapp.message_outbound',
+  whatsappEscalated: 'whatsapp.escalated',
+  whatsappOpsNotified: 'whatsapp.ops_notified',
 } as const
 
 export type AuditAction = (typeof AUDIT_ACTIONS)[keyof typeof AUDIT_ACTIONS] | string

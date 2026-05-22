@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { istDayStartIso, toIstYmd } from '@/lib/admin/analytics-range'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logPostgrestError } from '@/lib/errors/safe-user-message'
 
@@ -27,7 +28,7 @@ export type SupportTicketMetrics = {
 
 export async function adminSupportTicketMetrics(): Promise<SupportTicketMetrics> {
   const admin = createAdminClient()
-  const dayStart = `${new Date().toISOString().slice(0, 10)}T00:00:00.000Z`
+  const dayStart = istDayStartIso(toIstYmd())
 
   const [openRes, progressRes, urgentRes, resolvedRes] = await Promise.all([
     admin.from('support_tickets').select('id', { count: 'exact', head: true }).eq('status', 'open'),

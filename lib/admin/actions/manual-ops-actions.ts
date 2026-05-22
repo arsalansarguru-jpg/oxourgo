@@ -10,7 +10,9 @@ import { hasPermission } from '@/lib/auth/permissions'
 import { insertBookingCore, type BookingPricingOverride } from '@/lib/booking/create-booking-core'
 import { computeBookingQuote } from '@/lib/booking/pricing'
 import { hasVehicleBookingOverlap } from '@/lib/booking/vehicle-overlap'
+import { isProfileKycApprovedForBooking } from '@/lib/kyc/kyc-booking-eligible'
 import { parseMoneyIntRupees } from '@/lib/fleet/vehicle-mappers'
+import { safeRupees } from '@/lib/money/safe'
 import { buildDeductionsSnapshot, penaltyNotesFromJson } from '@/lib/booking/financial'
 import { onBookingApproved, onBookingCancelled, onBookingCreated } from '@/lib/notifications/events'
 import { adminActionDbFailed } from '@/lib/errors/safe-user-message'
@@ -169,7 +171,7 @@ export async function adminForceConfirmBookingAction(
     const admin = createAdminClient()
     const { data: row, error: fetchErr } = await admin
       .from('bookings')
-      .select('booking_status, vehicle_id, pickup_date, return_date, ops_hold_at, restrictions_bypass')
+      .select('booking_status, vehicle_id, pickup_date, return_date, ops_hold_at, restrictions_bypass, user_id')
       .eq('id', bookingId)
       .single()
 
@@ -192,6 +194,20 @@ export async function adminForceConfirmBookingAction(
         return {
           ok: false,
           message: 'Vehicle overlap detected. Enable bypass restrictions or swap vehicle first.',
+        }
+      }
+    }
+
+    if (!row.restrictions_bypass && row.user_id) {
+      const { data: prof } = await admin
+        .from('profiles')
+        .select('verification_tier, kyc_status')
+        .eq('user_id', row.user_id)
+        .maybeSingle()
+      if (!isProfileKycApprovedForBooking(prof)) {
+        return {
+          ok: false,
+          message: 'Customer KYC must be approved before force confirming. Enable restrictions bypass for ops override.',
         }
       }
     }
@@ -377,7 +393,7 @@ export async function adminSwapBookingVehicleAction(input: {
     const { data: row, error: fetchErr } = await admin
       .from('bookings')
       .select(
-        'vehicle_id, pickup_date, return_date, rental_days, booking_status, restrictions_bypass, total_rupees, price_per_day_rupees_snapshot',
+        'vehicle_id, user_id, pickup_date, return_date, rental_days, booking_status, restrictions_bypass, total_rupees, price_per_day_rupees_snapshot, amount_paid',
       )
       .eq('id', input.bookingId)
       .single()
@@ -385,6 +401,20 @@ export async function adminSwapBookingVehicleAction(input: {
     if (fetchErr || !row) return { ok: false, message: 'Booking not found.' }
     if (!row.vehicle_id) return { ok: false, message: 'Booking has no current vehicle.' }
     if (row.vehicle_id === input.newVehicleId) return { ok: true }
+
+    if (!row.restrictions_bypass && row.user_id) {
+      const { data: prof } = await admin
+        .from('profiles')
+        .select('verification_tier, kyc_status')
+        .eq('user_id', row.user_id)
+        .maybeSingle()
+      if (!isProfileKycApprovedForBooking(prof)) {
+        return {
+          ok: false,
+          message: 'Customer KYC must be approved before allocating a vehicle. Enable restrictions bypass for ops override.',
+        }
+      }
+    }
 
     const bypass = Boolean(input.bypassOverlap) || Boolean(row.restrictions_bypass)
     if (!bypass) {
@@ -414,7 +444,7 @@ export async function adminSwapBookingVehicleAction(input: {
 
     if (vehErr || !newVehicle) return { ok: false, message: 'Replacement vehicle not found.' }
 
-    const previousTotal = Math.round(Number(row.total_rupees ?? 0))
+    const previousTotal = safeRupees(row.total_rupees)
     let newTotal = previousTotal
     const patch: Database['public']['Tables']['bookings']['Update'] = {
       vehicle_id: input.newVehicleId,
@@ -430,8 +460,9 @@ export async function adminSwapBookingVehicleAction(input: {
       patch.subtotal_rupees = quote.subtotalRupees
       patch.convenience_fee_rupees = quote.convenienceFeeRupees
       patch.gst_rupees = quote.gstRupees
+      const paid = safeRupees(row.amount_paid)
       patch.total_rupees = newTotal
-      patch.amount_due = newTotal
+      patch.amount_due = Math.max(0, newTotal - paid)
       patch.deposit_amount = parseMoneyIntRupees(newVehicle.security_deposit)
       patch.deposit_held_rupees = patch.deposit_amount
     }
@@ -651,11 +682,10 @@ export async function adminApplyBookingDiscountAction(input: {
 
     if (fetchErr || !row) return { ok: false, message: 'Booking not found.' }
 
-    const baseTotal = Math.round(
-      Number(row.subtotal_rupees ?? 0) + Number(row.convenience_fee_rupees ?? 0) + Number(row.gst_rupees ?? 0),
-    )
+    const baseTotal =
+      safeRupees(row.subtotal_rupees) + safeRupees(row.convenience_fee_rupees) + safeRupees(row.gst_rupees)
     const newTotal = Math.max(0, baseTotal - discount)
-    const paid = Math.round(Number(row.amount_paid ?? 0))
+    const paid = safeRupees(row.amount_paid)
 
     const { error } = await admin
       .from('bookings')
@@ -786,7 +816,7 @@ export async function adminManualRentalRefundAction(input: {
       .single()
 
     if (fetchErr || !row) return { ok: false, message: 'Booking not found.' }
-    const paid = Math.round(Number(row.amount_paid ?? 0))
+    const paid = safeRupees(row.amount_paid)
     if (refund > paid) {
       return { ok: false, message: 'Refund cannot exceed amount collected on the rental.' }
     }
@@ -797,7 +827,7 @@ export async function adminManualRentalRefundAction(input: {
       .update({
         payment_status: 'refunded',
         amount_paid: Math.max(0, paid - refund),
-        amount_due: Math.max(0, Math.round(Number(row.total_rupees ?? 0)) - Math.max(0, paid - refund)),
+        amount_due: Math.max(0, safeRupees(row.total_rupees) - Math.max(0, paid - refund)),
         payment_notes: input.note?.trim() || null,
         financial_manual_override: true,
         updated_at: ts,

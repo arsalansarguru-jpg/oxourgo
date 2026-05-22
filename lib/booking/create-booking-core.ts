@@ -9,6 +9,7 @@ import { hasVehicleBookingOverlap } from '@/lib/booking/vehicle-overlap'
 import { normalizeBookingSource, type BookingSource } from '@/lib/booking/booking-source'
 import { isProfileKycApprovedForBooking } from '@/lib/kyc/kyc-booking-eligible'
 import { isVehicleAvailableForBooking, parseMoneyIntRupees, type VehicleRow } from '@/lib/fleet/vehicle-mappers'
+import { safeRupees } from '@/lib/money/safe'
 import { normalizeBookingPaymentMethod } from '@/lib/payments/methods'
 import { assertOnlineCheckoutAllowed } from '@/lib/payments/checkout-guard'
 import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from '@/lib/audit/actions'
@@ -103,7 +104,7 @@ export async function insertBookingCore(
 
   const { data: vehicleRow, error: vehicleErr } = await supabase
     .from('vehicles')
-    .select('id,available,price_per_day')
+    .select('id,available,price_per_day,security_deposit')
     .eq('id', input.vehicleId)
     .maybeSingle()
 
@@ -132,12 +133,13 @@ export async function insertBookingCore(
   const discount = Math.max(0, Math.round(Number(input.pricingOverride?.customDiscountRupees ?? 0)))
   const quote = {
     rentalDays: baseQuote.rentalDays,
-    subtotalRupees: input.pricingOverride?.subtotalRupees ?? baseQuote.subtotalRupees,
-    convenienceFeeRupees: input.pricingOverride?.convenienceFeeRupees ?? baseQuote.convenienceFeeRupees,
-    gstRupees: input.pricingOverride?.gstRupees ?? baseQuote.gstRupees,
-    totalRupees:
-      input.pricingOverride?.totalRupees ??
+    subtotalRupees: safeRupees(input.pricingOverride?.subtotalRupees, baseQuote.subtotalRupees),
+    convenienceFeeRupees: safeRupees(input.pricingOverride?.convenienceFeeRupees, baseQuote.convenienceFeeRupees),
+    gstRupees: safeRupees(input.pricingOverride?.gstRupees, baseQuote.gstRupees),
+    totalRupees: safeRupees(
+      input.pricingOverride?.totalRupees,
       Math.max(0, baseQuote.totalRupees - discount),
+    ),
   }
 
   if (!input.bypassRestrictions) {
@@ -182,10 +184,15 @@ export async function insertBookingCore(
 
   const bookingSource = normalizeBookingSource(input.bookingSource)
 
+  const catalogDeposit = parseMoneyIntRupees(
+    (vehicleRow as { security_deposit?: unknown }).security_deposit,
+  )
   const depositAmount =
     input.pricingOverride?.depositAmountRupees != null
       ? Math.max(0, Math.round(input.pricingOverride.depositAmountRupees))
-      : null
+      : catalogDeposit > 0
+        ? catalogDeposit
+        : null
 
   const insert: Database['public']['Tables']['bookings']['Insert'] = {
     vehicle_id: vehicleRow.id,

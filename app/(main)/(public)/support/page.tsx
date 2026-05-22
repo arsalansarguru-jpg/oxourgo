@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 
 import { getAuthenticatedUser } from '@/lib/auth/server'
+import { listCustomerSupportMessages } from '@/lib/customer/support-queries'
+import { resolveCustomerDisplayName } from '@/lib/customer/display-name'
 import { buildPageMetadata } from '@/lib/seo/build-page-metadata'
 import { SupportView } from '@/features/support/support-view'
 
@@ -15,8 +17,23 @@ export const metadata: Metadata = buildPageMetadata({
 export default async function SupportPage() {
   const user = await getAuthenticatedUser()
   const meta = user?.user_metadata as Record<string, unknown> | undefined
-  const fullName = typeof meta?.full_name === 'string' ? meta.full_name.trim() : ''
-  const firstName = fullName ? fullName.split(/\s+/)[0] : (user?.email?.split('@')[0] ?? null)
+  const displayName = user
+    ? resolveCustomerDisplayName({
+        userId: user.id,
+        fullName: typeof meta?.full_name === 'string' ? meta.full_name : null,
+        email: user.email ?? null,
+        phone: typeof meta?.phone === 'string' ? meta.phone : null,
+        authMetadata: {
+          full_name: typeof meta?.full_name === 'string' ? meta.full_name : undefined,
+          name: typeof meta?.name === 'string' ? meta.name : undefined,
+          display_name: typeof meta?.display_name === 'string' ? meta.display_name : undefined,
+        },
+      })
+    : null
+  const firstName = displayName ? displayName.split(/\s+/)[0] : null
+  const initialMessages = user ? await listCustomerSupportMessages(user.id) : []
 
-  return <SupportView greetingName={firstName} />
+  return (
+    <SupportView greetingName={firstName} initialMessages={initialMessages} signedIn={Boolean(user)} />
+  )
 }

@@ -44,6 +44,29 @@ export async function GET(request: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser()
     if (user) {
+      const meta = (user.user_metadata ?? {}) as Record<string, unknown>
+      const fullName =
+        (typeof meta.full_name === 'string' && meta.full_name.trim()) ||
+        (typeof meta.name === 'string' && meta.name.trim()) ||
+        null
+      const displayName =
+        (typeof meta.display_name === 'string' && meta.display_name.trim()) ||
+        (typeof meta.name === 'string' && meta.name.trim()) ||
+        fullName
+      const phone = typeof meta.phone === 'string' ? meta.phone.trim() : null
+      if (fullName || displayName || phone) {
+        await supabase.from('profiles').upsert(
+          {
+            user_id: user.id,
+            full_name: fullName,
+            display_name: displayName,
+            phone: phone || null,
+            updated_at: new Date().toISOString(),
+          },
+          { onConflict: 'user_id' },
+        )
+      }
+
       const appRole = await resolveAppRoleWithClaims(supabase, user, 'auth/callback')
       debugLogRoleResolution('auth/callback', {
         userId: user.id,

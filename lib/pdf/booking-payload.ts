@@ -1,6 +1,7 @@
 import type { BookingWithCar } from '@/lib/supabase/database.types'
 
 import { getPublicSiteUrl } from '@/lib/env/site-url'
+import { safeRupees } from '@/lib/money/safe'
 import { BRAND } from '@/constants/brand'
 
 export type BookingPdfDocKind = 'confirmation' | 'invoice' | 'summary'
@@ -90,11 +91,16 @@ export function buildBookingPdfPayload(
     returnLocation: row.return_location,
     rentalDays: row.rental_days,
     pricePerDaySnapshot: row.price_per_day_rupees_snapshot,
-    subtotalRupees: row.subtotal_rupees,
-    convenienceFeeRupees: row.convenience_fee_rupees,
-    gstRupees: row.gst_rupees,
-    totalRupees: row.total_rupees,
-    securityDepositRupees: v?.security_deposit != null ? Number(v.security_deposit) : null,
+    subtotalRupees: safeRupees(row.subtotal_rupees),
+    convenienceFeeRupees: safeRupees(row.convenience_fee_rupees),
+    gstRupees: safeRupees(row.gst_rupees),
+    totalRupees: safeRupees(row.total_rupees),
+    securityDepositRupees:
+      safeRupees(row.deposit_amount, -1) > 0
+        ? safeRupees(row.deposit_amount)
+        : v?.security_deposit != null
+          ? safeRupees(v.security_deposit)
+          : null,
   }
 }
 

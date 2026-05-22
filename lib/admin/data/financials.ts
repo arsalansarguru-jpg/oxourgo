@@ -6,6 +6,7 @@ import {
   penaltyNotesFromJson,
   resolveDepositAmount,
 } from '@/lib/booking/financial'
+import { safeRupees } from '@/lib/money/safe'
 import type { BookingWithCar } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logPostgrestError } from '@/lib/errors/safe-user-message'
@@ -92,7 +93,7 @@ function vehicleLabel(booking: BookingWithCar): string {
 function vehicleSecurityDeposit(booking: BookingWithCar): number {
   const v = booking.vehicles
   const one = Array.isArray(v) ? v[0] : v
-  return Number(one?.security_deposit ?? 0)
+  return safeRupees(one?.security_deposit)
 }
 
 export async function adminFinancialMetrics(): Promise<AdminFinancialMetrics> {

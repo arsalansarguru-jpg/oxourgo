@@ -246,7 +246,7 @@ export async function adminEnrichBookingsForAdminList(rows: BookingWithCar[]): P
   const uniqueIds = [...new Set(rows.map((r) => r.user_id))]
 
   const [{ data: profiles, error: profilesErr }, ...emailResults] = await Promise.all([
-    admin.from('profiles').select('user_id, full_name, phone').in('user_id', uniqueIds),
+    admin.from('profiles').select('user_id, full_name, display_name, phone').in('user_id', uniqueIds),
     ...uniqueIds.map(async (uid) => {
       try {
         const { data, error } = await admin.auth.admin.getUserById(uid)
@@ -270,7 +270,11 @@ export async function adminEnrichBookingsForAdminList(rows: BookingWithCar[]): P
   const profileByUserId = new Map(
     (profiles ?? []).map((p) => [
       p.user_id,
-      { full_name: p.full_name?.trim() || null, phone: (p as { phone?: string | null }).phone?.trim() || null },
+      {
+        full_name: p.full_name?.trim() || null,
+        display_name: (p as { display_name?: string | null }).display_name?.trim() || null,
+        phone: (p as { phone?: string | null }).phone?.trim() || null,
+      },
     ]),
   )
   const emailByUserId = new Map<string, string | null>()
@@ -289,6 +293,7 @@ export async function adminEnrichBookingsForAdminList(rows: BookingWithCar[]): P
       customerFullName: resolveCustomerDisplayName({
         userId: r.user_id,
         fullName: prof?.full_name ?? null,
+        displayName: prof?.display_name ?? null,
         email,
         phone: prof?.phone ?? null,
         authMetadata: metaByUserId.get(r.user_id) ?? null,

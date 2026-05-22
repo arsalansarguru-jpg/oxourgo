@@ -1,14 +1,14 @@
 'use client'
 
-import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Check, Headphones, LifeBuoy, Loader2, MessageCircle, Mic, Phone, ShieldAlert } from 'lucide-react'
+import { Headphones, LifeBuoy, MessageCircle, Mic, Phone, ShieldAlert } from 'lucide-react'
+import { SupportChatPanel } from '@/features/support/support-chat-panel'
+import type { SupportMessageRow } from '@/lib/support/types'
 import { BRAND } from '@/constants/brand'
 import { supportFaqs } from '@/data/faqs'
 import { Section, SectionHeading } from '@/components/ui/Section'
 import { SupportCard } from '@/components/support/support-card'
 import { Button } from '@/components/ui/Button'
-import { Input } from '@/components/ui/Input'
 import { Card, CardContent } from '@/components/ui/Card'
 import {
   cardPadding,
@@ -41,13 +41,11 @@ const categories = [
 
 type SupportViewProps = {
   greetingName?: string | null
+  initialMessages?: SupportMessageRow[]
+  signedIn?: boolean
 }
 
-export function SupportView({ greetingName }: SupportViewProps) {
-  const [chat, setChat] = useState('')
-  const [sentHint, setSentHint] = useState<string | null>(null)
-  const [sending, setSending] = useState(false)
-
+export function SupportView({ greetingName, initialMessages = [], signedIn = false }: SupportViewProps) {
   const greet = greetingName?.trim() ? greetingName.trim() : 'there'
 
   return (
@@ -74,69 +72,11 @@ export function SupportView({ greetingName }: SupportViewProps) {
                 </span>
               </div>
 
-              <div
-                className={cn(
-                  'mt-4 space-y-3 p-4',
-                  cardSurfaceBase,
-                  cardSurfaceTransition,
-                  'bg-matte/[0.45]',
-                )}
-              >
-                <div className="max-w-[85%] rounded-2xl rounded-bl-md border border-stroke bg-fill-glass px-3 py-2 text-sm text-muted">
-                  Hi {greet} — I can help with bookings, billing, or roadside. What do you need?
-                </div>
-                <div className="ml-auto max-w-[85%] rounded-2xl rounded-br-md border border-electric/25 bg-electric/10 px-3 py-2 text-sm text-soft">
-                  I&apos;d like to extend my BMW booking by one day.
-                </div>
-                <div className="max-w-[85%] rounded-2xl rounded-bl-md border border-stroke bg-fill-glass px-3 py-2 text-sm text-muted">
-                  Checking detailing… You can extend until May 15, 18:00 for ₹8,500 + taxes. Shall I hold
-                  it?
-                </div>
-              </div>
-
-              <div className="mt-4 flex min-w-0 flex-col gap-3 sm:flex-row sm:items-stretch">
-                <Input
-                  placeholder="Ask anything about your trip…"
-                  value={chat}
-                  onChange={(e) => setChat(e.target.value)}
-                  aria-label="Chat message"
-                  className="min-w-0 flex-1"
-                />
-                <Button
-                  type="button"
-                  className="w-full shrink-0 sm:w-40"
-                  disabled={sending || !chat.trim()}
-                  onClick={() => {
-                    setSentHint(null)
-                    setSending(true)
-                    window.setTimeout(() => {
-                      setSentHint('Message queued for the concierge team.')
-                      setChat('')
-                      setSending(false)
-                    }, 650)
-                  }}
-                >
-                  {sending ? (
-                    <span className="inline-flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                      Sending…
-                    </span>
-                  ) : (
-                    'Send'
-                  )}
-                </Button>
-              </div>
-              {sentHint ? (
-                <p className="mt-3 flex items-center gap-2 text-xs font-medium text-emerald">
-                  <Check className="h-3.5 w-3.5" aria-hidden />
-                  {sentHint}
-                </p>
-              ) : (
-                <p className="mt-2 text-xs text-silver">
-                  Messages route to our Mumbai operations desk. For urgent issues, use WhatsApp or the
-                  emergency line.
-                </p>
-              )}
+              <SupportChatPanel
+                greetingName={greet}
+                initialMessages={initialMessages}
+                signedIn={signedIn}
+              />
             </CardContent>
           </Card>
 

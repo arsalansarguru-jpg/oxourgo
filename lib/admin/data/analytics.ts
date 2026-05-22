@@ -8,7 +8,14 @@ import {
   isBookingCancelled,
   type BookingFinancialRow,
 } from '@/lib/admin/booking-financials'
-import { enumerateUtcDays, toUtcYmd, type AnalyticsResolvedRange } from '@/lib/admin/analytics-range'
+import {
+  ANALYTICS_BUSINESS_TZ,
+  enumerateIstDays,
+  istMonthStartIso,
+  toIstYmd,
+  type AnalyticsResolvedRange,
+} from '@/lib/admin/analytics-range'
+import { safeRupees } from '@/lib/money/safe'
 import { fleetCatalogTitle } from '@/lib/admin/fleet-display'
 import { resolveCustomerDisplayName, type CustomerNameInput } from '@/lib/customer/display-name'
 import { logAdminQueryResult } from '@/lib/admin/debug-query'
@@ -32,7 +39,11 @@ type VehicleLite = { id: string; name: string; brand: string; registration_numbe
 
 function bookingSuccessForConversion(b: Pick<BookingLite, 'booking_status'>): boolean {
   const s = (b.booking_status ?? '').trim().toLowerCase()
-  return s === 'confirmed' || s === 'active' || s === 'completed'
+  return s === 'pending_payment' || s === 'confirmed' || s === 'active' || s === 'completed'
+}
+
+function bookingCreatedIstDay(createdAt: string): string {
+  return new Date(createdAt).toLocaleDateString('en-CA', { timeZone: ANALYTICS_BUSINESS_TZ })
 }
 
 function overlapsDay(pickup: string, ret: string, day: string): boolean {
@@ -59,10 +70,7 @@ async function sumBookingFinancials(
     if (range && 'startIso' in range) {
       q = q.gte('created_at', range.startIso).lte('created_at', range.endIso)
     } else if (range && 'fromMonthStart' in range) {
-      const y = new Date().getUTCFullYear()
-      const m = new Date().getUTCMonth()
-      const start = new Date(Date.UTC(y, m, 1, 0, 0, 0, 0)).toISOString()
-      q = q.gte('created_at', start)
+      q = q.gte('created_at', istMonthStartIso())
     }
     const { data, error } = await q
     if (error) {
@@ -153,9 +161,9 @@ function vehicleLabel(v: VehicleLite | undefined, vehicleId: string | null): str
 
 export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): Promise<AdminAnalyticsBundle> {
   const admin = createAdminClient()
-  const today = toUtcYmd(new Date())
+  const today = toIstYmd()
 
-  const days = enumerateUtcDays(range.startDay, range.endDay)
+  const days = enumerateIstDays(range.startDay, range.endDay)
   const daySet = new Set(days)
 
   const [
@@ -174,7 +182,7 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
     admin
       .from('bookings')
       .select('id', { count: 'exact', head: true })
-      .in('booking_status', ['confirmed', 'pending_payment', 'active'])
+      .in('booking_status', ['pending_payment', 'confirmed', 'active'])
       .not('vehicle_id', 'is', null)
       .is('deleted_at', null)
       .lte('pickup_date', today)
@@ -280,7 +288,7 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
   }
 
   for (const b of allInRange) {
-    const day = b.created_at.slice(0, 10)
+    const day = bookingCreatedIstDay(b.created_at)
     if (!daySet.has(day)) continue
     if (isBookingCancelled(b.booking_status)) continue
 
@@ -320,7 +328,7 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
   const newCustomersByDay = new Map<string, number>()
   for (const d of days) newCustomersByDay.set(d, 0)
   for (const row of (profilesGrowthRes.data ?? []) as { created_at: string }[]) {
-    const day = row.created_at.slice(0, 10)
+    const day = bookingCreatedIstDay(row.created_at)
     if (daySet.has(day)) newCustomersByDay.set(day, (newCustomersByDay.get(day) ?? 0) + 1)
   }
 
@@ -361,7 +369,7 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
   if (topUserIds.length) {
     const { data: profs } = await admin
       .from('profiles')
-      .select('user_id, full_name, phone')
+      .select('user_id, full_name, display_name, phone')
       .in('user_id', topUserIds)
     const profById = new Map((profs ?? []).map((p) => [p.user_id, p]))
     await Promise.all(
@@ -388,6 +396,7 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
           resolveCustomerDisplayName({
             userId: uid,
             fullName: prof?.full_name ?? null,
+            displayName: (prof as { display_name?: string | null } | undefined)?.display_name ?? null,
             email,
             phone: (prof as { phone?: string | null } | undefined)?.phone ?? null,
             authMetadata: meta,
@@ -419,7 +428,7 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
     created_at: b.created_at,
     pickup_date: b.pickup_date,
     return_date: b.return_date,
-    total_rupees: b.total_rupees ?? 0,
+    total_rupees: safeRupees(b.total_rupees),
     booking_status: b.booking_status,
     payment_status: b.payment_status ?? 'pending',
     vehicle_label: vehicleLabel(b.vehicle_id ? vehicleMap.get(b.vehicle_id) : undefined, b.vehicle_id),

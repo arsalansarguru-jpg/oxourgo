@@ -63,6 +63,7 @@ export async function adminListCustomers(): Promise<AdminCustomerRow[]> {
       displayName: resolveCustomerDisplayName({
         userId: u.id,
         fullName: profile?.full_name ?? null,
+        displayName: (profile as { display_name?: string | null } | null)?.display_name ?? null,
         email: u.email ?? null,
         phone: profile?.phone ?? null,
         authMetadata: meta ?? null,
@@ -121,6 +122,7 @@ export async function adminGetCustomer(userId: string): Promise<AdminCustomerRow
     displayName: resolveCustomerDisplayName({
       userId: u.id,
       fullName: profile?.full_name ?? null,
+      displayName: (profile as { display_name?: string | null } | null)?.display_name ?? null,
       email: u.email ?? null,
       phone: profile?.phone ?? null,
       authMetadata: meta ?? null,

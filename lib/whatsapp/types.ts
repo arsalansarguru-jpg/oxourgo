@@ -30,8 +30,16 @@ export type WhatsAppConversationContext = {
   pickupLocation?: string
   returnLocation?: string
   suggestedVehicleIds?: string[]
+  /** Indexed options shown to customer (1-based selection). */
+  suggestedVehicleLabels?: string[]
   selectedVehicleId?: string
   draftBookingId?: string
   lastCustomerMessage?: string
   notes?: string
+  /** Set when customer must complete KYC on web. */
+  kycLinkSentAt?: string
+  /** Last structured AI extraction (debug/ops). */
+  lastAiExtraction?: Record<string, unknown>
+  /** Duplicate booking guard hit — do not recreate. */
+  duplicateBookingBlockedAt?: string
 }

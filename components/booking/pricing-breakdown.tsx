@@ -1,4 +1,5 @@
 import { formatInr } from '@/lib/format'
+import { safeRupees } from '@/lib/money/safe'
 import { cn } from '@/lib/utils/cn'
 import {
   cardEyebrow,
@@ -22,8 +23,8 @@ type PricingBreakdownProps = {
 }
 
 export function PricingBreakdown({ lines, totalRupees, eyebrow = 'Transparent pricing', className }: PricingBreakdownProps) {
-  const computedTotal = lines.reduce((s, l) => s + l.amount, 0)
-  const total = totalRupees ?? computedTotal
+  const computedTotal = lines.reduce((s, l) => s + safeRupees(l.amount), 0)
+  const total = safeRupees(totalRupees ?? computedTotal)
   return (
     <div
       className={cn(

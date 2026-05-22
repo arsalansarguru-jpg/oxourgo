@@ -8,6 +8,7 @@ import { getAuthSessionSummary } from '@/lib/auth/server'
 import { isStaffRole } from '@/lib/auth/permissions'
 import { ADMIN_HOME } from '@/lib/auth/routes'
 import { countUnreadNotifications, listNotificationsForUser } from '@/lib/customer/notifications-queries'
+import { resolveCustomerDisplayName } from '@/lib/customer/display-name'
 import { getCustomerProfileSnapshot } from '@/lib/customer/profile-queries'
 import { logUnknownError } from '@/lib/errors/safe-user-message'
 
@@ -38,11 +39,15 @@ export default async function DashboardRouteLayout({ children }: { children: Rea
   try {
     const profile = await getCustomerProfileSnapshot(user.id)
 
-    const displayName =
-      profile.full_name?.trim() ||
-      (typeof user.user_metadata?.full_name === 'string' ? user.user_metadata.full_name : null) ||
-      user.email?.split('@')[0] ||
-      'Member'
+    const meta = user.user_metadata as { full_name?: string; name?: string; display_name?: string } | undefined
+    const displayName = resolveCustomerDisplayName({
+      userId: user.id,
+      fullName: profile.full_name,
+      displayName: profile.display_name,
+      email: user.email ?? null,
+      phone: profile.phone ?? null,
+      authMetadata: meta ?? null,
+    })
 
     const tier = profile.verification_tier
     const kycLifecycleStatus = profile.kyc_status

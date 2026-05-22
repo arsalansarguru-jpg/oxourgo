@@ -45,7 +45,7 @@ export function AdminNewCarForm() {
             })
           }}
         >
-          <Input name="brand" label="Brand" required placeholder="BMW" />
+          <Input name="brand" label="Brand" required placeholder="Hyundai" />
           <Input name="model" label="Model" required placeholder="5 Series" />
           <Input name="year" label="Year" type="number" required min={1990} max={2035} defaultValue={2024} />
           <Input name="registration_number" label="Registration" required placeholder="MH01AB1234" />

@@ -1,6 +1,7 @@
 import type { Car, CarCategory, CarStatus, FuelType, Transmission } from '@/types/car'
 import { VEHICLE_IMAGE_FALLBACK } from '@/constants/vehicle-media'
 import type { FleetCar, FleetCarAvailabilityLabel, FleetCarCategory, FleetCarFuel } from '@/lib/fleet/types'
+import { modelFromListingName, parseMoneyIntRupees } from '@/lib/fleet/vehicle-mappers'
 import { getPublicStorageObjectUrl } from '@/lib/supabase/storage-public-url'
 
 export type FleetCarRow = {
@@ -104,13 +105,14 @@ function toCarStatus(status: string): CarStatus {
 }
 
 export function mapFleetRowToFleetCar(row: FleetCarRow): FleetCar {
-  const price = Number(row.pricing_per_day)
+  const price = parseMoneyIntRupees(row.pricing_per_day)
   const imageUrl = resolveRowPrimaryImage(row)
-  const displayName = `${row.brand} ${row.model}`.trim()
+  const model = modelFromListingName(row.brand, row.model)
+  const displayName = `${row.brand} ${model}`.trim()
   return {
     id: row.id,
     brand: row.brand,
-    model: row.model,
+    model,
     displayName,
     year: row.year,
     registrationNumber: row.registration_number,
@@ -118,7 +120,7 @@ export function mapFleetRowToFleetCar(row: FleetCarRow): FleetCar {
     transmission: toTransmission(row.transmission),
     seats: row.seats,
     pricePerDay: price,
-    securityDeposit: Number(row.security_deposit),
+    securityDeposit: parseMoneyIntRupees(row.security_deposit),
     availability: toAvailability(row.availability_status),
     featured: Boolean(row.featured),
     category: toFleetCategory(price),
@@ -127,10 +129,11 @@ export function mapFleetRowToFleetCar(row: FleetCarRow): FleetCar {
 }
 
 export function mapFleetRowToCar(row: FleetCarRow): Car {
-  const price = Number(row.pricing_per_day)
+  const price = parseMoneyIntRupees(row.pricing_per_day)
   const imageUrl = resolveRowPrimaryImage(row)
   const gallery = resolveRowGallery(row, imageUrl)
-  const name = `${row.brand} ${row.model}`.trim()
+  const model = modelFromListingName(row.brand, row.model)
+  const name = `${row.brand} ${model}`.trim()
   return {
     id: row.id,
     name,
@@ -155,6 +158,6 @@ export function mapFleetRowToCar(row: FleetCarRow): Car {
       Transmission: toTransmission(row.transmission) === 'Auto' ? 'Automatic' : 'Manual',
       Seats: String(row.seats),
     },
-    securityDeposit: Number(row.security_deposit),
+    securityDeposit: parseMoneyIntRupees(row.security_deposit),
   }
 }

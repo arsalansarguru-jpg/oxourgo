@@ -1,4 +1,7 @@
-/** Placeholder analytics for admin dashboard — replace with live queries later. */
+/**
+ * @deprecated Unused — live dashboard uses `AdminDashboardOverview` + Supabase.
+ * Do not import into routes; kept only to avoid breaking stale references during cleanup.
+ */
 
 export const dashboardDummyMetrics = {
   totalRevenue: 4_282_000,

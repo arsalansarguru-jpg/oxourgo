@@ -795,6 +795,7 @@ export type Database = {
         Row: {
           user_id: string
           full_name: string | null
+          display_name: string | null
           avatar_url: string | null
           phone: string | null
           preferences: Json
@@ -810,6 +811,7 @@ export type Database = {
         Insert: {
           user_id: string
           full_name?: string | null
+          display_name?: string | null
           avatar_url?: string | null
           phone?: string | null
           preferences?: Json
@@ -825,6 +827,7 @@ export type Database = {
         Update: {
           user_id?: string
           full_name?: string | null
+          display_name?: string | null
           avatar_url?: string | null
           phone?: string | null
           preferences?: Json
@@ -1255,6 +1258,57 @@ export type Database = {
           summary?: string | null
           metadata?: Json
           performed_by?: string | null
+          created_at?: string
+        }
+        Relationships: []
+      }
+      support_conversations: {
+        Row: {
+          id: string
+          user_id: string
+          status: string
+          last_message_at: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          status?: string
+          last_message_at?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          status?: string
+          last_message_at?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      support_messages: {
+        Row: {
+          id: string
+          conversation_id: string
+          sender_role: string
+          body: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          conversation_id: string
+          sender_role: string
+          body: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          conversation_id?: string
+          sender_role?: string
+          body?: string
           created_at?: string
         }
         Relationships: []

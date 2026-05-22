@@ -6,6 +6,10 @@ import type { AppAuthRole } from '@/lib/auth/roles'
 import { hasPermission } from '@/lib/auth/permissions'
 import { buildAuditActorLookup, type AuditActorLookup } from '@/lib/admin/data/audit-actors'
 import { listAuditLogs, type AuditLogRow } from '@/lib/admin/data/audit-logs'
+import { istDayStartIso, toIstYmd } from '@/lib/admin/analytics-range'
+import { bookingCollectedRupees } from '@/lib/admin/booking-financials'
+import { formatInr } from '@/lib/format'
+import { safeRupees } from '@/lib/money/safe'
 import { adminFinancialMetrics } from '@/lib/admin/data/financials'
 import { adminPaymentOperationsMetrics } from '@/lib/admin/data/payments'
 import { adminViolationMetrics } from '@/lib/admin/data/violations'
@@ -86,11 +90,6 @@ export type CommandCenterBundle = {
 
 function utcTodayYmd(): string {
   return new Date().toISOString().slice(0, 10)
-}
-
-function utcDayStartIso(): string {
-  const ymd = utcTodayYmd()
-  return `${ymd}T00:00:00.000Z`
 }
 
 function resolveVisibility(role: AppAuthRole): CommandCenterVisibility {
@@ -242,12 +241,12 @@ async function fetchQueue(admin: ReturnType<typeof createAdminClient>): Promise<
 }
 
 async function sumRevenueToday(admin: ReturnType<typeof createAdminClient>): Promise<number> {
-  const dayStart = utcDayStartIso()
+  const dayStart = istDayStartIso(toIstYmd())
   const { data, error } = await admin
     .from('payment_events')
     .select('amount_rupees, direction, status')
     .gte('created_at', dayStart)
-    .eq('direction', 'charge')
+    .in('direction', ['charge', 'rental_collection'])
     .limit(5000)
 
   if (error) {
@@ -260,7 +259,22 @@ async function sumRevenueToday(admin: ReturnType<typeof createAdminClient>): Pro
     const st = (row.status ?? '').trim().toLowerCase()
     if (st === 'void') continue
     if (st && st !== 'posted' && st !== 'completed' && st !== 'succeeded') continue
-    sum += Math.max(0, Math.round(Number(row.amount_rupees ?? 0)))
+    sum += safeRupees(row.amount_rupees)
+  }
+  if (sum > 0) return sum
+
+  const { data: bookings, error: bErr } = await admin
+    .from('bookings')
+    .select('booking_status, payment_status, amount_paid, amount_due, total_rupees, updated_at')
+    .gte('updated_at', dayStart)
+    .is('deleted_at', null)
+    .limit(3000)
+  if (bErr) {
+    logPostgrestError('[commandCenter] revenueToday.bookingsFallback', bErr)
+    return 0
+  }
+  for (const b of bookings ?? []) {
+    sum += bookingCollectedRupees(b)
   }
   return sum
 }
@@ -422,7 +436,7 @@ async function fetchUpcoming(
         id: `refund-${row.id}`,
         kind: 'refund',
         label: `Refund pending · ${bookingLabel(row, vehicles)}`,
-        sublabel: amt > 0 ? `₹${amt.toLocaleString('en-IN')}` : 'Deposit release',
+        sublabel: amt > 0 ? formatInr(amt) : 'Deposit release',
         whenLabel: 'Action needed',
         href: `/admin/bookings/${row.id}`,
       })

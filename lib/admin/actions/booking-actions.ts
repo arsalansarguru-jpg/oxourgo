@@ -8,6 +8,7 @@ import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from '@/lib/audit/actions'
 import { requirePermissionForAdminAction } from '@/lib/auth/admin-action-auth'
 import { hasVehicleBookingOverlap } from '@/lib/booking/vehicle-overlap'
 import { validatePickupInspectionForHandover, validateReturnInspectionForCheckpoint } from '@/lib/admin/booking-inspection-validate'
+import { isProfileKycApprovedForBooking } from '@/lib/kyc/kyc-booking-eligible'
 import {
   onBookingApproved,
   onBookingCancelled,
@@ -42,7 +43,7 @@ async function confirmPendingBookingFromAdmin(
 
   const { data: row, error: fetchErr } = await admin
     .from('bookings')
-    .select('booking_status, vehicle_id, pickup_date, return_date, user_id')
+    .select('booking_status, vehicle_id, pickup_date, return_date, user_id, restrictions_bypass')
     .eq('id', bookingId)
     .single()
 
@@ -52,6 +53,20 @@ async function confirmPendingBookingFromAdmin(
   }
   if (!row.vehicle_id) {
     return { ok: false, message: 'Booking is missing a vehicle allocation.' }
+  }
+
+  if (!row.restrictions_bypass) {
+    const { data: profileRow } = await admin
+      .from('profiles')
+      .select('verification_tier, kyc_status')
+      .eq('user_id', row.user_id)
+      .maybeSingle()
+    if (!isProfileKycApprovedForBooking(profileRow)) {
+      return {
+        ok: false,
+        message: 'Customer KYC must be approved before confirming this booking. Enable restrictions bypass for ops override.',
+      }
+    }
   }
 
   const { overlap, error: ovErr } = await hasVehicleBookingOverlap(

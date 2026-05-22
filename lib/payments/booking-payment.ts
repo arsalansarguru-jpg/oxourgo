@@ -1,3 +1,4 @@
+import { safeRupees } from '@/lib/money/safe'
 import type { BookingWithCar } from '@/lib/supabase/database.types'
 import type { PaymentCheckoutStatus } from '@/lib/payments/types'
 
@@ -16,7 +17,9 @@ export function collectedRentalRupees(booking: {
 }): number {
   if (booking.booking_status.trim().toLowerCase() === 'cancelled') return 0
   const p = normalizePaymentStatus(booking.payment_status)
-  if (p === 'received' || p === 'partial') return Math.max(0, Math.round(Number(booking.amount_paid ?? 0)))
+  if (p === 'received' || p === 'partial' || p === 'paid' || p === 'authorized' || p === 'completed' || p === 'succeeded') {
+    return safeRupees(booking.amount_paid)
+  }
   return 0
 }
 
@@ -40,19 +43,24 @@ export type BookingPaymentBreakdown = {
 }
 
 export function bookingPaymentBreakdown(row: BookingWithCar): BookingPaymentBreakdown {
-  const total = Math.max(0, Math.round(Number(row.total_rupees ?? 0)))
+  const total = safeRupees(row.total_rupees)
   const veh = firstVehicle(row)
-  const securityDepositRupees = Math.max(0, Math.round(Number(veh?.security_deposit ?? 0)))
-  const collectedRentalRupees = Math.max(0, Math.round(Number(row.amount_paid ?? 0)))
-  const pendingFromDb = Math.round(Number(row.amount_due ?? NaN))
-  const pendingRentalRupees = Number.isFinite(pendingFromDb)
-    ? Math.max(0, pendingFromDb)
-    : Math.max(0, total - collectedRentalRupees)
+  const bookingDeposit = safeRupees(
+    (row as { deposit_amount?: number | null }).deposit_amount ??
+      (row as { deposit_held_rupees?: number | null }).deposit_held_rupees,
+    -1,
+  )
+  const securityDepositRupees =
+    bookingDeposit > 0 ? bookingDeposit : safeRupees(veh?.security_deposit)
+  const collected = collectedRentalRupees(row)
+  const pendingFromDb = safeRupees(row.amount_due, -1)
+  const pendingRentalRupees =
+    pendingFromDb >= 0 ? pendingFromDb : Math.max(0, total - collected)
   return {
     bookingTotalRupees: total,
     securityDepositRupees,
     pendingRentalRupees,
-    collectedRentalRupees,
+    collectedRentalRupees: collected,
   }
 }
 

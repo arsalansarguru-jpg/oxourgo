@@ -1,4 +1,6 @@
-/** Admin analytics time windows (UTC boundaries for consistent server + chart bucketing). */
+/** Admin analytics time windows — business day boundaries use IST (Asia/Kolkata). */
+
+export const ANALYTICS_BUSINESS_TZ = 'Asia/Kolkata'
 
 export type AnalyticsPresetId = 'today' | '7d' | '30d' | '90d' | 'custom'
 
@@ -29,6 +31,32 @@ export function utcDayStartIso(ymd: string): string {
 export function utcDayEndIso(ymd: string): string {
   const [y, m, d] = ymd.split('-').map(Number)
   return new Date(Date.UTC(y, (m ?? 1) - 1, d ?? 1, 23, 59, 59, 999)).toISOString()
+}
+
+/** Calendar day in IST as YYYY-MM-DD. */
+export function toIstYmd(d = new Date()): string {
+  return d.toLocaleDateString('en-CA', { timeZone: ANALYTICS_BUSINESS_TZ })
+}
+
+/** Inclusive IST day start as ISO timestamptz. */
+export function istDayStartIso(ymd: string): string {
+  return new Date(`${ymd}T00:00:00+05:30`).toISOString()
+}
+
+/** Inclusive IST day end as ISO timestamptz. */
+export function istDayEndIso(ymd: string): string {
+  return new Date(`${ymd}T23:59:59.999+05:30`).toISOString()
+}
+
+/** Inclusive IST calendar day list from `startDay` to `endDay` (YYYY-MM-DD). */
+export function enumerateIstDays(startDay: string, endDay: string): string[] {
+  const out: string[] = []
+  const a = new Date(istDayStartIso(startDay))
+  const end = new Date(istDayEndIso(endDay))
+  for (let t = a.getTime(); t <= end.getTime(); t += 24 * 60 * 60 * 1000) {
+    out.push(toIstYmd(new Date(t)))
+  }
+  return out
 }
 
 /** Inclusive UTC day list from `startDay` to `endDay` (YYYY-MM-DD). */
@@ -75,6 +103,7 @@ export function resolveAnalyticsRangeFromSearchParams(
       : '30d'
 
   const now = new Date()
+  const endDay = toIstYmd(now)
 
   if (preset === 'custom') {
     const from = typeof raw.from === 'string' ? raw.from.trim() : ''
@@ -82,45 +111,76 @@ export function resolveAnalyticsRangeFromSearchParams(
     const df = parseYmdToUtc(from)
     const dt = parseYmdToUtc(to)
     if (df && dt && df.getTime() <= dt.getTime()) {
-      const startDay = toUtcYmd(df)
-      const endDay = toUtcYmd(dt)
+      const startDay = toIstYmd(df)
+      const endDayCustom = toIstYmd(dt)
       return {
         preset: 'custom',
-        label: `${startDay} → ${endDay}`,
-        startIso: utcDayStartIso(startDay),
-        endIso: utcDayEndIso(endDay),
+        label: `${startDay} → ${endDayCustom} (IST)`,
+        startIso: istDayStartIso(startDay),
+        endIso: istDayEndIso(endDayCustom),
         startDay,
-        endDay,
+        endDay: endDayCustom,
       }
     }
     // fall through if custom invalid
   }
 
-  const endDay = toUtcYmd(now)
   let startDay = endDay
   if (preset === 'today') {
     startDay = endDay
   } else if (preset === '7d') {
-    const t = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 6, 12, 0, 0, 0))
-    startDay = toUtcYmd(t)
+    const t = new Date(istDayStartIso(endDay))
+    t.setUTCDate(t.getUTCDate() - 6)
+    startDay = toIstYmd(t)
   } else if (preset === '30d') {
-    const t = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 29, 12, 0, 0, 0))
-    startDay = toUtcYmd(t)
+    const t = new Date(istDayStartIso(endDay))
+    t.setUTCDate(t.getUTCDate() - 29)
+    startDay = toIstYmd(t)
   } else if (preset === '90d') {
-    const t = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 89, 12, 0, 0, 0))
-    startDay = toUtcYmd(t)
+    const t = new Date(istDayStartIso(endDay))
+    t.setUTCDate(t.getUTCDate() - 89)
+    startDay = toIstYmd(t)
   } else {
-    const t = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 29, 12, 0, 0, 0))
-    startDay = toUtcYmd(t)
+    const t = new Date(istDayStartIso(endDay))
+    t.setUTCDate(t.getUTCDate() - 29)
+    startDay = toIstYmd(t)
   }
 
   const safePreset: AnalyticsPresetId = preset === 'custom' ? '30d' : preset
 
   return {
     preset: safePreset,
-    label: PRESET_LABEL[safePreset as Exclude<AnalyticsPresetId, 'custom'>] ?? 'Last 30 days',
-    startIso: utcDayStartIso(startDay),
-    endIso: utcDayEndIso(endDay),
+    label: `${PRESET_LABEL[safePreset as Exclude<AnalyticsPresetId, 'custom'>] ?? 'Last 30 days'} (IST)`,
+    startIso: istDayStartIso(startDay),
+    endIso: istDayEndIso(endDay),
+    startDay,
+    endDay,
+  }
+}
+
+/** First day of current calendar month in IST (YYYY-MM-DD). */
+export function istMonthStartYmd(d = new Date()): string {
+  const ymd = toIstYmd(d)
+  return `${ymd.slice(0, 7)}-01`
+}
+
+/** Inclusive IST month start as ISO timestamptz. */
+export function istMonthStartIso(d = new Date()): string {
+  return istDayStartIso(istMonthStartYmd(d))
+}
+
+/** Last 7 days inclusive in IST (for dashboard overview charts). */
+export function analyticsRange7dIst(): AnalyticsResolvedRange {
+  const now = new Date()
+  const endDay = toIstYmd(now)
+  const t = new Date(istDayStartIso(endDay))
+  t.setUTCDate(t.getUTCDate() - 6)
+  const startDay = toIstYmd(t)
+  return {
+    preset: '7d',
+    label: 'Last 7 days (IST)',
+    startIso: istDayStartIso(startDay),
+    endIso: istDayEndIso(endDay),
     startDay,
     endDay,
   }

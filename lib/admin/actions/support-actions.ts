@@ -36,3 +36,35 @@ export async function updateSupportTicketStatusAction(
     return { ok: true }
   })
 }
+
+export async function adminReplySupportConversationAction(
+  conversationId: string,
+  body: string,
+): Promise<AdminActionResult> {
+  return runInstrumentedServerAction('adminReplySupportConversationAction', 'admin', async () => {
+    const guard = await requirePermissionForAdminAction('support.write')
+    if (!guard.ok) return guard
+
+    const text = body.trim()
+    if (!text) return { ok: false, message: 'Reply cannot be empty.' }
+
+    const admin = createAdminClient()
+    const now = new Date().toISOString()
+
+    const { error: msgErr } = await admin.from('support_messages').insert({
+      conversation_id: conversationId,
+      sender_role: 'staff',
+      body: text,
+    })
+    if (msgErr) return adminActionDbFailed('adminReplySupportConversationAction', msgErr)
+
+    const { error: convErr } = await admin
+      .from('support_conversations')
+      .update({ status: 'in_progress', last_message_at: now, updated_at: now })
+      .eq('id', conversationId)
+    if (convErr) return adminActionDbFailed('adminReplySupportConversationAction:conv', convErr)
+
+    revalidatePath('/admin/support')
+    return { ok: true }
+  })
+}

@@ -19,7 +19,7 @@ export default async function AdminAnalyticsPage({
       <AdminPageHeader
         eyebrow="Intelligence"
         title="Analytics"
-        description="Revenue, fleet load, and booking intelligence sourced from live Supabase data. Use presets or a custom UTC date range."
+        description="Revenue, fleet load, and booking intelligence sourced from live Supabase data. Presets and custom ranges use IST business-day boundaries."
       />
       <AdminAnalyticsDashboard data={data} />
     </div>

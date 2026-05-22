@@ -1,5 +1,7 @@
 /** Deposit and penalty financial model — shared by admin actions and customer views. */
 
+import { safeRupees } from '@/lib/money/safe'
+
 export const DEPOSIT_STATUSES = [
   'pending',
   'received',
@@ -192,13 +194,11 @@ export function resolveDepositAmount(input: {
   deposit_held_rupees?: number | null
   vehicle_security_deposit?: number | null
 }): number {
-  if (input.deposit_amount != null && input.deposit_amount > 0) {
-    return Math.round(input.deposit_amount)
-  }
-  if (input.deposit_held_rupees != null && input.deposit_held_rupees > 0) {
-    return Math.round(input.deposit_held_rupees)
-  }
-  return Math.max(0, Math.round(input.vehicle_security_deposit ?? 0))
+  const fromBooking = safeRupees(input.deposit_amount, -1)
+  if (fromBooking > 0) return fromBooking
+  const fromHeld = safeRupees(input.deposit_held_rupees, -1)
+  if (fromHeld > 0) return fromHeld
+  return safeRupees(input.vehicle_security_deposit, 0)
 }
 
 export function penaltyNotesFromJson(raw: unknown): Partial<Record<PenaltyCategory, string | null>> {

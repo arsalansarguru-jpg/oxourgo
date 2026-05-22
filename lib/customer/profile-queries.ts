@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export type CustomerProfileSnapshot = {
   full_name: string | null
+  display_name: string | null
   phone: string | null
   avatar_url: string | null
   verification_tier: string
@@ -16,6 +17,7 @@ export type CustomerProfileSnapshot = {
 
 export const DEFAULT_CUSTOMER_PROFILE: CustomerProfileSnapshot = {
   full_name: null,
+  display_name: null,
   phone: null,
   avatar_url: null,
   verification_tier: 'basic',
@@ -25,9 +27,9 @@ export const DEFAULT_CUSTOMER_PROFILE: CustomerProfileSnapshot = {
 }
 
 const PROFILE_KYC_SELECT =
-  'full_name, phone, avatar_url, verification_tier, kyc_status, kyc_submitted_at, kyc_approved_at' as const
+  'full_name, display_name, phone, avatar_url, verification_tier, kyc_status, kyc_submitted_at, kyc_approved_at' as const
 
-const PROFILE_MINIMAL_SELECT = 'full_name, phone, avatar_url, verification_tier' as const
+const PROFILE_MINIMAL_SELECT = 'full_name, display_name, phone, avatar_url, verification_tier' as const
 
 type ProfileRow = Partial<Record<keyof CustomerProfileSnapshot, string | null>>
 
@@ -35,6 +37,7 @@ function snapshotFromRow(row: ProfileRow | null): CustomerProfileSnapshot {
   if (!row) return DEFAULT_CUSTOMER_PROFILE
   return {
     full_name: row.full_name ?? null,
+    display_name: row.display_name ?? null,
     phone: row.phone ?? null,
     avatar_url: row.avatar_url ?? null,
     verification_tier: (row.verification_tier ?? 'basic').trim() || 'basic',

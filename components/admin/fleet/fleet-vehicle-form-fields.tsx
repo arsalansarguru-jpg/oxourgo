@@ -40,7 +40,7 @@ export function FleetVehicleFormFields({ defaults, showImageUrlField, showListin
         defaultValue={defaults.name ?? ''}
         className="sm:col-span-2"
       />
-      <Input name="brand" label="Brand" required placeholder="BMW" defaultValue={defaults.brand ?? ''} />
+      <Input name="brand" label="Brand" required placeholder="Hyundai" defaultValue={defaults.brand ?? ''} />
       <Input name="city" label="City / hub" placeholder="Mumbai, BKC…" defaultValue={defaults.city ?? ''} />
       <Input name="year" label="Year" type="number" required min={1990} max={2100} defaultValue={year} />
       <Input

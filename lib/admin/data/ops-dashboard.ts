@@ -2,13 +2,18 @@ import 'server-only'
 
 import type { PostgrestError } from '@supabase/supabase-js'
 
-import { bookingCollectedRupees, isBookingCancelled } from '@/lib/admin/booking-financials'
+import {
+  bookingCollectedRupees,
+  isBookingCancelled,
+  type BookingFinancialRow,
+} from '@/lib/admin/booking-financials'
 import { resolveCustomerDisplayName } from '@/lib/customer/display-name'
 import { adminEnrichBookingsForAdminList, type AdminBookingListItem } from '@/lib/admin/data/bookings'
 import {
   fetchCommandCenterBundle,
   type CommandCenterVisibility,
 } from '@/lib/admin/data/command-center'
+import { istDayStartIso, toIstYmd } from '@/lib/admin/analytics-range'
 import { adminFinancialMetrics } from '@/lib/admin/data/financials'
 import { adminPaymentOperationsMetrics } from '@/lib/admin/data/payments'
 import { countPendingKycCustomers } from '@/lib/admin/kyc-metrics'
@@ -135,9 +140,8 @@ function utcTodayYmd(): string {
 }
 
 function monthStartIso(): string {
-  const y = new Date().getUTCFullYear()
-  const m = new Date().getUTCMonth()
-  return new Date(Date.UTC(y, m, 1, 0, 0, 0, 0)).toISOString()
+  const ymd = toIstYmd()
+  return istDayStartIso(`${ymd.slice(0, 7)}-01`)
 }
 
 function readCount(label: string, res: { count: number | null; error: PostgrestError | null }): number {
@@ -381,7 +385,10 @@ async function fetchVehicles(admin: ReturnType<typeof createAdminClient>, today:
     if (pu <= today && re >= today) {
       onTripByVehicle.set(vid, { pickup: pu, return: re })
     }
-    revenueByVehicle.set(vid, (revenueByVehicle.get(vid) ?? 0) + Math.max(0, Math.round(Number(b.amount_paid ?? 0))))
+    revenueByVehicle.set(
+      vid,
+      (revenueByVehicle.get(vid) ?? 0) + bookingCollectedRupees(b as BookingFinancialRow),
+    )
     bookingDaysByVehicle.set(vid, (bookingDaysByVehicle.get(vid) ?? 0) + 1)
   }
 

@@ -7,6 +7,7 @@ import {
   PICKUP_INSPECTION_CHECKLIST_KEYS,
   RETURN_INSPECTION_CHECKLIST_KEYS,
 } from '@/lib/booking/inspection'
+import { isProfileKycApprovedForBooking } from '@/lib/kyc/kyc-booking-eligible'
 import { isPostedRentalPayment } from '@/lib/payments/booking-payment'
 import type { Database, Json } from '@/lib/supabase/database.types'
 
@@ -40,12 +41,11 @@ export async function validatePickupInspectionForHandover(
 
   const { data: profile } = await admin
     .from('profiles')
-    .select('kyc_status')
+    .select('kyc_status, verification_tier')
     .eq('user_id', booking.user_id)
     .maybeSingle()
 
-  const kycOk = (profile?.kyc_status ?? '').trim().toLowerCase() === 'approved'
-  if (!kycOk) {
+  if (!isProfileKycApprovedForBooking(profile)) {
     return { ok: false, message: 'Customer KYC must be approved before handover.' }
   }
 

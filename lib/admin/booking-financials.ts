@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { normalizePaymentStatus } from '@/lib/admin/status-enums'
+import { safeRupees } from '@/lib/money/safe'
 
 export type BookingFinancialRow = {
   booking_status?: string | null
@@ -23,21 +24,20 @@ export function isBookingCancelled(status: string | null | undefined): boolean {
   return (status ?? '').trim().toLowerCase() === 'cancelled'
 }
 
-/** Whole INR collected on the booking (uses amount_paid when status indicates collection). */
+/** Whole INR collected on the booking (requires posted payment status). */
 export function bookingCollectedRupees(b: BookingFinancialRow): number {
   if (isBookingCancelled(b.booking_status)) return 0
-  const paid = Math.max(0, Math.round(Number(b.amount_paid ?? 0)))
   const ps = normalizePaymentStatusForAnalytics(b.payment_status)
-  if (COLLECTED_STATUSES.has(ps) || paid > 0) return paid
-  return 0
+  if (!COLLECTED_STATUSES.has(ps)) return 0
+  return safeRupees(b.amount_paid)
 }
 
 /** Outstanding rental balance (amount_due with total fallback). */
 export function bookingPendingRupees(b: BookingFinancialRow): number {
   if (isBookingCancelled(b.booking_status)) return 0
-  const due = b.amount_due
-  if (due != null && Number.isFinite(Number(due))) return Math.max(0, Math.round(Number(due)))
-  const total = Math.max(0, Math.round(Number(b.total_rupees ?? 0)))
+  const due = safeRupees(b.amount_due, -1)
+  if (due >= 0) return due
+  const total = bookingContractRupees(b)
   const paid = bookingCollectedRupees(b)
   return Math.max(0, total - paid)
 }
@@ -45,7 +45,7 @@ export function bookingPendingRupees(b: BookingFinancialRow): number {
 /** Contract value (gross rental) for non-cancelled bookings. */
 export function bookingContractRupees(b: BookingFinancialRow): number {
   if (isBookingCancelled(b.booking_status)) return 0
-  return Math.max(0, Math.round(Number(b.total_rupees ?? 0)))
+  return safeRupees(b.total_rupees)
 }
 
 export function hasCollectedPayment(b: BookingFinancialRow): boolean {
