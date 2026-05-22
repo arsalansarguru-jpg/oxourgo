@@ -395,8 +395,7 @@ export async function fetchAdminAnalyticsBundle(range: AnalyticsResolvedRange): 
           uid,
           resolveCustomerDisplayName({
             userId: uid,
-            fullName: prof?.full_name ?? null,
-            displayName: (prof as { display_name?: string | null } | undefined)?.display_name ?? null,
+            fullName: prof?.full_name ?? prof?.display_name ?? null,
             email,
             phone: (prof as { phone?: string | null } | undefined)?.phone ?? null,
             authMetadata: meta,

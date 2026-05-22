@@ -51,7 +51,10 @@ async function markAiTurn(conversationId: string, model: string): Promise<void> 
   const admin = createAdminClient()
   await admin
     .from('whatsapp_conversations')
-    .update({ last_ai_turn_at: new Date().toISOString(), last_ai_model: model })
+    .update({
+      last_ai_turn_at: new Date().toISOString(),
+      last_ai_model: model,
+    } as Record<string, string>)
     .eq('id', conversationId)
 }
 
