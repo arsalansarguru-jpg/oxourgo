@@ -25,7 +25,7 @@ test.describe('production smoke', () => {
     await page.goto('/fleet', { waitUntil: 'domcontentloaded' })
     await expect(page.locator('#main')).toBeVisible()
     await expect(page.getByTestId('fleet-page')).toBeVisible()
-    await expect(page.getByRole('heading', { name: 'Browse the collection' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Curated fleet' })).toBeVisible()
   })
 
   test('dashboard redirects when logged out', async ({ page }) => {

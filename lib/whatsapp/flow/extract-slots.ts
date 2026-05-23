@@ -71,8 +71,8 @@ export function extractTripSlotsFromText(text: string): ExtractedTripSlots {
   }
 
   const range =
-    lower.match(/(\d{1,2}\s+[a-z]+(?:\s+\d{4})?)\s*(?:to|–|-|—)\s*(\d{1,2}\s+[a-z]+(?:\s+\d{4})?)/i) ??
-    lower.match(/from\s+(\d{1,2}\s+[a-z]+(?:\s+\d{4})?)\s+(?:to|till|until)\s+(\d{1,2}\s+[a-z]+(?:\s+\d{4})?)/i)
+    lower.match(/(\d{1,2}\s+[a-z]+(?:\s+\d{4})?)(?:\s+\d{1,2}:\d{2})?\s*(?:to|–|-|—)\s*(\d{1,2}\s+[a-z]+(?:\s+\d{4})?)(?:\s+\d{1,2}:\d{2})?/i) ??
+    lower.match(/from\s+(\d{1,2}\s+[a-z]+(?:\s+\d{4})?)(?:\s+\d{1,2}:\d{2})?\s+(?:to|till|until)\s+(\d{1,2}\s+[a-z]+(?:\s+\d{4})?)(?:\s+\d{1,2}:\d{2})?/i)
 
   if (range) {
     const pu = parseDayMonth(range[1])
