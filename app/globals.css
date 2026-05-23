@@ -487,3 +487,28 @@ html[data-theme='dark'] {
   background-size: 200% 100%;
   animation: shimmer 1.8s linear infinite;
 }
+
+@utility text-brand-gradient {
+  background: linear-gradient(135deg, var(--color-soft) 30%, var(--color-electric) 70%, var(--color-cyan) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Premium glassmorphic scrollbar styling */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-matte);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-stroke-strong);
+  border: 2px solid var(--color-matte);
+  border-radius: 5px;
+  transition: background var(--duration-normal) var(--ease-premium);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-electric);
+}
