@@ -42,6 +42,18 @@ export function CustomerSettingsForm({ user, profile }: { user: User; profile: P
     e.preventDefault()
     setMessage(null)
     setFieldError(null)
+
+    const nameTrimmed = fullName.trim()
+    if (!nameTrimmed) {
+      setFieldError('Full name is required.')
+      return
+    }
+    const nameParts = nameTrimmed.split(/\s+/).filter(Boolean)
+    if (nameParts.length < 2) {
+      setFieldError('Please enter both your first and last name (e.g. Rahul Sharma).')
+      return
+    }
+
     const phoneErr = validateIndianMobile(phone)
     if (phoneErr) {
       setFieldError(phoneErr)

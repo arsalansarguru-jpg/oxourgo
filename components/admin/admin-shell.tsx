@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import {
-  Bell,
   ChevronsLeft,
   ChevronsRight,
   Home,
@@ -120,20 +119,6 @@ function SidebarFooter({
         </div>
       )}
       <div className={cn('mt-3 flex flex-col gap-0.5', !expanded && 'items-center')}>
-        {hasPermission(appRole, 'ops.alerts.read') ? (
-          <Link
-            href="/admin/notifications"
-            onClick={onNavigate}
-            className={cn(
-              'flex items-center gap-2 rounded-xl px-2.5 py-2 text-xs font-medium text-muted hover:bg-fill-glass hover:text-soft',
-              !expanded && 'justify-center p-2',
-            )}
-            title="Alerts"
-          >
-            <Bell className="h-4 w-4 shrink-0" aria-hidden />
-            {expanded ? <span>Alerts</span> : null}
-          </Link>
-        ) : null}
         <Link
           href="/"
           onClick={onNavigate}
@@ -177,6 +162,12 @@ export function AdminShell({
   const [sidebarHydrated, setSidebarHydrated] = useState(false)
 
   const barTitle = adminTopBarTitle(pathname)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined' && barTitle) {
+      document.title = `${barTitle} | Oxour Go Admin`
+    }
+  }, [barTitle])
 
   useEffect(() => {
     setCollapsed(readAdminSidebarCollapsed())

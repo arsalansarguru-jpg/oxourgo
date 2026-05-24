@@ -103,6 +103,88 @@ export function formatAuditValueChange(
   newValue: unknown,
 ): string | null {
   if (oldValue == null && newValue == null) return null
+
+  // Format utility
+  const formatVal = (k: string, v: unknown) => {
+    if (v == null) return 'none'
+    const keyLower = k.toLowerCase()
+    if (
+      keyLower.includes('amount') ||
+      keyLower.includes('price') ||
+      keyLower.includes('rupees') ||
+      keyLower.includes('fee') ||
+      keyLower.includes('deposit') ||
+      keyLower.includes('total') ||
+      keyLower.includes('fine') ||
+      keyLower.includes('penalty') ||
+      keyLower.includes('due') ||
+      keyLower.includes('paid')
+    ) {
+      if (typeof v === 'number') return `₹${v.toLocaleString('en-IN')}`
+      if (typeof v === 'string' && !isNaN(Number(v))) return `₹${Number(v).toLocaleString('en-IN')}`
+    }
+    if (v === true) return 'yes'
+    if (v === false) return 'no'
+    if (typeof v === 'object') {
+      try {
+        return JSON.stringify(v)
+      } catch {
+        return String(v)
+      }
+    }
+    return String(v)
+  }
+
+  // If both are non-null objects and not arrays, diff their properties
+  if (
+    oldValue != null &&
+    newValue != null &&
+    typeof oldValue === 'object' &&
+    typeof newValue === 'object' &&
+    !Array.isArray(oldValue) &&
+    !Array.isArray(newValue)
+  ) {
+    const oldObj = oldValue as Record<string, unknown>
+    const newObj = newValue as Record<string, unknown>
+    const keys = [...new Set([...Object.keys(oldObj), ...Object.keys(newObj)])]
+    const changes: string[] = []
+
+    for (const key of keys) {
+      const oldVal = oldObj[key]
+      const newVal = newObj[key]
+      if (oldVal !== newVal) {
+        const humanKey = key.replace(/_/g, ' ')
+        const titleCaseKey = humanKey.charAt(0).toUpperCase() + humanKey.slice(1)
+        if (oldVal == null) {
+          changes.push(`${titleCaseKey} set to ${formatVal(key, newVal)}`)
+        } else if (newVal == null) {
+          changes.push(`${titleCaseKey} cleared (was ${formatVal(key, oldVal)})`)
+        } else {
+          changes.push(`${titleCaseKey} updated to ${formatVal(key, newVal)}`)
+        }
+      }
+    }
+    if (changes.length > 0) {
+      return changes.join(', ')
+    }
+  }
+
+  // If oldValue is null/undefined and newValue is an object, list its non-null entries
+  if (oldValue == null && newValue != null && typeof newValue === 'object' && !Array.isArray(newValue)) {
+    const newObj = newValue as Record<string, unknown>
+    const entries = Object.entries(newObj).filter(([, v]) => v != null)
+    if (entries.length > 0) {
+      return entries
+        .map(([k, v]) => {
+          const humanKey = k.replace(/_/g, ' ')
+          const titleCaseKey = humanKey.charAt(0).toUpperCase() + humanKey.slice(1)
+          return `${titleCaseKey}: ${formatVal(k, v)}`
+        })
+        .join(', ')
+    }
+  }
+
+  // Fallback for simple scalar types
   const fmt = (v: unknown) => {
     if (v == null) return '—'
     if (typeof v === 'string') return v
@@ -113,6 +195,7 @@ export function formatAuditValueChange(
       return String(v)
     }
   }
+
   if (oldValue != null && newValue != null) return `${fmt(oldValue)} → ${fmt(newValue)}`
   if (newValue != null) return fmt(newValue)
   return fmt(oldValue)

@@ -113,13 +113,14 @@ export function UsersManagementClient({ users, activity, actorRole, actorId }: U
                           ))}
                         </Select>
                       </td>
-                      <td className="px-4 py-3.5 text-right">
+                      <td className="px-4 py-3.5 text-right whitespace-nowrap">
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
                           disabled={pending}
                           onClick={() => onRevokeSessions(u.id)}
+                          className="whitespace-nowrap"
                         >
                           <RefreshCw className="h-4 w-4" aria-hidden />
                           Revoke sessions

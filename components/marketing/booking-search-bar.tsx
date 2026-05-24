@@ -102,9 +102,9 @@ export function BookingSearchBar() {
 
   return (
     <div className="w-full min-w-0">
-      <div className="rounded-3xl border border-white/14 bg-[#fff8ec]/95 p-4 shadow-[0_30px_80px_-42px_rgba(0,0,0,0.75)] backdrop-blur-xl sm:p-5">
-        <p className="mb-4 text-sm text-[#5c4a32]">
-          All vehicles are collected from our <span className="font-semibold text-[#2a2118]">{PICKUP_HUB}</span> hub.
+      <div className="rounded-3xl border border-stroke-strong bg-carbon/75 p-4 shadow-glow-strong backdrop-blur-2xl sm:p-5 transition-all duration-300">
+        <p className="mb-4 text-sm text-silver">
+          All vehicles are collected from our <span className="font-semibold text-soft">{PICKUP_HUB}</span> hub.
         </p>
         <div
           className="grid min-w-0 gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:items-end"
@@ -165,7 +165,7 @@ export function BookingSearchBar() {
           />
         </div>
         {error && (touched.pickup || touched.dropoff) ? (
-          <div className="mt-4 flex items-start gap-2 rounded-2xl border border-amber-400/40 bg-amber-100 px-3 py-2 text-sm text-amber-900">
+          <div className="mt-4 flex items-start gap-2 rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] px-3 py-2 text-sm text-amber-200">
             <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
             <span>{error}</span>
           </div>

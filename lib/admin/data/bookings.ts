@@ -98,7 +98,6 @@ async function attachVehiclesToBookings(
     .from('vehicles')
     .select('id, name, brand, price_per_day, image, available, transmission, fuel_type, seats, year, registration_number, security_deposit')
     .in('id', vehicleIds)
-    .is('deleted_at', null)
 
   if (error) {
     logPostgrestError('[attachVehiclesToBookings]', error)

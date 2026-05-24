@@ -18,6 +18,16 @@ import { cn } from '@/lib/utils/cn'
 
 const ease = [0.22, 1, 0.36, 1] as const
 
+const staggerContainer = {
+  hidden: {},
+  visible: { transition: { staggerChildren: 0.04, delayChildren: 0.02 } },
+}
+
+const staggerItem = {
+  hidden: { opacity: 0, y: 14 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease } },
+}
+
 function EnterpriseKpi({
   label,
   value,
@@ -30,18 +40,20 @@ function EnterpriseKpi({
   tone?: 'warn' | 'critical'
 }) {
   return (
-    <Link
-      href={href}
-      className={cn(
-        'group relative overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent p-4 shadow-[var(--shadow-card)] transition-[transform,box-shadow] hover:-translate-y-0.5',
-        tone === 'warn' && 'border-amber-400/25',
-        tone === 'critical' && 'border-rose-400/25',
-      )}
-    >
-      <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</p>
-      <p className="mt-2 text-xl font-semibold tabular-nums tracking-[-0.03em] text-soft sm:text-2xl">{value}</p>
-      <ArrowUpRight className="absolute right-3 top-3 h-4 w-4 text-muted opacity-0 transition-opacity group-hover:opacity-100" />
-    </Link>
+    <motion.div variants={staggerItem}>
+      <Link
+        href={href}
+        className={cn(
+          'group relative block overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent p-4 shadow-[var(--shadow-card)] transition-[transform,box-shadow] hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-accent)]',
+          tone === 'warn' && 'border-amber-400/25',
+          tone === 'critical' && 'border-rose-400/25',
+        )}
+      >
+        <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</p>
+        <p className="mt-2 text-xl font-semibold tabular-nums tracking-[-0.03em] text-soft sm:text-2xl">{value}</p>
+        <ArrowUpRight className="absolute right-3 top-3 h-4 w-4 text-muted opacity-0 transition-opacity group-hover:opacity-100" />
+      </Link>
+    </motion.div>
   )
 }
 
@@ -55,9 +67,9 @@ export function AdminDashboardOverview({ data }: { data: DashboardOverviewBundle
         <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-electric/90">Executive overview</p>
         <motion.div
           className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease }}
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
         >
           <EnterpriseKpi label="Total bookings" value={kpis.totalBookings} href="/admin/bookings" />
           <EnterpriseKpi label="Active rentals" value={kpis.activeRentals} href="/admin/bookings?status=active" />
@@ -78,7 +90,7 @@ export function AdminDashboardOverview({ data }: { data: DashboardOverviewBundle
           />
           <EnterpriseKpi
             label="Pending refunds"
-            value={`${kpis.pendingRefunds} · ${formatInr(kpis.pendingRefundsRupees)}`}
+            value={`${kpis.pendingRefunds} refunds / ${formatInr(kpis.pendingRefundsRupees)}`}
             href="/admin/financials"
             tone={kpis.pendingRefunds > 0 ? 'warn' : undefined}
           />

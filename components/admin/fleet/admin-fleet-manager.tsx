@@ -140,6 +140,18 @@ export function AdminFleetManager({
     <div className="space-y-8">
       <FleetUtilizationHero metrics={metrics} />
 
+      {metrics.featuredVehicles === 0 && (
+        <div className="rounded-2xl border border-amber-500/20 bg-amber-500/[0.06] p-4 text-sm text-soft flex items-start gap-3 shadow-[var(--shadow-card)]">
+          <Sparkles className="h-5 w-5 text-amber-300 shrink-0 mt-0.5" aria-hidden />
+          <div className="space-y-1">
+            <p className="font-semibold text-amber-200">No Featured Vehicles for Marketing</p>
+            <p className="text-muted text-xs leading-relaxed">
+              You currently have 0 vehicles marked as featured. This means no vehicles will be spotlighted on the public landing page. Please edit at least one vehicle in your catalog and check the <strong>&quot;Featured&quot;</strong> option to showcase it on marketing surfaces.
+            </p>
+          </div>
+        </div>
+      )}
+
       <AdminCard className="overflow-hidden">
         <AdminCardContent className="space-y-4 border-b border-white/[0.06] pb-5 sm:space-y-5 sm:pb-6">
           <form

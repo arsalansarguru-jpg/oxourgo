@@ -68,3 +68,41 @@ export async function adminReplySupportConversationAction(
     return { ok: true }
   })
 }
+
+export async function adminCreateSupportTicketAction(input: {
+  userId?: string | null
+  bookingId?: string | null
+  subject: string
+  body: string
+  category: string
+  priority: string
+}): Promise<AdminActionResult> {
+  return runInstrumentedServerAction('adminCreateSupportTicketAction', 'admin', async () => {
+    const guard = await requirePermissionForAdminAction('support.write')
+    if (!guard.ok) return guard
+
+    const subject = input.subject.trim()
+    const body = input.body.trim()
+    if (!subject || !body) {
+      return { ok: false, message: 'Subject and body are required.' }
+    }
+
+    const admin = createAdminClient()
+    const { error } = await admin.from('support_tickets').insert({
+      user_id: input.userId || null,
+      booking_id: input.bookingId || null,
+      subject,
+      body,
+      category: input.category,
+      priority: input.priority,
+      status: 'open',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+
+    if (error) return adminActionDbFailed('adminCreateSupportTicketAction', error)
+
+    revalidatePath('/admin/support')
+    return { ok: true }
+  })
+}

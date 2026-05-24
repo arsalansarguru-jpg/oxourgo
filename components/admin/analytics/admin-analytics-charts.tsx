@@ -160,6 +160,14 @@ export function AnalyticsSeriesArea({
 
 export function AnalyticsDailyBars({ points, color }: { points: AdminAnalyticsSeriesPoint[]; color: string }) {
   const rawMax = points.length ? Math.max(...points.map((p) => p.value), 0) : 0
+  if (rawMax === 0) {
+    return (
+      <div className="flex h-[160px] w-full items-center justify-center sm:h-[180px] rounded-2xl border border-white/[0.04] bg-white/[0.01]">
+        <p className="text-sm text-muted">No activity in range</p>
+      </div>
+    )
+  }
+
   const max = rawMax > 0 ? rawMax : 1
   const w = 720
   const h = 180

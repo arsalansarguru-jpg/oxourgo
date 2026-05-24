@@ -84,7 +84,7 @@ export function SupportView({ greetingName, initialMessages = [], signedIn = fal
             <SupportCard
               icon={MessageCircle}
               title="WhatsApp priority lane"
-              description="Verified guests jump the queue. Average first response under 4 minutes."
+              description={`Verified guests jump the queue. Average first response under 4 minutes. Direct support line: ${BRAND.phoneDisplay}`}
               action={
                 <Button className="w-full" href={BRAND.whatsapp} target="_blank" rel="noreferrer">
                   Open WhatsApp

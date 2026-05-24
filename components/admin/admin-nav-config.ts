@@ -14,6 +14,8 @@ import {
   UserCog,
   Users,
   Wrench,
+  Activity,
+  ScrollText,
 } from 'lucide-react'
 
 import type { Permission } from '@/lib/auth/permissions'
@@ -27,21 +29,23 @@ export type AdminNavItem = {
   permission: Permission
 }
 
-/** Enterprise admin navigation — 14 operational sections. */
+/** Enterprise admin navigation — 17 operational sections. */
 export const ADMIN_NAV: readonly AdminNavItem[] = [
   { href: ADMIN_HOME, label: 'Dashboard', icon: LayoutDashboard, exact: true, permission: 'admin.dashboard.read' },
   { href: '/admin/fleet', label: 'Fleet', icon: CarFront, exact: false, permission: 'fleet.read' },
   { href: '/admin/bookings', label: 'Bookings', icon: ClipboardList, exact: false, permission: 'bookings.read' },
+  { href: '/admin/operations', label: 'Operations', icon: Activity, exact: false, permission: 'ops.manual.read' },
   { href: '/admin/kyc', label: 'KYC Verification', icon: ShieldCheck, exact: false, permission: 'kyc.read' },
   { href: '/admin/payments', label: 'Payments', icon: Banknote, exact: false, permission: 'payments.read' },
-  { href: '/admin/financials', label: 'Deposits', icon: Scale, exact: false, permission: 'deposits.read' },
+  { href: '/admin/financials', label: 'Deposits & Penalties', icon: Scale, exact: false, permission: 'deposits.read' },
   { href: '/admin/customers', label: 'Customers', icon: Users, exact: false, permission: 'customers.read' },
   { href: '/admin/tracking', label: 'Vehicle Tracking', icon: MapPin, exact: false, permission: 'tracking.read' },
   { href: '/admin/damage', label: 'Damage & Penalties', icon: Wrench, exact: false, permission: 'damage.read' },
   { href: '/admin/traffic', label: 'Traffic Fines', icon: Gavel, exact: false, permission: 'traffic.read' },
-  { href: '/admin/analytics', label: 'Reports', icon: BarChart3, exact: false, permission: 'analytics.read' },
+  { href: '/admin/analytics', label: 'Analytics', icon: BarChart3, exact: false, permission: 'analytics.read' },
   { href: '/admin/notifications', label: 'Notifications', icon: Bell, exact: false, permission: 'ops.alerts.read' },
   { href: '/admin/support', label: 'Support Tickets', icon: Headphones, exact: false, permission: 'support.read' },
+  { href: '/admin/audit', label: 'Audit Log', icon: ScrollText, exact: false, permission: 'admin.audit.read' },
   { href: '/admin/users', label: 'Staff', icon: UserCog, exact: false, permission: 'admin.users.manage' },
   { href: '/admin/settings', label: 'Settings', icon: Settings, exact: false, permission: 'settings.read' },
 ] as const
@@ -80,15 +84,15 @@ export function adminTopBarTitle(pathname: string): string {
   if (pathname.startsWith('/admin/customers')) return 'Customers'
   if (pathname.startsWith('/admin/kyc')) return 'KYC Verification'
   if (pathname.startsWith('/admin/payments')) return 'Payments'
-  if (pathname.startsWith('/admin/financials')) return 'Deposits'
+  if (pathname.startsWith('/admin/financials')) return 'Deposits & Penalties'
   if (pathname.startsWith('/admin/tracking')) return 'Vehicle Tracking'
   if (pathname.startsWith('/admin/damage')) return 'Damage & Penalties'
   if (pathname.startsWith('/admin/traffic')) return 'Traffic Fines'
-  if (pathname.startsWith('/admin/analytics')) return 'Reports & Analytics'
+  if (pathname.startsWith('/admin/analytics')) return 'Analytics'
   if (pathname.startsWith('/admin/notifications')) return 'Notifications'
   if (pathname.startsWith('/admin/support')) return 'Support Tickets'
   if (pathname.startsWith('/admin/violations')) return 'Violations'
-  if (pathname.startsWith('/admin/audit')) return 'Audit log'
+  if (pathname.startsWith('/admin/audit')) return 'Audit Log'
   if (pathname.startsWith('/admin/help/onboarding')) return 'Onboarding'
   if (pathname.startsWith('/admin/help/')) return 'Procedure'
   if (pathname.startsWith('/admin/help')) return 'Help & SOPs'

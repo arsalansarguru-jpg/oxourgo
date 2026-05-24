@@ -49,7 +49,7 @@ export function AdminPaymentsPageBody({
       <AdminPageHeader
         eyebrow="Treasury"
         title="Payment operations"
-        description="Pay-at-pickup and operational collections — amounts, statuses, and ledger lines. Online PSP checkout is not wired yet."
+        description="Pay-at-pickup, online PSP checkout, and operational collections — amounts, statuses, and ledger lines."
       />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">

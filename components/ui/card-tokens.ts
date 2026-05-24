@@ -5,19 +5,20 @@ export const cardSurfaceBase =
   'rounded-2xl border border-stroke bg-fill-glass-strong shadow-[var(--shadow-card)] backdrop-blur-2xl'
 
 export const cardSurfaceTransition =
-  'transition-[transform,box-shadow,border-color,background-color] duration-200'
+  'transition-[transform,box-shadow,border-color,background-color] duration-300 ease-[var(--ease-premium)]'
 
 export const cardSurfaceHover =
-  'hover:-translate-y-0.5 hover:border-electric/25 hover:shadow-[var(--shadow-card-hover)]'
+  'hover:-translate-y-1 hover:border-electric/45 hover:shadow-[0_20px_50px_rgba(0,102,255,0.18)]'
 
-export const cardSurfaceHoverAccent = cardSurfaceHover
+export const cardSurfaceHoverAccent =
+  'hover:-translate-y-1 hover:border-cyan/45 hover:shadow-[0_20px_50px_rgba(0,194,255,0.2)]'
 
 export const cardSurfaceGlass = cardSurfaceBase
 
 export const cardSurfaceGlassHover = cardSurfaceHover
 
 export const cardSurfaceDashed =
-  'rounded-2xl border border-dashed border-stroke-strong bg-carbon/80 backdrop-blur-xl transition-colors duration-150 hover:border-electric/30'
+  'rounded-2xl border border-dashed border-stroke-strong bg-carbon/80 backdrop-blur-xl transition-colors duration-200 hover:border-electric/30'
 
 export const cardPadding = 'p-5 sm:p-6'
 export const cardPaddingCompact = 'p-4 sm:p-5'

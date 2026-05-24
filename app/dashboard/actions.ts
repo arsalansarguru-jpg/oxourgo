@@ -30,6 +30,16 @@ export async function updateCustomerProfileAction(formData: FormData): Promise<{
 
     const rawName = String(formData.get('fullName') ?? '').trim()
     const fullName = isRolePlaceholderName(rawName) ? '' : rawName
+
+    if (fullName) {
+      const parts = fullName.split(/\s+/).filter(Boolean)
+      if (parts.length < 2) {
+        return { ok: false, message: 'Please enter both your first and last name.' }
+      }
+    } else {
+      return { ok: false, message: 'Full name is required.' }
+    }
+
     const phone = String(formData.get('phone') ?? '').trim()
     const avatarUrl = String(formData.get('avatarUrl') ?? '').trim()
 

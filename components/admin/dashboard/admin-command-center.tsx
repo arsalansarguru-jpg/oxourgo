@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import type { LucideIcon } from 'lucide-react'
 import { motion } from 'framer-motion'
 import {
@@ -206,20 +207,37 @@ export function AdminCommandCenter({ data }: { data: CommandCenterBundle }) {
   const { visibility, live, finance, fleet, queue, auditEntries, actorLookup, upcoming, alerts, loadedAt } =
     data
 
-  // Format on the client only — avoids hydration mismatch from differing server/browser locales.
+  const router = useRouter()
+  const [countdown, setCountdown] = useState(30)
   const [refreshed, setRefreshed] = useState<string>('')
+
   useEffect(() => {
     try {
       setRefreshed(
         new Date(loadedAt).toLocaleTimeString('en-IN', {
           hour: '2-digit',
           minute: '2-digit',
+          second: '2-digit',
         }),
       )
+      setCountdown(30)
     } catch {
       setRefreshed('')
     }
   }, [loadedAt])
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          router.refresh()
+          return 30
+        }
+        return prev - 1
+      })
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [router])
 
   return (
     <motion.div
@@ -243,6 +261,7 @@ export function AdminCommandCenter({ data }: { data: CommandCenterBundle }) {
             <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-electric/90">Live HQ</p>
             <p className="text-sm text-muted">
               Operational pulse{refreshed ? ` · refreshed ${refreshed}` : ''}
+              <span className="text-[11px] font-medium text-electric/70 ml-2">(auto-refreshing in {countdown}s)</span>
             </p>
           </div>
         </div>
