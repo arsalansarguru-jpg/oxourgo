@@ -12,6 +12,10 @@ import { isStaffRole } from '@/lib/auth/permissions'
 
 export const metadata: Metadata = {
   robots: { index: false, follow: false },
+  title: {
+    template: '%s | Oxour Go Admin',
+    default: 'Dashboard | Oxour Go Admin',
+  },
 }
 
 export const dynamic = 'force-dynamic'

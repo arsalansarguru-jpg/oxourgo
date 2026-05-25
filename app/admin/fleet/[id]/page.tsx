@@ -22,12 +22,20 @@ export default async function AdminFleetDetailPage({ params }: { params: Promise
 
   const cover = fleetVehicleImageUrl(vehicle.image)
 
+  const subtitleParts = [
+    vehicle.brand,
+    vehicle.year ? String(vehicle.year) : null,
+    vehicle.registration_number,
+    `ID ${vehicle.id}`
+  ].filter((x) => x !== null && x !== undefined && String(x).trim() !== '' && String(x) !== 'null')
+  const subtitle = subtitleParts.join(' · ')
+
   return (
     <div className="space-y-8">
       <AdminPageHeader
         eyebrow="Fleet"
         title={vehicle.name}
-        description={`${vehicle.brand} · ${vehicle.registration_number} · ID ${vehicle.id}`}
+        description={subtitle}
       />
 
       {cover ? (

@@ -21,6 +21,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       <input
         ref={ref}
         id={inputId}
+        aria-invalid={error ? 'true' : 'false'}
         className={cn(
           'touch-manipulation min-h-11 w-full rounded-xl border border-stroke-strong bg-carbon/90 px-4 py-2.5 text-base font-normal text-soft placeholder:text-muted backdrop-blur-sm sm:text-sm',
           'shadow-[inset_0_1px_0_rgb(255_255_255/0.06)] transition-[border-color,box-shadow,background-color] duration-200',

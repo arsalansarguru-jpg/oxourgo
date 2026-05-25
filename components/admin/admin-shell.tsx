@@ -165,7 +165,10 @@ export function AdminShell({
 
   useEffect(() => {
     if (typeof window !== 'undefined' && barTitle) {
-      document.title = `${barTitle} | Oxour Go Admin`
+      const handle = setTimeout(() => {
+        document.title = `${barTitle} | Oxour Go Admin`
+      }, 0)
+      return () => clearTimeout(handle)
     }
   }, [barTitle])
 

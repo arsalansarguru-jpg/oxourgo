@@ -7,6 +7,19 @@ import { AdminStatusPill } from '@/components/admin/admin-status-pill'
 
 export const dynamic = 'force-dynamic'
 
+function isInvalidName(name: string): boolean {
+  const cleanName = name.trim().toLowerCase()
+  if (!cleanName) return true
+  const blacklist = [
+    'engineering', 'info', 'ltd', 'pvt', 'inc', 'co', 'corp', 'limited', 'solutions',
+    'technologies', 'services', 'enterprises', 'industries', 'group', 'agency', 'consulting'
+  ]
+  if (blacklist.some(token => cleanName.includes(token))) return true
+  const words = cleanName.split(/\s+/).filter(Boolean)
+  if (words.length < 2) return true
+  return false
+}
+
 export default async function AdminCustomersPage() {
   let rows: Awaited<ReturnType<typeof adminListCustomers>> = []
   try {
@@ -42,9 +55,19 @@ export default async function AdminCustomersPage() {
                   const tier = r.profile?.verification_tier ?? 'basic'
                   const stored = r.profile?.risk_score ?? 0
                   const displayRisk = Math.max(stored, r.heuristicRisk)
+                  const nameFlag = isInvalidName(r.displayName)
                   return (
                     <tr key={r.userId} className="admin-table-row">
-                      <td className="px-4 py-3 font-medium text-soft">{r.displayName}</td>
+                      <td className="px-4 py-3 font-medium text-soft">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span>{r.displayName}</span>
+                          {nameFlag ? (
+                            <span className="inline-flex items-center rounded bg-rose-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-rose-400 border border-rose-500/20 shrink-0">
+                              Non-Person / Company
+                            </span>
+                          ) : null}
+                        </div>
+                      </td>
                       <td className="px-4 py-3 text-muted">{r.email ?? '—'}</td>
                       <td className="px-4 py-3">
                         <AdminStatusPill value={tier} />

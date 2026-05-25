@@ -66,7 +66,7 @@ export function AdminDashboardOverview({ data }: { data: DashboardOverviewBundle
       <section aria-label="Enterprise KPIs">
         <p className="mb-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-electric/90">Executive overview</p>
         <motion.div
-          className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5"
+          className="grid gap-3 grid-cols-2 lg:grid-cols-5"
           variants={staggerContainer}
           initial="hidden"
           animate="visible"
@@ -148,7 +148,7 @@ export function AdminDashboardOverview({ data }: { data: DashboardOverviewBundle
                 period.
               </p>
               <AnalyticsSeriesArea
-                points={analytics.series.fleetAvailabilityByDay}
+                points={analytics.series.fleetAvailabilityByDay.map(pt => ({ ...pt, value: 100 - pt.value }))}
                 accent="emerald"
                 valueFormatter={(n) => `${n}%`}
               />

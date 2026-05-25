@@ -21,6 +21,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
       <select
         ref={ref}
         id={selectId}
+        aria-invalid={error ? 'true' : 'false'}
         className={cn(
           'touch-manipulation min-h-12 w-full appearance-none rounded-full border border-stroke-strong bg-carbon/85 px-4 py-3 text-base text-soft shadow-[inset_0_1px_0_0_rgba(255,255,255,0.24)] sm:min-h-11 sm:py-2 sm:text-sm',
           'transition-[border-color,box-shadow,background-color] duration-300 focus-visible:border-electric/55 focus-visible:bg-matte/[0.65] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/22',

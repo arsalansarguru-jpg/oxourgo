@@ -30,7 +30,9 @@ export default async function SupportPage() {
         },
       })
     : null
-  const firstName = displayName ? displayName.split(/\s+/)[0] : null
+  const rawFirstName = displayName ? displayName.split(/\s+/)[0] : null
+  const isBlacklisted = rawFirstName && /oxour|admin|info|noble|test|co|corp|ltd|pvt|engineering/i.test(rawFirstName)
+  const firstName = isBlacklisted ? null : rawFirstName
   const initialMessages = user ? await listCustomerSupportMessages(user.id) : []
 
   return (

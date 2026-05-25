@@ -26,8 +26,11 @@ type Props = {
 export function FleetVehicleFormFields({ defaults, showImageUrlField, showListingToggles }: Props) {
   const year = defaults.year ?? 2024
   const seats = defaults.seats ?? 5
-  const fuel = defaults.fuel_type ?? 'petrol'
-  const transmission = defaults.transmission ?? 'auto'
+  const rawFuel = (defaults.fuel_type ?? 'petrol').toLowerCase()
+  const fuel = ['petrol', 'diesel', 'electric', 'hybrid', 'cng'].includes(rawFuel) ? rawFuel : 'petrol'
+
+  const rawTrans = (defaults.transmission ?? 'auto').toLowerCase()
+  const transmission = rawTrans.startsWith('man') ? 'manual' : 'auto'
   const deposit = defaults.security_deposit ?? 0
 
   return (

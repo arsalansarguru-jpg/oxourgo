@@ -92,7 +92,7 @@ export function AdminViolationsPageBody({
           </div>
 
           <div className="overflow-x-auto admin-table-scroll rounded-2xl border border-white/[0.06]">
-            <table className="min-w-[880px] w-full text-left text-sm">
+            <table className="min-w-[600px] w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-white/[0.06] text-[11px] font-semibold uppercase tracking-wide text-muted">
                   <th className="px-4 py-3">Trip</th>

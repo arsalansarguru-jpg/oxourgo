@@ -18,14 +18,18 @@ import {
 import type { AdminSupportConversationItem } from '@/lib/admin/data/support-conversations'
 import type { SupportTicketMetrics, SupportTicketRow } from '@/lib/admin/data/support-tickets'
 
+import type { adminListCustomers } from '@/lib/admin/data/customers'
+
 export function AdminSupportDashboard({
   metrics,
   tickets,
   conversations,
+  customers,
 }: {
   metrics: SupportTicketMetrics
   tickets: SupportTicketRow[]
   conversations: AdminSupportConversationItem[]
+  customers?: Awaited<ReturnType<typeof adminListCustomers>>
 }) {
   const router = useRouter()
   const [showCreateModal, setShowCreateModal] = useState(false)
@@ -184,13 +188,16 @@ export function AdminSupportDashboard({
               }}
               className="space-y-4 text-soft"
             >
-              <Input label="Subject / Summary" name="subject" placeholder="e.g., Security deposit refund delay" required />
+              <Input label="Subject / Summary *" name="subject" placeholder="e.g., Security deposit refund delay" required aria-required="true" />
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold uppercase tracking-wider text-muted">Description Body</label>
+                <label className="text-xs font-semibold uppercase tracking-wider text-muted flex items-center gap-1">
+                  Description Body <span className="text-rose-400">*</span>
+                </label>
                 <textarea
                   name="body"
                   rows={4}
                   required
+                  aria-required="true"
                   placeholder="Detailed explanation of the issue or request..."
                   className="w-full rounded-xl border border-white/[0.08] bg-black/20 p-3 text-sm text-soft placeholder:text-muted focus:border-electric/55 focus:outline-none"
                 />
@@ -223,7 +230,21 @@ export function AdminSupportDashboard({
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <Input label="User ID (optional)" name="userId" placeholder="Customer UUID" />
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold uppercase tracking-wider text-muted">Customer (optional)</label>
+                  <select
+                    name="userId"
+                    defaultValue=""
+                    className="w-full rounded-xl border border-white/[0.08] bg-black/20 p-2.5 text-sm text-soft focus:border-electric/55 focus:outline-none"
+                  >
+                    <option value="">Select customer</option>
+                    {(customers ?? []).map((c) => (
+                      <option key={c.userId} value={c.userId}>
+                        {c.displayName || 'Unnamed'} ({c.email || 'No email'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
                 <Input label="Booking ID (optional)" name="bookingId" placeholder="Booking UUID" />
               </div>
 

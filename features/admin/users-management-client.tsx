@@ -85,7 +85,7 @@ export function UsersManagementClient({ users, activity, actorRole, actorId }: U
                     <th className="px-4 py-3.5 font-medium">Role</th>
                     <th className="px-4 py-3.5 font-medium">Last sign-in</th>
                     <th className="px-4 py-3.5 font-medium">Assign role</th>
-                    <th className="px-4 py-3.5 font-medium" />
+                    <th className="px-4 py-3.5 font-medium min-w-[12rem] text-right" />
                   </tr>
                 </thead>
                 <tbody>
@@ -113,7 +113,7 @@ export function UsersManagementClient({ users, activity, actorRole, actorId }: U
                           ))}
                         </Select>
                       </td>
-                      <td className="px-4 py-3.5 text-right whitespace-nowrap">
+                      <td className="px-4 py-3.5 text-right whitespace-nowrap min-w-[12rem]">
                         <Button
                           type="button"
                           variant="ghost"

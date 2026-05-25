@@ -98,13 +98,25 @@ export function AdminOpsAlertBell({
                 <p className="px-4 py-6 text-center text-sm text-muted">No active alerts.</p>
               ) : (
                 <ul>
-                  {items.map((n) => (
-                    <li key={n.id} className="border-b border-stroke last:border-0">
-                      <div className="flex gap-2 px-4 py-3">
-                        <div className="min-w-0 flex-1">
-                          <p className="text-sm font-medium text-soft">{n.title}</p>
-                          {n.body ? <p className="mt-0.5 line-clamp-2 text-xs text-muted">{n.body}</p> : null}
-                        </div>
+                  {items.map((n) => {
+                    const ageInMs = new Date().getTime() - new Date(n.created_at).getTime()
+                    const ageInDays = ageInMs / (1000 * 60 * 60 * 24)
+                    const isSlaBreach = ageInDays >= 3
+
+                    return (
+                      <li key={n.id} className="border-b border-stroke last:border-0">
+                        <div className="flex gap-2 px-4 py-3">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <p className="text-sm font-medium text-soft">{n.title}</p>
+                              {isSlaBreach ? (
+                                <span className="inline-flex items-center gap-0.5 rounded bg-rose-500/10 px-1 py-0.2 text-[9px] font-semibold text-rose-400 border border-rose-500/20 animate-pulse shrink-0">
+                                  ⚠️ SLA Breach
+                                </span>
+                              ) : null}
+                            </div>
+                            {n.body ? <p className="mt-0.5 line-clamp-2 text-xs text-muted">{n.body}</p> : null}
+                          </div>
                         <button
                           type="button"
                           className="shrink-0 text-[11px] font-semibold text-electric hover:underline"
@@ -122,7 +134,8 @@ export function AdminOpsAlertBell({
                         </button>
                       </div>
                     </li>
-                  ))}
+                    )
+                  })}
                 </ul>
               )}
             </div>

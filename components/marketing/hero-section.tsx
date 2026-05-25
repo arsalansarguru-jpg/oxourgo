@@ -10,8 +10,8 @@ import { WhatsAppInquiryButton } from '@/components/marketing/whatsapp-inquiry-b
 import { BookingSearchBar } from '@/components/marketing/booking-search-bar'
 import { Button } from '@/components/ui/Button'
 
-/** Cinematic black + electric blue hero — local asset for fast LCP. */
-const HERO_IMAGE_SRC = '/media/luxury-car-hero-electric.png'
+/** Cinematic black + electric blue hero — high-end SUV asset. */
+const HERO_IMAGE_SRC = 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=1800'
 
 export function HeroSection() {
   const { user, ready, appRole, isStaff } = useResolvedAppRole()
@@ -22,12 +22,13 @@ export function HeroSection() {
     <section className={marketingHeroSection}>
       <Image
         src={HERO_IMAGE_SRC}
-        alt="Black luxury sedan on a wet city street at night with electric blue lighting"
+        alt="Premium black off-road SUV in neon blue night lighting on wet street"
         fill
         priority
         quality={85}
         sizes="100vw"
         className="absolute inset-0 -z-20 h-full w-full object-cover object-[76%_52%] brightness-[0.7] contrast-[1.14] saturate-[0.9] sm:object-[70%_50%] lg:object-[62%_48%]"
+        unoptimized
       />
       <div
         className="pointer-events-none absolute inset-0 -z-[19] backdrop-blur-[1px] [mask-image:linear-gradient(90deg,black_0%,black_28%,transparent_62%)]"

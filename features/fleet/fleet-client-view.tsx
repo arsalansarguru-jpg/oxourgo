@@ -121,7 +121,7 @@ export function FleetClientView({
       <SectionHeading
         eyebrow="Fleet"
         title="Curated fleet"
-        subtitle="Search, filter, and reserve verified luxury and premium vehicles — all pickups at our Mira Road hub."
+        subtitle="Search, filter, and reserve verified premium off-road and family SUVs — all pickups at our Mira Road hub."
       />
 
       {(from || to || location.trim() || searchQuery.trim()) && (
