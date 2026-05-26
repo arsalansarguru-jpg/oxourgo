@@ -9,6 +9,7 @@ import { captureClientEvent } from '@/lib/analytics/capture-client'
 import { BOOKING_FUNNEL, POSTHOG_EVENTS } from '@/lib/analytics/posthog-events'
 import { EmptyFleet } from '@/components/fleet/empty-fleet'
 import { FleetCarCard } from '@/components/fleet/fleet-car-card'
+import { ThreeDTiltWrapper } from '@/components/ui/three-d-tilt-wrapper'
 import { FleetFilterDrawer } from '@/components/fleet/fleet-filter-drawer'
 import { FleetGridSkeleton } from '@/components/fleet/fleet-grid-skeleton'
 import { FilterPills } from '@/components/fleet/filter-pills'
@@ -279,7 +280,9 @@ export function FleetClientView({
                           key={car.id}
                           transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                         >
-                          <FleetCarCard car={car} tripFrom={from} tripTo={to} />
+                          <ThreeDTiltWrapper>
+                            <FleetCarCard car={car} tripFrom={from} tripTo={to} />
+                          </ThreeDTiltWrapper>
                         </motion.div>
                       ))}
                     </div>

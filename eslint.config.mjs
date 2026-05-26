@@ -12,7 +12,7 @@ const compat = new FlatCompat({
 })
 
 export default tseslint.config(
-  { ignores: ['node_modules', '.next', 'next-env.d.ts', 'test-results', 'playwright-report', 'blob-report'] },
+  { ignores: ['node_modules', '.next', 'next-env.d.ts', 'test-results', 'playwright-report', 'blob-report', 'scripts', 'scripts/**'] },
   ...compat.extends('next/core-web-vitals'),
   js.configs.recommended,
   ...tseslint.configs.recommended,

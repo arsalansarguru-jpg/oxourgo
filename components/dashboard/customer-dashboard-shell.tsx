@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
@@ -46,6 +47,20 @@ export function CustomerDashboardShell({
   children,
 }: CustomerDashboardShellProps) {
   const pathname = usePathname()
+  const [kycSeen, setKycSeen] = useState(false)
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const seen = localStorage.getItem('oxour-kyc-seen') === 'true'
+      if (seen) {
+        setKycSeen(true)
+      }
+      if (pathname === '/dashboard/kyc') {
+        localStorage.setItem('oxour-kyc-seen', 'true')
+        setKycSeen(true)
+      }
+    }
+  }, [pathname])
 
   return (
     <div className="mx-auto flex min-w-0 w-full max-w-[var(--container-wide)] flex-col gap-8 px-[var(--spacing-edge)] pb-20 pt-8 md:pt-10 lg:flex-row lg:gap-10">
@@ -53,10 +68,13 @@ export function CustomerDashboardShell({
         <div className="border-b border-stroke pb-4">
           <p className="truncate text-sm font-semibold text-soft">{displayName}</p>
           <p className="truncate text-xs text-muted">{email ?? '—'}</p>
-          <p className="mt-2 flex items-center gap-1.5 text-xs text-muted">
+          <Link
+            href="/dashboard/kyc"
+            className="mt-2 flex items-center gap-1.5 text-xs text-muted hover:text-electric transition-colors"
+          >
             <FileBadge className="h-3.5 w-3.5" aria-hidden />
-            {verificationLabel}
-          </p>
+            <span>{verificationLabel}</span>
+          </Link>
         </div>
 
         <div className="mt-4 border-t border-stroke pt-4">
@@ -98,7 +116,7 @@ export function CustomerDashboardShell({
               >
                 <Icon className="h-4 w-4 shrink-0" aria-hidden />
                 <span className="truncate">{label}</span>
-                {href === '/dashboard/kyc' && kycLifecycleStatus !== 'approved' ? (
+                {href === '/dashboard/kyc' && kycLifecycleStatus !== 'approved' && !kycSeen ? (
                   <span className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full bg-electric" aria-hidden />
                 ) : null}
               </Link>

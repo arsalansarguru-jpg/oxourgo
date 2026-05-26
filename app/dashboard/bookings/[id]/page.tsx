@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { notFound, redirect } from 'next/navigation'
 
 import { BookingRealtimeSubscriber } from '@/features/dashboard/booking-realtime-subscriber'
@@ -9,6 +10,14 @@ import { getBookingForUser, listInspectionPhotosForBooking } from '@/lib/custome
 import { createClient } from '@/lib/supabase/server'
 
 export const dynamic = 'force-dynamic'
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params
+  const ref = `OX-${id.replace(/-/g, '').slice(0, 10).toUpperCase()}`
+  return {
+    title: `Booking ${ref} | Oxour Go`,
+  }
+}
 
 export default async function CustomerBookingDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await getAuthenticatedUser()

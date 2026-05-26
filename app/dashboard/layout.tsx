@@ -8,7 +8,7 @@ import { debugLogRoleResolution } from '@/lib/auth/role-debug'
 import { getAuthSessionSummary } from '@/lib/auth/server'
 import { isStaffRole } from '@/lib/auth/permissions'
 import { ADMIN_HOME } from '@/lib/auth/routes'
-import { countUnreadNotifications, listNotificationsForUser } from '@/lib/customer/notifications-queries'
+import { getNotificationsWithSynthetics } from '@/lib/customer/notifications-queries'
 import { resolveCustomerDisplayName } from '@/lib/customer/display-name'
 import { getCustomerProfileSnapshot } from '@/lib/customer/profile-queries'
 import { listKycDocuments } from '@/lib/customer/kyc-queries'
@@ -62,15 +62,13 @@ export default async function DashboardRouteLayout({ children }: { children: Rea
       bookingCleared: isProfileKycApprovedForBooking(profile),
     })
 
-    const [notificationUnread, notificationPreview] = await Promise.all([
-      countUnreadNotifications(user.id).catch(() => 0),
-      listNotificationsForUser(user.id, 8).catch(() => []),
-    ])
+    const { notifications, unreadCount } = await getNotificationsWithSynthetics(user.id)
+    const notificationPreview = notifications.slice(0, 8)
 
     return (
     <DashboardChrome
       userId={user.id}
-      notificationUnread={notificationUnread}
+      notificationUnread={unreadCount}
       notificationPreview={notificationPreview}
     >
       <KycStatusProvider value={kycUi}>

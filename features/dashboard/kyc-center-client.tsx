@@ -100,7 +100,6 @@ export function KycCenterClient({
     Boolean(latestMap.get('aadhaar') || latestMap.get('pan'))
 
   const canSubmit =
-    readyForReview &&
     initialProfile.kyc_status !== 'approved' &&
     initialProfile.kyc_status !== 'pending'
 
@@ -214,6 +213,14 @@ export function KycCenterClient({
           disabled={!canSubmit || submitPending}
           onClick={() => {
             setSubmitMessage(null)
+            if (!readyForReview) {
+              const missing: string[] = []
+              if (!latestMap.get('license')) missing.push('Driving License')
+              if (!latestMap.get('aadhaar') && !latestMap.get('pan')) missing.push('Government ID (Aadhaar or PAN)')
+              if (!latestMap.get('selfie')) missing.push('Selfie')
+              setSubmitMessage(`Please upload the following required documents before submitting: ${missing.join(', ')}.`)
+              return
+            }
             startSubmit(async () => {
               const res = await submitKycForReviewAction()
               setSubmitMessage(res.ok ? 'Submitted for review — we will notify you when verified.' : res.message ?? 'Could not submit.')
@@ -224,9 +231,17 @@ export function KycCenterClient({
         </Button>
       </div>
       {submitMessage ? (
-        <p className="text-sm font-medium text-soft" role="status">
+        <div
+          className={cn(
+            "rounded-xl border p-4 text-sm leading-relaxed",
+            submitMessage.startsWith('Submitted')
+              ? "border-emerald-500/20 bg-emerald-500/5 text-emerald-400"
+              : "border-amber-500/20 bg-amber-500/5 text-amber-300"
+          )}
+          role="status"
+        >
           {submitMessage}
-        </p>
+        </div>
       ) : null}
 
       <div className="grid min-w-0 gap-4 sm:grid-cols-2 xl:grid-cols-3">

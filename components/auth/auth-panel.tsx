@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   ArrowLeft,
-  Fingerprint,
   Loader2,
   Lock,
   Mail,
@@ -47,9 +46,9 @@ const trustItems = [
     sub: 'Fleet & identity checks',
   },
   {
-    icon: Fingerprint,
-    label: 'Biometric-ready',
-    sub: 'Step-up when required',
+    icon: Smartphone,
+    label: 'SMS Secured',
+    sub: 'One-time SMS tokens',
   },
 ] as const
 

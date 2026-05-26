@@ -74,7 +74,7 @@ export function mapDbBookingStatusToCustomerBadge(status: string): CustomerBooki
 
 export function customerBookingStatusLabel(badge: CustomerBookingStatusBadge): string {
   const labels: Record<CustomerBookingStatusBadge, string> = {
-    pending: 'Pending review',
+    pending: 'Awaiting payment',
     scheduled: 'Pickup scheduled',
     on_trip: 'Active trip',
     cancelled: 'Cancelled',

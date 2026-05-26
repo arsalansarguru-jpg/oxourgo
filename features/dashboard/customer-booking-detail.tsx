@@ -590,19 +590,32 @@ export function CustomerBookingDetail({
                 </p>
               ) : null}
               {isCancelled ? (
-                <p className="text-sm leading-relaxed text-silver/95">
-                  This booking is already cancelled. For deposit release timing or refunds, reach out to concierge with
-                  your reference <span className="font-mono text-soft">{invoiceRef}</span>.
-                </p>
+                <>
+                  <p className="text-sm leading-relaxed text-silver/95">
+                    This booking is already cancelled. For deposit release timing or refunds, reach out to concierge with
+                    your reference <span className="font-mono text-soft">{invoiceRef}</span>.
+                  </p>
+                  <Button type="button" variant="secondary" className="w-full" disabled>
+                    Cancelled
+                  </Button>
+                </>
               ) : (
-                <p className="text-sm leading-relaxed text-silver/95">
-                  Self-service cancellation is not available in the app yet. Concierge will confirm eligibility, any
-                  policy fees, and rebooking options before changes are applied.
-                </p>
+                <>
+                  <p className="text-sm leading-relaxed text-silver/95">
+                    To modify or cancel your booking, message concierge on WhatsApp. Our team will verify eligibility, policy fees, and assist with immediate rebooking.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="danger"
+                    className="w-full"
+                    href={whatsAppPrefilled}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Cancel on WhatsApp
+                  </Button>
+                </>
               )}
-              <Button type="button" variant="secondary" className="w-full" disabled>
-                Request cancellation (soon)
-              </Button>
             </CardContent>
           </Card>
 

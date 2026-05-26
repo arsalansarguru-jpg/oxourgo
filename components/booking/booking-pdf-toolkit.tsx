@@ -181,24 +181,44 @@ export function BookingPdfToolkit({ bookingId, className }: { bookingId: string;
       ) : null}
 
       {previewUrl ? (
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs font-medium uppercase tracking-[0.14em] text-muted">
-              Preview ·{' '}
-              {previewDoc === 'confirmation' ? 'Confirmation' : previewDoc === 'invoice' ? 'Invoice' : 'Trip summary'}
-            </p>
-            <Button type="button" size="sm" variant="ghost" className="gap-1.5" onClick={printPreview}>
-              <Printer className="h-3.5 w-3.5" aria-hidden />
-              Print
-            </Button>
-          </div>
-          <div className="overflow-hidden rounded-2xl border border-stroke bg-matte shadow-[var(--shadow-card)]">
-            <iframe
-              ref={iframeRef}
-              title="PDF preview"
-              src={previewUrl}
-              className="h-[min(72vh,640px)] w-full border-0 bg-white"
-            />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-matte/85 p-4 backdrop-blur-md">
+          <div className="relative flex h-[85vh] w-full max-w-4xl flex-col overflow-hidden rounded-3xl border border-stroke bg-matte shadow-2xl">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-stroke px-6 py-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-electric">
+                  Preview ·{' '}
+                  {previewDoc === 'confirmation' ? 'Confirmation' : previewDoc === 'invoice' ? 'Invoice' : 'Trip summary'}
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button type="button" size="sm" variant="ghost" className="gap-1.5 hover:text-soft" onClick={printPreview}>
+                  <Printer className="h-3.5 w-3.5" aria-hidden />
+                  Print
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="secondary"
+                  onClick={() => {
+                    cleanup()
+                    setPreviewUrl(null)
+                    setPreviewDoc(null)
+                  }}
+                >
+                  Close
+                </Button>
+              </div>
+            </div>
+            {/* Iframe container */}
+            <div className="flex-1 bg-white">
+              <iframe
+                ref={iframeRef}
+                title="PDF preview"
+                src={previewUrl}
+                className="h-full w-full border-0"
+              />
+            </div>
           </div>
         </div>
       ) : null}

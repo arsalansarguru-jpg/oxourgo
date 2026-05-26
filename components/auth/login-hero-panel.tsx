@@ -60,7 +60,7 @@ export function LoginHeroPanel({ className }: LoginHeroPanelProps) {
           {BRAND.name}
         </div>
         <h1 className="max-w-lg text-balance text-2xl font-semibold tracking-[-0.04em] text-soft sm:text-3xl lg:text-[clamp(1.75rem,2.2vw+1rem,2.75rem)] lg:leading-[1.08]">
-          The quiet confidence of a chauffeured-grade fleet — on your schedule.
+          The quiet confidence of a premium self-drive fleet — on your schedule.
         </h1>
         <p className="mt-4 max-w-md text-sm leading-relaxed text-silver/95 sm:text-[0.9375rem]">
           Identity verification, live pricing, and concierge routing built for Mumbai&apos;s premium

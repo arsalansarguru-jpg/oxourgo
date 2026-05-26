@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { markAllNotificationsReadAction } from '@/app/dashboard/notifications/actions'
 import { CustomerNotificationRow } from '@/features/dashboard/customer-notification-row'
 import { groupNotificationsByDay } from '@/lib/customer/notification-groups'
-import { listNotificationsForUser } from '@/lib/customer/notifications-queries'
+import { getNotificationsWithSynthetics } from '@/lib/customer/notifications-queries'
 import { getAuthenticatedUser } from '@/lib/auth/server'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -24,7 +24,7 @@ export default async function NotificationsCenterPage() {
     redirect(`/login?${new URLSearchParams({ redirect: '/dashboard/notifications' }).toString()}`)
   }
 
-  const rows = await listNotificationsForUser(user.id)
+  const { notifications: rows } = await getNotificationsWithSynthetics(user.id)
   const groups = groupNotificationsByDay(rows)
 
   return (

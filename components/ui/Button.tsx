@@ -9,7 +9,6 @@ const variants = {
   primary: [
     'border border-electric/50 bg-[linear-gradient(135deg,#0080ff_0%,#0066ff_48%,#004fcc_100%)] text-white',
     'shadow-[0_0_32px_-8px_var(--glow-electric)] hover:shadow-[0_0_40px_-6px_var(--glow-cyan)]',
-    'hover:scale-[1.02] active:scale-[0.98]',
     'theme-light:text-white',
   ].join(' '),
   secondary: [
@@ -37,7 +36,7 @@ const sizes = {
 } as const
 
 const base =
-  'touch-manipulation inline-flex shrink-0 items-center justify-center gap-2 text-sm font-medium tracking-wide transition-[transform,filter,background-color,border-color,box-shadow] duration-200 hover:-translate-y-0.5 focus-visible:shadow-none disabled:pointer-events-none disabled:translate-y-0 disabled:opacity-45'
+  'touch-manipulation inline-flex shrink-0 items-center justify-center gap-2 text-sm font-medium tracking-wide transition-[transform,filter,background-color,border-color,box-shadow] duration-200 focus-visible:shadow-none disabled:pointer-events-none disabled:opacity-45'
 
 export type ButtonProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'href' | 'onClick'> & {
   variant?: keyof typeof variants
@@ -75,7 +74,14 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
         ? (adminAction as keyof typeof variants)
         : variant
 
-  const cls = cn(base, variants[resolvedVariant], sizes[size], className)
+  const cls = cn(
+    base,
+    !props.disabled && 'hover:-translate-y-0.5',
+    !props.disabled && resolvedVariant === 'primary' && 'hover:scale-[1.02] active:scale-[0.98]',
+    variants[resolvedVariant],
+    sizes[size],
+    className,
+  )
 
   if (to !== undefined) {
     return (

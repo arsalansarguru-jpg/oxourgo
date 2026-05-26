@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils/cn'
 import { cardSurfaceBase } from '@/components/ui/card-tokens'
+import { Loader2 } from 'lucide-react'
 
 function Shimmer({ className }: { className?: string }) {
   return (
@@ -15,7 +16,15 @@ function Shimmer({ className }: { className?: string }) {
 
 export function CustomerBookingDetailSkeleton() {
   return (
-    <div className="space-y-8">
+    <div className="relative space-y-8">
+      {/* Premium Glassmorphic Loader Overlay */}
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center rounded-3xl bg-matte/40 backdrop-blur-[4px]">
+        <div className="flex flex-col items-center gap-3 rounded-2xl border border-stroke-strong bg-matte/90 px-6 py-5 shadow-2xl">
+          <Loader2 className="h-8 w-8 animate-spin text-electric" />
+          <p className="text-sm font-semibold tracking-wide text-soft animate-pulse">Loading booking details...</p>
+        </div>
+      </div>
+
       <div className="overflow-hidden rounded-3xl border border-stroke">
         <Shimmer className="aspect-[21/10] w-full min-h-[200px] rounded-none md:min-h-[280px]" />
         <div className="space-y-3 border-t border-stroke bg-matte/80 p-6 md:p-8">
