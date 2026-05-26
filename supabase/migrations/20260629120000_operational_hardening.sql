@@ -33,13 +33,13 @@ begin
   values (new.id, v_full, coalesce(v_display, v_full), v_phone)
   on conflict (user_id) do update
   set
-    full_name = coalesce(public.profiles.full_name, excluded.full_name),
-    display_name = coalesce(public.profiles.display_name, excluded.display_name),
-    phone = coalesce(public.profiles.phone, excluded.phone),
+    full_name = coalesce(profiles.full_name, excluded.full_name),
+    display_name = coalesce(profiles.display_name, excluded.display_name),
+    phone = coalesce(profiles.phone, excluded.phone),
     updated_at = now()
-  where public.profiles.full_name is null
-     or public.profiles.display_name is null
-     or public.profiles.phone is null;
+  where profiles.full_name is null
+     or profiles.display_name is null
+     or profiles.phone is null;
 
   return new;
 end;
