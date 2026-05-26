@@ -277,8 +277,9 @@ export function FleetClientView({
                     <div className="grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
                       {slice.map((car) => (
                         <motion.div
+                          layout
                           key={car.id}
-                          transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+                          transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }}
                         >
                           <ThreeDTiltWrapper>
                             <FleetCarCard car={car} tripFrom={from} tripTo={to} />
