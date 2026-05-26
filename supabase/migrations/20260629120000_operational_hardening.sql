@@ -29,17 +29,18 @@ begin
   v_display := nullif(trim(coalesce(meta->>'display_name', meta->>'name', '')), '');
   v_phone := nullif(trim(coalesce(meta->>'phone', '')), '');
 
-  insert into public.profiles (user_id, full_name, display_name, phone)
+  -- Explicitly alias the target table as 'p' to ensure 100% compatible references
+  insert into public.profiles as p (user_id, full_name, display_name, phone)
   values (new.id, v_full, coalesce(v_display, v_full), v_phone)
   on conflict (user_id) do update
   set
-    full_name = coalesce(profiles.full_name, excluded.full_name),
-    display_name = coalesce(profiles.display_name, excluded.display_name),
-    phone = coalesce(profiles.phone, excluded.phone),
+    full_name = coalesce(p.full_name, excluded.full_name),
+    display_name = coalesce(p.display_name, excluded.display_name),
+    phone = coalesce(p.phone, excluded.phone),
     updated_at = now()
-  where profiles.full_name is null
-     or profiles.display_name is null
-     or profiles.phone is null;
+  where p.full_name is null
+     or p.display_name is null
+     or p.phone is null;
 
   return new;
 end;
