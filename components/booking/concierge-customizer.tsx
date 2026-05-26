@@ -2,8 +2,14 @@
 
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Sparkles, Music, Coffee, Wind, Wine, Check, Plus, ShieldCheck, ChevronRight } from 'lucide-react'
+import { Sparkles, Music, Coffee, Wind, Wine, Check, Plus, ShieldCheck, MessageCircle } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
+
+export interface ConciergeCustomizerProps {
+  vehicleName?: string
+  tripFrom?: string
+  tripTo?: string
+}
 
 export interface ScentOption {
   id: string
@@ -66,11 +72,45 @@ const AMENITY_OPTIONS: AmenityOption[] = [
   },
 ]
 
-export function ConciergeCustomizer() {
+export function ConciergeCustomizer({
+  vehicleName = 'a luxury vehicle',
+  tripFrom,
+  tripTo,
+}: ConciergeCustomizerProps) {
   const [selectedScent, setSelectedScent] = useState<string | null>(null)
   const [activeAmenities, setActiveAmenities] = useState<string[]>([])
   const [musicVibe, setMusicVibe] = useState('')
-  const [isSubmitted, setIsSubmitted] = useState(false)
+
+  // Construct dynamic WhatsApp inquiry prefill message
+  const getWhatsAppPrefill = () => {
+    let msg = `Hi Oxour Go, I want to book the ${vehicleName}`
+    if (tripFrom && tripTo) {
+      msg += ` from ${tripFrom} to ${tripTo}`
+    }
+    msg += `.`
+
+    const customizations: string[] = []
+    if (selectedScent) {
+      const scent = SCENT_OPTIONS.find(s => s.id === selectedScent)
+      if (scent) customizations.push(`pre-infused with ${scent.name} scent`)
+    }
+    activeAmenities.forEach(id => {
+      const item = AMENITY_OPTIONS.find(o => o.id === id)
+      if (item) customizations.push(`with ${item.name}`)
+    })
+    if (musicVibe.trim()) {
+      customizations.push(`and a "${musicVibe.trim()}" custom playlist`)
+    }
+
+    if (customizations.length > 0) {
+      msg += ` I would like the cabin customized: ${customizations.join(', ')}.`
+    }
+
+    msg += ` Pickup at Mira Road hub.`
+    return msg
+  }
+
+  const whatsappUrl = `https://wa.me/919833133343?text=${encodeURIComponent(getWhatsAppPrefill())}`
 
   // Toggle amenity selection
   const toggleAmenity = (id: string) => {
@@ -96,12 +136,6 @@ export function ConciergeCustomizer() {
     }).format(value)
   }
 
-  const handleConfirm = () => {
-    setIsSubmitted(true)
-    setTimeout(() => {
-      setIsSubmitted(false)
-    }, 4000)
-  }
 
   return (
     <div className="w-full max-w-4xl mx-auto p-1 md:p-6" id="concierge-panel">
@@ -402,44 +436,17 @@ export function ConciergeCustomizer() {
             </div>
 
             {/* Glowing Action Button */}
-            <motion.button
-              onClick={handleConfirm}
-              disabled={isSubmitted}
+            <motion.a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              className={cn(
-                "w-full py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs transition-all duration-300 relative overflow-hidden flex items-center justify-center gap-2",
-                isSubmitted
-                  ? "bg-emerald border border-emerald text-white cursor-default"
-                  : "bg-electric border border-electric/30 text-white hover:shadow-glow shadow-card"
-              )}
+              className="w-full py-3.5 rounded-xl font-bold uppercase tracking-wider text-xs transition-all duration-300 relative overflow-hidden flex items-center justify-center gap-2 bg-electric border border-electric/30 text-white hover:shadow-glow shadow-card hover:text-white"
             >
-              <AnimatePresence mode="wait">
-                {isSubmitted ? (
-                  <motion.span
-                    key="success"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="flex items-center gap-2"
-                  >
-                    <Check className="w-4 h-4 stroke-[3]" />
-                    Cabin Customizations Saved
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    key="idle"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    className="flex items-center gap-2"
-                  >
-                    Confirm Cabin Selections
-                    <ChevronRight className="w-4 h-4" />
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </motion.button>
+              <MessageCircle className="w-4 h-4 shrink-0" />
+              Book on WhatsApp with Selections
+            </motion.a>
           </div>
         </div>
       </div>

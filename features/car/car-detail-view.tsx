@@ -22,6 +22,7 @@ import {
   cardSurfaceTransition,
 } from '@/components/ui/card-tokens'
 import { CarDetailInquiryPanel } from '@/components/car/car-detail-inquiry-panel'
+import { ConciergeCustomizer } from '@/components/booking/concierge-customizer'
 import { WhatsAppInquiryButton } from '@/components/marketing/whatsapp-inquiry-button'
 import { captureClientEvent } from '@/lib/analytics/capture-client'
 import { BOOKING_FUNNEL, POSTHOG_EVENTS } from '@/lib/analytics/posthog-events'
@@ -166,7 +167,15 @@ export function CarDetailView({
             </Card>
           </div>
 
-          <div className="mt-10">
+          <div className="mt-12 border-t border-stroke/50 pt-10">
+            <ConciergeCustomizer
+              vehicleName={car.name}
+              tripFrom={tripFrom}
+              tripTo={tripTo}
+            />
+          </div>
+
+          <div className="mt-14">
             <h2 className="text-xl font-semibold text-soft">Frequently asked</h2>
             <div
               className={cn(
