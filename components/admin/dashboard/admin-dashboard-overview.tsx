@@ -1,7 +1,8 @@
 'use client'
 
+import { useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { motion, useMotionValue, useTransform, animate, type Variants } from 'framer-motion'
 import { ArrowUpRight, BarChart3, CarFront, ClipboardList, IndianRupee, RotateCcw, Shield, Wrench } from 'lucide-react'
 
 import { AdminCommandCenter } from '@/components/admin/dashboard/admin-command-center'
@@ -18,14 +19,46 @@ import { cn } from '@/lib/utils/cn'
 
 const ease = [0.22, 1, 0.36, 1] as const
 
-const staggerContainer = {
+const staggerContainer: Variants = {
   hidden: {},
   visible: { transition: { staggerChildren: 0.04, delayChildren: 0.02 } },
 }
 
-const staggerItem = {
+const staggerItem: Variants = {
   hidden: { opacity: 0, y: 14 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.4, ease } },
+}
+
+export function AnimatedCounter({
+  value,
+  duration = 1.0,
+  formatter = (val: number) => Math.round(val).toLocaleString('en-IN'),
+}: {
+  value: number
+  duration?: number
+  formatter?: (val: number) => string
+}) {
+  const count = useMotionValue(0)
+  const rounded = useTransform(count, (latest) => formatter(latest))
+  const ref = useRef<HTMLSpanElement>(null)
+
+  useEffect(() => {
+    const controls = animate(count, value, {
+      duration,
+      ease: 'easeOut',
+    })
+    return () => controls.stop()
+  }, [count, value, duration])
+
+  useEffect(() => {
+    return rounded.on('change', (latest) => {
+      if (ref.current) {
+        ref.current.textContent = latest
+      }
+    })
+  }, [rounded])
+
+  return <span ref={ref}>{formatter(0)}</span>
 }
 
 function EnterpriseKpi({
@@ -35,23 +68,28 @@ function EnterpriseKpi({
   tone,
 }: {
   label: string
-  value: string | number
+  value: React.ReactNode
   href: string
   tone?: 'warn' | 'critical'
 }) {
   return (
-    <motion.div variants={staggerItem}>
+    <motion.div
+      variants={staggerItem}
+      whileHover={{ scale: 1.025, y: -2 }}
+      whileTap={{ scale: 0.975 }}
+      transition={{ type: 'spring', stiffness: 350, damping: 22 }}
+    >
       <Link
         href={href}
         className={cn(
-          'group relative block overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent p-4 shadow-[var(--shadow-card)] transition-[transform,box-shadow] hover:-translate-y-0.5 hover:shadow-[var(--shadow-card-accent)]',
-          tone === 'warn' && 'border-amber-400/25',
-          tone === 'critical' && 'border-rose-400/25',
+          'group relative block overflow-hidden rounded-2xl border border-white/[0.08] bg-gradient-to-br from-white/[0.06] via-white/[0.02] to-transparent p-4 shadow-[var(--shadow-card)] transition-[border-color,box-shadow] duration-300 hover:border-electric/40 hover:shadow-[0_0_24px_rgba(0,102,255,0.15)]',
+          tone === 'warn' && 'border-amber-400/25 hover:border-amber-400/50 hover:shadow-[0_0_24px_rgba(245,158,11,0.15)]',
+          tone === 'critical' && 'border-rose-400/25 hover:border-rose-400/50 hover:shadow-[0_0_24px_rgba(244,63,94,0.15)]',
         )}
       >
         <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</p>
         <p className="mt-2 text-xl font-semibold tabular-nums tracking-[-0.03em] text-soft sm:text-2xl">{value}</p>
-        <ArrowUpRight className="absolute right-3 top-3 h-4 w-4 text-muted opacity-0 transition-opacity group-hover:opacity-100" />
+        <ArrowUpRight className="absolute right-3 top-3 h-4 w-4 text-electric opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
       </Link>
     </motion.div>
   )
@@ -71,38 +109,43 @@ export function AdminDashboardOverview({ data }: { data: DashboardOverviewBundle
           initial="hidden"
           animate="visible"
         >
-          <EnterpriseKpi label="Total bookings" value={kpis.totalBookings} href="/admin/bookings" />
-          <EnterpriseKpi label="Active rentals" value={kpis.activeRentals} href="/admin/bookings?status=active" />
-          <EnterpriseKpi label="Revenue today" value={formatInr(kpis.revenueTodayRupees)} href="/admin/payments" />
-          <EnterpriseKpi label="Revenue this month" value={formatInr(kpis.revenueMonthRupees)} href="/admin/analytics" />
+          <EnterpriseKpi label="Total bookings" value={<AnimatedCounter value={kpis.totalBookings} />} href="/admin/bookings" />
+          <EnterpriseKpi label="Active rentals" value={<AnimatedCounter value={kpis.activeRentals} />} href="/admin/bookings?status=active" />
+          <EnterpriseKpi label="Revenue today" value={<AnimatedCounter value={kpis.revenueTodayRupees} formatter={(v) => formatInr(v)} />} href="/admin/payments" />
+          <EnterpriseKpi label="Revenue this month" value={<AnimatedCounter value={kpis.revenueMonthRupees} formatter={(v) => formatInr(v)} />} href="/admin/analytics" />
           <EnterpriseKpi
             label="Pending KYC"
-            value={kpis.pendingKyc}
+            value={<AnimatedCounter value={kpis.pendingKyc} />}
             href="/admin/kyc"
             tone={kpis.pendingKyc > 0 ? 'warn' : undefined}
           />
-          <EnterpriseKpi label="Available vehicles" value={kpis.availableVehicles} href="/admin/fleet" />
+          <EnterpriseKpi label="Available vehicles" value={<AnimatedCounter value={kpis.availableVehicles} />} href="/admin/fleet" />
           <EnterpriseKpi
             label="Under maintenance"
-            value={kpis.vehiclesMaintenance}
+            value={<AnimatedCounter value={kpis.vehiclesMaintenance} />}
             href="/admin/fleet"
             tone={kpis.vehiclesMaintenance > 0 ? 'warn' : undefined}
           />
           <EnterpriseKpi
             label="Pending refunds"
-            value={`${kpis.pendingRefunds} refunds / ${formatInr(kpis.pendingRefundsRupees)}`}
+            value={
+              <span>
+                <AnimatedCounter value={kpis.pendingRefunds} /> refunds /{' '}
+                <AnimatedCounter value={kpis.pendingRefundsRupees} formatter={(v) => formatInr(v)} />
+              </span>
+            }
             href="/admin/financials"
             tone={kpis.pendingRefunds > 0 ? 'warn' : undefined}
           />
           <EnterpriseKpi
             label="Late returns"
-            value={kpis.lateReturns}
+            value={<AnimatedCounter value={kpis.lateReturns} />}
             href="/admin/bookings?status=active"
             tone={kpis.lateReturns > 0 ? 'critical' : undefined}
           />
           <EnterpriseKpi
             label="Damage claims"
-            value={kpis.damageClaims}
+            value={<AnimatedCounter value={kpis.damageClaims} />}
             href="/admin/damage"
             tone={kpis.damageClaims > 0 ? 'warn' : undefined}
           />

@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { motion } from 'framer-motion'
 import {
   ChevronsLeft,
   ChevronsRight,
@@ -62,15 +63,24 @@ function NavLinks({
             title={collapsed ? label : undefined}
             onClick={onNavigate}
             className={cn(
-              'flex min-h-11 items-center rounded-xl text-sm font-medium transition-colors',
+              'flex min-h-11 items-center rounded-xl text-sm font-medium transition-all duration-200',
               collapsed ? 'justify-center px-0 py-3' : 'gap-2.5 px-2.5 py-2.5',
               active
-                ? 'bg-electric/20 text-soft ring-1 ring-electric/35 shadow-[0_0_20px_-10px_var(--glow-electric)]'
+                ? 'bg-electric/20 text-soft ring-1 ring-electric/35 shadow-[0_0_20px_rgba(0,102,255,0.25)]'
                 : 'text-muted hover:bg-fill-glass hover:text-soft',
             )}
           >
-            <Icon className={cn('shrink-0', collapsed ? 'h-5 w-5' : 'h-4 w-4')} aria-hidden />
-            <span className={cn('min-w-0 truncate', collapsed && 'sr-only')}>{label}</span>
+            <Icon className={cn('shrink-0 text-electric', collapsed ? 'h-5 w-5' : 'h-4 w-4')} aria-hidden />
+            {!collapsed && (
+              <motion.span
+                initial={{ opacity: 0, x: -6 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.18 }}
+                className="min-w-0 truncate"
+              >
+                {label}
+              </motion.span>
+            )}
           </Link>
         )
       })}
@@ -80,12 +90,21 @@ function NavLinks({
 
 function BrandBlock({ expanded }: { expanded: boolean }) {
   return (
-    <div className={cn('flex items-center gap-2.5', !expanded && 'justify-center')}>
+    <div className={cn('flex items-center gap-2.5 h-8', !expanded && 'justify-center')}>
       <BrandLogo
         variant={expanded ? 'lockup' : 'mark'}
-        className={cn('shrink-0', expanded ? 'h-8 w-auto max-w-[6rem]' : 'h-8 w-8')}
+        className={cn('shrink-0 h-8 w-auto', expanded ? 'max-w-[6rem]' : 'w-8')}
       />
-      {expanded ? <span className="text-sm font-medium text-soft">Admin</span> : null}
+      {expanded && (
+        <motion.span
+          initial={{ opacity: 0, x: -6 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.18 }}
+          className="text-sm font-semibold tracking-wider uppercase text-soft"
+        >
+          Admin
+        </motion.span>
+      )}
     </div>
   )
 }
@@ -103,14 +122,18 @@ function SidebarFooter({
 }) {
   const expanded = !collapsed
   return (
-    <div className="border-t border-stroke pt-4">
+    <div className="border-t border-stroke pt-4 min-h-[110px]">
       {expanded ? (
-        <>
+        <motion.div
+          initial={{ opacity: 0, y: 4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.18 }}
+        >
           <p className="truncate text-xs text-muted">{email ?? '—'}</p>
           <div className="mt-2">
             <RoleBadge role={appRole} />
           </div>
-        </>
+        </motion.div>
       ) : (
         <div className="flex justify-center" title={email ?? 'Account'}>
           <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-stroke bg-carbon-deep text-muted">
@@ -123,25 +146,41 @@ function SidebarFooter({
           href="/"
           onClick={onNavigate}
           className={cn(
-            'flex items-center gap-2 rounded-xl px-2.5 py-2 text-xs font-medium text-muted hover:bg-fill-glass hover:text-soft',
+            'flex items-center gap-2 rounded-xl px-2.5 py-2 text-xs font-medium text-muted hover:bg-fill-glass hover:text-soft transition-colors',
             !expanded && 'justify-center p-2',
           )}
           title="Marketing home"
         >
-          <Home className="h-4 w-4 shrink-0" aria-hidden />
-          {expanded ? <span>Home</span> : null}
+          <Home className="h-4 w-4 shrink-0 text-electric" aria-hidden />
+          {expanded && (
+            <motion.span
+              initial={{ opacity: 0, x: -4 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="truncate"
+            >
+              Home
+            </motion.span>
+          )}
         </Link>
         <Link
           href="/dashboard"
           onClick={onNavigate}
           className={cn(
-            'flex items-center gap-2 rounded-xl px-2.5 py-2 text-xs font-medium text-muted hover:bg-fill-glass hover:text-soft',
+            'flex items-center gap-2 rounded-xl px-2.5 py-2 text-xs font-medium text-muted hover:bg-fill-glass hover:text-soft transition-colors',
             !expanded && 'justify-center p-2',
           )}
           title="Customer app"
         >
-          <LayoutGrid className="h-4 w-4 shrink-0" aria-hidden />
-          {expanded ? <span>Customer app</span> : null}
+          <LayoutGrid className="h-4 w-4 shrink-0 text-electric" aria-hidden />
+          {expanded && (
+            <motion.span
+              initial={{ opacity: 0, x: -4 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="truncate"
+            >
+              Customer app
+            </motion.span>
+          )}
         </Link>
       </div>
     </div>
@@ -160,6 +199,7 @@ export function AdminShell({
   const [mobileOpen, setMobileOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
   const [sidebarHydrated, setSidebarHydrated] = useState(false)
+  const [isHovered, setIsHovered] = useState(false)
 
   const barTitle = adminTopBarTitle(pathname)
 
@@ -199,45 +239,60 @@ export function AdminShell({
   }, [mobileOpen])
 
   const desktopExpanded = sidebarHydrated ? !collapsed : true
+  const isVisualExpanded = desktopExpanded || isHovered
 
   return (
     <div className="flex min-h-dvh min-w-0 bg-matte text-soft">
-      <aside
-        className={cn(
-          'fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-stroke bg-carbon-deep/95 py-5 shadow-[var(--shadow-sidebar)] backdrop-blur-2xl lg:flex',
-          'transition-[width,padding] duration-200',
-          desktopExpanded ? 'w-60 px-4' : 'w-[4.25rem] px-2',
-        )}
+      <motion.aside
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        animate={{
+          width: isVisualExpanded ? 240 : 68,
+          paddingLeft: isVisualExpanded ? 16 : 8,
+          paddingRight: isVisualExpanded ? 16 : 8,
+        }}
+        transition={{
+          type: 'spring',
+          stiffness: 280,
+          damping: 24,
+        }}
+        className="fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-stroke bg-carbon-deep/95 py-5 shadow-[var(--shadow-sidebar)] backdrop-blur-2xl lg:flex overflow-hidden"
         aria-label="Admin navigation"
       >
-        <BrandBlock expanded={desktopExpanded} />
+        <BrandBlock expanded={isVisualExpanded} />
         <nav
-          className="mt-6 flex flex-1 flex-col gap-0.5 overflow-y-auto"
+          className="mt-6 flex flex-1 flex-col gap-0.5 overflow-y-auto scrollbar-none"
           aria-label="Admin sections"
         >
-          <NavLinks pathname={pathname} collapsed={!desktopExpanded} permissions={permissions} />
+          <NavLinks pathname={pathname} collapsed={!isVisualExpanded} permissions={permissions} />
         </nav>
-        <SidebarFooter collapsed={!desktopExpanded} email={email} appRole={appRole} />
+        <SidebarFooter collapsed={!isVisualExpanded} email={email} appRole={appRole} />
         <button
           type="button"
           onClick={toggleCollapsed}
           className={cn(
-            'mt-3 flex items-center justify-center gap-2 rounded-xl border border-stroke py-2 text-xs font-medium text-muted hover:bg-fill-glass hover:text-soft',
-            desktopExpanded ? 'w-full px-3' : 'h-9 w-full',
+            'mt-3 flex items-center justify-center gap-2 rounded-xl border border-stroke py-2 text-xs font-medium text-muted hover:bg-fill-glass hover:text-soft transition-all duration-200',
+            isVisualExpanded ? 'w-full px-3' : 'h-9 w-full',
           )}
           aria-expanded={desktopExpanded}
           aria-label={desktopExpanded ? 'Collapse sidebar' : 'Expand sidebar'}
         >
-          {desktopExpanded ? (
+          {isVisualExpanded ? (
             <>
-              <ChevronsLeft className="h-4 w-4" aria-hidden />
-              <span>Collapse</span>
+              <ChevronsLeft className="h-4 w-4 shrink-0 text-electric" aria-hidden />
+              <motion.span
+                initial={{ opacity: 0, x: -4 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="truncate"
+              >
+                Collapse
+              </motion.span>
             </>
           ) : (
-            <ChevronsRight className="h-4 w-4" aria-hidden />
+            <ChevronsRight className="h-4 w-4 shrink-0 text-electric" aria-hidden />
           )}
         </button>
-      </aside>
+      </motion.aside>
 
       <div
         className={cn(
