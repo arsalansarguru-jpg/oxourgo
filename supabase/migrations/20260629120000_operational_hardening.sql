@@ -30,17 +30,19 @@ begin
   v_phone := nullif(trim(coalesce(meta->>'phone', '')), '');
 
   -- Explicitly alias the target table as 'p' to ensure 100% compatible references
-  insert into public.profiles as p (user_id, full_name, display_name, phone)
-  values (new.id, v_full, coalesce(v_display, v_full), v_phone)
+  insert into public.profiles as p (user_id, email, full_name, display_name, phone)
+  values (new.id, new.email, v_full, coalesce(v_display, v_full), v_phone)
   on conflict (user_id) do update
   set
+    email = coalesce(p.email, excluded.email),
     full_name = coalesce(p.full_name, excluded.full_name),
     display_name = coalesce(p.display_name, excluded.display_name),
     phone = coalesce(p.phone, excluded.phone),
     updated_at = now()
   where p.full_name is null
      or p.display_name is null
-     or p.phone is null;
+     or p.phone is null
+     or p.email is null;
 
   return new;
 end;
