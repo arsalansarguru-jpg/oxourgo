@@ -82,6 +82,8 @@ export type Database = {
           seats: number
           price_per_day: number
           image: string | null
+          /** Booking gallery: [{ path, label }] in fleet bucket. */
+          gallery_images: Json
           featured: boolean
           /** When set, drives catalog + booking (matches Supabase `available`). */
           available?: boolean
@@ -123,6 +125,7 @@ export type Database = {
           seats: number
           price_per_day: number
           image?: string | null
+          gallery_images?: Json
           featured?: boolean
           available?: boolean
           availability_status?: string
@@ -161,6 +164,7 @@ export type Database = {
           seats?: number
           price_per_day?: number
           image?: string | null
+          gallery_images?: Json
           featured?: boolean
           available?: boolean
           availability_status?: string

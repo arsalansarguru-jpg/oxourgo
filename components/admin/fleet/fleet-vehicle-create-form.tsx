@@ -56,6 +56,10 @@ export function FleetVehicleCreateForm({ embedded, onCreated }: Props) {
       }}
     >
       <FleetVehicleFormFields defaults={{}} showListingToggles />
+      <p className="rounded-lg border border-electric/20 bg-electric/10 px-3 py-2 text-xs text-muted sm:col-span-2">
+        After you create the vehicle, you can upload multiple photos (exterior, interior, dashboard, etc.) on the
+        vehicle detail page. Those images appear in the booking gallery for customers.
+      </p>
       {error ? <p className="text-sm text-red-300 sm:col-span-2">{error}</p> : null}
       <div className="sm:col-span-2">
         <Button type="submit" disabled={pending}>

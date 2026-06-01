@@ -5,7 +5,7 @@ import { useState, useTransition } from 'react'
 
 import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 import { FleetVehicleFormFields } from '@/components/admin/fleet/fleet-vehicle-form-fields'
-import { FleetVehicleHeroUpload } from '@/components/admin/fleet/fleet-vehicle-hero-upload'
+import { FleetVehicleGalleryManager } from '@/components/admin/fleet/fleet-vehicle-gallery-manager'
 import { adminUpdateVehicleAction } from '@/lib/admin/actions/vehicle-actions'
 import type { AdminVehicleRow } from '@/lib/admin/data/fleet'
 import { Button } from '@/components/ui/Button'
@@ -39,8 +39,11 @@ export function FleetVehicleCatalogEditForm({
       {shell === 'card' ? <h2 className="mb-4 text-lg font-semibold text-soft">{title}</h2> : null}
       {showHeroUploader ? (
         <div className="mb-5 rounded-xl border border-white/[0.08] bg-white/[0.03] p-4 theme-light:border-stroke-strong theme-light:bg-white/60">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.12em] text-muted">Media</p>
-          <FleetVehicleHeroUpload vehicleId={vehicle.id} />
+          <FleetVehicleGalleryManager
+            vehicleId={vehicle.id}
+            coverPath={vehicle.image}
+            galleryImages={vehicle.gallery_images}
+          />
         </div>
       ) : null}
       <form

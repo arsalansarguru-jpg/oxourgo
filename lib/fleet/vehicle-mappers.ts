@@ -3,6 +3,7 @@ import type { Car, CarCategory, CarStatus, FuelType, Transmission } from '@/type
 import type { FleetCar, FleetCarAvailabilityLabel, FleetCarCategory, FleetCarFuel } from '@/lib/fleet/types'
 import { getPublicStorageObjectUrl } from '@/lib/supabase/storage-public-url'
 import { VEHICLE_IMAGE_FALLBACK } from '@/constants/vehicle-media'
+import { resolveVehicleGalleryUrls } from '@/lib/fleet/vehicle-gallery'
 
 export type VehicleRow = Database['public']['Tables']['vehicles']['Row']
 
@@ -191,7 +192,7 @@ export function mapVehicleRowToCar(row: VehicleRow): Car {
   const imageUrl = resolveVehicleImageUrl(row.image)
   const listingName = String(row.name ?? '').trim()
   const name = listingName || `${row.brand} ${modelFromListingName(row.brand, listingName)}`.trim()
-  const gallery = [imageUrl, imageUrl, imageUrl]
+  const gallery = resolveVehicleGalleryUrls(row.image, row.gallery_images)
   const reg = row.registration_number?.trim()
   const specs: Record<string, string> = {
     Brand: row.brand,
