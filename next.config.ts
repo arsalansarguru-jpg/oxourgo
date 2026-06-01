@@ -33,6 +33,11 @@ const nextConfig: NextConfig = {
         destination: '/dashboard/settings',
         permanent: true,
       },
+      {
+        source: '/admin/deposits',
+        destination: '/admin/financials',
+        permanent: true,
+      },
     ]
   },
 }
