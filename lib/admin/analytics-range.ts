@@ -175,8 +175,8 @@ export function resolveAnalyticsRangeFromSearchParams(
     }
   }
 
-  const startDay = startDayForPreset(preset === 'custom' ? '30d' : preset, endDay)
-  return { range: fallbackRange(preset === 'custom' ? '30d' : preset, endDay, startDay) }
+  const startDay = startDayForPreset(preset, endDay)
+  return { range: fallbackRange(preset, endDay, startDay) }
 }
 
 /** First day of current calendar month in IST (YYYY-MM-DD). */
