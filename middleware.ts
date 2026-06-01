@@ -45,6 +45,18 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(target, 308)
   }
 
+  // Legacy admin URL → Deposits & Penalties (financials console)
+  if (pathname === '/admin/deposits' || pathname.startsWith('/admin/deposits/')) {
+    const target = new URL(
+      pathname === '/admin/deposits'
+        ? '/admin/financials'
+        : `/admin/financials${pathname.slice('/admin/deposits'.length)}`,
+      request.url,
+    )
+    target.search = request.nextUrl.search
+    return NextResponse.redirect(target, 308)
+  }
+
   // Legacy member URLs → customer dashboard
   if (pathname === '/member' || pathname.startsWith('/member/')) {
     const memberTarget = new URL(
