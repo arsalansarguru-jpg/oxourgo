@@ -97,14 +97,14 @@ export function UsersManagementClient({ users, activity, actorRole, actorId }: U
         <AdminCard className="overflow-hidden">
           <AdminCardContent className="p-0">
             <div className="overflow-x-auto scroll-touch">
-              <table className="w-full min-w-[920px] text-left text-sm">
+              <table className="w-full min-w-[1040px] table-fixed text-left text-sm">
                 <thead className="admin-table-head">
                   <tr>
-                    <th className="px-4 py-3.5 font-medium">Email</th>
-                    <th className="px-4 py-3.5 font-medium">Role</th>
-                    <th className="px-4 py-3.5 font-medium">Last sign-in</th>
-                    <th className="px-4 py-3.5 font-medium">Assign role</th>
-                    <th className="px-4 py-3.5 font-medium min-w-[9.5rem] text-right">Sessions</th>
+                    <th className="w-[28%] px-4 py-3.5 font-medium">Email</th>
+                    <th className="w-[14%] px-4 py-3.5 font-medium">Role</th>
+                    <th className="w-[18%] px-4 py-3.5 font-medium">Last sign-in</th>
+                    <th className="w-[22%] px-4 py-3.5 font-medium">Assign role</th>
+                    <th className="w-[18%] px-4 py-3.5 font-medium text-right">Sessions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -132,7 +132,7 @@ export function UsersManagementClient({ users, activity, actorRole, actorId }: U
                           ))}
                         </Select>
                       </td>
-                      <td className="px-4 py-3.5 text-right whitespace-nowrap min-w-[9.5rem]">
+                      <td className="px-4 py-3.5 text-right">
                         <Button
                           type="button"
                           variant="ghost"
@@ -140,11 +140,10 @@ export function UsersManagementClient({ users, activity, actorRole, actorId }: U
                           disabled={pending}
                           title="Revoke all sessions for this staff member"
                           onClick={() => setRevokeTarget({ id: u.id, email: u.email })}
-                          className="whitespace-nowrap gap-1.5"
+                          className="inline-flex w-full max-w-[11rem] items-center justify-end gap-1.5 whitespace-nowrap"
                         >
                           <RefreshCw className="h-4 w-4 shrink-0" aria-hidden />
-                          <span className="hidden sm:inline">Revoke</span>
-                          <span className="sm:hidden">Revoke</span>
+                          Revoke sessions
                         </Button>
                       </td>
                     </tr>

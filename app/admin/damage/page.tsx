@@ -1,9 +1,12 @@
 import { AdminDamageDashboard } from '@/components/admin/damage/admin-damage-dashboard'
 import { adminDamageMetrics, adminListDamageReports } from '@/lib/admin/data/damage-reports'
 import { adminListViolations, adminViolationMetrics } from '@/lib/admin/data/violations'
+import { adminPageMetadata } from '@/lib/admin/page-metadata'
 import { requireAdminPageAccess } from '@/lib/auth/guards'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata = adminPageMetadata('Damage & Penalties')
 
 export default async function AdminDamagePage() {
   await requireAdminPageAccess('/admin/damage')

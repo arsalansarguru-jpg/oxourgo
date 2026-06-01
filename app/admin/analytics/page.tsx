@@ -1,9 +1,12 @@
 import { AdminAnalyticsDashboard } from '@/components/admin/analytics/admin-analytics-dashboard'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { fetchAdminAnalyticsBundle } from '@/lib/admin/data/analytics'
+import { adminPageMetadata } from '@/lib/admin/page-metadata'
 import { resolveAnalyticsRangeFromSearchParams } from '@/lib/admin/analytics-range'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata = adminPageMetadata('Analytics')
 
 export default async function AdminAnalyticsPage({
   searchParams,

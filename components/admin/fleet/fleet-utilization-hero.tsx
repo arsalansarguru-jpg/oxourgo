@@ -87,8 +87,8 @@ export function FleetUtilizationHero({ metrics }: Props) {
           </div>
         </div>
         <p className="max-w-[240px] text-center text-xs leading-relaxed text-muted">
-          {vehiclesOnTripToday} vehicle{vehiclesOnTripToday === 1 ? '' : 's'} with overlapping active bookings today
-          (confirmed or pending payment). Share reflects on-trip vs bookable fleet.
+          {vehiclesOnTripToday} vehicle{vehiclesOnTripToday === 1 ? '' : 's'} on confirmed or active trips today.
+          Pending-payment holds are not counted as deployed.
         </p>
       </div>
     </div>

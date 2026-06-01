@@ -204,11 +204,10 @@ export function AdminShell({
   const barTitle = adminTopBarTitle(pathname)
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && barTitle) {
-      const handle = setTimeout(() => {
-        document.title = `${barTitle} | Oxour Go Admin`
-      }, 0)
-      return () => clearTimeout(handle)
+    if (typeof window === 'undefined' || !barTitle) return
+    const next = `${barTitle} | Oxour Go Admin`
+    if (document.title !== next) {
+      document.title = next
     }
   }, [barTitle])
 

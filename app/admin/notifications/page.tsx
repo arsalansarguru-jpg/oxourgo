@@ -3,15 +3,21 @@ import Link from 'next/link'
 import { AdminOpsAlertRow } from '@/components/admin/admin-ops-alert-row'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
+import { resolveStaleKycReviewOpsAlerts } from '@/lib/admin/kyc-ops-alerts-resolve'
 import { listOpsAlertsForAdmin } from '@/lib/admin/data/ops-alerts'
+import { adminPageMetadata } from '@/lib/admin/page-metadata'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { requireAdminPageAccess } from '@/lib/auth/guards'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata = adminPageMetadata('Notifications')
 
 export default async function AdminNotificationsPage() {
   const { user } = await requireAdminPageAccess('/admin/notifications')
   let alerts: Awaited<ReturnType<typeof listOpsAlertsForAdmin>> = []
   try {
+    await resolveStaleKycReviewOpsAlerts(createAdminClient())
     alerts = await listOpsAlertsForAdmin(user.id, 200)
   } catch {
     alerts = []

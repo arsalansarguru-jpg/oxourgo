@@ -9,7 +9,12 @@ import { AdminConfirmDialog } from '@/components/admin/operations/admin-confirm-
 import { adminGetKycSignedUrlAction, adminSetKycDocumentStatusAction } from '@/lib/admin/actions/kyc-actions'
 import { pickLatestDocPerType, type KycDocMinimal } from '@/lib/kyc/compute-kyc-profile-status'
 import { formatKycDocumentType } from '@/lib/kyc/doc-label'
-import { isHeicKycContentType, kycPreviewNotSupportedMessage } from '@/lib/kyc/preview'
+import { resolveKycPreviewContentType } from '@/lib/kyc/content-type-from-path'
+import {
+  isBrowserPreviewableImage,
+  isHeicKycContentType,
+  kycPreviewNotSupportedMessage,
+} from '@/lib/kyc/preview'
 import { AdminStatusPill } from '@/components/admin/admin-status-pill'
 import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 import { Button } from '@/components/ui/Button'
@@ -36,15 +41,20 @@ function reviewerLine(doc: AdminKycReviewDocumentRow | undefined) {
 function DocPreview({
   documentId,
   contentType,
+  storagePath,
 }: {
   documentId: string
   contentType: string | null
+  storagePath: string | null
 }) {
   const [url, setUrl] = useState<string | null>(null)
   const [err, setErr] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [zoom, setZoom] = useState(1)
   const [pending, start] = useTransition()
+  const [resolvedType, setResolvedType] = useState<string | null>(() =>
+    storagePath ? resolveKycPreviewContentType(storagePath, contentType) : contentType,
+  )
 
   const load = useCallback(() => {
     start(async () => {
@@ -58,17 +68,25 @@ function DocPreview({
         return
       }
       setUrl(r.url)
+      setResolvedType(
+        r.contentType ??
+          (storagePath ? resolveKycPreviewContentType(storagePath, contentType) : contentType),
+      )
       setLoading(false)
     })
-  }, [documentId])
+  }, [documentId, contentType, storagePath])
 
   useEffect(() => {
     load()
   }, [load])
 
-  const isPdf = (contentType ?? '').includes('pdf')
-  const heic = isHeicKycContentType(contentType)
-  const previewBlocked = heic ? kycPreviewNotSupportedMessage(contentType) : null
+  const mime = resolvedType ?? contentType
+  const isPdf = (mime ?? '').includes('pdf')
+  const heic = isHeicKycContentType(mime)
+  const previewBlocked =
+    kycPreviewNotSupportedMessage(mime) ??
+    (!isBrowserPreviewableImage(mime) && !isPdf ? kycPreviewNotSupportedMessage('application/octet-stream') : null)
+  const canInlinePreview = Boolean(url && !loading && !err && !isPdf && !previewBlocked && isBrowserPreviewableImage(mime))
 
   return (
     <div className="space-y-3">
@@ -79,10 +97,10 @@ function DocPreview({
             variant="ghost"
             size="sm"
             className="h-8 px-2"
-            disabled={zoom <= 1 || !url || isPdf || Boolean(previewBlocked)}
+            disabled={zoom <= 1 || !canInlinePreview}
             title={zoom <= 1 ? 'Already at minimum zoom (100%)' : 'Zoom out'}
             onClick={() => setZoom((z) => Math.max(1, +(z - 0.25).toFixed(2)))}
-            aria-label="Zoom out"
+            aria-label={zoom <= 1 ? 'Zoom out (disabled at minimum zoom)' : 'Zoom out'}
           >
             <ZoomOut className="h-4 w-4" />
           </Button>
@@ -148,13 +166,13 @@ function DocPreview({
               {isPdf ? 'Open PDF' : 'Open / download'}
             </Button>
           </div>
-        ) : url ? (
+        ) : canInlinePreview && url ? (
           <div className="flex min-h-[220px] items-center justify-center p-4 sm:p-6">
             {/* eslint-disable-next-line @next/next/no-img-element -- signed URL from private bucket */}
             <img
               src={url}
               alt="KYC document preview"
-              className="max-w-none select-none rounded-lg shadow-2xl ring-1 ring-white/10"
+              className="max-h-[min(68vh,480px)] max-w-full select-none rounded-lg object-contain shadow-2xl ring-1 ring-white/10"
               style={{ transform: `scale(${zoom})`, transformOrigin: 'center center' }}
               draggable={false}
               onError={() => {
@@ -162,6 +180,15 @@ function DocPreview({
                 setUrl(null)
               }}
             />
+          </div>
+        ) : url ? (
+          <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 p-6 text-center">
+            <p className="max-w-sm text-sm text-muted">
+              {previewBlocked ?? 'Inline preview is not available for this file.'}
+            </p>
+            <Button type="button" variant="secondary" onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}>
+              Open / download
+            </Button>
           </div>
         ) : null}
       </div>
@@ -243,6 +270,9 @@ function DocReviewPanel({
   }
 
   const reviewed = reviewerLine(doc)
+  const isApproved = doc.status === 'approved'
+  const isTerminal = isApproved || doc.status === 'rejected'
+  const canMarkReviewing = !isApproved && doc.status !== 'reviewing'
 
   return (
     <AdminCard className="overflow-hidden border-stroke-strong bg-gradient-to-br from-matte/80 via-matte/40 to-electric/[0.04]">
@@ -272,14 +302,21 @@ function DocReviewPanel({
           <AdminStatusPill value={doc.status} kycDocument />
         </div>
 
-        <DocPreview documentId={doc.id} contentType={doc.content_type} />
+        <DocPreview documentId={doc.id} contentType={doc.content_type} storagePath={doc.storage_path} />
+
+        {isApproved ? (
+          <p className="rounded-lg border border-emerald-400/25 bg-emerald-500/[0.06] px-3 py-2 text-xs text-emerald-100/95">
+            This document is approved. Use Reject or Request resubmission only if you need to reverse the decision.
+          </p>
+        ) : null}
 
         <div className="flex flex-wrap gap-2 border-t border-stroke/80 pt-4">
           <Button
             type="button"
             variant="ghost"
             size="sm"
-            disabled={pending}
+            disabled={pending || !canMarkReviewing}
+            title={!canMarkReviewing ? 'Already approved or in review' : undefined}
             onClick={() => setConfirm({ kind: 'reviewing' })}
           >
             Mark reviewing
@@ -288,7 +325,8 @@ function DocReviewPanel({
             type="button"
             variant="secondary"
             size="sm"
-            disabled={pending}
+            disabled={pending || isApproved}
+            title={isApproved ? 'Already approved' : undefined}
             onClick={() => setConfirm({ kind: 'approve' })}
           >
             Approve
@@ -296,7 +334,10 @@ function DocReviewPanel({
         </div>
 
         <form
-          className="grid gap-3 rounded-xl border border-stroke bg-matte/[0.35] p-4"
+          className={cn(
+            'grid gap-3 rounded-xl border border-stroke bg-matte/[0.35] p-4',
+            isTerminal && 'opacity-80',
+          )}
           onSubmit={(e) => {
             e.preventDefault()
             const fd = new FormData(e.currentTarget)
@@ -320,13 +361,16 @@ function DocReviewPanel({
             placeholder="Internal note (optional)"
             className="min-h-10"
           />
-          <Button type="submit" variant="danger" size="sm" className="w-fit" disabled={pending}>
+          <Button type="submit" variant="danger" size="sm" className="w-fit" disabled={pending || isApproved}>
             Reject document
           </Button>
         </form>
 
         <form
-          className="grid gap-3 rounded-xl border border-stroke bg-matte/[0.35] p-4"
+          className={cn(
+            'grid gap-3 rounded-xl border border-stroke bg-matte/[0.35] p-4',
+            isApproved && 'opacity-80',
+          )}
           onSubmit={(e) => {
             e.preventDefault()
             const fd = new FormData(e.currentTarget)
@@ -350,7 +394,7 @@ function DocReviewPanel({
             placeholder="Internal note (optional)"
             className="min-h-10"
           />
-          <Button type="submit" variant="secondary" size="sm" className="w-fit" disabled={pending}>
+          <Button type="submit" variant="secondary" size="sm" className="w-fit" disabled={pending || isApproved}>
             Request resubmission
           </Button>
         </form>

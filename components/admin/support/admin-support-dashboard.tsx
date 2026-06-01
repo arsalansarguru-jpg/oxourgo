@@ -53,7 +53,7 @@ export function AdminSupportDashboard({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-        <MetricTile label="Open" value={metrics.open} />
+        <MetricTile label="Open" value={metrics.open} hint="Tickets + live chat threads" />
         <MetricTile label="In progress" value={metrics.inProgress} />
         <MetricTile label="Urgent" value={metrics.urgent} />
         <MetricTile label="Resolved today" value={metrics.resolvedToday} />
@@ -272,11 +272,12 @@ export function AdminSupportDashboard({
   )
 }
 
-function MetricTile({ label, value }: { label: string; value: number }) {
+function MetricTile({ label, value, hint }: { label: string; value: number; hint?: string }) {
   return (
     <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-4">
       <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</p>
       <p className="mt-2 text-2xl font-semibold tabular-nums text-soft">{value}</p>
+      {hint ? <p className="mt-1 text-[11px] text-muted">{hint}</p> : null}
     </div>
   )
 }
@@ -285,6 +286,7 @@ function ConversationRow({ item }: { item: AdminSupportConversationItem }) {
   const router = useRouter()
   const [pending, start] = useTransition()
   const [reply, setReply] = useState('')
+  const [sendStatus, setSendStatus] = useState<string | null>(null)
 
   return (
     <tr className="border-b border-white/[0.04] align-top hover:bg-white/[0.02]">
@@ -306,22 +308,33 @@ function ConversationRow({ item }: { item: AdminSupportConversationItem }) {
             const text = reply.trim()
             if (!text || pending) return
             start(async () => {
+              setSendStatus(null)
               const res = await adminReplySupportConversationAction(item.id, text)
               if (res.ok) {
                 setReply('')
+                setSendStatus('Message sent.')
                 router.refresh()
+              } else {
+                setSendStatus(res.message ?? 'Could not send message.')
               }
             })
           }}
         >
-          <Input
-            value={reply}
-            onChange={(e) => setReply(e.target.value)}
-            placeholder="Staff reply…"
-            aria-label="Reply to customer"
-            className="min-w-0 flex-1"
-            disabled={pending}
-          />
+          <div className="min-w-[200px] flex-1 space-y-1">
+            <Input
+              value={reply}
+              onChange={(e) => {
+                setReply(e.target.value)
+                setSendStatus(null)
+              }}
+              placeholder="Staff reply…"
+              aria-label="Reply to customer"
+              maxLength={2000}
+              className="min-w-0 w-full"
+              disabled={pending}
+            />
+            {sendStatus ? <p className="text-[11px] text-muted">{sendStatus}</p> : null}
+          </div>
           <Button type="submit" size="sm" variant="secondary" disabled={pending || !reply.trim()}>
             Send
           </Button>

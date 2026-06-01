@@ -8,7 +8,10 @@ import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { buildAuditActorLookup } from '@/lib/admin/data/audit-actors'
 import { listAuditLogsPage, listDistinctAuditActions } from '@/lib/admin/data/audit-logs'
 import { listStaffUsersForAdmin } from '@/lib/admin/data/staff-users'
+import { adminPageMetadata } from '@/lib/admin/page-metadata'
 import { requireAdminPageAccess } from '@/lib/auth/guards'
+
+export const metadata = adminPageMetadata('Audit Log')
 
 export const dynamic = 'force-dynamic'
 

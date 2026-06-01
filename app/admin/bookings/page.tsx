@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 import { AdminBookingsManager } from '@/components/admin/bookings/admin-bookings-manager'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
-import { adminListBookingsPage } from '@/lib/admin/data/bookings'
+import { getCachedAdminBookingsPage } from '@/lib/admin/cached-data'
 import { adminPageMetadata } from '@/lib/admin/page-metadata'
 import { cn } from '@/lib/utils/cn'
 
@@ -55,7 +55,7 @@ export default async function AdminBookingsPage({
   const perRaw = parseIntSafe(q.per, 25)
   const pageSize = PAGE_SIZE_OPTIONS.includes(perRaw as (typeof PAGE_SIZE_OPTIONS)[number]) ? perRaw : 25
 
-  let pageResult: Awaited<ReturnType<typeof adminListBookingsPage>> = {
+  let pageResult: Awaited<ReturnType<typeof getCachedAdminBookingsPage>> = {
     rows: [],
     totalCount: 0,
     page: 1,
@@ -65,14 +65,16 @@ export default async function AdminBookingsPage({
   let loadError: string | null = null
 
   try {
-    pageResult = await adminListBookingsPage({
-      page,
-      pageSize,
-      booking_status: safeStatus,
-      payment_status: safePayment,
-      booking_source: safeSource,
-      search,
-    })
+    pageResult = await getCachedAdminBookingsPage(
+      JSON.stringify({
+        page,
+        pageSize,
+        booking_status: safeStatus,
+        payment_status: safePayment,
+        booking_source: safeSource,
+        search,
+      }),
+    )
   } catch (e) {
     console.error('[AdminBookingsPage]', e)
     loadError = 'Unable to load bookings. Please try again in a moment.'

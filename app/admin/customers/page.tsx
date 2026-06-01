@@ -1,6 +1,7 @@
 import { AdminCustomersDirectory } from '@/components/admin/customers/admin-customers-directory'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
-import { adminListCustomers } from '@/lib/admin/data/customers'
+import { getCachedAdminCustomers } from '@/lib/admin/cached-data'
+import type { AdminCustomerRow } from '@/lib/admin/data/customers'
 import { adminPageMetadata } from '@/lib/admin/page-metadata'
 
 export const dynamic = 'force-dynamic'
@@ -8,9 +9,9 @@ export const dynamic = 'force-dynamic'
 export const metadata = adminPageMetadata('Customers')
 
 export default async function AdminCustomersPage() {
-  let rows: Awaited<ReturnType<typeof adminListCustomers>> = []
+  let rows: AdminCustomerRow[] = []
   try {
-    rows = await adminListCustomers()
+    rows = await getCachedAdminCustomers()
   } catch {
     rows = []
   }

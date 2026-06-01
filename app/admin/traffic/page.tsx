@@ -1,8 +1,11 @@
 import { AdminViolationsPageBody } from '@/components/admin/violations/admin-violations-page-body'
 import { adminListViolations, adminViolationMetrics } from '@/lib/admin/data/violations'
+import { adminPageMetadata } from '@/lib/admin/page-metadata'
 import { requireAdminPageAccess } from '@/lib/auth/guards'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata = adminPageMetadata('Traffic Fines')
 
 export default async function AdminTrafficPage() {
   await requireAdminPageAccess('/admin/traffic')

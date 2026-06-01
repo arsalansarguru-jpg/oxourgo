@@ -154,7 +154,7 @@ export async function adminListKycUserSummaries(filter: AdminKycListFilter): Pro
       phone: profile?.phone ?? null,
       authMetadata: meta ?? null,
     })
-    if (isInternalTestAccount({ email, displayName: resolvedName })) continue
+    if (filter === 'pending' && isInternalTestAccount({ email, displayName: resolvedName })) continue
 
     const docUpdated = latestUpdated.get(userId) ?? profile?.updated_at ?? new Date().toISOString()
 

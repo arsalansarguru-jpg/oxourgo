@@ -49,5 +49,22 @@ export async function countPendingKycCustomers(): Promise<number> {
     pendingCount++
   }
 
-  return pendingCount
+  const { data: reviewDocs, error: docErr } = await admin
+    .from('kyc_documents')
+    .select('user_id')
+    .is('deleted_at', null)
+    .in('status', ['pending', 'reviewing'])
+
+  if (docErr) logPostgrestError('[countPendingKycCustomers] docReview', docErr)
+
+  const reviewUserIds = new Set((reviewDocs ?? []).map((d) => d.user_id))
+  let reviewUserCount = 0
+  for (const userId of reviewUserIds) {
+    const { data: authUser } = await admin.auth.admin.getUserById(userId)
+    const email = authUser?.user?.email ?? null
+    if (isInternalTestAccount({ email, displayName: null })) continue
+    reviewUserCount++
+  }
+
+  return Math.max(pendingCount, reviewUserCount)
 }

@@ -18,6 +18,8 @@ type Props = {
   vehicles: AdminVehicleRow[]
   canBypass: boolean
   canWrite: boolean
+  canSkipKyc: boolean
+  canVip: boolean
 }
 
 function StatCard({
@@ -55,6 +57,8 @@ export function AdminOperationsDashboard({
   vehicles,
   canBypass,
   canWrite,
+  canSkipKyc,
+  canVip,
 }: Props) {
   return (
     <div className="space-y-8">
@@ -68,7 +72,14 @@ export function AdminOperationsDashboard({
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {canWrite ? <AdminManualBookingPanel vehicles={vehicles} canBypass={canBypass} /> : null}
+        {canWrite ? (
+          <AdminManualBookingPanel
+            vehicles={vehicles}
+            canBypass={canBypass}
+            canSkipKyc={canSkipKyc}
+            canVip={canVip}
+          />
+        ) : null}
         <AdminFleetEmergencyPanel vehicles={vehicles} />
       </div>
 

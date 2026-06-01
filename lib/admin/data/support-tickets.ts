@@ -30,7 +30,7 @@ export async function adminSupportTicketMetrics(): Promise<SupportTicketMetrics>
   const admin = createAdminClient()
   const dayStart = istDayStartIso(toIstYmd())
 
-  const [openRes, progressRes, urgentRes, resolvedRes] = await Promise.all([
+  const [openRes, progressRes, urgentRes, resolvedRes, openChatsRes] = await Promise.all([
     admin.from('support_tickets').select('id', { count: 'exact', head: true }).eq('status', 'open'),
     admin.from('support_tickets').select('id', { count: 'exact', head: true }).eq('status', 'in_progress'),
     admin
@@ -43,14 +43,18 @@ export async function adminSupportTicketMetrics(): Promise<SupportTicketMetrics>
       .select('id', { count: 'exact', head: true })
       .eq('status', 'resolved')
       .gte('resolved_at', dayStart),
+    admin.from('support_conversations').select('id', { count: 'exact', head: true }).eq('status', 'open'),
   ])
 
-  for (const res of [openRes, progressRes, urgentRes, resolvedRes]) {
+  for (const res of [openRes, progressRes, urgentRes, resolvedRes, openChatsRes]) {
     if (res.error) logPostgrestError('[supportTickets] metrics', res.error)
   }
 
+  const openTickets = openRes.count ?? 0
+  const openChats = openChatsRes.count ?? 0
+
   return {
-    open: openRes.count ?? 0,
+    open: openTickets + openChats,
     inProgress: progressRes.count ?? 0,
     urgent: urgentRes.count ?? 0,
     resolvedToday: resolvedRes.count ?? 0,

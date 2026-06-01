@@ -16,12 +16,16 @@ import { PICKUP_HUB } from '@/lib/booking/constants'
 type Props = {
   vehicles: AdminVehicleRow[]
   canBypass: boolean
+  canSkipKyc: boolean
+  canVip: boolean
 }
 
-export function AdminManualBookingPanel({ vehicles, canBypass }: Props) {
+export function AdminManualBookingPanel({ vehicles, canBypass, canSkipKyc, canVip }: Props) {
   const router = useRouter()
   const [pending, start] = useTransition()
   const [msg, setMsg] = useState<string | null>(null)
+  const [skipKycChecked, setSkipKycChecked] = useState(false)
+  const [bypassChecked, setBypassChecked] = useState(false)
 
   return (
     <AdminCard>
@@ -118,18 +122,49 @@ export function AdminManualBookingPanel({ vehicles, canBypass }: Props) {
             <input type="checkbox" name="autoConfirm" className="rounded border-stroke" />
             Auto-confirm (skip pending payment)
           </label>
-          <label className="flex items-center gap-2 text-sm text-muted">
-            <input type="checkbox" name="vipFlag" className="rounded border-stroke" />
-            VIP handling
-          </label>
-          <label className="flex items-center gap-2 text-sm text-muted">
-            <input type="checkbox" name="skipKyc" className="rounded border-stroke" />
-            Skip KYC check
-          </label>
+          {canVip ? (
+            <label className="flex items-center gap-2 text-sm text-muted">
+              <input type="checkbox" name="vipFlag" className="rounded border-stroke" />
+              VIP handling
+            </label>
+          ) : null}
+          {canSkipKyc ? (
+            <label className="flex flex-col gap-2 text-sm text-muted sm:col-span-2">
+              <span className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="skipKyc"
+                  className="rounded border-stroke"
+                  checked={skipKycChecked}
+                  onChange={(e) => setSkipKycChecked(e.target.checked)}
+                />
+                Skip KYC check
+              </span>
+              {skipKycChecked ? (
+                <p className="rounded-lg border border-red-400/30 bg-red-500/[0.08] px-3 py-2 text-xs font-medium text-red-100/95">
+                  You are creating a booking for a customer who has not completed KYC verification. This action is
+                  audited and should only be used with written ops approval.
+                </p>
+              ) : null}
+            </label>
+          ) : null}
           {canBypass ? (
-            <label className="flex items-center gap-2 text-sm text-amber-200/90 sm:col-span-2">
-              <input type="checkbox" name="bypassRestrictions" className="rounded border-stroke" />
-              Bypass overlap &amp; availability (audited)
+            <label className="flex flex-col gap-2 text-sm text-amber-200/90 sm:col-span-2">
+              <span className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  name="bypassRestrictions"
+                  className="rounded border-stroke"
+                  checked={bypassChecked}
+                  onChange={(e) => setBypassChecked(e.target.checked)}
+                />
+                Bypass overlap &amp; availability (audited)
+              </span>
+              {bypassChecked ? (
+                <p className="rounded-lg border border-amber-400/30 bg-amber-500/[0.08] px-3 py-2 text-xs text-amber-100/95">
+                  Availability and double-booking checks will be skipped. Document why in internal notes.
+                </p>
+              ) : null}
             </label>
           ) : null}
 

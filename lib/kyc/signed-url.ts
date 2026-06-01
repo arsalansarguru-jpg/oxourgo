@@ -21,8 +21,8 @@ export function mapKycStorageSignError(error: StorageError | null): string {
   if (status === 404 || msg.includes('not found') || msg.includes('object not found')) {
     return 'The vault file is missing. Ask the customer to re-upload this document.'
   }
-  if (status === 400 && msg.includes('bucket')) {
-    return 'KYC storage is not fully configured on the server. Our team has been notified — try again shortly or contact support.'
+  if (status === 400 && (msg.includes('bucket') || msg.includes('not found'))) {
+    return 'Could not access the KYC vault bucket. Verify the private "kyc" bucket exists and storage policies are applied.'
   }
   if (status === 403 || msg.includes('policy') || msg.includes('row-level security')) {
     return 'Unable to access this vault file with admin credentials. Check storage policies for the kyc bucket.'

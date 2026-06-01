@@ -1,10 +1,13 @@
 import { AdminOperationsDashboard } from '@/components/admin/operations/admin-operations-dashboard'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { adminLoadOperationsContext } from '@/lib/admin/data/operations'
+import { adminPageMetadata } from '@/lib/admin/page-metadata'
 import { canUseOpsOverride, hasPermission } from '@/lib/auth/permissions'
 import { getAuthSessionSummary } from '@/lib/auth/server'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata = adminPageMetadata('Operations')
 
 export default async function AdminOperationsPage() {
   const session = await getAuthSessionSummary()
@@ -44,6 +47,8 @@ export default async function AdminOperationsPage() {
         vehicles={context.vehicles}
         canBypass={canUseOpsOverride(role)}
         canWrite={hasPermission(role, 'bookings.write')}
+        canSkipKyc={canUseOpsOverride(role)}
+        canVip={canUseOpsOverride(role)}
       />
     </div>
   )

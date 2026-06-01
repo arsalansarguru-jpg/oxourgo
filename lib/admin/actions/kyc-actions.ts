@@ -7,6 +7,8 @@ import { writeAdminAudit } from '@/lib/admin/audit'
 import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from '@/lib/audit/actions'
 import { requirePermissionForAdminAction } from '@/lib/auth/admin-action-auth'
 import { onKycDecision } from '@/lib/notifications/events'
+import { resolveKycReviewOpsAlerts } from '@/lib/admin/kyc-ops-alerts-resolve'
+import { resolveKycPreviewContentType } from '@/lib/kyc/content-type-from-path'
 import { createKycSignedUrl } from '@/lib/kyc/signed-url'
 import { syncProfileKycFromDocuments } from '@/lib/kyc/sync-profile-kyc'
 import { kycActionDbFailed } from '@/lib/kyc/upload-errors'
@@ -109,6 +111,14 @@ export async function adminSetKycDocumentStatusAction(input: AdminKycSetStatusIn
       void onKycDecision(doc.user_id, input.documentId, doc.document_type, input.status, customerMessage)
     }
 
+    if (input.status === 'approved' || input.status === 'rejected' || input.status === 'resubmission_required') {
+      await resolveKycReviewOpsAlerts(admin, {
+        documentId: input.documentId,
+        customerUserId: doc.user_id,
+      })
+      revalidatePath('/admin/notifications')
+    }
+
     revalidatePath('/admin/kyc')
     revalidatePath(`/admin/kyc/review/${doc.user_id}`)
     revalidatePath('/admin/customers')
@@ -127,20 +137,21 @@ const SIGNED_URL_DEFAULT = 900
 export async function adminGetKycSignedUrlAction(
   documentId: string,
   ttlSeconds?: number,
-): Promise<{ ok: true; url: string; expiresIn: number } | { ok: false; message: string }> {
+): Promise<
+  | { ok: true; url: string; expiresIn: number; contentType: string | null }
+  | { ok: false; message: string }
+> {
   return runInstrumentedServerAction('adminGetKycSignedUrlAction', 'kyc', async () => {
     const guard = await requirePermissionForAdminAction('kyc.review')
     if (!guard.ok) return guard
     const admin = createAdminClient()
 
-    const { data: doc, error } = await admin
-      .from('kyc_documents')
-      .select('storage_path, content_type')
-      .eq('id', documentId)
-      .single()
+    const { data: doc, error } = await admin.from('kyc_documents').select('storage_path').eq('id', documentId).single()
 
     if (error) return kycActionDbFailed('adminGetKycSignedUrlAction:select', error)
     if (!doc?.storage_path) return { ok: false, message: 'Document not found.' }
+
+    const contentType = resolveKycPreviewContentType(doc.storage_path, null)
 
     const raw = ttlSeconds ?? SIGNED_URL_DEFAULT
     const expiresIn = Math.min(SIGNED_URL_MAX, Math.max(SIGNED_URL_MIN, Number.isFinite(raw) ? raw : SIGNED_URL_DEFAULT))
@@ -151,6 +162,6 @@ export async function adminGetKycSignedUrlAction(
       return { ok: false, message: signed.message }
     }
 
-    return { ok: true, url: signed.url, expiresIn }
+    return { ok: true, url: signed.url, expiresIn, contentType }
   })
 }

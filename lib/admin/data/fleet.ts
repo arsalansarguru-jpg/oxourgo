@@ -127,15 +127,18 @@ export async function adminGetVehicle(id: string): Promise<AdminVehicleRow | nul
 
 export async function adminGetFleetDashboardMetrics(): Promise<AdminFleetDashboardMetrics> {
   const admin = createAdminClient()
+  const today = new Date().toISOString().slice(0, 10)
 
   const [{ data: vehicles, error: vErr }, { data: bookings, error: bErr }] = await Promise.all([
     admin.from('vehicles').select('id, available, featured, price_per_day').is('deleted_at', null),
     admin
       .from('bookings')
       .select('vehicle_id')
-      .in('booking_status', ['confirmed', 'pending_payment', 'active'])
+      .in('booking_status', ['confirmed', 'active'])
       .not('vehicle_id', 'is', null)
-      .is('deleted_at', null),
+      .is('deleted_at', null)
+      .lte('pickup_date', today)
+      .gte('return_date', today),
   ])
 
   if (vErr) {
