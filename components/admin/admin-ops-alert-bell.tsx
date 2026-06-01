@@ -64,8 +64,11 @@ export function AdminOpsAlertBell({
         type="button"
         onClick={() => setOpen((o) => !o)}
         className={cn(
-          'relative flex h-11 w-11 items-center justify-center rounded-2xl border border-white/[0.08] bg-white/[0.04] text-soft shadow-[var(--shadow-card)] transition-[background-color,box-shadow,border-color,transform] duration-300 hover:-translate-y-0.5 hover:border-white/[0.12] hover:bg-white/[0.07]',
-          open && 'border-amber-400/35 bg-amber-500/12 shadow-[0_0_28px_-10px_rgba(251,191,36,0.35)]',
+          'relative flex h-11 w-11 items-center justify-center rounded-2xl border shadow-[var(--shadow-card)] transition-[background-color,box-shadow,border-color,transform,color] duration-300',
+          unread > 0
+            ? 'border-white/[0.08] bg-white/[0.04] text-soft hover:-translate-y-0.5 hover:border-white/[0.12] hover:bg-white/[0.07]'
+            : 'border-white/[0.05] bg-white/[0.02] text-muted/70 hover:text-muted',
+          open && unread > 0 && 'border-amber-400/35 bg-amber-500/12 text-soft shadow-[0_0_28px_-10px_rgba(251,191,36,0.35)]',
         )}
         aria-expanded={open}
         aria-label="Operations alerts"

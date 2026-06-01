@@ -44,6 +44,7 @@ function DocPreview({
   storagePath: string | null
 }) {
   const [url, setUrl] = useState<string | null>(null)
+  const [displayUrl, setDisplayUrl] = useState<string | null>(null)
   const [err, setErr] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [zoom, setZoom] = useState(1)
@@ -76,12 +77,39 @@ function DocPreview({
     load()
   }, [load])
 
+  useEffect(() => {
+    if (!url) {
+      setDisplayUrl(null)
+      return
+    }
+    let revoked: string | null = null
+    let cancelled = false
+    void (async () => {
+      try {
+        const res = await fetch(url)
+        if (!res.ok) throw new Error('fetch failed')
+        const blob = await res.blob()
+        revoked = URL.createObjectURL(blob)
+        if (!cancelled) setDisplayUrl(revoked)
+      } catch {
+        if (!cancelled) setDisplayUrl(url)
+      }
+    })()
+    return () => {
+      cancelled = true
+      if (revoked) URL.revokeObjectURL(revoked)
+    }
+  }, [url])
+
   const mime = resolvedType ?? contentType
   const isPdf = (mime ?? '').includes('pdf')
   const previewBlocked =
     kycPreviewNotSupportedMessage(mime) ??
     (!isBrowserPreviewableImage(mime) && !isPdf ? kycPreviewNotSupportedMessage('application/octet-stream') : null)
-  const canInlinePreview = Boolean(url && !loading && !err && !isPdf && !previewBlocked && isBrowserPreviewableImage(mime))
+  const previewSrc = displayUrl ?? url
+  const canInlinePreview = Boolean(
+    previewSrc && !loading && !err && !isPdf && !previewBlocked && isBrowserPreviewableImage(mime),
+  )
 
   return (
     <div className="space-y-3">
@@ -161,13 +189,13 @@ function DocPreview({
               {isPdf ? 'Open PDF' : 'Open / download'}
             </Button>
           </div>
-        ) : canInlinePreview && url ? (
-          <div className="flex min-h-[220px] items-center justify-center p-4 sm:p-6">
+        ) : canInlinePreview && previewSrc ? (
+          <div className="isolate flex min-h-[220px] items-center justify-center p-4 sm:p-6">
             {/* eslint-disable-next-line @next/next/no-img-element -- signed URL from private bucket */}
             <img
-              src={url}
+              src={previewSrc}
               alt="KYC document preview"
-              className="max-h-[min(68vh,480px)] max-w-full select-none rounded-md object-contain"
+              className="max-h-[min(68vh,480px)] max-w-full select-none rounded-md object-contain mix-blend-normal"
               style={{
                 transform: `scale(${zoom})`,
                 transformOrigin: 'center center',
@@ -202,8 +230,8 @@ function DocPreview({
 
 type PendingAction =
   | { kind: 'approve' }
-  | { kind: 'reject'; reason: string; note: string | null }
-  | { kind: 'resubmit'; reason: string; note: string | null }
+  | { kind: 'reject'; reason: string; note: string | null; reversingApproved?: boolean }
+  | { kind: 'resubmit'; reason: string; note: string | null; reversingApproved?: boolean }
   | { kind: 'reviewing' }
 
 function DocReviewPanel({
@@ -281,7 +309,7 @@ function DocReviewPanel({
   }
 
   return (
-    <AdminCard className="overflow-hidden border-stroke-strong bg-gradient-to-br from-matte/80 via-matte/40 to-electric/[0.04]">
+    <AdminCard className="overflow-hidden border-stroke-strong bg-matte/40">
       <AdminCardContent className="space-y-4 p-5 sm:p-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 space-y-1">
@@ -353,12 +381,11 @@ function DocReviewPanel({
           )}
           onSubmit={(e) => {
             e.preventDefault()
-            if (isApproved) return
             const fd = new FormData(e.currentTarget)
             const reason = String(fd.get('reject_reason') ?? '').trim()
             const note = String(fd.get(`reject_note_${panelId}`) ?? '').trim() || null
             if (!reason) return
-            setConfirm({ kind: 'reject', reason, note })
+            setConfirm({ kind: 'reject', reason, note, reversingApproved: isApproved })
           }}
         >
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Reject</p>
@@ -375,8 +402,8 @@ function DocReviewPanel({
             placeholder="Internal note (optional)"
             className="min-h-10"
           />
-          <Button type="submit" variant="danger" size="sm" className="w-fit" disabled={pending || isApproved}>
-            Reject document
+          <Button type="submit" variant="danger" size="sm" className="w-fit" disabled={pending}>
+            {isApproved ? 'Reject approved document' : 'Reject document'}
           </Button>
         </form>
 
@@ -387,12 +414,11 @@ function DocReviewPanel({
           )}
           onSubmit={(e) => {
             e.preventDefault()
-            if (isApproved) return
             const fd = new FormData(e.currentTarget)
             const reason = String(fd.get('resubmit_reason') ?? '').trim()
             const note = String(fd.get(`resubmit_note_${panelId}`) ?? '').trim() || null
             if (!reason) return
-            setConfirm({ kind: 'resubmit', reason, note })
+            setConfirm({ kind: 'resubmit', reason, note, reversingApproved: isApproved })
           }}
         >
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Request resubmission</p>
@@ -409,8 +435,8 @@ function DocReviewPanel({
             placeholder="Internal note (optional)"
             className="min-h-10"
           />
-          <Button type="submit" variant="secondary" size="sm" className="w-fit" disabled={pending || isApproved}>
-            Request resubmission
+          <Button type="submit" variant="secondary" size="sm" className="w-fit" disabled={pending}>
+            {isApproved ? 'Request resubmission (reversal)' : 'Request resubmission'}
           </Button>
         </form>
 
@@ -425,9 +451,13 @@ function DocReviewPanel({
               : confirm?.kind === 'reviewing'
                 ? 'Mark as reviewing?'
                 : confirm?.kind === 'reject'
-                  ? 'Reject this document?'
+                  ? confirm.reversingApproved
+                    ? 'Reject this approved document?'
+                    : 'Reject this document?'
                   : confirm?.kind === 'resubmit'
-                    ? 'Request resubmission?'
+                    ? confirm.reversingApproved
+                      ? 'Reverse approval and request resubmission?'
+                      : 'Request resubmission?'
                     : 'Confirm action'
           }
           description={
@@ -436,9 +466,13 @@ function DocReviewPanel({
               : confirm?.kind === 'reviewing'
                 ? `Mark ${title} as in review without changing the customer-visible outcome.`
                 : confirm?.kind === 'reject'
-                  ? 'The customer will see your rejection reason. This cannot be undone from the admin UI.'
+                  ? confirm.reversingApproved
+                    ? 'This document is already approved. Rejecting will notify the customer and re-open their KYC. This cannot be undone from the admin UI.'
+                    : 'The customer will see your rejection reason. This cannot be undone from the admin UI.'
                   : confirm?.kind === 'resubmit'
-                    ? 'The customer will be asked to upload again with your note.'
+                    ? confirm.reversingApproved
+                      ? 'The customer will be asked to upload again. Their approved status will be reversed.'
+                      : 'The customer will be asked to upload again with your note.'
                     : ''
           }
           confirmLabel={

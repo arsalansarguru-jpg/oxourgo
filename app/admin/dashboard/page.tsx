@@ -1,8 +1,6 @@
-import { Suspense } from 'react'
-
-import { AdminCommandCenterLoader } from '@/components/admin/dashboard/admin-command-center-loader'
-import { AdminCommandCenterSkeleton } from '@/components/admin/dashboard/admin-command-center-skeleton'
+import { AdminDashboardOverview } from '@/components/admin/dashboard/admin-dashboard-overview'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
+import { fetchDashboardOverviewBundle } from '@/lib/admin/data/dashboard-overview'
 import { adminPageMetadata } from '@/lib/admin/page-metadata'
 import { requireAdminPageAccess } from '@/lib/auth/guards'
 import { isStaffRole } from '@/lib/auth/permissions'
@@ -16,6 +14,9 @@ export default async function AdminDashboardPage() {
   if (!isStaffRole(summary.appRole)) {
     return null
   }
+
+  const data = await fetchDashboardOverviewBundle(summary.appRole)
+
   return (
     <div className="space-y-8 lg:space-y-10">
       <AdminPageHeader
@@ -23,9 +24,7 @@ export default async function AdminDashboardPage() {
         description="Enterprise command center — live KPIs, revenue analytics, fleet utilization, and operational queues for Oxour Go."
         eyebrow="Operations HQ"
       />
-      <Suspense fallback={<AdminCommandCenterSkeleton />}>
-        <AdminCommandCenterLoader />
-      </Suspense>
+      <AdminDashboardOverview data={data} />
     </div>
   )
 }

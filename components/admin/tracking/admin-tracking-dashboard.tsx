@@ -126,10 +126,12 @@ export function AdminTrackingDashboard({
                               {v.fuelLevelPct}%
                             </span>
                             {v.lastGpsPingAt ? (
-                              <span className="text-[10px] text-muted/80">as of {formatRelativePing(v.lastGpsPingAt)}</span>
-                            ) : (
-                              <span className="text-[10px] text-amber-200/75">Stale — no recent telemetry</span>
-                            )}
+                              <span className="text-[10px] text-amber-200/80">
+                                Last updated {formatRelativePing(v.lastGpsPingAt)}
+                              </span>
+                            ) : v.fuelLevelPct != null ? (
+                              <span className="text-[10px] text-amber-200/75">Stale — no telemetry timestamp</span>
+                            ) : null}
                           </span>
                         ) : (
                           '—'

@@ -63,8 +63,11 @@ export async function adminListVehicleTracking(): Promise<VehicleTrackingRow[]> 
     const tripActive = onTrip.has(v.id as string)
 
     const storedLocation = (v.vehicle_location as string | null)?.trim() || null
+    const needsGpsSetup = !hasTracker
     let location: string
-    if (tripActive && storedLocation) {
+    if (needsGpsSetup) {
+      location = 'Pending GPS setup · configure tracker in Fleet'
+    } else if (tripActive && storedLocation) {
       location = `${storedLocation} · On trip`
     } else if (storedLocation) {
       location = `${storedLocation} · Last seen`

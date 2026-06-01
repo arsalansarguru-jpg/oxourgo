@@ -5,6 +5,7 @@ import type { AdminSupportConversationItem } from '@/lib/admin/data/support-conv
 import type { SupportTicketRow } from '@/lib/admin/data/support-tickets'
 import { adminPageMetadata } from '@/lib/admin/page-metadata'
 import { requireAdminPageAccess } from '@/lib/auth/guards'
+import { ensureSupportSlaOpsAlerts } from '@/lib/admin/support-sla-alerts'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,6 +20,7 @@ export default async function AdminSupportPage() {
   let customers: AdminCustomerRow[] = []
 
   try {
+    await ensureSupportSlaOpsAlerts()
     const bundle = await getCachedAdminSupportBundle()
     metrics = bundle.metrics
     tickets = bundle.tickets

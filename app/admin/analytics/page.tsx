@@ -14,7 +14,7 @@ export default async function AdminAnalyticsPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const raw = await searchParams
-  const range = resolveAnalyticsRangeFromSearchParams(raw)
+  const { range, customRangeRejected } = resolveAnalyticsRangeFromSearchParams(raw)
   const data = await fetchAdminAnalyticsBundle(range)
 
   return (
@@ -24,7 +24,7 @@ export default async function AdminAnalyticsPage({
         title="Analytics"
         description="Revenue, fleet load, and booking intelligence sourced from live Supabase data. Presets and custom ranges use IST business-day boundaries."
       />
-      <AdminAnalyticsDashboard data={data} />
+      <AdminAnalyticsDashboard data={data} customRangeRejected={customRangeRejected} />
     </div>
   )
 }

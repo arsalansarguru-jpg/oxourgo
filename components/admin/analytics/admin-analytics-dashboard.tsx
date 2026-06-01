@@ -78,7 +78,13 @@ const section = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease } },
 }
 
-export function AdminAnalyticsDashboard({ data }: { data: AdminAnalyticsBundle }) {
+export function AdminAnalyticsDashboard({
+  data,
+  customRangeRejected,
+}: {
+  data: AdminAnalyticsBundle
+  customRangeRejected?: string
+}) {
   const { range, totals, series, tables, truncatedBookings } = data
 
   return (
@@ -89,6 +95,11 @@ export function AdminAnalyticsDashboard({ data }: { data: AdminAnalyticsBundle }
       animate={{ opacity: 1 }}
       transition={{ duration: 0.35, ease }}
     >
+      {customRangeRejected ? (
+        <div className="rounded-xl border border-rose-400/30 bg-rose-500/[0.08] px-4 py-3 text-sm text-rose-100/95" role="alert">
+          {customRangeRejected} Showing last 30 days instead.
+        </div>
+      ) : null}
       <AnalyticsRangeFilter range={range} />
 
       <p className="text-xs text-muted">

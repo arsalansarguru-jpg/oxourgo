@@ -64,11 +64,13 @@ export function AnimatedCounter({
 function EnterpriseKpi({
   label,
   value,
+  subtitle,
   href,
   tone,
 }: {
   label: string
   value: React.ReactNode
+  subtitle?: string
   href: string
   tone?: 'warn' | 'critical'
 }) {
@@ -89,6 +91,7 @@ function EnterpriseKpi({
       >
         <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-muted">{label}</p>
         <p className="mt-2 text-xl font-semibold tabular-nums tracking-[-0.03em] text-soft sm:text-2xl">{value}</p>
+        {subtitle ? <p className="mt-1 text-[11px] leading-snug text-muted">{subtitle}</p> : null}
         <ArrowUpRight className="absolute right-3 top-3 h-4 w-4 text-electric opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
       </Link>
     </motion.div>
@@ -98,6 +101,19 @@ function EnterpriseKpi({
 export function AdminDashboardOverview({ data }: { data: DashboardOverviewBundle }) {
   const { commandCenter, kpis, analytics, activityFeed, topVehicles } = data
   const showCharts = analytics != null
+  const outstanding = commandCenter.finance?.pendingCollectionsRupees ?? 0
+  const revenueTodaySub =
+    outstanding > 0
+      ? `${formatInr(kpis.revenueTodayRupees)} collected · ${formatInr(outstanding)} outstanding`
+      : kpis.revenueTodayRupees === 0
+        ? 'No rental collected yet'
+        : undefined
+  const revenueMonthSub =
+    outstanding > 0
+      ? `${formatInr(kpis.revenueMonthRupees)} collected · ${formatInr(outstanding)} outstanding`
+      : kpis.revenueMonthRupees === 0
+        ? 'No rental collected this month'
+        : undefined
 
   return (
     <div className="space-y-10">
@@ -114,11 +130,13 @@ export function AdminDashboardOverview({ data }: { data: DashboardOverviewBundle
           <EnterpriseKpi
             label="Revenue today"
             value={<AnimatedCounter value={kpis.revenueTodayRupees} formatter={(v) => formatInr(v)} />}
+            subtitle={revenueTodaySub}
             href="/admin/payments"
           />
           <EnterpriseKpi
             label="Revenue this month"
             value={<AnimatedCounter value={kpis.revenueMonthRupees} formatter={(v) => formatInr(v)} />}
+            subtitle={revenueMonthSub}
             href="/admin/analytics"
           />
           <EnterpriseKpi

@@ -6,6 +6,7 @@ import { AdminNoAccessView } from '@/components/admin/admin-no-access-view'
 import { AdminShell } from '@/components/admin/admin-shell'
 import { listOpsAlertsForAdmin } from '@/lib/admin/data/ops-alerts'
 import { resolveStaleKycReviewOpsAlerts } from '@/lib/admin/kyc-ops-alerts-resolve'
+import { ensureSupportSlaOpsAlerts } from '@/lib/admin/support-sla-alerts'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { probeAdminBookingSchema } from '@/lib/admin/schema-health'
 import { getPermissionsForRole } from '@/lib/auth/permissions'
@@ -53,7 +54,8 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   if (hasServiceRole && permissions.includes('ops.alerts.read')) {
     try {
-      await resolveStaleKycReviewOpsAlerts(createAdminClient())
+      const admin = createAdminClient()
+      await Promise.all([resolveStaleKycReviewOpsAlerts(admin), ensureSupportSlaOpsAlerts()])
       const items = await listOpsAlertsForAdmin(summary.user.id, 12)
       opsInitialUnread = items.filter((i) => !i.dismissed).length
       opsInitialItems = items.filter((i) => !i.dismissed).slice(0, 6)

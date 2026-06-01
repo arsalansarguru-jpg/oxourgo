@@ -374,8 +374,8 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError, dataErr
           </div>
         ) : showRows ? (
           <>
-            <p className="hidden border-b border-white/[0.06] px-4 py-2 text-[11px] text-muted lg:block">
-              Scroll horizontally for booking and payment status columns →
+            <p className="hidden border-b border-amber-400/20 bg-amber-500/[0.06] px-4 py-2.5 text-xs font-medium text-amber-100/90 lg:block">
+              → Scroll right to see Booking status, Payment status, and Actions
             </p>
             <div className="admin-table-scroll hidden max-h-[min(72vh,860px)] overflow-auto lg:block">
               <table className="w-full min-w-[1180px] text-left text-sm">
@@ -393,6 +393,11 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError, dataErr
                           className={cn(
                             'whitespace-nowrap px-4 py-3.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-muted',
                             (h === 'Total' || h === 'Actions') && 'text-right',
+                            (h === 'Booking' || h === 'Payment' || h === 'Actions') &&
+                              'sticky z-10 bg-matte/95 backdrop-blur-md theme-light:bg-white/95',
+                            h === 'Booking' && 'right-[11.5rem]',
+                            h === 'Payment' && 'right-[5.5rem]',
+                            h === 'Actions' && 'right-0',
                           )}
                         >
                           {h}
@@ -481,13 +486,13 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError, dataErr
                         <td className="px-4 py-3 align-top text-right tabular-nums text-sm font-semibold text-soft">
                           {formatInr(b.total_rupees)}
                         </td>
-                        <td className="px-4 py-3 align-top">
+                        <td className="sticky right-[11.5rem] z-10 bg-matte/90 px-4 py-3 align-top backdrop-blur-md theme-light:bg-white/90">
                           <AdminStatusPill value={b.booking_status} />
                         </td>
-                        <td className="px-4 py-3 align-top">
+                        <td className="sticky right-[5.5rem] z-10 bg-matte/90 px-4 py-3 align-top backdrop-blur-md theme-light:bg-white/90">
                           <AdminStatusPill value={b.payment_status} />
                         </td>
-                        <td className="px-4 py-3 align-top">
+                        <td className="sticky right-0 z-10 bg-matte/90 px-4 py-3 align-top backdrop-blur-md theme-light:bg-white/90">
                           <div className="flex flex-col items-end gap-1.5">
                             {canApprove ? (
                               <Button

@@ -89,13 +89,39 @@ function parseYmdToUtc(s: string): Date | null {
   return Number.isNaN(dt.getTime()) ? null : dt
 }
 
+function startDayForPreset(preset: Exclude<AnalyticsPresetId, 'custom'>, endDay: string): string {
+  if (preset === 'today') return endDay
+  const t = new Date(istDayStartIso(endDay))
+  const offset = preset === '7d' ? 6 : preset === '90d' ? 89 : 29
+  t.setUTCDate(t.getUTCDate() - offset)
+  return toIstYmd(t)
+}
+
+function fallbackRange(preset: AnalyticsPresetId, endDay: string, startDay: string): AnalyticsResolvedRange {
+  const safePreset: AnalyticsPresetId = preset === 'custom' ? '30d' : preset
+  return {
+    preset: safePreset,
+    label: `${PRESET_LABEL[safePreset as Exclude<AnalyticsPresetId, 'custom'>] ?? 'Last 30 days'} (IST)`,
+    startIso: istDayStartIso(startDay),
+    endIso: istDayEndIso(endDay),
+    startDay,
+    endDay,
+  }
+}
+
 /**
  * Resolve dashboard range from URL search params (`preset`, optional `from` / `to` for custom).
  * Defaults to **30d**. Unknown preset → 30d.
  */
+export type AnalyticsRangeResolution = {
+  range: AnalyticsResolvedRange
+  /** Set when a custom range was requested but failed validation (server fell back to 30d). */
+  customRangeRejected?: string
+}
+
 export function resolveAnalyticsRangeFromSearchParams(
   raw: Record<string, string | string[] | undefined>,
-): AnalyticsResolvedRange {
+): AnalyticsRangeResolution {
   const presetRaw = typeof raw.preset === 'string' ? raw.preset.trim().toLowerCase() : ''
   const preset: AnalyticsPresetId =
     presetRaw === 'today' || presetRaw === '7d' || presetRaw === '30d' || presetRaw === '90d' || presetRaw === 'custom'
@@ -108,54 +134,49 @@ export function resolveAnalyticsRangeFromSearchParams(
   if (preset === 'custom') {
     const from = typeof raw.from === 'string' ? raw.from.trim() : ''
     const to = typeof raw.to === 'string' ? raw.to.trim() : ''
+    const todayIst = toIstYmd(now)
+    if (!from || !to) {
+      return {
+        range: fallbackRange('30d', endDay, startDayForPreset('30d', endDay)),
+        customRangeRejected: 'Custom range requires both start and end dates.',
+      }
+    }
+    if (to < from) {
+      return {
+        range: fallbackRange('30d', endDay, startDayForPreset('30d', endDay)),
+        customRangeRejected: 'End date must be on or after the start date.',
+      }
+    }
+    if (from > todayIst || to > todayIst) {
+      return {
+        range: fallbackRange('30d', endDay, startDayForPreset('30d', endDay)),
+        customRangeRejected: 'Future dates are not allowed for analytics.',
+      }
+    }
     const df = parseYmdToUtc(from)
     const dt = parseYmdToUtc(to)
     if (df && dt && df.getTime() <= dt.getTime()) {
       const startDay = toIstYmd(df)
       const endDayCustom = toIstYmd(dt)
       return {
-        preset: 'custom',
-        label: `${startDay} → ${endDayCustom} (IST)`,
-        startIso: istDayStartIso(startDay),
-        endIso: istDayEndIso(endDayCustom),
-        startDay,
-        endDay: endDayCustom,
+        range: {
+          preset: 'custom',
+          label: `${startDay} → ${endDayCustom} (IST)`,
+          startIso: istDayStartIso(startDay),
+          endIso: istDayEndIso(endDayCustom),
+          startDay,
+          endDay: endDayCustom,
+        },
       }
     }
-    // fall through if custom invalid
+    return {
+      range: fallbackRange('30d', endDay, startDayForPreset('30d', endDay)),
+      customRangeRejected: 'Invalid custom date range.',
+    }
   }
 
-  let startDay = endDay
-  if (preset === 'today') {
-    startDay = endDay
-  } else if (preset === '7d') {
-    const t = new Date(istDayStartIso(endDay))
-    t.setUTCDate(t.getUTCDate() - 6)
-    startDay = toIstYmd(t)
-  } else if (preset === '30d') {
-    const t = new Date(istDayStartIso(endDay))
-    t.setUTCDate(t.getUTCDate() - 29)
-    startDay = toIstYmd(t)
-  } else if (preset === '90d') {
-    const t = new Date(istDayStartIso(endDay))
-    t.setUTCDate(t.getUTCDate() - 89)
-    startDay = toIstYmd(t)
-  } else {
-    const t = new Date(istDayStartIso(endDay))
-    t.setUTCDate(t.getUTCDate() - 29)
-    startDay = toIstYmd(t)
-  }
-
-  const safePreset: AnalyticsPresetId = preset === 'custom' ? '30d' : preset
-
-  return {
-    preset: safePreset,
-    label: `${PRESET_LABEL[safePreset as Exclude<AnalyticsPresetId, 'custom'>] ?? 'Last 30 days'} (IST)`,
-    startIso: istDayStartIso(startDay),
-    endIso: istDayEndIso(endDay),
-    startDay,
-    endDay,
-  }
+  const startDay = startDayForPreset(preset === 'custom' ? '30d' : preset, endDay)
+  return { range: fallbackRange(preset === 'custom' ? '30d' : preset, endDay, startDay) }
 }
 
 /** First day of current calendar month in IST (YYYY-MM-DD). */

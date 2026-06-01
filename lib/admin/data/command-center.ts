@@ -13,6 +13,7 @@ import { safeRupees } from '@/lib/money/safe'
 import { adminFinancialMetrics } from '@/lib/admin/data/financials'
 import { adminPaymentOperationsMetrics } from '@/lib/admin/data/payments'
 import { adminViolationMetrics } from '@/lib/admin/data/violations'
+import { countBookableVehicles } from '@/lib/admin/fleet-bookable'
 import { countPendingKycCustomers } from '@/lib/admin/kyc-metrics'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logPostgrestError } from '@/lib/errors/safe-user-message'
@@ -144,13 +145,13 @@ async function fetchLiveMetrics(admin: ReturnType<typeof createAdminClient>, tod
       .select('id', { count: 'exact', head: true })
       .eq('booking_status', 'active')
       .lt('return_date', today),
-    admin
-      .from('vehicles')
-      .select('id', { count: 'exact', head: true })
-      .is('deleted_at', null)
-      .eq('availability_status', 'available')
-      .or('available.is.null,available.eq.true'),
+    admin.from('vehicles').select('available').is('deleted_at', null),
   ])
+
+  const vehicleRows = (availableVehiclesRes.data ?? []) as { available: boolean | null }[]
+  if (availableVehiclesRes.error) {
+    logPostgrestError('[commandCenter] availableVehicles', availableVehiclesRes.error)
+  }
 
   return {
     activeTrips: readCount('activeTrips', activeTripsRes),
@@ -158,13 +159,13 @@ async function fetchLiveMetrics(admin: ReturnType<typeof createAdminClient>, tod
     pendingKyc: pendingKycCount,
     pendingPayments: readCount('pendingPayments', pendingPaymentsRes),
     overdueReturns: readCount('overdueReturns', overdueReturnsRes),
-    availableVehicles: readCount('availableVehicles', availableVehiclesRes),
+    availableVehicles: countBookableVehicles(vehicleRows),
   }
 }
 
 async function fetchFleetStatus(admin: ReturnType<typeof createAdminClient>, today: string): Promise<CommandCenterFleetStatus> {
   const [vehiclesRes, bookingsRes] = await Promise.all([
-    admin.from('vehicles').select('id, availability_status').is('deleted_at', null),
+    admin.from('vehicles').select('id, available, availability_status').is('deleted_at', null),
     admin
       .from('bookings')
       .select('vehicle_id')
@@ -177,8 +178,8 @@ async function fetchFleetStatus(admin: ReturnType<typeof createAdminClient>, tod
   if (vehiclesRes.error) logPostgrestError('[commandCenter] fleet vehicles', vehiclesRes.error)
   if (bookingsRes.error) logPostgrestError('[commandCenter] fleet bookings', bookingsRes.error)
 
-  const rows = (vehiclesRes.data ?? []) as { id: string; availability_status: string }[]
-  let available = 0
+  const rows = (vehiclesRes.data ?? []) as { id: string; available: boolean | null; availability_status: string }[]
+  const available = countBookableVehicles(rows)
   let maintenance = 0
   let serviceMode = 0
   let accidentHold = 0
@@ -188,7 +189,6 @@ async function fetchFleetStatus(admin: ReturnType<typeof createAdminClient>, tod
     if (s === 'maintenance') maintenance += 1
     else if (s === 'service') serviceMode += 1
     else if (s === 'accident_hold') accidentHold += 1
-    else if (s === 'available') available += 1
   }
 
   const onTripIds = new Set(
