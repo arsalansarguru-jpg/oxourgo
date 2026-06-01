@@ -35,6 +35,14 @@ function idGate(latest: Map<string, KycDocMinimal>): 'ok' | 'rejected' | 'pendin
   return 'pending'
 }
 
+function allUploadedLatestApproved(latest: Map<string, KycDocMinimal>): boolean {
+  if (latest.size === 0) return false
+  for (const doc of latest.values()) {
+    if (doc.status !== 'approved') return false
+  }
+  return true
+}
+
 export function computeKycLifecycleFromDocuments(docs: KycDocMinimal[]): KycLifecycleStatus {
   if (!docs.length) return 'not_started'
 
@@ -43,7 +51,10 @@ export function computeKycLifecycleFromDocuments(docs: KycDocMinimal[]): KycLife
   const selfie = latest.get('selfie')
   const idg = idGate(latest)
 
-  if (license?.status === 'approved' && selfie?.status === 'approved' && idg === 'ok') return 'approved'
+  if (license?.status === 'approved' && idg === 'ok') {
+    if (selfie?.status === 'approved') return 'approved'
+    if (!selfie && allUploadedLatestApproved(latest)) return 'approved'
+  }
 
   if (idg === 'missing') return 'pending'
 

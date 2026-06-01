@@ -2,9 +2,12 @@ import { AdminSupportDashboard } from '@/components/admin/support/admin-support-
 import { adminListSupportConversations } from '@/lib/admin/data/support-conversations'
 import { adminListSupportTickets, adminSupportTicketMetrics } from '@/lib/admin/data/support-tickets'
 import { adminListCustomers } from '@/lib/admin/data/customers'
+import { adminPageMetadata } from '@/lib/admin/page-metadata'
 import { requireAdminPageAccess } from '@/lib/auth/guards'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata = adminPageMetadata('Support Tickets')
 
 export default async function AdminSupportPage() {
   await requireAdminPageAccess('/admin/support')

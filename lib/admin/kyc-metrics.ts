@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { isInternalTestAccount } from '@/lib/admin/test-accounts'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { logPostgrestError } from '@/lib/errors/safe-user-message'
 import { computeKycLifecycleFromDocuments } from '@/lib/kyc/compute-kyc-profile-status'
@@ -32,12 +33,20 @@ export async function countPendingKycCustomers(): Promise<number> {
     })
   }
 
-  let pendingCount = 0
-  for (const userDocs of docsByUser.values()) {
+  const pendingUserIds: string[] = []
+  for (const [userId, userDocs] of docsByUser) {
     const lifecycle = computeKycLifecycleFromDocuments(userDocs)
-    if (lifecycle === 'pending') {
-      pendingCount++
-    }
+    if (lifecycle === 'pending') pendingUserIds.push(userId)
+  }
+
+  if (pendingUserIds.length === 0) return 0
+
+  let pendingCount = 0
+  for (const userId of pendingUserIds) {
+    const { data: authUser } = await admin.auth.admin.getUserById(userId)
+    const email = authUser?.user?.email ?? null
+    if (isInternalTestAccount({ email, displayName: null })) continue
+    pendingCount++
   }
 
   return pendingCount

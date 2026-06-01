@@ -7,6 +7,7 @@ import { RoleBadge } from '@/components/auth/role-badge'
 import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { PermissionGuard } from '@/components/auth/permission-guard'
+import { AdminConfirmDialog } from '@/components/admin/operations/admin-confirm-dialog'
 import { Button } from '@/components/ui/Button'
 import { Select } from '@/components/ui/Select'
 import {
@@ -27,6 +28,7 @@ export function UsersManagementClient({ users, activity, actorRole, actorId }: U
   const [rows, setRows] = useState(users)
   const [message, setMessage] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
+  const [revokeTarget, setRevokeTarget] = useState<{ id: string; email: string | null } | null>(null)
 
   const roleOptions = useMemo(
     () =>
@@ -57,6 +59,7 @@ export function UsersManagementClient({ users, activity, actorRole, actorId }: U
     startTransition(async () => {
       const result = await adminRefreshUserSessionsAction(userId)
       setMessage(result.ok ? 'Sessions revoked for that user.' : result.message)
+      setRevokeTarget(null)
     })
   }
 
@@ -75,6 +78,22 @@ export function UsersManagementClient({ users, activity, actorRole, actorId }: U
           </p>
         ) : null}
 
+        <AdminConfirmDialog
+          open={revokeTarget != null}
+          onClose={() => setRevokeTarget(null)}
+          pending={pending}
+          title="Revoke staff sessions?"
+          description={
+            revokeTarget
+              ? `This signs ${revokeTarget.email ?? 'this user'} out on every device immediately. They must sign in again to access the admin console.`
+              : ''
+          }
+          confirmLabel="Revoke sessions"
+          onConfirm={() => {
+            if (revokeTarget) onRevokeSessions(revokeTarget.id)
+          }}
+        />
+
         <AdminCard className="overflow-hidden">
           <AdminCardContent className="p-0">
             <div className="overflow-x-auto scroll-touch">
@@ -85,7 +104,7 @@ export function UsersManagementClient({ users, activity, actorRole, actorId }: U
                     <th className="px-4 py-3.5 font-medium">Role</th>
                     <th className="px-4 py-3.5 font-medium">Last sign-in</th>
                     <th className="px-4 py-3.5 font-medium">Assign role</th>
-                    <th className="px-4 py-3.5 font-medium min-w-[12rem] text-right" />
+                    <th className="px-4 py-3.5 font-medium min-w-[9.5rem] text-right">Sessions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -113,17 +132,19 @@ export function UsersManagementClient({ users, activity, actorRole, actorId }: U
                           ))}
                         </Select>
                       </td>
-                      <td className="px-4 py-3.5 text-right whitespace-nowrap min-w-[12rem]">
+                      <td className="px-4 py-3.5 text-right whitespace-nowrap min-w-[9.5rem]">
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
                           disabled={pending}
-                          onClick={() => onRevokeSessions(u.id)}
-                          className="whitespace-nowrap"
+                          title="Revoke all sessions for this staff member"
+                          onClick={() => setRevokeTarget({ id: u.id, email: u.email })}
+                          className="whitespace-nowrap gap-1.5"
                         >
-                          <RefreshCw className="h-4 w-4" aria-hidden />
-                          Revoke sessions
+                          <RefreshCw className="h-4 w-4 shrink-0" aria-hidden />
+                          <span className="hidden sm:inline">Revoke</span>
+                          <span className="sm:hidden">Revoke</span>
                         </Button>
                       </td>
                     </tr>

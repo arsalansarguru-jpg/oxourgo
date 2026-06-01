@@ -1,8 +1,11 @@
 import { UsersManagementClient } from '@/features/admin/users-management-client'
 import { listRecentAdminAuditForAdmin, listStaffUsersForAdmin } from '@/lib/admin/data/staff-users'
+import { adminPageMetadata } from '@/lib/admin/page-metadata'
 import { requireAdminPageAccess } from '@/lib/auth/guards'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata = adminPageMetadata('Staff Management')
 
 export default async function AdminUsersPage() {
   const summary = await requireAdminPageAccess('/admin/users')

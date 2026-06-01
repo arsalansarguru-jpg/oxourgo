@@ -7,8 +7,11 @@ import { AdminStatusPill } from '@/components/admin/admin-status-pill'
 import { Button } from '@/components/ui/Button'
 import type { AdminKycListFilter } from '@/lib/admin/data/kyc'
 import { adminListKycUserSummaries } from '@/lib/admin/data/kyc'
+import { adminPageMetadata } from '@/lib/admin/page-metadata'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata = adminPageMetadata('KYC Verification')
 
 const FILTERS: AdminKycListFilter[] = ['all', 'pending', 'approved', 'rejected', 'resubmission_required']
 
@@ -48,7 +51,7 @@ export default async function AdminKycPage({ searchParams }: { searchParams: Pro
                 </p>
                 <p className="truncate text-sm text-muted">{row.user_email ?? row.user_id}</p>
                 <div className="flex flex-wrap items-center gap-2 pt-1">
-                  <AdminStatusPill value={row.kyc_status} />
+                  <AdminStatusPill value={row.kyc_status} kycProfile />
                 </div>
                 <p className="text-xs text-muted">
                   {row.kyc_submitted_at ? `Submitted ${new Date(row.kyc_submitted_at).toLocaleString()}` : 'No submit timestamp'}

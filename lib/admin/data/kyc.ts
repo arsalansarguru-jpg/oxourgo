@@ -1,7 +1,9 @@
 import 'server-only'
 
 import { logAdminQueryResult } from '@/lib/admin/debug-query'
+import { isInternalTestAccount } from '@/lib/admin/test-accounts'
 import { resolveCustomerDisplayName } from '@/lib/customer/display-name'
+import { syncProfileKycFromDocuments } from '@/lib/kyc/sync-profile-kyc'
 import { KYC_IN_REVIEW_DOCUMENT_STATUSES } from '@/lib/admin/status-enums'
 import {
   computeKycLifecycleFromDocuments,
@@ -111,7 +113,8 @@ export async function adminListKycUserSummaries(filter: AdminKycListFilter): Pro
   const candidateUserIds: string[] = []
   for (const [userId, userDocs] of docsByUser) {
     const lifecycle = computeKycLifecycleFromDocuments(userDocs)
-    if (lifecycleMatchesFilter(lifecycle, filter)) candidateUserIds.push(userId)
+    if (!lifecycleMatchesFilter(lifecycle, filter)) continue
+    candidateUserIds.push(userId)
   }
 
   if (!candidateUserIds.length) {
@@ -138,23 +141,27 @@ export async function adminListKycUserSummaries(filter: AdminKycListFilter): Pro
 
     const profile = profileByUser.get(userId)
     const { data: authUser } = await admin.auth.admin.getUserById(userId)
+    const email = authUser?.user?.email ?? null
     const meta = authUser?.user?.user_metadata as {
       full_name?: string
       name?: string
       display_name?: string
     } | undefined
+    const resolvedName = resolveCustomerDisplayName({
+      userId,
+      fullName: profile?.full_name ?? null,
+      email,
+      phone: profile?.phone ?? null,
+      authMetadata: meta ?? null,
+    })
+    if (isInternalTestAccount({ email, displayName: resolvedName })) continue
+
     const docUpdated = latestUpdated.get(userId) ?? profile?.updated_at ?? new Date().toISOString()
 
     out.push({
       user_id: userId,
-      user_email: authUser?.user?.email ?? null,
-      full_name: resolveCustomerDisplayName({
-        userId,
-        fullName: profile?.full_name ?? null,
-        email: authUser?.user?.email ?? null,
-        phone: profile?.phone ?? null,
-        authMetadata: meta ?? null,
-      }),
+      user_email: email,
+      full_name: resolvedName,
       phone: profile?.phone ?? null,
       kyc_status: lifecycle,
       kyc_submitted_at: profile?.kyc_submitted_at ?? userDocs[0]?.created_at ?? null,
@@ -179,6 +186,8 @@ export async function adminListKycUserSummaries(filter: AdminKycListFilter): Pro
 
 export async function adminGetKycUserReviewBundle(userId: string): Promise<AdminKycReviewBundle | null> {
   const admin = createAdminClient()
+
+  await syncProfileKycFromDocuments(admin, userId)
 
   const [{ data: profile, error: pErr }, { data: docs, error: dErr }] = await Promise.all([
     admin
@@ -233,16 +242,9 @@ export async function adminGetKycUserReviewBundle(userId: string): Promise<Admin
 
   const withEmails = await attachUserEmails(docs ?? [])
 
-  const reviewerIds = [...new Set(withEmails.map((d) => d.reviewed_by).filter((x): x is string => Boolean(x)))]
-  const reviewerMap = new Map<string, string | null>()
-  for (const rid of reviewerIds) {
-    const { data: rev } = await admin.auth.admin.getUserById(rid)
-    reviewerMap.set(rid, rev?.user?.email ?? null)
-  }
-
   const enriched: AdminKycReviewDocumentRow[] = withEmails.map((d) => ({
     ...d,
-    reviewer_email: d.reviewed_by ? reviewerMap.get(d.reviewed_by) ?? null : null,
+    reviewer_email: null,
   }))
 
   return { profile: summary, documents: enriched }

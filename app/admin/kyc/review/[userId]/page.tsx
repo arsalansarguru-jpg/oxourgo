@@ -5,8 +5,11 @@ import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { AdminKycReviewView } from '@/features/admin/kyc/admin-kyc-review-view'
 import { adminGetKycUserReviewBundle } from '@/lib/admin/data/kyc'
 import { Button } from '@/components/ui/Button'
+import { adminPageMetadata } from '@/lib/admin/page-metadata'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata = adminPageMetadata('KYC dossier')
 
 export default async function AdminKycReviewPage({ params }: { params: Promise<{ userId: string }> }) {
   const { userId } = await params

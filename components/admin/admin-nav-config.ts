@@ -82,6 +82,7 @@ export function adminTopBarTitle(pathname: string): string {
   if (pathname.startsWith('/admin/whatsapp')) return 'WhatsApp'
   if (pathname.startsWith('/admin/customers/')) return 'Customer detail'
   if (pathname.startsWith('/admin/customers')) return 'Customers'
+  if (pathname.startsWith('/admin/kyc/review/')) return 'KYC dossier'
   if (pathname.startsWith('/admin/kyc')) return 'KYC Verification'
   if (pathname.startsWith('/admin/payments')) return 'Payments'
   if (pathname.startsWith('/admin/financials')) return 'Deposits & Penalties'

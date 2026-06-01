@@ -1,24 +1,11 @@
-import Link from 'next/link'
-
+import { AdminCustomersDirectory } from '@/components/admin/customers/admin-customers-directory'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
-import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 import { adminListCustomers } from '@/lib/admin/data/customers'
-import { AdminStatusPill } from '@/components/admin/admin-status-pill'
+import { adminPageMetadata } from '@/lib/admin/page-metadata'
 
 export const dynamic = 'force-dynamic'
 
-function isInvalidName(name: string): boolean {
-  const cleanName = name.trim().toLowerCase()
-  if (!cleanName) return true
-  const blacklist = [
-    'engineering', 'info', 'ltd', 'pvt', 'inc', 'co', 'corp', 'limited', 'solutions',
-    'technologies', 'services', 'enterprises', 'industries', 'group', 'agency', 'consulting'
-  ]
-  if (blacklist.some(token => cleanName.includes(token))) return true
-  const words = cleanName.split(/\s+/).filter(Boolean)
-  if (words.length < 2) return true
-  return false
-}
+export const metadata = adminPageMetadata('Customers')
 
 export default async function AdminCustomersPage() {
   let rows: Awaited<ReturnType<typeof adminListCustomers>> = []
@@ -36,71 +23,7 @@ export default async function AdminCustomersPage() {
         description="Auth-backed directory with profile tier, heuristic risk from cancellations, and admin-editable fields."
       />
 
-      <AdminCard className="overflow-hidden">
-        <AdminCardContent className="p-0">
-          <div className="overflow-x-auto scroll-touch">
-            <table className="w-full min-w-[800px] text-left text-sm">
-              <thead className="admin-table-head">
-                <tr>
-                  <th className="px-4 py-3.5 font-medium">Name</th>
-                  <th className="px-4 py-3.5 font-medium">Email</th>
-                  <th className="px-4 py-3.5 font-medium">Tier</th>
-                  <th className="px-4 py-3.5 font-medium">Risk</th>
-                  <th className="px-4 py-3.5 font-medium">Bookings</th>
-                  <th className="px-4 py-3.5 font-medium" />
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((r) => {
-                  const tier = r.profile?.verification_tier ?? 'basic'
-                  const stored = r.profile?.risk_score ?? 0
-                  const displayRisk = Math.max(stored, r.heuristicRisk)
-                  const nameFlag = isInvalidName(r.displayName)
-                  return (
-                    <tr key={r.userId} className="admin-table-row">
-                      <td className="px-4 py-3 font-medium text-soft">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span>{r.displayName}</span>
-                          {nameFlag ? (
-                            <span className="inline-flex items-center rounded bg-rose-500/10 px-1.5 py-0.5 text-[9px] font-semibold text-rose-400 border border-rose-500/20 shrink-0">
-                              Non-Person / Company
-                            </span>
-                          ) : null}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-muted">{r.email ?? '—'}</td>
-                      <td className="px-4 py-3">
-                        <AdminStatusPill value={tier} />
-                      </td>
-                      <td className="px-4 py-3 tabular-nums text-muted">
-                        {displayRisk}
-                        <span className="ml-2 text-[10px] uppercase tracking-wide text-muted/80">
-                          (max stored {stored}, heuristic {r.heuristicRisk})
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-muted">
-                        {r.bookingCount}
-                        {r.cancelledCount ? ` · ${r.cancelledCount} cancelled` : ''}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <Link
-                          href={`/admin/customers/${r.userId}`}
-                          className="font-medium text-electric transition-colors hover:text-electric/85"
-                        >
-                          Open
-                        </Link>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-          {rows.length === 0 ? (
-            <p className="p-6 text-sm text-muted">No customers in this view. Adjust filters or try again shortly.</p>
-          ) : null}
-        </AdminCardContent>
-      </AdminCard>
+      <AdminCustomersDirectory rows={rows} />
     </div>
   )
 }

@@ -44,7 +44,7 @@ async function fetchExtendedKpis(
     maintenanceRes,
     damageRes,
   ] = await Promise.all([
-    admin.from('bookings').select('id', { count: 'exact', head: true }),
+    admin.from('bookings').select('id', { count: 'exact', head: true }).is('deleted_at', null),
     admin
       .from('vehicles')
       .select('id', { count: 'exact', head: true })

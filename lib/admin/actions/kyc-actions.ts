@@ -7,10 +7,11 @@ import { writeAdminAudit } from '@/lib/admin/audit'
 import { AUDIT_ACTIONS, AUDIT_ENTITY_TYPES } from '@/lib/audit/actions'
 import { requirePermissionForAdminAction } from '@/lib/auth/admin-action-auth'
 import { onKycDecision } from '@/lib/notifications/events'
-import { KYC_STORAGE_BUCKET } from '@/lib/kyc/constants'
+import { createKycSignedUrl } from '@/lib/kyc/signed-url'
 import { syncProfileKycFromDocuments } from '@/lib/kyc/sync-profile-kyc'
+import { kycActionDbFailed } from '@/lib/kyc/upload-errors'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { adminActionDbFailed, logUnknownError, SAFE_USER_MESSAGE } from '@/lib/errors/safe-user-message'
+import { adminActionDbFailed as adminDbFailed, logUnknownError } from '@/lib/errors/safe-user-message'
 import { runInstrumentedServerAction } from '@/lib/monitoring/instrument-server-action'
 
 function nowIso() {
@@ -73,7 +74,7 @@ export async function adminSetKycDocumentStatusAction(input: AdminKycSetStatusIn
       })
       .eq('id', input.documentId)
 
-    if (error) return adminActionDbFailed('adminSetKycDocumentStatusAction', error)
+    if (error) return adminDbFailed('adminSetKycDocumentStatusAction', error)
 
     const syncRes = await syncProfileKycFromDocuments(admin, doc.user_id)
     if (!syncRes.ok) {
@@ -132,29 +133,24 @@ export async function adminGetKycSignedUrlAction(
     if (!guard.ok) return guard
     const admin = createAdminClient()
 
-    const { data: doc, error } = await admin.from('kyc_documents').select('storage_path').eq('id', documentId).single()
-    if (error || !doc?.storage_path) return { ok: false, message: 'Document not found.' }
+    const { data: doc, error } = await admin
+      .from('kyc_documents')
+      .select('storage_path, content_type')
+      .eq('id', documentId)
+      .single()
+
+    if (error) return kycActionDbFailed('adminGetKycSignedUrlAction:select', error)
+    if (!doc?.storage_path) return { ok: false, message: 'Document not found.' }
 
     const raw = ttlSeconds ?? SIGNED_URL_DEFAULT
     const expiresIn = Math.min(SIGNED_URL_MAX, Math.max(SIGNED_URL_MIN, Number.isFinite(raw) ? raw : SIGNED_URL_DEFAULT))
 
-    const { data: signed, error: signErr } = await admin.storage
-      .from(KYC_STORAGE_BUCKET)
-      .createSignedUrl(doc.storage_path, expiresIn)
-
-    if (signErr || !signed?.signedUrl) {
-      if (signErr) {
-        console.error('[adminGetKycSignedUrlAction] signed URL failed', {
-          bucket: KYC_STORAGE_BUCKET,
-          storagePath: doc.storage_path,
-          message: signErr.message,
-          statusCode: signErr.statusCode,
-        })
-        logUnknownError('adminGetKycSignedUrlAction:storage', signErr)
-      }
-      return { ok: false, message: SAFE_USER_MESSAGE.generic }
+    const signed = await createKycSignedUrl(admin, doc.storage_path, expiresIn)
+    if (!signed.ok) {
+      logUnknownError('adminGetKycSignedUrlAction:storage', new Error(signed.message))
+      return { ok: false, message: signed.message }
     }
 
-    return { ok: true, url: signed.signedUrl, expiresIn }
+    return { ok: true, url: signed.url, expiresIn }
   })
 }

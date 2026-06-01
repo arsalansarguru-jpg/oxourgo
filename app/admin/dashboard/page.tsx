@@ -3,10 +3,13 @@ import { Suspense } from 'react'
 import { AdminCommandCenterLoader } from '@/components/admin/dashboard/admin-command-center-loader'
 import { AdminCommandCenterSkeleton } from '@/components/admin/dashboard/admin-command-center-skeleton'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
+import { adminPageMetadata } from '@/lib/admin/page-metadata'
 import { requireAdminPageAccess } from '@/lib/auth/guards'
 import { isStaffRole } from '@/lib/auth/permissions'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata = adminPageMetadata('Dashboard')
 
 export default async function AdminDashboardPage() {
   const summary = await requireAdminPageAccess('/admin/dashboard')

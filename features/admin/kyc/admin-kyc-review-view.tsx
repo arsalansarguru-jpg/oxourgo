@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation'
 import { Download, Loader2, RefreshCw, ZoomIn, ZoomOut } from 'lucide-react'
 
 import type { AdminKycReviewBundle, AdminKycReviewDocumentRow } from '@/lib/admin/data/kyc'
+import { AdminConfirmDialog } from '@/components/admin/operations/admin-confirm-dialog'
 import { adminGetKycSignedUrlAction, adminSetKycDocumentStatusAction } from '@/lib/admin/actions/kyc-actions'
 import { pickLatestDocPerType, type KycDocMinimal } from '@/lib/kyc/compute-kyc-profile-status'
 import { formatKycDocumentType } from '@/lib/kyc/doc-label'
+import { isHeicKycContentType, kycPreviewNotSupportedMessage } from '@/lib/kyc/preview'
 import { AdminStatusPill } from '@/components/admin/admin-status-pill'
 import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 import { Button } from '@/components/ui/Button'
@@ -27,7 +29,7 @@ const SLOTS: { type: string; title: string }[] = [
 function reviewerLine(doc: AdminKycReviewDocumentRow | undefined) {
   if (!doc?.reviewed_at) return null
   const when = new Date(doc.reviewed_at).toLocaleString()
-  const who = doc.reviewer_email ?? (doc.reviewed_by ? `Staff ${doc.reviewed_by.slice(0, 8)}…` : 'Staff')
+  const who = doc.reviewed_by ? `Reviewer ${doc.reviewed_by.slice(0, 8)}…` : 'Staff reviewer'
   return `${who} · ${when}`
 }
 
@@ -65,6 +67,8 @@ function DocPreview({
   }, [load])
 
   const isPdf = (contentType ?? '').includes('pdf')
+  const heic = isHeicKycContentType(contentType)
+  const previewBlocked = heic ? kycPreviewNotSupportedMessage(contentType) : null
 
   return (
     <div className="space-y-3">
@@ -75,7 +79,8 @@ function DocPreview({
             variant="ghost"
             size="sm"
             className="h-8 px-2"
-            disabled={zoom <= 1 || !url || isPdf}
+            disabled={zoom <= 1 || !url || isPdf || Boolean(previewBlocked)}
+            title={zoom <= 1 ? 'Already at minimum zoom (100%)' : 'Zoom out'}
             onClick={() => setZoom((z) => Math.max(1, +(z - 0.25).toFixed(2)))}
             aria-label="Zoom out"
           >
@@ -134,11 +139,13 @@ function DocPreview({
               Try again
             </Button>
           </div>
-        ) : url && isPdf ? (
+        ) : url && (isPdf || previewBlocked) ? (
           <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 p-6 text-center">
-            <p className="max-w-sm text-sm text-muted">PDF documents open best in a new tab with the signed link.</p>
+            <p className="max-w-sm text-sm text-muted">
+              {previewBlocked ?? 'PDF documents open best in a new tab with the signed link.'}
+            </p>
             <Button type="button" variant="secondary" onClick={() => window.open(url, '_blank', 'noopener,noreferrer')}>
-              Open PDF
+              {isPdf ? 'Open PDF' : 'Open / download'}
             </Button>
           </div>
         ) : url ? (
@@ -150,6 +157,10 @@ function DocPreview({
               className="max-w-none select-none rounded-lg shadow-2xl ring-1 ring-white/10"
               style={{ transform: `scale(${zoom})`, transformOrigin: 'center center' }}
               draggable={false}
+              onError={() => {
+                setErr('Preview could not render this file. Use Open / download to view the original.')
+                setUrl(null)
+              }}
             />
           </div>
         ) : null}
@@ -161,6 +172,12 @@ function DocPreview({
   )
 }
 
+type PendingAction =
+  | { kind: 'approve' }
+  | { kind: 'reject'; reason: string; note: string | null }
+  | { kind: 'resubmit'; reason: string; note: string | null }
+  | { kind: 'reviewing' }
+
 function DocReviewPanel({
   doc,
   title,
@@ -171,6 +188,48 @@ function DocReviewPanel({
   const router = useRouter()
   const [msg, setMsg] = useState<string | null>(null)
   const [pending, start] = useTransition()
+  const [confirm, setConfirm] = useState<PendingAction | null>(null)
+  const panelId = doc?.id ?? title.replace(/\s+/g, '-').toLowerCase()
+
+  const runDecision = (action: PendingAction) => {
+    if (!doc) return
+    setMsg(null)
+    start(async () => {
+      const payload =
+        action.kind === 'approve'
+          ? {
+              documentId: doc.id,
+              status: 'approved' as const,
+              reviewer_note: null,
+              rejection_reason: null,
+            }
+          : action.kind === 'reviewing'
+            ? {
+                documentId: doc.id,
+                status: 'reviewing' as const,
+                reviewer_note: null,
+                rejection_reason: null,
+              }
+            : action.kind === 'reject'
+              ? {
+                  documentId: doc.id,
+                  status: 'rejected' as const,
+                  rejection_reason: action.reason,
+                  reviewer_note: action.note,
+                }
+              : {
+                  documentId: doc.id,
+                  status: 'resubmission_required' as const,
+                  rejection_reason: action.reason,
+                  reviewer_note: action.note,
+                }
+
+      const r = await adminSetKycDocumentStatusAction(payload)
+      if (!r.ok) setMsg(r.message)
+      setConfirm(null)
+      router.refresh()
+    })
+  }
 
   if (!doc) {
     return (
@@ -210,7 +269,7 @@ function DocReviewPanel({
               </p>
             ) : null}
           </div>
-          <AdminStatusPill value={doc.status} />
+          <AdminStatusPill value={doc.status} kycDocument />
         </div>
 
         <DocPreview documentId={doc.id} contentType={doc.content_type} />
@@ -221,19 +280,7 @@ function DocReviewPanel({
             variant="ghost"
             size="sm"
             disabled={pending}
-            onClick={() => {
-              setMsg(null)
-              start(async () => {
-                const r = await adminSetKycDocumentStatusAction({
-                  documentId: doc.id,
-                  status: 'reviewing',
-                  reviewer_note: null,
-                  rejection_reason: null,
-                })
-                if (!r.ok) setMsg(r.message)
-                router.refresh()
-              })
-            }}
+            onClick={() => setConfirm({ kind: 'reviewing' })}
           >
             Mark reviewing
           </Button>
@@ -242,19 +289,7 @@ function DocReviewPanel({
             variant="secondary"
             size="sm"
             disabled={pending}
-            onClick={() => {
-              setMsg(null)
-              start(async () => {
-                const r = await adminSetKycDocumentStatusAction({
-                  documentId: doc.id,
-                  status: 'approved',
-                  reviewer_note: null,
-                  rejection_reason: null,
-                })
-                if (!r.ok) setMsg(r.message)
-                router.refresh()
-              })
-            }}
+            onClick={() => setConfirm({ kind: 'approve' })}
           >
             Approve
           </Button>
@@ -266,18 +301,9 @@ function DocReviewPanel({
             e.preventDefault()
             const fd = new FormData(e.currentTarget)
             const reason = String(fd.get('reject_reason') ?? '').trim()
-            const note = String(fd.get('reject_note') ?? '').trim() || null
-            setMsg(null)
-            start(async () => {
-              const r = await adminSetKycDocumentStatusAction({
-                documentId: doc.id,
-                status: 'rejected',
-                rejection_reason: reason,
-                reviewer_note: note,
-              })
-              if (!r.ok) setMsg(r.message)
-              router.refresh()
-            })
+            const note = String(fd.get(`reject_note_${panelId}`) ?? '').trim() || null
+            if (!reason) return
+            setConfirm({ kind: 'reject', reason, note })
           }}
         >
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Reject</p>
@@ -288,7 +314,12 @@ function DocReviewPanel({
             placeholder="Reason shown to the customer (required)"
             className="min-h-[72px] w-full rounded-xl border border-stroke-strong bg-matte/[0.55] px-3 py-2 text-sm text-soft placeholder:text-muted/80 focus-visible:border-electric/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/22"
           />
-          <Input name="reject_note" placeholder="Internal note (optional)" className="min-h-10" />
+          <Input
+            id={`reject_note_${panelId}`}
+            name={`reject_note_${panelId}`}
+            placeholder="Internal note (optional)"
+            className="min-h-10"
+          />
           <Button type="submit" variant="danger" size="sm" className="w-fit" disabled={pending}>
             Reject document
           </Button>
@@ -300,18 +331,9 @@ function DocReviewPanel({
             e.preventDefault()
             const fd = new FormData(e.currentTarget)
             const reason = String(fd.get('resubmit_reason') ?? '').trim()
-            const note = String(fd.get('resubmit_note') ?? '').trim() || null
-            setMsg(null)
-            start(async () => {
-              const r = await adminSetKycDocumentStatusAction({
-                documentId: doc.id,
-                status: 'resubmission_required',
-                rejection_reason: reason,
-                reviewer_note: note,
-              })
-              if (!r.ok) setMsg(r.message)
-              router.refresh()
-            })
+            const note = String(fd.get(`resubmit_note_${panelId}`) ?? '').trim() || null
+            if (!reason) return
+            setConfirm({ kind: 'resubmit', reason, note })
           }}
         >
           <p className="text-xs font-semibold uppercase tracking-wide text-muted">Request resubmission</p>
@@ -322,11 +344,59 @@ function DocReviewPanel({
             placeholder="What should they fix? (required, customer-visible)"
             className="min-h-[72px] w-full rounded-xl border border-stroke-strong bg-matte/[0.55] px-3 py-2 text-sm text-soft placeholder:text-muted/80 focus-visible:border-electric/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-electric/22"
           />
-          <Input name="resubmit_note" placeholder="Internal note (optional)" className="min-h-10" />
+          <Input
+            id={`resubmit_note_${panelId}`}
+            name={`resubmit_note_${panelId}`}
+            placeholder="Internal note (optional)"
+            className="min-h-10"
+          />
           <Button type="submit" variant="secondary" size="sm" className="w-fit" disabled={pending}>
             Request resubmission
           </Button>
         </form>
+
+        <AdminConfirmDialog
+          open={confirm != null}
+          onClose={() => setConfirm(null)}
+          pending={pending}
+          variant={confirm?.kind === 'approve' || confirm?.kind === 'reviewing' ? 'primary' : 'danger'}
+          title={
+            confirm?.kind === 'approve'
+              ? 'Approve this document?'
+              : confirm?.kind === 'reviewing'
+                ? 'Mark as reviewing?'
+                : confirm?.kind === 'reject'
+                  ? 'Reject this document?'
+                  : confirm?.kind === 'resubmit'
+                    ? 'Request resubmission?'
+                    : 'Confirm action'
+          }
+          description={
+            confirm?.kind === 'approve'
+              ? `This will approve ${title} and update the customer’s KYC status.`
+              : confirm?.kind === 'reviewing'
+                ? `Mark ${title} as in review without changing the customer-visible outcome.`
+                : confirm?.kind === 'reject'
+                  ? 'The customer will see your rejection reason. This cannot be undone from the admin UI.'
+                  : confirm?.kind === 'resubmit'
+                    ? 'The customer will be asked to upload again with your note.'
+                    : ''
+          }
+          confirmLabel={
+            confirm?.kind === 'approve'
+              ? 'Approve'
+              : confirm?.kind === 'reviewing'
+                ? 'Mark reviewing'
+                : confirm?.kind === 'reject'
+                  ? 'Reject'
+                  : confirm?.kind === 'resubmit'
+                    ? 'Request resubmission'
+                    : 'Confirm'
+          }
+          onConfirm={() => {
+            if (confirm) runDecision(confirm)
+          }}
+        />
 
         {msg ? <p className="text-xs text-red-300">{msg}</p> : null}
       </AdminCardContent>
@@ -353,7 +423,7 @@ export function AdminKycReviewView({ bundle }: { bundle: AdminKycReviewBundle })
             </div>
           </div>
           <div className="flex flex-col items-start gap-2 sm:items-end">
-            <AdminStatusPill value={profile.kyc_status} />
+            <AdminStatusPill value={profile.kyc_status} kycProfile />
             <p className="text-[11px] text-muted">Aggregate status syncs from the latest vault rows.</p>
           </div>
         </AdminCardContent>
@@ -385,7 +455,7 @@ export function AdminKycReviewView({ bundle }: { bundle: AdminKycReviewBundle })
                       {d.reviewed_at ? ` · Reviewed ${new Date(d.reviewed_at).toLocaleString()}` : ''}
                     </p>
                   </div>
-                  <AdminStatusPill value={d.status} />
+                  <AdminStatusPill value={d.status} kycDocument />
                 </div>
               ))
             )}

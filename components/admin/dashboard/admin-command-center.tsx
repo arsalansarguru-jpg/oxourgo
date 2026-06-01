@@ -208,7 +208,10 @@ export function AdminCommandCenter({ data }: { data: CommandCenterBundle }) {
     data
 
   const router = useRouter()
-  const [countdown, setCountdown] = useState(30)
+  const REFRESH_KEY = 'oxour-admin-pulse-deadline'
+  const REFRESH_INTERVAL_SEC = 30
+
+  const [countdown, setCountdown] = useState(REFRESH_INTERVAL_SEC)
   const [refreshed, setRefreshed] = useState<string>('')
 
   useEffect(() => {
@@ -220,21 +223,50 @@ export function AdminCommandCenter({ data }: { data: CommandCenterBundle }) {
           second: '2-digit',
         }),
       )
-      setCountdown(30)
     } catch {
       setRefreshed('')
     }
+
+    const now = Date.now()
+    let deadline = now + REFRESH_INTERVAL_SEC * 1000
+    try {
+      const stored = sessionStorage.getItem(REFRESH_KEY)
+      const parsed = stored ? Number(stored) : NaN
+      if (Number.isFinite(parsed) && parsed > now) {
+        deadline = parsed
+      } else {
+        sessionStorage.setItem(REFRESH_KEY, String(deadline))
+      }
+    } catch {
+      /* private mode */
+    }
+    setCountdown(Math.max(1, Math.ceil((deadline - now) / 1000)))
   }, [loadedAt])
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCountdown((prev) => {
-        if (prev <= 1) {
-          router.refresh()
-          return 30
+      let deadline = Date.now() + REFRESH_INTERVAL_SEC * 1000
+      try {
+        const stored = sessionStorage.getItem(REFRESH_KEY)
+        const parsed = stored ? Number(stored) : NaN
+        if (Number.isFinite(parsed)) deadline = parsed
+      } catch {
+        /* ignore */
+      }
+
+      const remaining = Math.ceil((deadline - Date.now()) / 1000)
+      if (remaining <= 0) {
+        const next = Date.now() + REFRESH_INTERVAL_SEC * 1000
+        try {
+          sessionStorage.setItem(REFRESH_KEY, String(next))
+        } catch {
+          /* ignore */
         }
-        return prev - 1
-      })
+        router.refresh()
+        setCountdown(REFRESH_INTERVAL_SEC)
+        return
+      }
+      setCountdown(remaining)
     }, 1000)
     return () => clearInterval(timer)
   }, [router])

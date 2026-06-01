@@ -3,9 +3,12 @@ import Link from 'next/link'
 import { AdminBookingsManager } from '@/components/admin/bookings/admin-bookings-manager'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { adminListBookingsPage } from '@/lib/admin/data/bookings'
+import { adminPageMetadata } from '@/lib/admin/page-metadata'
 import { cn } from '@/lib/utils/cn'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata = adminPageMetadata('Bookings')
 
 const STATUS_TABS = [
   { label: 'All', param: '' },

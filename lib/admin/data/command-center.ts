@@ -265,16 +265,27 @@ async function sumRevenueToday(admin: ReturnType<typeof createAdminClient>): Pro
 
   const { data: bookings, error: bErr } = await admin
     .from('bookings')
-    .select('booking_status, payment_status, amount_paid, amount_due, total_rupees, updated_at')
-    .gte('updated_at', dayStart)
+    .select('booking_status, payment_status, amount_paid, amount_due, total_rupees, updated_at, created_at')
     .is('deleted_at', null)
+    .or(`updated_at.gte.${dayStart},created_at.gte.${dayStart}`)
     .limit(3000)
   if (bErr) {
     logPostgrestError('[commandCenter] revenueToday.bookingsFallback', bErr)
     return 0
   }
   for (const b of bookings ?? []) {
-    sum += bookingCollectedRupees(b)
+    const row = b as {
+      booking_status: string
+      payment_status: string
+      amount_paid: number | null
+      amount_due: number | null
+      total_rupees: number | null
+      updated_at: string
+      created_at: string
+    }
+    const touchedToday = row.updated_at >= dayStart || row.created_at >= dayStart
+    if (!touchedToday) continue
+    sum += bookingCollectedRupees(row)
   }
   return sum
 }

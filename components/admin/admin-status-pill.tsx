@@ -47,7 +47,36 @@ const styles: Record<string, string> = {
   damage_liability: 'border-red-400/30 bg-red-500/10 text-red-200',
 }
 
-export function AdminStatusPill({ value }: { value: string }) {
+const KYC_DOCUMENT_LABELS: Record<string, string> = {
+  pending: 'in review',
+  reviewing: 'in review',
+}
+
+const KYC_PROFILE_LABELS: Record<string, string> = {
+  pending: 'in review',
+  resubmission_required: 'resubmit',
+}
+
+function formatStatusLabel(
+  value: string,
+  kycDocument?: boolean,
+  kycProfile?: boolean,
+): string {
+  if (kycDocument && KYC_DOCUMENT_LABELS[value]) return KYC_DOCUMENT_LABELS[value]!
+  if (kycProfile && KYC_PROFILE_LABELS[value]) return KYC_PROFILE_LABELS[value]!
+  return value.replace(/_/g, ' ')
+}
+
+export function AdminStatusPill({
+  value,
+  kycDocument,
+  kycProfile,
+}: {
+  value: string
+  /** Use queue terminology (pending → in review) on document rows. */
+  kycDocument?: boolean
+  kycProfile?: boolean
+}) {
   const cls = styles[value] ?? 'border-stroke-strong bg-fill-glass-strong text-soft'
   return (
     <span
@@ -56,7 +85,7 @@ export function AdminStatusPill({ value }: { value: string }) {
         cls,
       )}
     >
-      {value.replace(/_/g, ' ')}
+      {formatStatusLabel(value, kycDocument, kycProfile)}
     </span>
   )
 }

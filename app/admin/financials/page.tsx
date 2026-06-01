@@ -4,8 +4,11 @@ import {
   adminPenaltyManagementRows,
   type AdminFinancialMetrics,
 } from '@/lib/admin/data/financials'
+import { adminPageMetadata } from '@/lib/admin/page-metadata'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata = adminPageMetadata('Deposits & Penalties')
 
 const emptyMetrics: AdminFinancialMetrics = {
   totalDepositsHeldRupees: 0,

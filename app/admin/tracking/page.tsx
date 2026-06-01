@@ -1,8 +1,11 @@
 import { AdminTrackingDashboard } from '@/components/admin/tracking/admin-tracking-dashboard'
 import { adminListVehicleTracking, adminVehicleComplianceAlerts } from '@/lib/admin/data/tracking'
+import { adminPageMetadata } from '@/lib/admin/page-metadata'
 import { requireAdminPageAccess } from '@/lib/auth/guards'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata = adminPageMetadata('Vehicle Tracking')
 
 export default async function AdminTrackingPage() {
   await requireAdminPageAccess('/admin/tracking')

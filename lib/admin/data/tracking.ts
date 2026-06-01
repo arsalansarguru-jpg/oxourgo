@@ -58,22 +58,26 @@ export async function adminListVehicleTracking(): Promise<VehicleTrackingRow[]> 
 
   return (vehiclesRes.data ?? []).map((v) => {
     const rawGpsStatus = (v.gps_status as string)?.trim() || 'unknown'
-    const isMockNeeded = rawGpsStatus === 'unknown' || !v.gps_tracker_id
+    const hasTracker = Boolean((v.gps_tracker_id as string | null)?.trim())
+    const hasLiveData = hasTracker && rawGpsStatus !== 'unknown'
+    const tripActive = onTrip.has(v.id as string)
 
-    const mockLocations = [
-      'Bandra West, Mumbai · Active',
-      'Juhu Tara Road, Mumbai · Stationed',
-      'Nariman Point, Mumbai · Active',
-      'Colaba Causeway, Mumbai · Stationed',
-      'Andheri East, Mumbai · Active'
-    ]
-    const index = String(v.id).charCodeAt(0) % mockLocations.length
+    const storedLocation = (v.vehicle_location as string | null)?.trim() || null
+    let location: string
+    if (tripActive && storedLocation) {
+      location = `${storedLocation} · On trip`
+    } else if (storedLocation) {
+      location = `${storedLocation} · Last seen`
+    } else if (hasLiveData) {
+      location = 'GPS linked · awaiting location fix'
+    } else {
+      location = 'No GPS feed · Parked / offline'
+    }
 
-    const gpsStatus = isMockNeeded ? 'online' : rawGpsStatus
-    const location = isMockNeeded ? mockLocations[index] : ((v.vehicle_location as string | null)?.trim() || 'Mumbai, IN')
-    const gpsTrackerId = isMockNeeded ? `GPS-OBD-${v.id.slice(0, 5).toUpperCase()}` : (v.gps_tracker_id as string | null)
-    const lastGpsPingAt = isMockNeeded ? new Date(Date.now() - 45000).toISOString() : ((v.last_gps_ping_at as string | null) ?? new Date().toISOString())
-    const fuelLevelPct = v.fuel_level_pct != null ? Number(v.fuel_level_pct) : (isMockNeeded ? (75 + (String(v.id).charCodeAt(1) % 20)) : 80)
+    const gpsStatus = hasLiveData ? rawGpsStatus : 'offline'
+    const gpsTrackerId = hasTracker ? (v.gps_tracker_id as string | null) : null
+    const lastGpsPingAt = (v.last_gps_ping_at as string | null) ?? null
+    const fuelLevelPct = v.fuel_level_pct != null ? Number(v.fuel_level_pct) : null
 
     return {
       id: v.id as string,

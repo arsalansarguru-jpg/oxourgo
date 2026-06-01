@@ -2,8 +2,11 @@ import { AdminFleetManager } from '@/components/admin/fleet/admin-fleet-manager'
 import { AdminPageHeader } from '@/components/admin/admin-page-header'
 import { getAdminLoaderUiMessage } from '@/lib/admin/admin-data-load-errors'
 import { adminGetFleetDashboardMetrics, adminListVehiclesPage } from '@/lib/admin/data/fleet'
+import { adminPageMetadata } from '@/lib/admin/page-metadata'
 
 export const dynamic = 'force-dynamic'
+
+export const metadata = adminPageMetadata('Fleet')
 
 const PAGE_SIZE_OPTIONS = [12, 24, 36, 48] as const
 
