@@ -1,6 +1,6 @@
 import 'server-only'
 
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
  * Returns true if another non-cancelled booking overlaps [pickup, return) for this car.
@@ -14,7 +14,7 @@ export async function hasBookingOverlap(
   excludeBookingId?: string | null,
 ): Promise<{ overlap: boolean; error: string | null }> {
   try {
-    const supabase = await createClient()
+    const supabase = createAdminClient()
     const { data, error } = await supabase.rpc('has_booking_overlap', {
       p_car_id: carId,
       p_pickup: pickupIso,

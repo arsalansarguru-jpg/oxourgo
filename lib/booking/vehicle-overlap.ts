@@ -3,7 +3,6 @@ import 'server-only'
 import type { PostgrestError } from '@supabase/supabase-js'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { Database } from '@/lib/supabase/database.types'
 
@@ -59,7 +58,7 @@ export async function hasVehicleBookingOverlap(
   rpcClient?: SupabaseClient<Database>,
 ): Promise<{ overlap: boolean; error: VehicleOverlapError }> {
   try {
-    const client = rpcClient ?? (await createClient())
+    const client = rpcClient ?? createAdminClient()
     const { data, error } = await client.rpc('has_vehicle_booking_overlap', {
       p_vehicle_id: vehicleId,
       p_pickup: pickupIso,
