@@ -2,7 +2,7 @@ import { AdminSupportDashboard } from '@/components/admin/support/admin-support-
 import { getCachedAdminCustomers, getCachedAdminSupportBundle } from '@/lib/admin/cached-data'
 import type { AdminCustomerRow } from '@/lib/admin/data/customers'
 import type { AdminSupportConversationItem } from '@/lib/admin/data/support-conversations'
-import type { SupportTicketMetrics, SupportTicketRow } from '@/lib/admin/data/support-tickets'
+import type { SupportTicketRow } from '@/lib/admin/data/support-tickets'
 import { adminPageMetadata } from '@/lib/admin/page-metadata'
 import { requireAdminPageAccess } from '@/lib/auth/guards'
 
