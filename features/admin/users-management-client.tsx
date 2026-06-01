@@ -96,15 +96,20 @@ export function UsersManagementClient({ users, activity, actorRole, actorId }: U
 
         <AdminCard className="overflow-hidden">
           <AdminCardContent className="p-0">
-            <div className="overflow-x-auto scroll-touch">
-              <table className="w-full min-w-[1040px] table-fixed text-left text-sm">
+            <p className="border-b border-white/[0.06] px-4 py-2 text-[11px] text-muted lg:hidden">
+              Swipe horizontally to reach session actions →
+            </p>
+            <div className="admin-table-scroll overflow-x-auto scroll-touch">
+              <table className="w-full min-w-[920px] text-left text-sm">
                 <thead className="admin-table-head">
                   <tr>
-                    <th className="w-[28%] px-4 py-3.5 font-medium">Email</th>
-                    <th className="w-[14%] px-4 py-3.5 font-medium">Role</th>
-                    <th className="w-[18%] px-4 py-3.5 font-medium">Last sign-in</th>
-                    <th className="w-[22%] px-4 py-3.5 font-medium">Assign role</th>
-                    <th className="w-[18%] px-4 py-3.5 font-medium text-right">Sessions</th>
+                    <th className="min-w-[200px] px-4 py-3.5 font-medium">Email</th>
+                    <th className="px-4 py-3.5 font-medium">Role</th>
+                    <th className="px-4 py-3.5 font-medium">Last sign-in</th>
+                    <th className="px-4 py-3.5 font-medium">Assign role</th>
+                    <th className="sticky right-0 z-10 min-w-[148px] bg-matte/95 px-4 py-3.5 text-right font-medium backdrop-blur-md theme-light:bg-white/95">
+                      Sessions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -132,7 +137,7 @@ export function UsersManagementClient({ users, activity, actorRole, actorId }: U
                           ))}
                         </Select>
                       </td>
-                      <td className="px-4 py-3.5 text-right">
+                      <td className="sticky right-0 z-10 bg-matte/90 px-4 py-3.5 text-right backdrop-blur-md theme-light:bg-white/90">
                         <Button
                           type="button"
                           variant="ghost"

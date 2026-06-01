@@ -129,8 +129,8 @@ export function AdminManualBookingPanel({ vehicles, canBypass, canSkipKyc, canVi
             </label>
           ) : null}
           {canSkipKyc ? (
-            <label className="flex flex-col gap-2 text-sm text-muted sm:col-span-2">
-              <span className="flex items-center gap-2">
+            <div className="flex flex-col gap-2 sm:col-span-2">
+              <label className="flex items-center gap-2 text-sm text-muted">
                 <input
                   type="checkbox"
                   name="skipKyc"
@@ -139,15 +139,21 @@ export function AdminManualBookingPanel({ vehicles, canBypass, canSkipKyc, canVi
                   onChange={(e) => setSkipKycChecked(e.target.checked)}
                 />
                 Skip KYC check
-              </span>
+              </label>
+              <p className="rounded-lg border border-amber-400/25 bg-amber-500/[0.06] px-3 py-2 text-xs text-amber-100/90">
+                Ops override only — bypasses customer identity verification. Requires written approval and is fully audited.
+              </p>
               {skipKycChecked ? (
                 <p className="rounded-lg border border-red-400/30 bg-red-500/[0.08] px-3 py-2 text-xs font-medium text-red-100/95">
-                  You are creating a booking for a customer who has not completed KYC verification. This action is
-                  audited and should only be used with written ops approval.
+                  You are creating a booking without KYC verification. Confirm the customer identity through another channel before handover.
                 </p>
               ) : null}
-            </label>
-          ) : null}
+            </div>
+          ) : (
+            <p className="text-xs text-muted sm:col-span-2">
+              KYC bypass is restricted to roles with ops override permission.
+            </p>
+          )}
           {canBypass ? (
             <label className="flex flex-col gap-2 text-sm text-amber-200/90 sm:col-span-2">
               <span className="flex items-center gap-2">

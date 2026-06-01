@@ -9,6 +9,18 @@ import { AdminStatusPill } from '@/components/admin/admin-status-pill'
 import type { VehicleComplianceAlert, VehicleTrackingRow } from '@/lib/admin/data/tracking'
 import { cn } from '@/lib/utils/cn'
 
+function formatRelativePing(iso: string): string {
+  const ms = Date.now() - new Date(iso).getTime()
+  if (!Number.isFinite(ms) || ms < 0) return new Date(iso).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
+  const mins = Math.floor(ms / 60_000)
+  if (mins < 1) return 'just now'
+  if (mins < 60) return `${mins}m ago`
+  const hrs = Math.floor(mins / 60)
+  if (hrs < 48) return `${hrs}h ago`
+  const days = Math.floor(hrs / 24)
+  return `${days}d ago · ${new Date(iso).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata', dateStyle: 'short', timeStyle: 'short' })}`
+}
+
 export function AdminTrackingDashboard({
   vehicles,
   alerts,
@@ -77,9 +89,16 @@ export function AdminTrackingDashboard({
                       </td>
                       <td className="px-4 py-3 text-muted">
                         <span className="inline-flex items-center gap-1">
-                          <MapPin className="h-3.5 w-3.5" aria-hidden />
-                          {v.location ?? '—'}
+                          <MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                          <span>{v.location ?? '—'}</span>
                         </span>
+                        {v.lastGpsPingAt ? (
+                          <p className="mt-1 text-[10px] text-muted/90">
+                            Last ping {formatRelativePing(v.lastGpsPingAt)}
+                          </p>
+                        ) : v.gpsStatus === 'offline' ? (
+                          <p className="mt-1 text-[10px] text-amber-200/80">No GPS ping on record</p>
+                        ) : null}
                       </td>
                       <td className="px-4 py-3">
                         <span
@@ -101,9 +120,16 @@ export function AdminTrackingDashboard({
                       </td>
                       <td className="px-4 py-3 text-muted">
                         {v.fuelLevelPct != null ? (
-                          <span className="inline-flex items-center gap-1 tabular-nums">
-                            <Fuel className="h-3.5 w-3.5" aria-hidden />
-                            {v.fuelLevelPct}%
+                          <span className="inline-flex flex-col gap-0.5">
+                            <span className="inline-flex items-center gap-1 tabular-nums">
+                              <Fuel className="h-3.5 w-3.5" aria-hidden />
+                              {v.fuelLevelPct}%
+                            </span>
+                            {v.lastGpsPingAt ? (
+                              <span className="text-[10px] text-muted/80">as of {formatRelativePing(v.lastGpsPingAt)}</span>
+                            ) : (
+                              <span className="text-[10px] text-amber-200/75">Stale — no recent telemetry</span>
+                            )}
                           </span>
                         ) : (
                           '—'

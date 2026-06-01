@@ -65,7 +65,9 @@ export function AdminPaymentsPageBody({
           <p className="mt-3 text-3xl font-semibold tabular-nums tracking-[-0.03em] text-soft">
             {formatInr(metrics.collectedRentalRupees)}
           </p>
-          <p className="mt-1 text-xs text-muted">Sum of recorded rental collections (full + partial)</p>
+          <p className="mt-1 text-xs text-muted">
+            Cash posted on bookings (amount paid). Outstanding contracts are unpaid rental totals — not revenue.
+          </p>
         </AdminCard>
         <AdminCard className="border border-white/[0.06] bg-gradient-to-br from-sky-500/[0.07] via-transparent to-transparent p-5 sm:p-6">
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">Outstanding contracts</p>

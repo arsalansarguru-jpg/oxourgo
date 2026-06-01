@@ -10,11 +10,7 @@ import { adminGetKycSignedUrlAction, adminSetKycDocumentStatusAction } from '@/l
 import { pickLatestDocPerType, type KycDocMinimal } from '@/lib/kyc/compute-kyc-profile-status'
 import { formatKycDocumentType } from '@/lib/kyc/doc-label'
 import { resolveKycPreviewContentType } from '@/lib/kyc/content-type-from-path'
-import {
-  isBrowserPreviewableImage,
-  isHeicKycContentType,
-  kycPreviewNotSupportedMessage,
-} from '@/lib/kyc/preview'
+import { isBrowserPreviewableImage, kycPreviewNotSupportedMessage } from '@/lib/kyc/preview'
 import { AdminStatusPill } from '@/components/admin/admin-status-pill'
 import { AdminCard, AdminCardContent } from '@/components/admin/admin-card'
 import { Button } from '@/components/ui/Button'
@@ -82,7 +78,6 @@ function DocPreview({
 
   const mime = resolvedType ?? contentType
   const isPdf = (mime ?? '').includes('pdf')
-  const heic = isHeicKycContentType(mime)
   const previewBlocked =
     kycPreviewNotSupportedMessage(mime) ??
     (!isBrowserPreviewableImage(mime) && !isPdf ? kycPreviewNotSupportedMessage('application/octet-stream') : null)
@@ -141,7 +136,7 @@ function DocPreview({
 
       <div
         className={cn(
-          'relative overflow-auto rounded-2xl border border-stroke-strong bg-[#0a0c10]',
+          'relative overflow-auto rounded-2xl border border-stroke-strong bg-neutral-100',
           'max-h-[min(70vh,520px)] min-h-[200px]',
         )}
       >
@@ -172,8 +167,13 @@ function DocPreview({
             <img
               src={url}
               alt="KYC document preview"
-              className="max-h-[min(68vh,480px)] max-w-full select-none rounded-lg object-contain shadow-2xl ring-1 ring-white/10"
-              style={{ transform: `scale(${zoom})`, transformOrigin: 'center center' }}
+              className="max-h-[min(68vh,480px)] max-w-full select-none rounded-md object-contain"
+              style={{
+                transform: `scale(${zoom})`,
+                transformOrigin: 'center center',
+                imageRendering: 'auto',
+              }}
+              decoding="async"
               draggable={false}
               onError={() => {
                 setErr('Preview could not render this file. Use Open / download to view the original.')
@@ -194,6 +194,7 @@ function DocPreview({
       </div>
       <p className="text-[11px] leading-relaxed text-muted">
         Links expire quickly and are not logged in the browser history beyond this session. Do not copy URLs into tickets.
+        If the preview looks grainy or soft, open the original file — quality depends on the customer upload, not admin filters.
       </p>
     </div>
   )
@@ -274,6 +275,11 @@ function DocReviewPanel({
   const isTerminal = isApproved || doc.status === 'rejected'
   const canMarkReviewing = !isApproved && doc.status !== 'reviewing'
 
+  const guardApprovedAction = (action: () => void) => {
+    if (isApproved) return
+    action()
+  }
+
   return (
     <AdminCard className="overflow-hidden border-stroke-strong bg-gradient-to-br from-matte/80 via-matte/40 to-electric/[0.04]">
       <AdminCardContent className="space-y-4 p-5 sm:p-6">
@@ -311,26 +317,33 @@ function DocReviewPanel({
         ) : null}
 
         <div className="flex flex-wrap gap-2 border-t border-stroke/80 pt-4">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            disabled={pending || !canMarkReviewing}
-            title={!canMarkReviewing ? 'Already approved or in review' : undefined}
-            onClick={() => setConfirm({ kind: 'reviewing' })}
-          >
-            Mark reviewing
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            size="sm"
-            disabled={pending || isApproved}
-            title={isApproved ? 'Already approved' : undefined}
-            onClick={() => setConfirm({ kind: 'approve' })}
-          >
-            Approve
-          </Button>
+          {isApproved ? (
+            <p className="text-xs text-muted">Approval actions are locked. Use Reject or Request resubmission below to reverse.</p>
+          ) : (
+            <>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                disabled={pending || !canMarkReviewing}
+                aria-disabled={pending || !canMarkReviewing}
+                title={!canMarkReviewing ? 'Already in review' : undefined}
+                onClick={() => guardApprovedAction(() => setConfirm({ kind: 'reviewing' }))}
+              >
+                Mark reviewing
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                size="sm"
+                disabled={pending || isApproved}
+                aria-disabled={pending || isApproved}
+                onClick={() => guardApprovedAction(() => setConfirm({ kind: 'approve' }))}
+              >
+                Approve
+              </Button>
+            </>
+          )}
         </div>
 
         <form
@@ -340,6 +353,7 @@ function DocReviewPanel({
           )}
           onSubmit={(e) => {
             e.preventDefault()
+            if (isApproved) return
             const fd = new FormData(e.currentTarget)
             const reason = String(fd.get('reject_reason') ?? '').trim()
             const note = String(fd.get(`reject_note_${panelId}`) ?? '').trim() || null
@@ -373,6 +387,7 @@ function DocReviewPanel({
           )}
           onSubmit={(e) => {
             e.preventDefault()
+            if (isApproved) return
             const fd = new FormData(e.currentTarget)
             const reason = String(fd.get('resubmit_reason') ?? '').trim()
             const note = String(fd.get(`resubmit_note_${panelId}`) ?? '').trim() || null

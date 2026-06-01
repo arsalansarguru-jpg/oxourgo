@@ -372,7 +372,7 @@ export function AdminCommandCenter({ data }: { data: CommandCenterBundle }) {
                   href="/admin/payments"
                 />
                 <div className="grid gap-3 sm:grid-cols-2">
-                  <FinanceTile label="Revenue today" value={formatInr(finance.revenueTodayRupees)} hint="Posted charges · UTC day" />
+                  <FinanceTile label="Revenue today" value={formatInr(finance.revenueTodayRupees)} hint="Collected rental (IST day) · not outstanding contracts" />
                   <FinanceTile
                     label="Pending collections"
                     value={formatInr(finance.pendingCollectionsRupees)}

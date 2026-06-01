@@ -24,12 +24,14 @@ export function isBookingCancelled(status: string | null | undefined): boolean {
   return (status ?? '').trim().toLowerCase() === 'cancelled'
 }
 
-/** Whole INR collected on the booking (requires posted payment status). */
+/** Whole INR collected on the booking (posted payment status or any recorded amount_paid). */
 export function bookingCollectedRupees(b: BookingFinancialRow): number {
   if (isBookingCancelled(b.booking_status)) return 0
+  const paid = safeRupees(b.amount_paid)
+  if (paid > 0) return paid
   const ps = normalizePaymentStatusForAnalytics(b.payment_status)
   if (!COLLECTED_STATUSES.has(ps)) return 0
-  return safeRupees(b.amount_paid)
+  return paid
 }
 
 /** Outstanding rental balance (amount_due with total fallback). */

@@ -111,8 +111,16 @@ export function AdminDashboardOverview({ data }: { data: DashboardOverviewBundle
         >
           <EnterpriseKpi label="Total bookings" value={<AnimatedCounter value={kpis.totalBookings} />} href="/admin/bookings" />
           <EnterpriseKpi label="Active rentals" value={<AnimatedCounter value={kpis.activeRentals} />} href="/admin/bookings?status=active" />
-          <EnterpriseKpi label="Revenue today" value={<AnimatedCounter value={kpis.revenueTodayRupees} formatter={(v) => formatInr(v)} />} href="/admin/payments" />
-          <EnterpriseKpi label="Revenue this month" value={<AnimatedCounter value={kpis.revenueMonthRupees} formatter={(v) => formatInr(v)} />} href="/admin/analytics" />
+          <EnterpriseKpi
+            label="Revenue today"
+            value={<AnimatedCounter value={kpis.revenueTodayRupees} formatter={(v) => formatInr(v)} />}
+            href="/admin/payments"
+          />
+          <EnterpriseKpi
+            label="Revenue this month"
+            value={<AnimatedCounter value={kpis.revenueMonthRupees} formatter={(v) => formatInr(v)} />}
+            href="/admin/analytics"
+          />
           <EnterpriseKpi
             label="Pending KYC"
             value={<AnimatedCounter value={kpis.pendingKyc} />}

@@ -18,6 +18,7 @@ export function AnalyticsRangeFilter({ range }: { range: AnalyticsResolvedRange 
   const { isPending, navigatePreset, navigateCustom } = useAdminAnalyticsFilters()
   const [from, setFrom] = useState(range.preset === 'custom' ? range.startDay : '')
   const [to, setTo] = useState(range.preset === 'custom' ? range.endDay : '')
+  const [validationError, setValidationError] = useState<string | null>(null)
 
   useEffect(() => {
     if (range.preset === 'custom') {
@@ -57,7 +58,20 @@ export function AnalyticsRangeFilter({ range }: { range: AnalyticsResolvedRange 
         className="flex min-w-0 flex-wrap items-end gap-3"
         onSubmit={(e) => {
           e.preventDefault()
-          if (!from || !to) return
+          setValidationError(null)
+          if (!from || !to) {
+            setValidationError('Choose both start and end dates.')
+            return
+          }
+          if (to < from) {
+            setValidationError('End date must be on or after the start date.')
+            return
+          }
+          const todayIst = new Date().toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' })
+          if (from > todayIst || to > todayIst) {
+            setValidationError('Future dates are not allowed — use today or an earlier range.')
+            return
+          }
           navigateCustom(from, to)
         }}
       >
@@ -89,6 +103,11 @@ export function AnalyticsRangeFilter({ range }: { range: AnalyticsResolvedRange 
         >
           Custom range
         </Button>
+        {validationError ? (
+          <p className="w-full basis-full text-xs text-rose-300/95" role="alert">
+            {validationError}
+          </p>
+        ) : null}
       </form>
     </div>
   )

@@ -12,7 +12,7 @@ export const metadata = adminPageMetadata('Bookings')
 
 const STATUS_TABS = [
   { label: 'All', param: '' },
-  { label: 'Pending', param: 'pending_payment' },
+  { label: 'Pending payment', param: 'pending_payment' },
   { label: 'Approved', param: 'confirmed' },
   { label: 'On trip', param: 'active' },
   { label: 'Completed', param: 'completed' },

@@ -19,6 +19,7 @@ import type { AdminSupportConversationItem } from '@/lib/admin/data/support-conv
 import type { SupportTicketMetrics, SupportTicketRow } from '@/lib/admin/data/support-tickets'
 
 import type { adminListCustomers } from '@/lib/admin/data/customers'
+import { cn } from '@/lib/utils/cn'
 
 export function AdminSupportDashboard({
   metrics,
@@ -287,10 +288,26 @@ function ConversationRow({ item }: { item: AdminSupportConversationItem }) {
   const [pending, start] = useTransition()
   const [reply, setReply] = useState('')
   const [sendStatus, setSendStatus] = useState<string | null>(null)
+  const ageHours = (Date.now() - new Date(item.lastMessageAt).getTime()) / (1000 * 60 * 60)
+  const slaBreached = item.status === 'open' && ageHours >= 48
 
   return (
-    <tr className="border-b border-white/[0.04] align-top hover:bg-white/[0.02]">
-      <td className="px-4 py-3 font-medium text-soft">{item.customerLabel}</td>
+    <tr
+      className={cn(
+        'border-b border-white/[0.04] align-top hover:bg-white/[0.02]',
+        slaBreached && 'bg-rose-500/[0.04]',
+      )}
+    >
+      <td className="px-4 py-3 font-medium text-soft">
+        <div className="flex flex-wrap items-center gap-2">
+          <span>{item.customerLabel}</span>
+          {slaBreached ? (
+            <span className="inline-flex items-center rounded bg-rose-500/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-rose-300 border border-rose-500/25">
+              SLA · {Math.floor(ageHours / 24)}d+ open
+            </span>
+          ) : null}
+        </div>
+      </td>
       <td className="max-w-xs px-4 py-3 text-xs text-muted">
         <p className="line-clamp-2">{item.lastMessagePreview ?? '—'}</p>
       </td>
@@ -312,7 +329,7 @@ function ConversationRow({ item }: { item: AdminSupportConversationItem }) {
               const res = await adminReplySupportConversationAction(item.id, text)
               if (res.ok) {
                 setReply('')
-                setSendStatus('Message sent.')
+                setSendStatus('✓ Message sent to customer.')
                 router.refresh()
               } else {
                 setSendStatus(res.message ?? 'Could not send message.')

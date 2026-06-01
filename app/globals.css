@@ -477,6 +477,19 @@ html[data-theme='dark'] {
   scrollbar-gutter: stable;
 }
 
+.admin-table-scroll::-webkit-scrollbar {
+  height: 8px;
+}
+
+.admin-table-scroll::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.22);
+}
+
+.admin-table-scroll::-webkit-scrollbar-track {
+  background: rgb(255 255 255 / 0.06);
+}
+
 @utility skeleton-shimmer {
   background: linear-gradient(
     90deg,

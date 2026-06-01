@@ -374,6 +374,9 @@ export function AdminBookingsManager({ pageResult, listQuery, loadError, dataErr
           </div>
         ) : showRows ? (
           <>
+            <p className="hidden border-b border-white/[0.06] px-4 py-2 text-[11px] text-muted lg:block">
+              Scroll horizontally for booking and payment status columns →
+            </p>
             <div className="admin-table-scroll hidden max-h-[min(72vh,860px)] overflow-auto lg:block">
               <table className="w-full min-w-[1180px] text-left text-sm">
                 <thead className="sticky top-0 z-20">

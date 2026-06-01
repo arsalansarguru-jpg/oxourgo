@@ -21,6 +21,11 @@ export function AdminCustomersDirectory({ rows }: { rows: AdminCustomerRow[] }) 
   const [page, setPage] = useState(1)
   const [showInternal, setShowInternal] = useState(false)
 
+  const internalHiddenCount = useMemo(
+    () => rows.filter((r) => isInternalTestAccount({ email: r.email, displayName: r.displayName })).length,
+    [rows],
+  )
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase()
     let list = rows
@@ -84,17 +89,28 @@ export function AdminCustomersDirectory({ rows }: { rows: AdminCustomerRow[] }) 
           }}
           className="max-w-md"
         />
-        <label className="flex items-center gap-2 text-xs text-muted">
-          <input
-            type="checkbox"
-            checked={showInternal}
-            onChange={(e) => {
-              setShowInternal(e.target.checked)
-              setPage(1)
-            }}
-            className="rounded border-stroke-strong"
-          />
-          Show internal / test accounts
+        <label className="flex flex-col gap-0.5 text-xs text-muted sm:items-end">
+          <span className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={showInternal}
+              onChange={(e) => {
+                setShowInternal(e.target.checked)
+                setPage(1)
+              }}
+              className="rounded border-stroke-strong"
+            />
+            Show internal / test accounts
+          </span>
+          {internalHiddenCount > 0 ? (
+            <span className="text-[11px] text-muted/90">
+              {showInternal
+                ? `Showing all ${filtered.length} (incl. ${internalHiddenCount} internal)`
+                : `${internalHiddenCount} internal account(s) hidden`}
+            </span>
+          ) : (
+            <span className="text-[11px] text-muted/80">No internal accounts in directory</span>
+          )}
         </label>
       </div>
 

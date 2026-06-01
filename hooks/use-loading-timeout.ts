@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 
-const DEFAULT_MS = 5000
+const DEFAULT_MS = 15000
 
 /**
  * Flips to true after `ms` so slow client fetches can show an error fallback.
