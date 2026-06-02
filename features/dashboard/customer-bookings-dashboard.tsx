@@ -104,6 +104,20 @@ function partitionBookings(rows: BookingWithCar[]) {
   return { active, upcoming, completed, cancelled }
 }
 
+function duplicateTripWarningCount(rows: BookingWithCar[]): number {
+  const seen = new Set<string>()
+  const dupes = new Set<string>()
+  for (const row of rows) {
+    const vehicle = Array.isArray(row.vehicles) ? (row.vehicles[0] ?? null) : row.vehicles
+    const reg = vehicle?.registration_number?.trim().toUpperCase()
+    if (!reg) continue
+    const key = `${reg}|${row.pickup_date}|${row.return_date}`
+    if (seen.has(key)) dupes.add(key)
+    seen.add(key)
+  }
+  return dupes.size
+}
+
 export type CustomerBookingsDashboardProps = {
   result: ListBookingsForUserResult
   bookingCleared: boolean
@@ -157,6 +171,7 @@ export function CustomerBookingsDashboard({ result, bookingCleared, kycStatus }:
   }
 
   const { active, upcoming, completed, cancelled } = partitionBookings(bookings)
+  const duplicateWarnings = duplicateTripWarningCount(bookings)
 
   return (
     <div className="space-y-12">
@@ -170,6 +185,12 @@ export function CustomerBookingsDashboard({ result, bookingCleared, kycStatus }:
       </header>
 
       <KycBookingsGate bookingCleared={bookingCleared} kycStatus={kycStatus} />
+      {duplicateWarnings > 0 ? (
+        <div className={cn(cardSurfaceBase, 'rounded-2xl border border-amber-400/25 bg-amber-500/[0.08] px-4 py-3 text-sm text-amber-100')}>
+          We found {duplicateWarnings} overlapping booking group{duplicateWarnings === 1 ? '' : 's'} for the same vehicle and trip window.
+          Concierge has been notified to reconcile this.
+        </div>
+      ) : null}
 
       {/* Desktop table-style header (decorative alignment hint; cards hold real data) */}
       <div className="hidden xl:grid xl:grid-cols-[160px_1fr] xl:gap-8 xl:px-1">

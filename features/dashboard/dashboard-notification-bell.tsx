@@ -38,9 +38,28 @@ export function DashboardNotificationBell({
     const onDoc = (e: MouseEvent) => {
       if (!rootRef.current?.contains(e.target as Node)) setOpen(false)
     }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false)
+    }
+    const onDropdownOpen = (e: Event) => {
+      const ce = e as CustomEvent<string>
+      if (ce.detail !== 'notifications') setOpen(false)
+    }
     document.addEventListener('mousedown', onDoc)
-    return () => document.removeEventListener('mousedown', onDoc)
+    document.addEventListener('keydown', onKey)
+    document.addEventListener('oxour:dropdown-open', onDropdownOpen)
+    return () => {
+      document.removeEventListener('mousedown', onDoc)
+      document.removeEventListener('keydown', onKey)
+      document.removeEventListener('oxour:dropdown-open', onDropdownOpen)
+    }
   }, [])
+
+  useEffect(() => {
+    if (open) {
+      document.dispatchEvent(new CustomEvent('oxour:dropdown-open', { detail: 'notifications' }))
+    }
+  }, [open])
 
   useEffect(() => {
     if (!supabase) return

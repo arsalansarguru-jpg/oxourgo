@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params
   const ref = `OX-${id.replace(/-/g, '').slice(0, 10).toUpperCase()}`
   return {
-    title: `Booking ${ref} | Oxour Go`,
+    title: `Booking ${ref}`,
   }
 }
 

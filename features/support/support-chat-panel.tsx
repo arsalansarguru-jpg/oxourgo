@@ -62,6 +62,11 @@ export function SupportChatPanel({ greetingName, initialMessages, signedIn }: Su
 
   return (
     <>
+      {!signedIn ? (
+        <p className="rounded-xl border border-amber-500/20 bg-amber-500/5 px-3 py-2 text-xs text-amber-200">
+          Sign in to start a saved support conversation. You can still contact us instantly on WhatsApp.
+        </p>
+      ) : null}
       <div
         className={cn(
           'mt-4 max-h-80 space-y-3 overflow-y-auto p-4',
@@ -96,6 +101,11 @@ export function SupportChatPanel({ greetingName, initialMessages, signedIn }: Su
           placeholder={signedIn ? 'Ask anything about your trip…' : 'Sign in to message support…'}
           value={chat}
           onChange={(e) => setChat(e.target.value)}
+          onFocus={() => {
+            if (!signedIn) {
+              router.push(`/login?${new URLSearchParams({ redirect: '/support' }).toString()}`)
+            }
+          }}
           aria-label="Chat message"
           className="min-w-0 flex-1"
           disabled={!signedIn || pending}

@@ -69,6 +69,11 @@ export function KycCenterClient({
     return { steps, pct: Math.round((doneCount / steps.length) * 100) }
   }, [latestMap, initialProfile.full_name, initialProfile.phone])
 
+  const effectiveKycStatus =
+    initialProfile.kyc_status === 'not_started' && completion.pct > 0
+      ? 'pending'
+      : initialProfile.kyc_status
+
   const aggregateIssue = useMemo(() => {
     const st = initialProfile.kyc_status
     if (st !== 'rejected' && st !== 'resubmission_required') return null
@@ -122,7 +127,7 @@ export function KycCenterClient({
           </p>
         </div>
         <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
-          <KycStatusBadge status={initialProfile.kyc_status} />
+          <KycStatusBadge status={effectiveKycStatus} />
           <div className="text-xs text-muted">
             {initialProfile.kyc_submitted_at ? (
               <p>First submitted {new Date(initialProfile.kyc_submitted_at).toLocaleString()}</p>

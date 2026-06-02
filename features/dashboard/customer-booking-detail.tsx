@@ -154,6 +154,8 @@ export function CustomerBookingDetail({
 
   const pickupFmt = new Date(row.pickup_date).toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short' })
   const returnFmt = new Date(row.return_date).toLocaleString(undefined, { dateStyle: 'full', timeStyle: 'short' })
+  const pickupAt = new Date(row.pickup_date)
+  const isMidnightPickup = pickupAt.getHours() === 0 && pickupAt.getMinutes() === 0
   const pickupCondition = parseConditionNotes(row.pickup_condition_notes)
   const returnCondition = parseConditionNotes(row.return_condition_notes)
   const siteBase = getPublicSiteUrl().replace(/\/+$/, '')
@@ -304,6 +306,11 @@ export function CustomerBookingDetail({
                     Pickup
                   </dt>
                   <dd className="mt-2 text-sm font-medium leading-snug text-soft sm:text-base">{pickupFmt}</dd>
+                  {isMidnightPickup ? (
+                    <p className="mt-1 text-xs text-amber-200">
+                      Midnight pickup detected. Confirm exact handover time with concierge.
+                    </p>
+                  ) : null}
                 </div>
                 <div className="rounded-2xl border border-stroke bg-matte/[0.35] p-4">
                   <dt className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted">
@@ -602,7 +609,8 @@ export function CustomerBookingDetail({
               ) : (
                 <>
                   <p className="text-sm leading-relaxed text-silver/95">
-                    To modify or cancel your booking, message concierge on WhatsApp. Our team will verify eligibility, policy fees, and assist with immediate rebooking.
+                    To modify or cancel your booking, message concierge on WhatsApp. Standard policy: free cancellation up to
+                    24 hours before pickup, 25% fee within 24 hours, and no-show may forfeit up to 100% of booking value.
                   </p>
                   <Button
                     type="button"

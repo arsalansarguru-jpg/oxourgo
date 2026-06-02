@@ -43,7 +43,9 @@ export function CustomerPaymentsView({
               {bookings.map((b) => (
                 <tr key={b.id} className="text-muted">
                   <td className="px-4 py-3 font-mono text-xs text-soft">OX-{b.id.replace(/-/g, '').slice(0, 10).toUpperCase()}</td>
-                  <td className="px-4 py-3 text-soft">{formatBookingVehicleTitle(b)}</td>
+                  <td className="px-4 py-3 text-soft">
+                    <span className="whitespace-nowrap">{formatBookingVehicleTitle(b)}</span>
+                  </td>
                   <td className="px-4 py-3 tabular-nums text-soft">{formatInr(b.total_rupees)}</td>
                   <td className="px-4 py-3">
                     <Badge variant={paymentStatusBadgeVariant(b.payment_status)}>
@@ -66,7 +68,7 @@ export function CustomerPaymentsView({
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-soft">Security deposit tracking</h2>
         <div className="grid gap-4 md:grid-cols-2">
-          {bookings.slice(0, 4).map((b) => {
+          {bookings.map((b) => {
             const vehJoin = b.vehicles
             const v = Array.isArray(vehJoin) ? vehJoin[0] : vehJoin
             const dep = v?.security_deposit ?? 0
@@ -98,21 +100,24 @@ export function CustomerPaymentsView({
               </tr>
             </thead>
             <tbody className="divide-y divide-stroke">
-              {events.map((e) => (
-                <tr key={e.id} className="text-muted">
-                  <td className="px-4 py-3 text-soft">{e.title}</td>
-                  <td className="px-4 py-3 capitalize">{e.direction}</td>
-                  <td className="px-4 py-3 tabular-nums text-soft">{formatInr(e.amount_rupees)}</td>
-                  <td className="px-4 py-3 text-xs">{new Date(e.created_at).toLocaleString()}</td>
+              {events.length > 0 ? (
+                events.map((e) => (
+                  <tr key={e.id} className="text-muted">
+                    <td className="px-4 py-3 text-soft">{e.title}</td>
+                    <td className="px-4 py-3 capitalize">{e.direction}</td>
+                    <td className="px-4 py-3 tabular-nums text-soft">{formatInr(e.amount_rupees)}</td>
+                    <td className="px-4 py-3 text-xs">{new Date(e.created_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td className="px-4 py-6 text-center text-sm text-muted" colSpan={4}>
+                    No payment activity yet. Completed bookings and receipts will appear here.
+                  </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
-          {events.length === 0 ? (
-            <p className="px-4 py-6 text-center text-sm text-muted">
-              No payment activity yet. Completed bookings and receipts will appear here.
-            </p>
-          ) : null}
         </div>
       </section>
     </div>

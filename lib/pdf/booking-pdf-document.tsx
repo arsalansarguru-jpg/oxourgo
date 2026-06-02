@@ -103,10 +103,16 @@ const styles = StyleSheet.create({
 function fmtWhen(iso: string): string {
   try {
     const d = new Date(iso)
-    return d.toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short', timeZone: 'UTC' }) + ' UTC'
+    return d.toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short', timeZone: 'Asia/Kolkata' }) + ' IST'
   } catch {
     return iso
   }
+}
+
+function titleCaseStatus(raw: string): string {
+  return raw
+    .replace(/_/g, ' ')
+    .replace(/\b\w/g, (m) => m.toUpperCase())
 }
 
 function docTitle(kind: BookingPdfPayload['docKind']): string {
@@ -137,6 +143,9 @@ function docIntro(kind: BookingPdfPayload['docKind']): string {
 
 export function BookingPdfDocument({ data }: { data: BookingPdfPayload }) {
   const title = docTitle(data.docKind)
+  const modelLabel = data.vehicleName.toLowerCase().startsWith(data.vehicleBrand.toLowerCase())
+    ? data.vehicleName
+    : `${data.vehicleBrand} ${data.vehicleName}`.trim()
 
   return (
     <Document title={`${data.brandName} · ${title}`} author={data.brandName} subject={data.invoiceRef}>
@@ -173,9 +182,7 @@ export function BookingPdfDocument({ data }: { data: BookingPdfPayload }) {
         <Text style={[styles.h2, { marginTop: 14 }]}>Vehicle</Text>
         <View style={styles.row}>
           <Text style={styles.dt}>Model</Text>
-          <Text style={styles.dd}>
-            {data.vehicleBrand} {data.vehicleName}
-          </Text>
+          <Text style={styles.dd}>{modelLabel}</Text>
         </View>
         {data.vehicleReg ? (
           <View style={styles.row}>
@@ -215,11 +222,11 @@ export function BookingPdfDocument({ data }: { data: BookingPdfPayload }) {
         </View>
         <View style={styles.row}>
           <Text style={styles.dt}>Booking status</Text>
-          <Text style={[styles.dd, styles.mono]}>{data.bookingStatus}</Text>
+          <Text style={[styles.dd, styles.mono]}>{titleCaseStatus(data.bookingStatus)}</Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.dt}>Payment status</Text>
-          <Text style={[styles.dd, styles.mono]}>{data.paymentStatus}</Text>
+          <Text style={[styles.dd, styles.mono]}>{titleCaseStatus(data.paymentStatus)}</Text>
         </View>
 
         <Text style={[styles.h2, { marginTop: 14 }]}>Pricing</Text>

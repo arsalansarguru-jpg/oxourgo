@@ -56,10 +56,48 @@ export function DashboardTopBar({
   const { user, ready } = useSupabaseAuthUser()
   const accountMenuRef = useRef<HTMLDetailsElement>(null)
   const [signingOut, setSigningOut] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
 
   useEffect(() => {
     accountMenuRef.current?.removeAttribute('open')
+    setAccountOpen(false)
   }, [pathname])
+
+  useEffect(() => {
+    const onDoc = (e: MouseEvent) => {
+      if (!accountMenuRef.current?.contains(e.target as Node)) {
+        accountMenuRef.current?.removeAttribute('open')
+        setAccountOpen(false)
+      }
+    }
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        accountMenuRef.current?.removeAttribute('open')
+        setAccountOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', onDoc)
+    document.addEventListener('keydown', onKey)
+    const onDropdownOpen = (e: Event) => {
+      const ce = e as CustomEvent<string>
+      if (ce.detail !== 'account') {
+        accountMenuRef.current?.removeAttribute('open')
+        setAccountOpen(false)
+      }
+    }
+    document.addEventListener('oxour:dropdown-open', onDropdownOpen)
+    return () => {
+      document.removeEventListener('mousedown', onDoc)
+      document.removeEventListener('keydown', onKey)
+      document.removeEventListener('oxour:dropdown-open', onDropdownOpen)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (accountOpen) {
+      document.dispatchEvent(new CustomEvent('oxour:dropdown-open', { detail: 'account' }))
+    }
+  }, [accountOpen])
 
   async function handleSignOut() {
     if (!supabase || signingOut) return
@@ -99,12 +137,16 @@ export function DashboardTopBar({
           />
           <ThemeToggle className="hidden sm:inline-flex" />
           {ready && user ? (
-            <details ref={accountMenuRef} className="relative">
+            <details ref={accountMenuRef} className="relative" open={accountOpen}>
               <summary
                 className={cn(
                   'flex cursor-pointer list-none items-center gap-1.5 rounded-md border border-stroke bg-carbon py-1 pl-1 pr-2 text-soft [&::-webkit-details-marker]:hidden',
                 )}
                 aria-label="Account menu"
+                onClick={(e) => {
+                  e.preventDefault()
+                  setAccountOpen((v) => !v)
+                }}
               >
                 {avatarUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
@@ -123,46 +165,57 @@ export function DashboardTopBar({
                 )}
                 <ChevronDown className="h-4 w-4 shrink-0 text-muted" aria-hidden />
               </summary>
-              <div
-                className="absolute right-0 top-[calc(100%+0.25rem)] z-[80] min-w-[11.5rem] rounded-lg border border-stroke bg-carbon py-1 shadow-[var(--shadow-card-hover)]"
-                onClick={(e) => e.stopPropagation()}
-              >
-                {adminConsoleHref ? (
+              {accountOpen ? (
+                <div
+                  className="absolute right-0 top-[calc(100%+0.25rem)] z-[80] min-w-[11.5rem] rounded-lg border border-stroke bg-carbon py-1 shadow-[var(--shadow-card-hover)]"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {adminConsoleHref ? (
+                    <Link
+                      href={adminConsoleHref}
+                      className="flex items-center gap-2 px-3 py-2.5 text-sm text-soft hover:bg-fill-glass"
+                      onClick={() => {
+                        accountMenuRef.current?.removeAttribute('open')
+                        setAccountOpen(false)
+                      }}
+                    >
+                      <Shield className="h-4 w-4 text-electric" aria-hidden />
+                      Admin console
+                    </Link>
+                  ) : null}
                   <Link
-                    href={adminConsoleHref}
+                    href="/dashboard"
                     className="flex items-center gap-2 px-3 py-2.5 text-sm text-soft hover:bg-fill-glass"
-                    onClick={() => accountMenuRef.current?.removeAttribute('open')}
+                    onClick={() => {
+                      accountMenuRef.current?.removeAttribute('open')
+                      setAccountOpen(false)
+                    }}
                   >
-                    <Shield className="h-4 w-4 text-electric" aria-hidden />
-                    Admin console
+                    <LayoutDashboard className="h-4 w-4 text-muted" aria-hidden />
+                    Overview
                   </Link>
-                ) : null}
-                <Link
-                  href="/dashboard"
-                  className="flex items-center gap-2 px-3 py-2.5 text-sm text-soft hover:bg-fill-glass"
-                  onClick={() => accountMenuRef.current?.removeAttribute('open')}
-                >
-                  <LayoutDashboard className="h-4 w-4 text-muted" aria-hidden />
-                  Overview
-                </Link>
-                <Link
-                  href="/dashboard/settings"
-                  className="flex items-center gap-2 px-3 py-2.5 text-sm text-soft hover:bg-fill-glass"
-                  onClick={() => accountMenuRef.current?.removeAttribute('open')}
-                >
-                  <Settings className="h-4 w-4 text-muted" aria-hidden />
-                  Profile
-                </Link>
-                <button
-                  type="button"
-                  disabled={signingOut}
-                  className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-muted hover:bg-fill-glass hover:text-soft disabled:opacity-50"
-                  onClick={() => void handleSignOut()}
-                >
-                  <LogOut className="h-4 w-4" aria-hidden />
-                  {signingOut ? 'Signing out…' : 'Sign out'}
-                </button>
-              </div>
+                  <Link
+                    href="/dashboard/settings"
+                    className="flex items-center gap-2 px-3 py-2.5 text-sm text-soft hover:bg-fill-glass"
+                    onClick={() => {
+                      accountMenuRef.current?.removeAttribute('open')
+                      setAccountOpen(false)
+                    }}
+                  >
+                    <Settings className="h-4 w-4 text-muted" aria-hidden />
+                    Profile
+                  </Link>
+                  <button
+                    type="button"
+                    disabled={signingOut}
+                    className="flex w-full items-center gap-2 px-3 py-2.5 text-left text-sm text-muted hover:bg-fill-glass hover:text-soft disabled:opacity-50"
+                    onClick={() => void handleSignOut()}
+                  >
+                    <LogOut className="h-4 w-4" aria-hidden />
+                    {signingOut ? 'Signing out…' : 'Sign out'}
+                  </button>
+                </div>
+              ) : null}
             </details>
           ) : null}
         </div>

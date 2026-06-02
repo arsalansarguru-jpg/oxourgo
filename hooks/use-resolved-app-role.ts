@@ -51,7 +51,7 @@ export function useResolvedAppRole(): ResolvedAppRoleState {
     }
 
     let cancelled = false
-    void refresh({ refresh: true }).then(() => {
+    void refresh().then(() => {
       if (!cancelled) setReady(true)
     })
 
@@ -67,7 +67,6 @@ export function useResolvedAppRole(): ResolvedAppRoleState {
       const shouldRefresh =
         event === 'SIGNED_IN' ||
         event === 'TOKEN_REFRESHED' ||
-        event === 'INITIAL_SESSION' ||
         event === 'USER_UPDATED'
       void refresh({ refresh: shouldRefresh })
     })

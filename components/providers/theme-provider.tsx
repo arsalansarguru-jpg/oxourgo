@@ -24,6 +24,12 @@ const ThemeContext = createContext<ThemeContextValue | null>(null)
 
 function themeFromDom(): Theme {
   if (typeof document === 'undefined') return 'light'
+  try {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY)
+    if (stored === 'light' || stored === 'dark') return stored
+  } catch {
+    /* ignore */
+  }
   const v = document.documentElement.getAttribute('data-theme')
   return v === 'dark' ? 'dark' : 'light'
 }

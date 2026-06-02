@@ -100,7 +100,7 @@ export function CustomerDashboardHome({
           value={String(upcoming.length)}
           hint="Includes payment-pending and confirmed ahead"
         />
-        <Stat label="Posted spend" value={formatInr(postedSpend)} hint="Rental amounts recorded as collected" />
+        <Stat label="Total paid" value={formatInr(postedSpend)} hint="Rental amount collected so far" />
         <Stat
           label="Verification"
           value={kycUi.verificationCardTitle}
@@ -195,6 +195,11 @@ export function CustomerDashboardHome({
           </div>
         ) : (
           <div className="space-y-3">
+            {active.length + upcoming.length > spotlight.length ? (
+              <p className="text-xs text-muted">
+                Showing {spotlight.length} of {active.length + upcoming.length} bookings.
+              </p>
+            ) : null}
             {spotlight.map(({ row, ui }) => (
               <CustomerBookingCard
                 key={row.id}
